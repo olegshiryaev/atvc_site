@@ -4,14 +4,8 @@ ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 
 # Устанавливаем зависимости
-RUN apk update && apk add --no-cache --virtual .build-deps \
-    libpq \
-    gcc \
-    python3-dev \
-    musl-dev \
-    postgresql-dev \
-    nodejs \
-    npm
+RUN apk update && apk add libpq
+RUN apk add --virtual .build-deps gcc python3-dev musl-dev postgresql-dev nodejs npm
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
