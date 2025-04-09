@@ -1,0 +1,80 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+*.egg
+*.log
+
+# Virtual env
+venv/
+ENV/
+env.bak/
+env/
+
+# Django
+db.sqlite3
+*.sqlite3
+static/
+media/
+*.pot
+*.pyc
+*.mo
+
+# PyCharm/VS Code
+.idea/
+.vscode/
+
+# Mac OS
+.DS_Store
+
+# Tailwind and static assets
+node_modules/
+staticfiles/
+build/
+dist/
+
+# dotenv
+.env
+.env.*
+docker/env/.env*
+!docker/env/.env.example
+
+# Celery
+celerybeat-schedule
+
+# Coverage
+htmlcov/
+.coverage
+.tox/
+
+# pytest
+.cache/
+pytest_cache/
+
+# migrations compiled
+**/migrations/*.pyc
+**/migrations/__pycache__/
+
+# Tailwind output if not in static/
+public/
+
+# Lock files (optional, but often not versioned)
+package-lock.json
+pnpm-lock.yaml
+
+# Logs
+*.log
+docker/logs/
+
+# Docker
+*.pid
+*.sock
+
+# Nginx прод-конфиг
+docker/nginx/prod/django.conf
+
+# Redis временные данные
+docker/redis/data/

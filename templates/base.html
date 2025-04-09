@@ -1,0 +1,84 @@
+{% load compress %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en" class>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Django + Tailwind CSS + Flowbite</title>
+
+    {% compress css %}
+    <link rel="stylesheet" href="{% static 'src/dist/styles.css' %}">
+    {% endcompress %}
+
+</head>
+
+<body class="h-full" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+    {% include 'partials/_navbar.html' %}
+  
+    <main class="container mx-auto px-4 py-4">
+      {% block content %}{% endblock %}
+    </main>
+  
+    {% include 'partials/_footer.html' %}
+  
+    <!-- Инициализация Alpine.js -->
+    <script>
+      document.addEventListener('alpine:init', () => {
+        Alpine.data('dropdown', () => ({
+          open: false,
+          toggle() {
+            this.open = !this.open;
+          }
+        }));
+      });
+    </script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const citySelector = document.getElementById("city-selector");
+            const cityDropdown = document.getElementById("city-dropdown");
+            const cityList = document.getElementById("city-list");
+        
+            citySelector.addEventListener("click", function() {
+                cityDropdown.classList.toggle("hidden");
+        
+                fetch("/get_cities/")
+                    .then(response => response.json())
+                    .then(data => {
+                        cityList.innerHTML = "";
+                        data.cities.forEach(city => {
+                            const li = document.createElement("li");
+                            li.textContent = city.name;
+                            li.classList.add("px-4", "py-2", "hover:bg-gray-100", "cursor-pointer");
+                            li.addEventListener("click", () => {
+                                window.location.href = `/${city.slug}/`;
+                            });
+                            cityList.appendChild(li);
+                        });
+                    });
+            });
+        
+            document.addEventListener("click", function(event) {
+                if (!citySelector.contains(event.target) && !cityDropdown.contains(event.target)) {
+                    cityDropdown.classList.add("hidden");
+                }
+            });
+        });
+        </script>
+
+        <script>
+            window.citySlug = "{{ request.city.slug }}";
+        </script>
+
+        <script src="https://unpkg.com/imask"></script>
+    
+        <script src="https://unpkg.com/htmx.org@1.9.6"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
+</body>
+
+</html>

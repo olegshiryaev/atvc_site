@@ -1,0 +1,15 @@
+<div class="row">
+    {% for tariff in displayed_tariffs %}
+        <div class="col-md-4">
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ tariff.name }}</h5>
+                    <p class="card-text">Цена: {{ tariff.price }} ₽</p>
+                    <p class="card-text">Тип: {{ tariff.get_tariff_type_display }}</p>
+                </div>
+            </div>
+        </div>
+    {% empty %}
+        <p>Нет доступных тарифов.</p>
+    {% endfor %}
+</div>

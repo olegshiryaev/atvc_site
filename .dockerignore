@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual env
+venv/
+env/
+
+# Django
+*.sqlite3
+*.log
+media/
+staticfiles/
+static_root/
+
+# Node stuff
+node_modules/
+build/
+dist/
+public/
+
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Packages
+*.egg-info/
+.env
+.env.*
+*.log

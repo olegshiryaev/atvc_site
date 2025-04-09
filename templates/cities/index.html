@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Главная{% endblock %}
+{% block content %}
+
+<h1>Добро пожаловать!</h1>
+<p>Это главная страница.</p>
+
+<button
+    hx-get="#"
+    hx-target="#tariffs"
+    hx-swap="innerHTML"
+>
+    Загрузить тарифы
+</button>
+
+<div id="tariffs"></div>
+{% endblock %}

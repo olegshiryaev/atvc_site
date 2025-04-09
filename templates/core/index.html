@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Главная страница{% endblock %}
+
+{% block content %}
+<div class="bg-white min-h-screen font-sans">
+    <!-- Карусель (на всю ширину с отступами контейнера) -->
+    <div class="swiper-container mb-16 w-full mx-auto rounded-2xl overflow-hidden relative">
+        <div class="swiper-wrapper">
+            <!-- Баннер 1 -->
+            <div class="swiper-slide">
+                <div class="flex flex-col md:flex-row h-auto md:h-80 w-full">
+                    <div class="w-full md:w-2/5 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 md:p-8 text-white flex items-center justify-center md:justify-start min-h-[20rem]">
+                        <div class="text-center md:text-left max-w-lg">
+                            <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">Акция месяца!</h3>
+                            <p class="text-lg sm:text-xl md:text-xl mb-6">Подключите интернет + ТВ и получите скидку 20% на первый год</p>
+                            <button class="bg-white text-black px-5 py-3 sm:px-6 sm:py-3 rounded-md font-medium hover:bg-gray-100 transition text-base sm:text-lg">
+                                Подробнее
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-3/5 relative h-48 md:h-auto">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Баннер 2 -->
+            <div class="swiper-slide">
+                <div class="flex flex-col md:flex-row h-auto md:h-80 w-full">
+                    <div class="w-full md:w-2/5 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 md:p-8 text-white flex items-center justify-center md:justify-start min-h-[20rem]">
+                        <div class="text-center md:text-left max-w-lg">
+                            <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">Высокая скорость</h3>
+                            <p class="text-lg sm:text-xl md:text-xl mb-6">Новые тарифы до 1 Гбит/с по специальной цене</p>
+                            <button class="bg-white text-black px-5 py-3 sm:px-6 sm:py-3 rounded-md font-medium hover:bg-gray-100 transition text-base sm:text-lg">
+                                Выбрать тариф
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-3/5 relative h-48 md:h-auto">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1517430816045-df4b7de11d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Баннер 3 -->
+            <div class="swiper-slide">
+                <div class="flex flex-col md:flex-row h-auto md:h-80 w-full">
+                    <div class="w-full md:w-2/5 bg-gradient-to-r from-sky-500 to-indigo-600 p-6 md:p-8 text-white flex items-center justify-center md:justify-start min-h-[20rem]">
+                        <div class="text-center md:text-left max-w-lg">
+                            <h3 class="text-2xl sm:text-3xl md:text-4xl font-bold mb-3">Бесплатный монтаж</h3>
+                            <p class="text-lg sm:text-xl md:text-xl mb-6">При подключении ТВ — установка и настройка в подарок</p>
+                            <button class="bg-white text-black px-5 py-3 sm:px-6 sm:py-3 rounded-md font-medium hover:bg-gray-100 transition text-base sm:text-lg">
+                                Узнать условия
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-3/5 relative h-48 md:h-auto">
+                        <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1563986768609-322da13575f3?ixlib=rb-4.0.3&auto=format&fit=crop&w=1350&q=80');"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Точки пагинации (центрированные) -->
+        <div class="swiper-pagination !bottom-4"></div>
+    </div>
+
+    <div class="px-4 sm:px-6 lg:px-8 mb-10 items-center flex flex-col">
+        <p class="text-5xl font-normal text-gray-800 mb-6 text-center">Тарифы</p>
+        <div class="flex flex-wrap gap-4 justify-center">
+            <!-- Кнопка Интернет -->
+            <button class="filter-btn {% if active_filter == 'internet' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
+                    inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
+                    focus:ring-offset-2 transition rounded-md py-3 px-6 text-base font-medium shadow-sm cursor-pointer w-48 sm:w-56 text-center" 
+                    data-filter="internet">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                </svg>
+                Интернет
+            </button>
+            
+            <!-- Кнопка Телевидение -->
+            <button class="filter-btn {% if active_filter == 'tv' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
+                    inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
+                    focus:ring-offset-2 transition rounded-md py-3 px-6 text-base font-medium shadow-sm cursor-pointer w-48 sm:w-56 text-center" 
+                    data-filter="tv">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                </svg>
+                Телевидение
+            </button>
+            
+            <!-- Кнопка Комбо -->
+            <button class="filter-btn {% if active_filter == 'combo' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
+                    inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
+                    focus:ring-offset-2 transition rounded-md py-3 px-6 text-base font-medium shadow-sm cursor-pointer w-48 sm:w-56 text-center" 
+                    data-filter="combo">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+                Интернет + ТВ
+            </button>
+        </div>
+    </div>
+
+    <!-- Контейнер с тарифами -->
+    <div class="px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {% include 'core/partials/tariffs_list.html' %}
+    </div>
+</div>
+
+<!-- Подключаем Swiper CSS и JS -->
+<link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+<script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Инициализация карусели
+        const swiper = new Swiper('.swiper-container', {
+            loop: true,
+            slidesPerView: 1,
+            spaceBetween: 0,
+            autoplay: {
+                delay: 5000,
+                disableOnInteraction: false,
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
+    
+        // 2. Находим основные элементы
+        const tariffsContainer = document.querySelector('.grid.grid-cols-1');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const citySlug = window.location.pathname.split('/')[1];
+    
+        // 3. Функция для загрузки тарифов
+        async function loadTariffs(filterType) {
+            try {
+                tariffsContainer.innerHTML = `
+                    <div class="col-span-full py-12 flex justify-center">
+                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+                    </div>
+                `;
+                
+                const response = await fetch(`?type=${filterType}`, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Ошибка загрузки');
+                
+                const data = await response.json();
+                updateUI(filterType, data.html);
+                addConnectButtonListeners();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                tariffsContainer.innerHTML = `
+                    <div class="col-span-full text-center py-12">
+                        <p class="text-red-500">Произошла ошибка. Пожалуйста, попробуйте ещё раз.</p>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-sky-600 text-white rounded-md">
+                            Обновить страницу
+                        </button>
+                    </div>
+                `;
+            }
+        }
+    
+        // 4. Функция обновления интерфейса
+        function updateUI(activeFilter, tariffsHTML) {
+            tariffsContainer.innerHTML = tariffsHTML;
+            
+            filterButtons.forEach(btn => {
+                const isActive = btn.dataset.filter === activeFilter;
+                btn.classList.toggle('bg-sky-600', isActive);
+                btn.classList.toggle('text-white', isActive);
+                btn.classList.toggle('hover:bg-sky-700', isActive);
+                btn.classList.toggle('bg-white', !isActive);
+                btn.classList.toggle('text-sky-700', !isActive);
+                btn.classList.toggle('hover:bg-gray-100', !isActive);
+            });
+        }
+    
+        // 5. Функция для добавления обработчиков кнопок "Подключить"
+        function addConnectButtonListeners() {
+            const connectButtons = document.querySelectorAll('.connect-btn');
+            console.log('Найдено кнопок .connect-btn:', connectButtons.length);
+            connectButtons.forEach((button, index) => {
+                button.addEventListener('click', function(e) {
+                    console.log(`Клик по кнопке ${index + 1}, tariffId: ${this.dataset.tariffId}`);
+                    const tariffId = this.dataset.tariffId;
+                    const tariffName = this.dataset.tariffName;
+    
+                    // Находим элементы модального окна заново
+                    const modal = document.getElementById('applicationModal');
+                    const modalTitle = document.getElementById('modalTitle');
+                    const form = document.getElementById('applicationForm');
+                    const phoneInput = document.getElementById('phone');
+                    const formErrors = document.getElementById('formErrors');
+                    const formContainer = document.getElementById('formContainer');
+                    const successMessage = document.getElementById('successMessage');
+                    const closeModalBtn = document.getElementById('closeModal');
+                    const closeSuccessBtn = document.getElementById('closeSuccess');
+    
+                    // Показываем модальное окно
+                    if (modal && modalTitle) {
+                        modalTitle.textContent = `Заявка на подключение "${tariffName}"`;
+                        modal.classList.remove('hidden');
+                    }
+    
+                    // Инициализация маски телефона
+                    let phoneMask;
+                    if (phoneInput) {
+                        phoneMask = IMask(phoneInput, {
+                            mask: '+7(000)000-0000',
+                            lazy: false,
+                            placeholderChar: '_'
+                        });
+                        phoneMask.updateValue();
+                    }
+    
+                    // Сброс формы и состояния
+                    if (form) form.reset();
+                    if (formErrors) formErrors.classList.add('hidden');
+                    if (formContainer) formContainer.classList.remove('hidden');
+                    if (successMessage) successMessage.classList.add('hidden');
+    
+                    // Обработчик закрытия модального окна
+                    if (closeModalBtn) {
+                        closeModalBtn.onclick = function() {
+                            if (modal) modal.classList.add('hidden');
+                        };
+                    }
+    
+                    // Закрытие по клику на фон
+                    if (modal) {
+                        modal.onclick = function(e) {
+                            if (e.target === modal) {
+                                modal.classList.add('hidden');
+                            }
+                        };
+                    }
+    
+                    // Закрытие после успеха
+                    if (closeSuccessBtn) {
+                        closeSuccessBtn.onclick = function() {
+                            if (modal) modal.classList.add('hidden');
+                        };
+                    }
+    
+                    // Обработка отправки формы
+                    if (form) {
+                        form.onsubmit = async function(e) {
+                            e.preventDefault();
+                            const formData = new FormData(form);
+                            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+    
+                            try {
+                                const submitUrl = `/${citySlug}/application/submit/${tariffId}/`;
+                                const response = await fetch(submitUrl, {
+                                    method: 'POST',
+                                    body: formData,
+                                    headers: {
+                                        'X-Requested-With': 'XMLHttpRequest'
+                                    }
+                                });
+    
+                                if (!response.ok) throw new Error(`Сервер вернул ошибку: ${response.status}`);
+                                const data = await response.json();
+    
+                                if (data.success) {
+                                    if (formContainer) formContainer.classList.add('hidden');
+                                    if (successMessage) successMessage.classList.remove('hidden');
+                                } else {
+                                    if (formErrors) {
+                                        formErrors.classList.remove('hidden');
+                                        formErrors.innerHTML = data.errors ? Object.values(data.errors).join('<br>') : 'Произошла ошибка';
+                                    }
+                                }
+                            } catch (error) {
+                                if (formErrors) {
+                                    formErrors.classList.remove('hidden');
+                                    formErrors.innerHTML = `Ошибка: ${error.message}`;
+                                }
+                            }
+                        };
+                    }
+                });
+            });
+        }
+    
+        // 6. Обработчики событий для фильтров
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                const filterType = this.dataset.filter;
+                history.pushState({}, '', `?type=${filterType}`);
+                loadTariffs(filterType);
+            });
+        });
+    
+        // 7. Обработка кнопки "Назад" в браузере
+        window.addEventListener('popstate', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const filterType = urlParams.get('type') || 'internet';
+            loadTariffs(filterType);
+        });
+    
+        // Инициализируем обработчики для кнопок "Подключить" при первой загрузке
+        addConnectButtonListeners();
+    })
+</script>
+    
+<!-- Стили -->
+<style>
+    .swiper-container {
+        width: 100%;
+        overflow: hidden;
+        border-radius: 1rem; /* Скругление для всех углов */
+    }
+    
+    /* Сохраняем скругление для всех слайдов */
+    .swiper-slide {
+        border-radius: inherit;
+        overflow: hidden;
+    }
+    
+    /* Стили для белых точек пагинации */
+    .swiper-pagination {
+        position: absolute;
+        bottom: 1rem;
+        left: 0;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        z-index: 10;
+    }
+    
+    .swiper-pagination-bullet {
+        background: rgba(255, 255, 255, 0.5);
+        width: 10px;
+        height: 10px;
+        opacity: 1;
+        transition: all 0.3s;
+    }
+    
+    .swiper-pagination-bullet-active {
+        background: white;
+        width: 30px;
+        border-radius: 5px;
+    }
+    
+    /* Фикс для скругления на мобильных */
+    @media (max-width: 768px) {
+        .swiper-container {
+            margin-left: 1rem;
+            margin-right: 1rem;
+            width: calc(100% - 2rem);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .swiper-slide h3 {
+            font-size: 1.75rem !important; /* text-2xl -> ~28px */
+        }
+        .swiper-slide p {
+            font-size: 1.125rem !important; /* text-lg -> ~18px */
+        }
+        .swiper-slide button {
+            padding: 0.75rem 1.5rem !important; /* px-5 py-3 */
+            font-size: 1rem !important; /* text-base */
+        }
+    }    
+</style>
+{% endblock %}
