@@ -26,6 +26,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("<slug:city_slug>/", include("apps.core.urls")),
     path("", include("apps.cities.urls")),
+    path("<slug:city_slug>/news/", include("apps.news.urls", namespace="news")),
     path(
         "", lambda r: redirect(f"/{City.objects.filter(is_active=True).first().slug}/")
     ),

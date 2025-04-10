@@ -6,40 +6,49 @@ from django.views.generic import CreateView
 from django.template.loader import render_to_string
 
 from .forms import ApplicationForm, FeedbackCreateForm
-from .models import Office, Tariff, Feedback
+from .models import Device, Office, Service, Tariff, Feedback
 from ..cities.models import City
+from ..news.models import News
 from ..services.utils import get_client_ip
 from ..services.email import send_contact_email_message
 
 
 def index(request, city_slug):
+    city = get_object_or_404(City, slug=city_slug, is_active=True)
     active_filter = request.GET.get("type", "internet")
 
     tariffs = (
-        Tariff.objects.filter(cities=request.city, is_active=True)
+        Tariff.objects.filter(cities=city, is_active=True)
         .select_related()
         .prefetch_related("cities")
     )
 
-    if active_filter == "combo":
-        displayed_tariffs = tariffs.filter(tariff_type="combo")
+    if active_filter == "kombo":
+        displayed_tariffs = tariffs.filter(service__slug="kombo")
     else:
-        displayed_tariffs = tariffs.filter(tariff_type=active_filter)
+        displayed_tariffs = tariffs.filter(service__slug=active_filter)
 
-    # Если запрос AJAX (от JavaScript), возвращаем JSON с HTML
+    # Если запрос AJAX (от JavaScript / HTMX), возвращаем JSON с HTML
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         tariffs_html = render_to_string(
-            "core/partials/tariffs_list.html",  # Этот файл создадим на Шаге 2
+            "core/partials/tariffs_list.html",
             {"displayed_tariffs": displayed_tariffs.order_by("price")},
             request=request,
         )
         return JsonResponse({"html": tariffs_html})
 
-    # Если обычный запрос (первая загрузка страницы)
+    # Получаем последние 3 новости для текущего города
+    latest_news = News.objects.filter(is_published=True, cities=city).order_by(
+        "-created_at"
+    )[:3]
+
     context = {
         "displayed_tariffs": displayed_tariffs.order_by("price"),
         "active_filter": active_filter,
+        "city": city,
+        "latest_news": latest_news,
     }
+
     return render(request, "core/index.html", context)
 
 
@@ -66,11 +75,9 @@ def office_list(request, city_slug):
         request,
         "core/offices.html",
         {
-            "city": city,  # Передаём объект города
+            "city": city,
             "offices": offices,
-            "cities": City.objects.filter(is_active=True).exclude(
-                id=city.id
-            ),  # Все города кроме текущего
+            "cities": City.objects.filter(is_active=True).exclude(id=city.id),
         },
     )
 
@@ -110,3 +117,22 @@ class FeedbackCreateView(SuccessMessageMixin, CreateView):
                 feedback.user_id,
             )
         return super().form_valid(form)
+
+
+def internet_tariffs(request, city_slug):
+    city = get_object_or_404(City, slug=city_slug)
+    service = get_object_or_404(Service, slug="internet")
+    tariffs = Tariff.objects.filter(
+        service=service, cities__slug=city_slug, is_active=True
+    )
+    devices = Device.objects.filter(service_types=service).distinct()
+    return render(
+        request,
+        "tariffs/internet.html",
+        {
+            "tariffs": tariffs,
+            "devices": devices,
+            "city_slug": city_slug,
+            "city": city,
+        },
+    )

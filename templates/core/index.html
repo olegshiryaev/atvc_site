@@ -67,9 +67,9 @@
         <div class="swiper-pagination !bottom-4"></div>
     </div>
 
-    <div class="px-4 sm:px-6 lg:px-8 mb-10 items-center flex flex-col">
-        <p class="text-5xl font-normal text-gray-800 mb-6 text-center">Тарифы</p>
-        <div class="flex flex-wrap gap-4 justify-center">
+    <div class="mb-10 flex flex-col items-start">
+        <p class="text-4xl font-normal text-gray-800 mb-6 text-left">Тарифы</p>
+        <div class="flex flex-wrap gap-4 justify-start">
             <!-- Кнопка Интернет -->
             <button class="filter-btn {% if active_filter == 'internet' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
                     inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
@@ -80,34 +80,39 @@
                 </svg>
                 Интернет
             </button>
-            
+    
             <!-- Кнопка Телевидение -->
-            <button class="filter-btn {% if active_filter == 'tv' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
+            <button class="filter-btn {% if active_filter == 'televidenie' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
                     inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
                     focus:ring-offset-2 transition rounded-md py-3 px-6 text-base font-medium shadow-sm cursor-pointer w-48 sm:w-56 text-center" 
-                    data-filter="tv">
+                    data-filter="televidenie">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
                 Телевидение
             </button>
-            
+    
             <!-- Кнопка Комбо -->
-            <button class="filter-btn {% if active_filter == 'combo' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
+            <button class="filter-btn {% if active_filter == 'kombo' %}bg-sky-600 text-white hover:bg-sky-700{% else %}bg-white text-sky-700 hover:bg-gray-100{% endif %} 
                     inline-flex items-center justify-center border border-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 
                     focus:ring-offset-2 transition rounded-md py-3 px-6 text-base font-medium shadow-sm cursor-pointer w-48 sm:w-56 text-center" 
-                    data-filter="combo">
+                    data-filter="kombo">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
                 Интернет + ТВ
             </button>
         </div>
-    </div>
+    </div>    
 
     <!-- Контейнер с тарифами -->
-    <div class="px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {% include 'core/partials/tariffs_list.html' %}
+    </div>
+
+    <div id="latest-news" hx-get="{% url 'news:news_widget' city.slug %}" hx-trigger="load" hx-swap="innerHTML">
+        <!-- Прелоадер -->
+        <p class="text-center text-gray-500">Загрузка новостей...</p>
     </div>
 </div>
 
@@ -200,6 +205,7 @@
                     const modalTitle = document.getElementById('modalTitle');
                     const form = document.getElementById('applicationForm');
                     const phoneInput = document.getElementById('phone');
+                    const nameInput = document.getElementById('name');
                     const formErrors = document.getElementById('formErrors');
                     const formContainer = document.getElementById('formContainer');
                     const successMessage = document.getElementById('successMessage');
@@ -210,6 +216,13 @@
                     if (modal && modalTitle) {
                         modalTitle.textContent = `Заявка на подключение "${tariffName}"`;
                         modal.classList.remove('hidden');
+                        
+                        // Устанавливаем фокус на поле "Имя" с небольшой задержкой
+                        setTimeout(() => {
+                            if (nameInput) {
+                                nameInput.focus();
+                            }
+                        }, 50);
                     }
     
                     // Инициализация маски телефона

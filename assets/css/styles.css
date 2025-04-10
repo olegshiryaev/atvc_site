@@ -1,0 +1,63 @@
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Light.ttf") format("truetype");
+    font-weight: 300;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto";
+    src: url("../fonts/Roboto-Black.ttf") format("truetype");
+    font-weight: 900;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto Condensed";
+    src: url("../fonts/RobotoCondensed-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Roboto Condensed";
+    src: url("../fonts/RobotoCondensed-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-display: swap;
+}
+
+/* Then import Tailwind */
+@import "tailwindcss" layer(base);
+
+/* Theme customization */
+@theme {
+    --font-sans: "Roboto", sans-serif;
+    --font-condensed: "Roboto Condensed", sans-serif;
+}
+
+/* Base styles */
+@layer base {
+    body {
+        font-family: var(--font-sans);
+        font-weight: 400;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    .font-bold {
+        font-weight: 700;
+    }
+
+    .font-black {
+        font-weight: 900;
+    }
+}

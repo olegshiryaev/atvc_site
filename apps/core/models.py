@@ -5,13 +5,20 @@ from django.contrib.auth.models import User
 
 
 class Office(models.Model):
-    title = models.CharField(max_length=100, default="Офис обслуживания")
-    image = models.ImageField(upload_to="office_images/")
-    city = models.ForeignKey(City, on_delete=models.CASCADE, related_name="offices")
-    address = models.CharField(max_length=200)
-    phone = models.CharField(max_length=20)
-    longitude = models.FloatField()
-    latitude = models.FloatField()
+    image = models.ImageField(upload_to="office_images/", verbose_name="Изображение")
+    city = models.ForeignKey(
+        City, on_delete=models.CASCADE, related_name="offices", verbose_name="Город"
+    )
+    address = models.CharField(max_length=200, verbose_name="Адрес")
+    phone = models.CharField(
+        max_length=20, verbose_name="Телефон", blank=True, null=True
+    )
+    longitude = models.CharField(
+        max_length=50, verbose_name="Долгота", blank=True, null=True
+    )
+    latitude = models.CharField(
+        max_length=50, verbose_name="Широта", blank=True, null=True
+    )
 
     def __str__(self):
         return f"{self.city} - {self.address}"
@@ -52,8 +59,20 @@ class WorkSchedule(models.Model):
         verbose_name_plural = "Расписания работы"
 
 
+class Service(models.Model):
+    slug = models.SlugField("Код", unique=True)
+    name = models.CharField("Название услуги", max_length=100)
+
+    class Meta:
+        verbose_name = "Тип услуги"
+        verbose_name_plural = "Типы услуг"
+
+    def __str__(self):
+        return self.name
+
+
 class Tariff(models.Model):
-    TARIFF_TYPES = [
+    SERVICE_CHOICES = [
         ("internet", "Интернет"),
         ("tv", "Телевидение"),
         ("combo", "Комбо"),
@@ -65,7 +84,13 @@ class Tariff(models.Model):
     ]
 
     name = models.CharField("Название", max_length=100)
-    tariff_type = models.CharField("Тип", max_length=20, choices=TARIFF_TYPES)
+    service = models.ForeignKey(
+        "Service",
+        on_delete=models.CASCADE,
+        verbose_name="Тип услуги",
+        related_name="tariffs",
+        null=True,
+    )
     technology = models.CharField(
         "Технология подключения",
         max_length=20,
@@ -82,6 +107,24 @@ class Tariff(models.Model):
 
     def __str__(self):
         return f"{self.name} ({', '.join(city.name for city in self.cities.all())})"
+
+
+class Device(models.Model):
+    name = models.CharField(verbose_name="Название", max_length=255)
+    description = models.TextField(verbose_name="Описание")
+    price = models.DecimalField(verbose_name="Цена", max_digits=6, decimal_places=2)
+    image = models.ImageField(verbose_name="Изображение", upload_to="devices/")
+    service_types = models.ManyToManyField(
+        "Service", verbose_name="Типы услуги", related_name="devices"
+    )
+
+    class Meta:
+        verbose_name = "Оборудование"
+        verbose_name_plural = "Оборудование"
+        ordering = ["name"]
+
+    def __str__(self):
+        return self.name
 
 
 class Application(models.Model):

@@ -3,7 +3,7 @@ import csv
 from django.http import HttpResponse
 
 from apps.cities.models import City
-from .models import Application, Feedback, Office, Tariff, WorkSchedule
+from .models import Application, Device, Feedback, Office, Service, Tariff, WorkSchedule
 
 
 class WorkScheduleInline(admin.TabularInline):
@@ -29,11 +29,18 @@ class CityFilter(admin.SimpleListFilter):
             return queryset.filter(cities__id=self.value())
 
 
+@admin.register(Service)
+class ServiceAdmin(admin.ModelAdmin):
+    list_display = ("name", "slug")
+    search_fields = ("name", "slug")
+    prepopulated_fields = {"slug": ("name",)}
+
+
 @admin.register(Tariff)
 class TariffAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "tariff_type",
+        "service",
         "technology",
         "speed",
         "price",
@@ -41,11 +48,11 @@ class TariffAdmin(admin.ModelAdmin):
         "cities_list",
     )
     list_editable = ("price", "is_active")
-    list_filter = (CityFilter, "tariff_type")
+    list_filter = (CityFilter, "service")
     actions = ["export_as_csv"]
 
     fieldsets = (
-        ("Основное", {"fields": ("name", "tariff_type", "price", "is_active")}),
+        ("Основное", {"fields": ("name", "service", "price", "is_active")}),
         (
             "Характеристики",
             {
@@ -73,7 +80,7 @@ class TariffAdmin(admin.ModelAdmin):
             writer.writerow(
                 [
                     tariff.name,
-                    tariff.get_tariff_type_display(),
+                    tariff.get_service_display(),
                     tariff.price,
                     tariff.speed or "-",
                     cities,
@@ -82,6 +89,18 @@ class TariffAdmin(admin.ModelAdmin):
         return response
 
     export_as_csv.short_description = "Экспорт в CSV"
+
+
+@admin.register(Device)
+class DeviceAdmin(admin.ModelAdmin):
+    list_display = ("name", "get_service_types", "price")
+    list_filter = ("service_types",)
+    search_fields = ("name",)
+
+    def get_service_types(self, obj):
+        return ", ".join([s.name for s in obj.service_types.all()])
+
+    get_service_types.short_description = "Типы услуги"
 
 
 @admin.register(Application)

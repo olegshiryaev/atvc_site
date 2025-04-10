@@ -12,5 +12,7 @@ def select_city(request):
 
 
 def get_cities(request):
-    cities = list(City.objects.filter(is_active=True).values("name", "slug"))
+    cities = list(
+        City.objects.filter(is_active=True).order_by("name").values("name", "slug")
+    )
     return JsonResponse({"cities": cities})

@@ -4,8 +4,7 @@
         "tailwindcss": "^4.0.17"
     },
     "scripts": {
-        "build": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/src/dist/styles.css --minify",
-        "watch": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/src/dist/styles.css --watch",
-        "dev": "npx @tailwindcss/cli -i ./static/src/styles.css -o ./static/src/dist/styles.css --watch --poll"
+        "build": "npx @tailwindcss/cli -i ./assets/css/styles.css -o ./static/src/dist/styles.css --minify",
+        "watch": "npx @tailwindcss/cli -i ./assets/css/styles.css -o ./static/src/dist/styles.css --watch"
     }
 }
