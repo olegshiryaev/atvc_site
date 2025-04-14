@@ -5,26 +5,17 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 # Устанавливаем зависимости
 RUN apk update && apk add libpq
-RUN apk add --virtual .build-deps gcc python3-dev musl-dev postgresql-dev nodejs npm
+RUN apk add --virtual .build-deps gcc python3-dev musl-dev postgresql-dev
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
 
-# Копируем зависимости
-COPY requirements.txt ./
+# Копируем зависимости Python и устанавливаем их
+COPY requirements.txt .
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
-# Копируем package.json и ставим node-модули (для Tailwind)
-COPY package.json package-lock.json* ./
-RUN npm install
-
-# Копируем всё остальное
+# Копируем остальной код проекта
 COPY . .
 
-# Собираем Tailwind
-RUN npm run build
-
-# Удаляем ненужные пакеты для билда (если хочешь — оставь)
-RUN apk del .build-deps
-
+# Запускаем Gunicorn
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000"]

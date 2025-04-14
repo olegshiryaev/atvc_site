@@ -1,28 +1,64 @@
-<div class="mt-12">
-    <div class="flex justify-between items-center"> <!-- items-center вместо baseline -->
-        <p class="text-4xl font-normal text-gray-800 mb-6">Новости</p>
+{% load static %}
+<div class="container py-5 animate-fade-in">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fs-48 fw-black lh-custom text-gray-800">Последние новости</h2>
         <a 
             href="{% url 'news:news_list' city.slug %}" 
-            class="text-sm text-blue-400 hover:underline mb-6"
+            class="text-sky-600 hover-text-sky-700 text-decoration-none transition-200 fs-base fw-medium lh-sm d-flex align-items-center gap-1"
+            aria-label="Перейти ко всем новостям"
         >
-            Все новости →
+            Все новости
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
         </a>
     </div>
-  
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {% for news in latest_news %}
-        <a href="{% url 'news:news_detail' city.slug news.slug %}" class="bg-white rounded-2xl shadow hover:shadow-md transition duration-300">
-          {% if news.image %}
-            <img src="{{ news.image.url }}" alt="{{ news.title }}" loading="lazy" class="w-full h-48 object-cover rounded-t-2xl">
-          {% endif %}
-          <div class="p-4">
-            <p class="text-sm text-gray-500">{{ news.created_at|date:"d.m.Y" }}</p>
-            <h3 class="text-base font-normal text-gray-900 mt-1">{{ news.title }}</h3>
-          </div>
-        </a>
-      {% empty %}
-        <p class="text-gray-500 col-span-full">Пока нет новостей</p>
-      {% endfor %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        {% for news in latest_news %}
+            <div class="col">
+                <a 
+                    href="{% url 'news:news_detail' city.slug news.slug %}" 
+                    class="card border-0 shadow rounded-md text-decoration-none h-100 transition-200 animate-slide-up"
+                    aria-label="Читать новость: {{ news.title }}"
+                    data-animation-delay="{{ forloop.counter0 }}"
+                >
+                    {% if news.image %}
+                        <img 
+                            src="{{ news.image.url }}" 
+                            alt="{{ news.title }}" 
+                            loading="lazy" 
+                            class="card-img-top rounded-top-md object-fit-cover"
+                            style="height: 180px;"
+                        >
+                    {% else %}
+                        <div class="bg-gray-100 rounded-top-md d-flex align-items-center justify-content-center" style="height: 180px;">
+                            <span class="text-gray-400 fs-6">Нет изображения</span>
+                        </div>
+                    {% endif %}
+                    <div class="card-body p-4">
+                        <p class="text-gray-400 hover-text-sky-700 fs-6 fw-normal lh-sm mb-2 transition-200">{{ news.created_at|date:"d.m.Y" }}</p>
+                        <h3 class="card-title fs-5 fw-semibold lh-base text-gray-900 mb-0 line-clamp-2">{{ news.title }}</h3>
+                        {% if news.content %}
+                            <p class="fs-6 fw-normal lh-base text-gray-600 mt-2 mb-0 line-clamp-2">{{ news.content|striptags|truncatechars:100 }}</p>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        {% empty %}
+            <div class="col-12 text-center">
+                <p class="text-gray-500 fs-6">Пока нет новостей</p>
+            </div>
+        {% endfor %}
     </div>
-  </div>
-  
+</div>
+
+<!-- Скрипт для установки задержки анимации -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const cards = document.querySelectorAll('.animate-slide-up');
+        cards.forEach((card, index) => {
+            const delay = (index / 3).toFixed(2); // 0.00, 0.33, 0.67, ...
+            card.style.animationDelay = `${delay}s`;
+        });
+    });
+</script>

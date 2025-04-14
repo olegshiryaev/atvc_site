@@ -1,43 +1,48 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Главная страница{% endblock %}
+{% block title %}Офисы обслуживания{% endblock %}
 
 {% block content %}
-<div class="bg-white w-full">
-    <p class="text-3xl md:text-4xl font-bold text-gray-800">Офис обслуживания в {{ city.name_prepositional }}</p>
-    <div class="mx-auto py-12">
+<div class="bg-white w-100">
+    <div class="container">
+        <h2 class="fs-48 fw-black lh-custom text-gray-800 mb-5">Офис обслуживания в {{ city.name_prepositional }}</h2>
         {% for office in offices %}
-        <div class="lg:grid-cols-4 grid grid-cols-1 gap-8 mb-12">
-            <div class="lg:col-span-1 bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="h-56 overflow-hidden">
-                    <img alt="Современный офис компании" 
-                         src="{{ office.image.url }}" 
-                         class="object-cover w-full h-full">
-                </div>
-                <div class="p-6">
-                    <div class="space-y-5">
-                        <div class="items-center flex">
-                            <div class="w-10 h-10 bg-sky-100 rounded-full items-center justify-center flex-shrink-0 flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                                </svg>
+        <div class="row g-4 mb-5">
+            <!-- Левая колонка -->
+            <div class="col-12 col-lg-3">
+                <div class="card shadow-md rounded h-100">
+                    <div class="overflow-hidden" style="height: 224px;">
+                        <img alt="Современный офис компании" 
+                             src="{{ office.image.url }}" 
+                             class="img-fluid w-100 h-100 object-fit-cover">
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="d-flex flex-column gap-4">
+                            <!-- Адрес -->
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 d-flex align-items-center justify-content-center bg-sky-100 rounded-circle" style="width: 24px; height: 24px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="text-sky-600" style="width: 16px; height: 16px;" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="fw-normal text-gray-700 mb-1 ms-2" style="font-size: 16px; line-height: 18px;">Адрес</p>
+                                </div>
+                                <p class="fs-5 fw-medium lh-sm text-gray-600" style="padding-left: 32px;">{{ office.address }}</p>
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-700">Адрес</p>
-                                <p class="text-gray-600">{{ office.address }}</p>
-                            </div>
-                        </div>
-                        <div class="items-center flex">
-                            <div class="w-10 h-10 bg-sky-100 rounded-full items-center justify-center flex-shrink-0 flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
-                                </svg>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm font-medium text-gray-700">Режим работы</p>
+                            <!-- Режим работы -->
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 d-flex align-items-center justify-content-center bg-sky-100 rounded-circle" style="width: 24px; height: 24px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="text-sky-600" style="width: 16px; height: 16px;" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="fw-normal text-gray-700 mb-1 ms-2" style="font-size: 16px; line-height: 18px;">Режим работы</p>
+                                </div>
                                 {% for schedule in office.schedules.all %}
-                                    <p class="text-gray-600">
+                                    <p class="fs-5 fw-medium lh-sm text-gray-600 mb-1" style="padding-left: 32px;">
                                         {{ schedule.days }}: 
                                         {% if schedule.is_closed %}
                                             выходной
@@ -47,31 +52,36 @@
                                     </p>
                                 {% endfor %}
                             </div>
-                        </div>
-                        {% if office.phone %}
-                            <div class="items-center flex">
-                                <div class="w-10 h-10 bg-sky-100 rounded-full items-center justify-center flex-shrink-0 flex">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" viewBox="0 0 20 20" fill="currentColor">
-                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
-                                    </svg>
+                            <!-- Телефон -->
+                            {% if office.phone %}
+                            <div>
+                                <div class="d-flex align-items-center">
+                                    <div class="flex-shrink-0 d-flex align-items-center justify-content-center bg-sky-100 rounded-circle" style="width: 24px; height: 24px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="text-sky-600" style="width: 16px; height: 16px;" viewBox="0 0 20 20" fill="currentColor">
+                                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"></path>
+                                        </svg>
+                                    </div>
+                                    <p class="fw-normal text-gray-700 mb-1 ms-2" style="font-size: 16px; line-height: 18px;">Телефон</p>
                                 </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-700">Телефон</p>
-                                    <p class="text-gray-600">{{ office.phone }}</p>
-                                </div>
+                                <p class="fs-5 fw-medium lh-sm text-gray-600" style="padding-left: 32px;"><a href="tel:{{ office.phone }}" class="text-gray-600 text-decoration-none">{{ office.phone }}</a></p>
                             </div>
-                        {% endif %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="lg:col-span-3 bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
-                <div class="w-full h-[400px] md:h-[500px]">
-                    <iframe src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16&mode=map&pt={{ office.longitude }},{{ office.latitude }}" width="100%" height="100%" frameborder="0" allowfullscreen="true"></iframe>
+            <!-- Правая колонка -->
+            <div class="col-12 col-lg-9">
+                <div class="card shadow-md rounded h-100 border border-gray-200">
+                    <div class="w-100 h-100" style="min-height: 400px;">
+                        <iframe class="h-100" style="min-height: 400px;" src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16&mode=map&pt={{ office.longitude }},{{ office.latitude }}" 
+                                width="100%" height="100%" frameborder="0" allowfullscreen="true"></iframe>
+                    </div>
                 </div>
             </div>
         </div>
         {% empty %}
-        <p class="text-gray-600">Офисы в этом городе не найдены.</p>
+        <p class="text-gray-600 fs-5 text-center py-5">Офисы в этом городе не найдены.</p>
         {% endfor %}
     </div>
 </div>

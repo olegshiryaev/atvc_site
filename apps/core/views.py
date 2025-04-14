@@ -1,12 +1,13 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import resolve, reverse_lazy
+from django.views.decorators.http import require_POST
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import JsonResponse
 from django.views.generic import CreateView
 from django.template.loader import render_to_string
 
 from .forms import ApplicationForm, FeedbackCreateForm
-from .models import Device, Office, Service, Tariff, Feedback
+from .models import Banner, Device, Office, Service, Tariff, Feedback
 from ..cities.models import City
 from ..news.models import News
 from ..services.utils import get_client_ip
@@ -42,29 +43,38 @@ def index(request, city_slug):
         "-created_at"
     )[:3]
 
+    banners = Banner.objects.filter(is_active=True, cities=city)
+
     context = {
         "displayed_tariffs": displayed_tariffs.order_by("price"),
         "active_filter": active_filter,
         "city": city,
         "latest_news": latest_news,
+        "banners": banners,
     }
 
     return render(request, "core/index.html", context)
 
 
-def submit_application(request, city_slug, tariff_id):
-    tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True)
+@require_POST
+def submit_application(request, city_slug):
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        return JsonResponse(
+            {"success": False, "error": "Недопустимый запрос"}, status=400
+        )
 
-    if request.method == "POST":
-        form = ApplicationForm(request.POST)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.tariff = tariff
-            application.save()
-            return JsonResponse({"success": True})
-        else:
-            return JsonResponse({"success": False, "errors": form.errors})
-    return JsonResponse({"success": False, "error": "Неверный метод запроса"})
+    form = ApplicationForm(request.POST)
+    if form.is_valid():
+        application = form.save(commit=False)
+        if hasattr(request, "city") and request.city:
+            application.city = request.city
+        application.save()
+        return JsonResponse({"success": True})
+    else:
+        errors = {}
+        for field, error_list in form.errors.items():
+            errors[field] = [str(error) for error in error_list]
+        return JsonResponse({"success": False, "errors": errors}, status=400)
 
 
 def office_list(request, city_slug):

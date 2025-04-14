@@ -134,10 +134,16 @@ class Application(models.Model):
         ("completed", "Завершена"),
     )
 
-    tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, verbose_name="Тариф")
+    city = models.ForeignKey(
+        City, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Город"
+    )
     name = models.CharField(max_length=100, verbose_name="Имя")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
-    address = models.TextField(verbose_name="Адрес")
+    street = models.CharField(max_length=200, blank=True, verbose_name="Улица")
+    house_number = models.CharField(
+        max_length=50, blank=True, verbose_name="Номер дома"
+    )
+    comment = models.TextField(blank=True, verbose_name="Комментарий")
     status = models.CharField(
         max_length=20, choices=STATUSES, default="new", verbose_name="Статус заявки"
     )
@@ -145,7 +151,12 @@ class Application(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
-        return f"Заявка #{self.id} от {self.name} на {self.tariff.name}"
+        city_name = self.city.name if self.city else "без города"
+        return f"Заявка #{self.id} от {self.name} ({city_name})"
+
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки"
 
 
 class Feedback(models.Model):
@@ -176,3 +187,78 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Вам письмо от {self.email}"
+
+
+class Company(models.Model):
+    # Основные наименования
+    full_name = models.CharField(max_length=255, verbose_name="Полное наименование")
+    short_name = models.CharField(
+        max_length=100, verbose_name="Сокращенное наименование"
+    )
+
+    # Идентификационные номера
+    inn = models.CharField(max_length=12, verbose_name="ИНН")
+    kpp = models.CharField(max_length=9, verbose_name="КПП")
+    okved = models.CharField(max_length=100, verbose_name="ОКВЭД")
+    okpo = models.CharField(max_length=10, verbose_name="ОКПО")
+    ogrn = models.CharField(max_length=13, verbose_name="ОГРН")
+    ogrn_date = models.DateField(verbose_name="Дата ОГРН", null=True, blank=True)
+    okfs = models.CharField(max_length=10, verbose_name="ОКФС")
+    okogu = models.CharField(max_length=10, verbose_name="ОКОГУ")
+    okopf = models.CharField(max_length=10, verbose_name="ОКОПФ")
+    oktmo = models.CharField(max_length=10, verbose_name="ОКТМО")
+
+    # Адреса
+    legal_address = models.CharField(max_length=255, verbose_name="Юридический адрес")
+    postal_address = models.CharField(
+        max_length=255, verbose_name="Фактический (почтовый) адрес"
+    )
+
+    # Контакты
+    phone_fax = models.CharField(max_length=100, verbose_name="Телефон-факс")
+    email = models.EmailField(verbose_name="E-mail")
+
+    # Банковские реквизиты
+    bank_account = models.CharField(max_length=20, verbose_name="Расчетный счет")
+    bank_name = models.CharField(max_length=255, verbose_name="Наименование банка")
+    correspondent_account = models.CharField(max_length=20, verbose_name="Кор/счет")
+    bik = models.CharField(max_length=9, verbose_name="БИК")
+
+    # Руководитель
+    director_name = models.CharField(
+        max_length=255, verbose_name="Генеральный директор"
+    )
+    director_basis = models.CharField(
+        max_length=255, verbose_name="Действует на основании"
+    )
+
+    def __str__(self):
+        return self.short_name
+
+    class Meta:
+        verbose_name = "Компания"
+        verbose_name_plural = "Компании"
+
+
+class Banner(models.Model):
+    title = models.CharField("Заголовок", max_length=255)
+    description = models.TextField("Описание", blank=True)
+    image = models.ImageField(
+        "Изображение", upload_to="banners/", blank=True, null=True
+    )
+    button_text = models.CharField("Текст кнопки", max_length=100, default="Подробнее")
+    link = models.URLField("Ссылка", blank=True)
+    is_active = models.BooleanField("Активен", default=True)
+    cities = models.ManyToManyField(City, verbose_name="Города", related_name="banners")
+    order = models.PositiveIntegerField("Порядок показа", default=0)
+
+    created_at = models.DateTimeField("Создан", auto_now_add=True)
+    updated_at = models.DateTimeField("Обновлён", auto_now=True)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Баннер"
+        verbose_name_plural = "Баннеры"
+
+    def __str__(self):
+        return self.title

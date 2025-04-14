@@ -1,39 +1,40 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Интернет-тарифы{% endblock %}
 
 {% block content %}
-<section class="bg-gradient-to-r from-sky-500 to-indigo-600 py-12 rounded-2xl">
-    <div class="mx-auto px-4 md:px-8 container">
-        <div class="md:flex-row items-center flex flex-col rounded-lg overflow-hidden">
-            <div class="md:w-1/2 md:mb-0 mb-8">
-                <p class="text-3xl md:text-4xl font-bold text-white mb-4">
+<!-- Баннер -->
+<section class="bg-gradient-sky-indigo py-5 rounded-4">
+    <div class="container px-3 px-md-4">
+        <div class="d-flex flex-column flex-md-row align-items-center rounded overflow-hidden">
+            <div class="col-md-6 mb-4 mb-md-0">
+                <h1 class="fs-3 fs-md-2 fw-bold text-white mb-3">
                     Интернет в 
                     <button 
                         @click="$dispatch('open-modal')"
-                        class="text-white hover:text-sky-200 transition duration-200">
+                        class="text-white text-decoration-underline">
                         {{ city.name_prepositional }}
                     </button>
-                </p>
-                <p class="text-white mb-6 text-lg">Стабильное соединение, высокая скорость и выгодные тарифы для всей семьи.</p>
-                <button type="button" class="inline-flex bg-white text-black hover:bg-gray-100 transition border border-white
-                    focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 justify-center rounded-md py-3 px-6 
-                    text-base font-medium shadow-sm">
+                </h1>
+                <p class="fs-5 text-white mb-4">Стабильное соединение, высокая скорость и выгодные тарифы для всей семьи.</p>
+                <button type="button" class="btn btn-light text-dark border border-white py-2 px-4 shadow-sm rounded btn-light-hover">
                     Подключиться сейчас
                 </button>
             </div>
-            <div class="md:w-1/2">
-                <img alt="Fast Internet Connection" src="https://ip-home.net/images/macbook-air.png">
+            <div class="col-md-6">
+                <img alt="Fast Internet Connection" src="https://ip-home.net/images/macbook-air.png" class="img-fluid">
             </div>
         </div>
     </div>
 </section>
 
-<section class="py-8">
-    <div class="w-full mx-auto">
+<!-- Вкладки -->
+<section class="py-4">
+    <div class="container">
         <!-- Tabs -->
         <div x-data="{ tab: 'tariffs' }">
-            <nav class="flex border-b border-gray-200 mb-6">
+            <nav class="nav nav-tabs border-bottom border-gray-200 mb-4">
                 <template x-for="t in [
                     { id: 'tariffs', label: 'Тарифы' },
                     { id: 'promos', label: 'Акции' },
@@ -43,9 +44,9 @@
                     <button
                         @click="tab = t.id"
                         :class="tab === t.id 
-                            ? 'border-sky-600 text-sky-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
-                        class="cursor-pointer whitespace-nowrap py-4 px-4 text-base font-medium border-b focus:outline-none"
+                            ? 'nav-link active border-bottom border-sky-600 text-sky-600'
+                            : 'nav-link text-gray-500 nav-link-hover'"
+                        class="px-3 py-3 fs-6 fw-medium"
                         x-text="t.label"
                     ></button>
                 </template>
@@ -53,109 +54,113 @@
 
             <!-- Содержимое вкладок -->
             <!-- Тарифы -->
-            <div x-show="tab === 'tariffs'" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-10">
-                <div class="col-span-full mb-10">
-                    <h1 class="text-4xl font-bold text-gray-900 text-left">
-                        Тарифы на интернет в 
-                        <button class="text-gray-900">
-                            {{ city.name_prepositional }}
-                        </button>
-                    </h1>
-                    <p class="text-gray-600 mt-2 text-lg text-left">Высокоскоростной интернет и услуги для вашего дома</p>
-                </div>
-                {% for tariff in tariffs %}
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-neutral-200 hover:border-neutral-300
-                    transition-all duration-300 {% if tariff.service.name == 'combo' %}border-2 border-indigo-500{% endif %}">
-                    <div class="bg-gray-100 p-4 border-b border-gray-200">
-                        <p class="text-2xl font-medium text-gray-800">{{ tariff.name }}</p>
-                        <p class="text-sm font-light text-gray-600">{{ tariff.get_service_display }}</p>
-                    </div>
-                    <div class="p-6">
-                        {% if tariff.speed %}
-                            <div class="items-center mb-4 flex">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-sky-700 mr-2">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
-                                </svg>
-                                <span class="text-gray-700 font-normal">
-                                    Скорость: <span class="font-medium">{{ tariff.speed }} Мбит/с</span>
-                                </span>
-                            </div>
-                        {% endif %}
-                        
-                        {% if tariff.technology %}
-                        <div class="items-center mb-4 flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
-                            </svg>
-                            <span class="text-gray-700 font-normal">
-                                Технология: <span class="font-medium">{{ tariff.get_technology_display }}</span>
-                            </span>
-                        </div>
-                        {% endif %}
-                        
-                        {% if tariff.channels %}
-                        <div class="items-center mb-4 flex">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-sky-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            <span class="text-gray-700 font-normal">
-                                Каналы: <span class="font-medium">{{ tariff.channels }}</span>
-                            </span>
-                        </div>
-                        {% endif %}
-                        
-                        <div class="mt-6">
-                            <div class="flex flex-col items-start">
-                                <span class="text-4xl font-medium text-gray-900">{{ tariff.price }} ₽</span>
-                                <span class="text-gray-500 font-light mt-1">в месяц</span>
-                            </div>
-                            <button class="connect-btn inline-flex border border-sky-700 focus:outline-none focus:ring-2
-                                focus:ring-sky-700 focus:ring-offset-2 w-full justify-center rounded-md py-2 px-4 bg-sky-600
-                                text-sm font-medium text-white shadow-sm hover:bg-sky-700 transition-all duration-200
-                                md:py-3 md:px-6 md:text-base cursor-pointer mt-6"
-                                data-tariff-id="{{ tariff.id }}"
-                                data-tariff-name="{{ tariff.name }}">
-                                Подключить
+            <div x-show="tab === 'tariffs'" class="mt-5">
+                <!-- Заголовок -->
+                <div class="row">
+                    <div class="col-12 mb-5">
+                        <h1 class="fs-2 fw-bold text-gray-900 text-start">
+                            Тарифы на интернет в 
+                            <button class="text-gray-900 text-decoration-underline">
+                                {{ city.name_prepositional }}
                             </button>
-                        </div>
+                        </h1>
+                        <p class="text-gray-600 mt-2 fs-5 text-start">Высокоскоростной интернет и услуги для вашего дома</p>
                     </div>
                 </div>
-                {% empty %}
-                <div class="col-span-full text-center py-12">
-                    <p class="text-gray-500 text-lg">Тарифы не найдены</p>
+                <!-- Карточки -->
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                    {% for tariff in tariffs %}
+                    <div class="col">
+                        <div class="card shadow border border-neutral-200 card-hover h-100
+                            {% if tariff.service.name == 'combo' %}border-2 border-indigo-500{% endif %}">
+                            <div class="card-header bg-light p-3 border-bottom border-gray-200">
+                                <h3 class="fs-28 fw-black lh-34 text-gray-800 mb-1">{{ tariff.name }}</h3>
+                                <p class="fs-base fw-normal lh-tight text-gray-600">{{ tariff.service }}</p>
+                            </div>
+                            <div class="card-body p-4">
+                                {% if tariff.speed %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="icon-6 text-sky-700 me-2">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418" />
+                                    </svg>
+                                    <span class="fs-5 text-gray-700">
+                                        Скорость: <span class="fw-medium">{{ tariff.speed }} Мбит/с</span>
+                                    </span>
+                                </div>
+                                {% endif %}
+                                {% if tariff.technology %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon-6 text-sky-700 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+                                    </svg>
+                                    <span class="fs-5 text-gray-700">
+                                        Технология: <span class="fw-medium">{{ tariff.get_technology_display }}</span>
+                                    </span>
+                                </div>
+                                {% endif %}
+                                {% if tariff.channels %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="icon-6 text-sky-700 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span class="fs-5 text-gray-700">
+                                        Каналы: <span class="fw-medium">{{ tariff.channels }}</span>
+                                    </span>
+                                </div>
+                                {% endif %}
+                                <div class="mt-4">
+                                    <div class="d-flex flex-column">
+                                        <span class="fs-2 fw-medium text-gray-900">{{ tariff.price }} ₽</span>
+                                        <span class="fs-6 fw-light text-gray-500">в месяц</span>
+                                    </div>
+                                    <button class="connect-btn btn bg-sky-600 text-white hover-bg-sky-700 w-100 mt-4 py-2 py-md-3 fs-6 fw-medium text-uppercase"
+                                        data-tariff-id="{{ tariff.id }}"
+                                        data-tariff-name="{{ tariff.name }}">
+                                        Подключить
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12 text-center py-5">
+                        <p class="fs-5 text-gray-500">Тарифы не найдены</p>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
 
             <!-- Акции -->
-            <div x-show="tab === 'promos'" class="text-left text-gray-500 mt-10">
-                <h1 class="text-4xl font-bold text-gray-900">Акции</h1>
-                <p class="text-gray-600 mt-2 text-lg">Сейчас нет активных акций.</p>
+            <div x-show="tab === 'promos'" class="mt-5 text-start">
+                <h1 class="fs-2 fw-bold text-gray-900">Акции</h1>
+                <p class="fs-5 text-gray-600 mt-2">Сейчас нет активных акций.</p>
             </div>
 
             <!-- Доп. услуги -->
-            <div x-show="tab === 'services'" class="text-left text-gray-500 mt-10">
-                <h1 class="text-4xl font-bold text-gray-900">Дополнительные услуги</h1>
-                <p class="text-gray-600 mt-2 text-lg">Здесь будут дополнительные услуги.</p>
+            <div x-show="tab === 'services'" class="mt-5 text-start">
+                <h1 class="fs-2 fw-bold text-gray-900">Дополнительные услуги</h1>
+                <p class="fs-5 text-gray-600 mt-2">Здесь будут дополнительные услуги.</p>
             </div>
 
             <!-- Оборудование -->
-            <div x-show="tab === 'equipment'" class="text-left text-gray-500 mt-10">
-                <h1 class="text-4xl font-bold text-gray-900">Оборудование</h1>
-                <p class="text-gray-600 mt-2 text-lg">Выберите необходимое оборудование для подключения</p>
-                <!-- Пример карточки оборудования -->
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden border border-neutral-200 hover:border-neutral-300 transition-all duration-300">
-                    <div class="bg-gray-100 p-4 border-b border-gray-200">
-                        <p class="text-2xl font-medium text-gray-800">Маршрутизатор</p>
-                    </div>
-                    <div class="p-6">
-                        <p class="text-gray-700 mb-4">Устройство для обеспечения стабильного и быстрого интернета.</p>
-                        <div class="flex justify-between">
-                            <span class="text-xl font-medium text-gray-900">2500 ₽</span>
-                            <button class="inline-flex border border-sky-700 text-sky-700 py-2 px-4 bg-white rounded-md 
-                                hover:bg-sky-100 transition-all duration-200">
-                                Купить
-                            </button>
+            <div x-show="tab === 'equipment'" class="mt-5 text-start">
+                <h1 class="fs-2 fw-bold text-gray-900">Оборудование</h1>
+                <p class="fs-5 text-gray-600 mt-2">Выберите необходимое оборудование для подключения</p>
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow border border-neutral-200 card-hover h-100">
+                            <div class="card-header bg-light p-3 border-bottom border-gray-200">
+                                <h5 class="fs-4 fw-medium text-gray-800 mb-0">Маршрутизатор</h5>
+                            </div>
+                            <div class="card-body p-4">
+                                <p class="fs-5 text-gray-700 mb-4">Устройство для обеспечения стабильного и быстрого интернета.</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span class="fs-5 fw-medium text-gray-900">2500 ₽</span>
+                                    <button class="btn btn-outline-primary border border-sky-700 text-sky-700 py-2 px-4">
+                                        Купить
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = int(env("DEBUG", default=1))
+DEBUG = True
 
 ALLOWED_HOSTS = env("ALLOWED_HOSTS").split()
 
@@ -137,21 +137,25 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = "static/"
+STATIC_URL = "/static/"
+STATIC_ROOT = BASE_DIR / "static"
 
-STATICFILES_DIRS = [BASE_DIR / "static"]
+# Исходные статические файлы (в Git)
+STATICFILES_DIRS = [BASE_DIR / "assets"]
 
-# Media files
-
-MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
-
-COMPRESS_ROOT = BASE_DIR / "static"
+# Настройки django-compressor
+STATICFILES_FINDERS = [
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+    "compressor.finders.CompressorFinder",
+]
 
 COMPRESS_ENABLED = True
 
-STATICFILES_FINDERS = ("compressor.finders.CompressorFinder",)
+# Media files (пользовательские загрузки)
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

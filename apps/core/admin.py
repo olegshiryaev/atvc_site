@@ -3,7 +3,16 @@ import csv
 from django.http import HttpResponse
 
 from apps.cities.models import City
-from .models import Application, Device, Feedback, Office, Service, Tariff, WorkSchedule
+from .models import (
+    Application,
+    Banner,
+    Device,
+    Feedback,
+    Office,
+    Service,
+    Tariff,
+    WorkSchedule,
+)
 
 
 class WorkScheduleInline(admin.TabularInline):
@@ -109,27 +118,28 @@ class ApplicationAdmin(admin.ModelAdmin):
         "id",
         "name",
         "phone",
-        "tariff",
+        "city",
         "status",
         "created_at",
         "updated_at",
     )
-    list_filter = ("status", "tariff", "created_at")
-    search_fields = ("name", "phone", "address", "tariff__name")
+    list_filter = ("status", "city", "created_at")
+    search_fields = ("name", "phone", "street", "house_number", "comment")
     list_editable = ("status",)
-    ordering = ("-created_at",)
+    date_hierarchy = "created_at"
+    readonly_fields = ("created_at", "updated_at")
     list_per_page = 25
     fieldsets = (
-        (None, {"fields": ("tariff", "name", "phone", "address")}),
-        (
-            "Статус и даты",
-            {
-                "fields": ("status", "created_at", "updated_at"),
-            },
-        ),
+        (None, {"fields": ("name", "phone", "status")}),
+        ("Адрес", {"fields": ("city", "street", "house_number")}),
+        ("Дополнительно", {"fields": ("comment",)}),
+        ("Даты", {"fields": ("created_at", "updated_at")}),
     )
-    readonly_fields = ("created_at", "updated_at")
+    ordering = ("-created_at",)
     actions = ["mark_as_in_progress", "mark_as_completed"]
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related("city")
 
     # Кастомное действие: "Пометить как в обработке"
     @admin.action(description="Пометить выбранные заявки как 'В обработке'")
@@ -150,3 +160,9 @@ class FeedbackAdmin(admin.ModelAdmin):
 
     list_display = ("email", "ip_address", "user")
     list_display_links = ("email", "ip_address")
+
+
+@admin.register(Banner)
+class BannerAdmin(admin.ModelAdmin):
+    list_display = ("title", "is_active", "order")
+    list_editable = ("is_active", "order")

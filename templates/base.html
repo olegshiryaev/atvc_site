@@ -2,60 +2,62 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Django + Tailwind CSS + Flowbite{% endblock %}</title>
+    <title>{% block title %}ATVC Site{% endblock %}</title>
 
+    <!-- Bootstrap CSS -->
     {% compress css %}
-    <link rel="stylesheet" href="{% static 'src/dist/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap/css/bootstrap.min.css' %}">
     {% endcompress %}
 
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
     <!-- Alpine.js -->
-    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <script src="{% static 'js/alpinejs.min.js' %}" defer></script>
+
+    <!-- HTMX (опционально, пока закомментирован) -->
+    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
 
     <style>
-        [x-cloak] { display: none; }
-        @supports (backdrop-filter: blur(4px)) {
-            .backdrop-blur-sm {
-                backdrop-filter: blur(4px);
-            }
-        }
+        [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="h-full" hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+<body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
+
     {% include 'partials/_navbar.html' %}
-  
-    <main class="container mx-auto px-4 py-4">
+
+    <main class="py-2">
         {% block content %}{% endblock %}
     </main>
-  
-    {% include 'partials/_footer.html' %}
-    
 
-    <!-- Глобальный слушатель для открытия модального окна -->
+    {% include 'partials/_footer.html' %}
+
+    <!-- Bootstrap JS -->
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+
+    <script src="{% static 'js/imask.min.js' %}"></script>
+
+    <!-- Глобальные переменные и отладка -->
     <script>
         document.addEventListener('alpine:init', () => {
-            // Инициализация глобального состояния модального окна
-            Alpine.store('modal', {
-                open: false
-            });
-    
-            // Глобальный слушатель для открытия модального окна
-            window.addEventListener('open-modal', () => {
-                Alpine.store('modal').open = true;
-            });
+            console.log('Alpine.js initialized');
+            window.citySlug = "{{ request.city.slug|default:''|escapejs }}";
+            console.log('Initial city slug:', window.citySlug);
+        });
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM fully loaded');
+            console.log('Current URL:', window.location.pathname);
+        });
+        // Раскомментируйте, если включите HTMX
+        document.addEventListener('htmx:afterSwap', () => {
+            console.log('HTMX afterSwap');
+            Alpine.initTree(document.body);
         });
     </script>
-
-    <script>
-        window.citySlug = "{{ request.city.slug|escapejs }}";
-    </script>
-
-    <script src="https://unpkg.com/imask"></script>
-    <script src="https://unpkg.com/htmx.org@1.9.6"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flowbite@3.1.2/dist/flowbite.min.js"></script>
 </body>
 </html>

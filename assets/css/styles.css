@@ -1,63 +1,408 @@
-@font-face {
-    font-family: "Roboto";
-    src: url("../fonts/Roboto-Light.ttf") format("truetype");
-    font-weight: 300;
-    font-display: swap;
+/* Цвета фона */
+.bg-gray-100 {
+    background-color: #f3f4f6 !important;
+}
+.bg-gray-200 {
+    background-color: #e5e7eb !important;
+}
+.bg-sky-50 {
+    background-color: #f0f9ff !important;
+}
+.bg-sky-100 {
+    background-color: #e0f2fe !important;
+}
+.bg-orange-400 {
+    background-color: #fb923c !important;
+}
+.bg-orange-500 {
+    background-color: #f97316 !important;
+}
+.bg-gray-800 {
+    background-color: #1f2a44 !important;
+}
+.bg-gray-600-50 {
+    background-color: rgba(75, 85, 99, 0.5) !important;
+}
+.bg-sky-600 {
+    background-color: #0284c7 !important;
+}
+.bg-sky-700 {
+    background-color: #0369a1 !important;
 }
 
-@font-face {
-    font-family: "Roboto";
-    src: url("../fonts/Roboto-Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-display: swap;
+/* Градиенты */
+.bg-gradient-sky-indigo {
+    background: linear-gradient(
+        to right,
+        #0ea5e9,
+        #4f46e5
+    ) !important; /* Для баннера тарифов */
+}
+.bg-gradient-gray {
+    background: linear-gradient(
+        to right,
+        #f3f4f6,
+        #e5e7eb
+    ) !important; /* Для карусели */
 }
 
-@font-face {
-    font-family: "Roboto";
-    src: url("../fonts/Roboto-Black.ttf") format("truetype");
-    font-weight: 900;
-    font-display: swap;
+/* Цвета текста */
+.text-gray-300 {
+    color: #d1d5db !important;
+}
+.text-gray-400 {
+    color: #9ca3af !important;
+}
+.text-gray-500 {
+    color: #6b7280 !important;
+}
+.text-gray-600 {
+    color: #4b5563 !important;
+}
+.text-gray-700 {
+    color: #374151 !important;
+}
+.text-gray-900 {
+    color: #1f2937 !important;
+}
+.text-sky-600 {
+    color: #0284c7 !important;
+}
+.text-sky-700 {
+    color: #0369a1 !important;
+}
+.text-danger {
+    color: #dc3545 !important;
 }
 
-@font-face {
-    font-family: "Roboto Condensed";
-    src: url("../fonts/RobotoCondensed-Regular.ttf") format("truetype");
-    font-weight: 400;
-    font-display: swap;
+/* Границы */
+.border-gray-200 {
+    border-color: #e5e7eb !important;
+}
+.border-gray-300 {
+    border-color: #d1d5db !important;
+}
+.border-neutral-200 {
+    border-color: #e5e7eb !important; /* Для тарифов */
+}
+.border-neutral-300 {
+    border-color: #d1d5db !important; /* Для тарифов */
+}
+.border-indigo-500 {
+    border-color: #6366f1 !important; /* Для combo-тарифов */
+}
+.border-white-10 {
+    border-color: rgba(255, 255, 255, 0.1) !important;
+}
+.border-primary {
+    border-color: #0284c7 !important;
+}
+.border-sky-700 {
+    border-color: #0369a1 !important;
+}
+.border-2 {
+    border-width: 2px !important;
 }
 
-@font-face {
-    font-family: "Roboto Condensed";
-    src: url("../fonts/RobotoCondensed-Bold.ttf") format("truetype");
-    font-weight: 700;
-    font-display: swap;
+/* Шрифты */
+.fs-base {
+    font-size: 1rem !important;
+}
+.fs-6 {
+    font-size: 0.875rem !important; /* ~14px */
+}
+.fs-5 {
+    font-size: 1.125rem !important; /* ~18px */
+}
+.fs-4 {
+    font-size: 1.25rem !important; /* ~20px */
+}
+.fs-3 {
+    font-size: 1.5rem !important; /* ~24px */
+}
+.fs-2 {
+    font-size: 2rem !important; /* ~32px */
+}
+.fs-1 {
+    font-size: 2.25rem !important; /* ~36px */
+}
+.fs-28 {
+    font-size: 1.75rem !important; /* ~28px */
+}
+.fs-48 {
+    font-size: 3rem !important; /* ~48px */
+}
+.fw-light {
+    font-weight: 300 !important;
+}
+.fw-normal {
+    font-weight: 400 !important;
+}
+.fw-medium {
+    font-weight: 500 !important;
+}
+.fw-semibold {
+    font-weight: 600 !important;
+}
+.fw-bold {
+    font-weight: 700 !important;
+}
+.fw-black {
+    font-weight: 900 !important;
 }
 
-/* Then import Tailwind */
-@import "tailwindcss" layer(base);
-
-/* Theme customization */
-@theme {
-    --font-sans: "Roboto", sans-serif;
-    --font-condensed: "Roboto Condensed", sans-serif;
+/* Line-height */
+.lh-base {
+    line-height: 1.5 !important;
+}
+.lh-sm {
+    line-height: 1.25 !important;
+}
+.lh-tight {
+    line-height: 1.1 !important;
+}
+.lh-custom {
+    line-height: 3.375rem !important;
+}
+.lh-34 {
+    line-height: 2.125rem !important; /* ~34px */
+}
+.lh-38 {
+    line-height: 2.375rem !important; /* ~38px */
 }
 
-/* Base styles */
-@layer base {
-    body {
-        font-family: var(--font-sans);
-        font-weight: 400;
+/* Размеры */
+.h-96 {
+    height: 24rem !important;
+}
+.h-4 {
+    height: 1rem !important;
+}
+.w-4 {
+    width: 1rem !important;
+}
+.min-w-120px {
+    min-width: 120px !important;
+}
+.icon-6 {
+    width: 1.5rem !important; /* Для SVG в тарифах */
+    height: 1.5rem !important;
+}
+
+/* Отступы */
+.text-indent {
+    padding-left: 32px !important; /* Для выравнивания значений под лейблами (офисы) */
+}
+
+/* Эффекты наведения */
+.hover-text-sky-600:hover {
+    color: #0284c7 !important;
+}
+.hover-text-sky-700:hover {
+    color: #0369a1 !important;
+}
+.hover-bg-gray-100:hover {
+    background-color: #f3f4f6 !important;
+}
+.hover-bg-sky-100:hover {
+    background-color: #e0f2fe !important;
+}
+.hover-bg-orange-500:hover {
+    background-color: #f97316 !important;
+}
+.hover-bg-sky-700:hover {
+    background-color: #0369a1 !important;
+}
+.text-sky-600:hover {
+    text-decoration: underline !important;
+}
+.btn-light-hover:hover {
+    background-color: #f3f4f6 !important; /* gray-100 для кнопки баннера */
+}
+.nav-link-hover:hover {
+    color: #374151 !important; /* gray-700 для вкладок */
+    border-bottom-color: #d1d5db !important; /* gray-300 */
+}
+.card-hover:hover {
+    border-color: #d1d5db !important; /* neutral-300 для карточек */
+}
+.btn-outline-sky-700:hover {
+    background-color: #f3f4f6 !important; /* gray-100 */
+}
+
+/* Тени */
+.shadow {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+}
+.shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0atinum1),
+        0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+}
+.shadow-lg {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+.shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Скругления */
+.rounded-md {
+    border-radius: 0.375rem !important;
+}
+.rounded-lg {
+    border-radius: 0.5rem !important;
+}
+.rounded-top-md {
+    border-top-left-radius: 0.375rem !important;
+    border-top-right-radius: 0.375rem !important;
+}
+.rounded-circle {
+    border-radius: 50% !important;
+}
+
+/* Переходы */
+.transition-200 {
+    transition: all 0.2s ease-in-out !important;
+}
+
+/* Фокус */
+.focus-ring-sky-500 {
+    --bs-focus-ring-color: rgba(14, 165, 233, 0.25) !important;
+}
+
+/* Карусель */
+.carousel-inner {
+    min-height: 300px;
+}
+@media (min-width: 768px) {
+    .carousel-inner {
+        min-height: 400px;
     }
+}
 
-    h1,
-    h2,
-    h3,
-    h4,
-    .font-bold {
-        font-weight: 700;
+/* Фон и высота слайда */
+.carousel-item-bg {
+    min-height: 300px; /* Мобильные */
+    background: linear-gradient(
+        to right,
+        #0284c7,
+        #075985
+    ); /* sky-600 → sky-800 */
+}
+@media (min-width: 768px) {
+    .carousel-item-bg {
+        min-height: 400px; /* Десктоп */
     }
+}
 
-    .font-black {
-        font-weight: 900;
+/* Изображение */
+.carousel-image {
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* Анимация текста */
+.carousel-item.active .animate-text {
+    animation: slideInLeft 0.5s ease-out;
+}
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
     }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Карусель: пагинация */
+.carousel-indicators {
+    bottom: 1rem !important;
+}
+.carousel-indicators [data-bs-target] {
+    width: 10px !important;
+    height: 10px !important;
+    border-radius: 50% !important;
+    background-color: rgba(255, 255, 255, 0.5) !important;
+    margin: 0 4px !important;
+    transition: all 0.3s !important;
+}
+.carousel-indicators .active {
+    background-color: white !important;
+    width: 30px !important;
+    border-radius: 5px !important;
+}
+
+/* Кнопка */
+.carousel-button {
+    text-transform: uppercase;
+}
+
+/* Bootstrap кнопки */
+.btn-outline-sky-700 {
+    border-color: #0369a1 !important;
+    color: #0369a1 !important;
+}
+
+/* Анимации */
+@keyframes slide-up {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+@keyframes fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+.animate-slide-up {
+    animation: slide-up 0.5s ease-out forwards;
+}
+.animate-fade-in {
+    animation: fade-in 0.5s ease-out forwards;
+}
+
+/* Утилиты */
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.hidden {
+    display: none !important;
+}
+
+/* Модальное окно: чекбокс и кнопка */
+.no-border {
+    border: none !important;
+}
+.btn:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.65 !important;
+}
+.form-check .invalid-feedback {
+    display: none;
+    color: #dc3545 !important; /* text-danger */
+    font-size: 0.875rem !important; /* fs-6 */
+}
+.form-check .form-check-input:invalid ~ .invalid-feedback {
+    display: block;
 }
