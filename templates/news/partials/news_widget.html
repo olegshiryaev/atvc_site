@@ -1,4 +1,5 @@
 {% load static %}
+{% if latest_news %}
 <div class="container py-5 animate-fade-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fs-48 fw-black lh-custom text-gray-800">Последние новости</h2>
@@ -44,13 +45,10 @@
                     </div>
                 </a>
             </div>
-        {% empty %}
-            <div class="col-12 text-center">
-                <p class="text-gray-500 fs-6">Пока нет новостей</p>
-            </div>
         {% endfor %}
     </div>
 </div>
+{% endif %}
 
 <!-- Скрипт для установки задержки анимации -->
 <script>

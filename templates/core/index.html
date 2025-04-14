@@ -59,6 +59,7 @@
 
 
     <!-- Блок тарифов -->
+    {% if displayed_tariffs.exists %}
     <div class="container py-5">
         <div class="mb-5">
             <h2 class="fs-48 fw-black lh-custom text-gray-800 mb-4">Выберите тариф</h2>
@@ -104,6 +105,7 @@
             {% include 'core/partials/tariffs_list.html' %}
         </div>
     </div>
+    {% endif %}
 
     <!-- Модальное окно -->
     <div class="modal fade" id="applicationModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
@@ -182,20 +184,22 @@
         </div>
     </div>
 
-        <div id="latest-news" 
-            hx-get="{% url 'news:news_widget' city.slug %}" 
-            hx-trigger="load" 
-            hx-swap="innerHTML transition:true" 
-            hx-indicator="#news-preloader">
-            <!-- Прелоадер -->
-            <div id="news-preloader" class="text-center py-4">
-                <div class="spinner-border spinner-border-sm text-sky-600" role="status">
-                    <span class="visually-hidden">Загрузка...</span>
-                </div>
-                <p class="text-gray-500 fs-6 mt-2">Загрузка новостей...</p>
+    <!-- Последние новости -->
+    {% if latest_news.exists %}
+    <div id="latest-news" 
+        hx-get="{% url 'news:news_widget' city.slug %}" 
+        hx-trigger="load" 
+        hx-swap="innerHTML transition:true" 
+        hx-indicator="#news-preloader">
+        <!-- Прелоадер -->
+        <div id="news-preloader" class="text-center py-4">
+            <div class="spinner-border spinner-border-sm text-sky-600" role="status">
+                <span class="visually-hidden">Загрузка...</span>
             </div>
+            <p class="text-gray-500 fs-6 mt-2">Загрузка новостей...</p>
         </div>
     </div>
+    {% endif %}
 </div>
 
 <!-- Скрипты -->
