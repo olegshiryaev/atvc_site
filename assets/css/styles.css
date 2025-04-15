@@ -406,3 +406,23 @@
 .form-check .form-check-input:invalid ~ .invalid-feedback {
     display: block;
 }
+
+/* Контролируем высоту секции */
+.container-fluid.py-5 {
+    min-height: 500px; /* Установите желаемую высоту баннера */
+    position: relative;
+}
+
+/* Контейнер для изображения */
+.col-lg-6.position-relative {
+    min-height: 600px; /* Высота для изображения */
+    position: relative;
+}
+
+/* Убедимся, что изображение привязано к нижнему краю */
+.img-fluid {
+    max-height: 700px; /* Высота изображения больше высоты секции */
+    object-fit: contain;
+    bottom: 0 !important;
+    margin-bottom: 0;
+}

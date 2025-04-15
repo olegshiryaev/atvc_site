@@ -30,20 +30,15 @@ media/
 # Mac OS
 .DS_Store
 
-# Tailwind and static assets
-node_modules/
-staticfiles/
-build/
-dist/
-
 # dotenv
 .env
 .env.*
-docker/env/.env*
 !docker/env/.env.example
 
 # Celery
 celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
 
 # Coverage
 htmlcov/
@@ -58,16 +53,10 @@ pytest_cache/
 **/migrations/*.pyc
 **/migrations/__pycache__/
 
-# Tailwind output if not in static/
-public/
-
-# Lock files (optional, but often not versioned)
-package-lock.json
-pnpm-lock.yaml
-
 # Logs
 *.log
-docker/logs/
+docker/logs/*
+!docker/logs/
 
 # Docker
 *.pid
@@ -78,11 +67,12 @@ docker/nginx/prod/django.conf
 
 # Redis временные данные
 docker/redis/data/
+docker/redis/*
+!docker/redis/
 
-# Celery
-celerybeat-schedule
-celerybeat-schedule-shm
-celerybeat-schedule-wal
 
 # Certbot
-docker/certbot/
+docker/certbot/*
+!docker/certbot/conf/
+!docker/certbot/www/
+docker/certbot/**/*
