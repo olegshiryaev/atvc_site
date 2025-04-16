@@ -246,6 +246,9 @@ class Banner(models.Model):
     image = models.ImageField(
         "Изображение", upload_to="banners/", blank=True, null=True
     )
+    background_image = models.ImageField(
+        "Фоновое изображение", upload_to="banners/backgrounds/", blank=True, null=True
+    )
     button_text = models.CharField("Текст кнопки", max_length=100, default="Подробнее")
     link = models.URLField("Ссылка", blank=True)
     is_active = models.BooleanField("Активен", default=True)

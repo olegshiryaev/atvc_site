@@ -273,35 +273,71 @@
 }
 
 /* Карусель */
-.carousel-inner {
-    min-height: 300px;
+.carousel-item-bg {
+    min-height: 500px; /* Фиксированная минимальная высота для десктопов */
+    display: flex;
+    align-items: center; /* Центрирование контента по вертикали */
+    background-color: #f8f9fa; /* Фоновый цвет по умолчанию */
+    background-size: cover; /* Фон покрывает весь контейнер */
+    background-position: center; /* Центрирование фона */
 }
-@media (min-width: 768px) {
-    .carousel-inner {
-        min-height: 400px;
+
+.carousel-image {
+    max-height: 400px;
+    object-fit: contain;
+}
+
+/* Стили для заголовка */
+.carousel-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Ограничение на 2 строки */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 1rem;
+    color: #495056; /* Цвет текста */
+}
+
+/* Стили для описания */
+.carousel-description {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; /* Ограничение на 3 строки */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+    color: #495056; /* Цвет текста */
+}
+
+/* Медиа-запросы для адаптивности */
+@media (max-width: 991.98px) {
+    .carousel-title {
+        font-size: 2rem; /* Уменьшение шрифта для планшетов */
+        -webkit-line-clamp: 2;
+    }
+    .carousel-description {
+        font-size: 1.125rem; /* Лёгкое уменьшение шрифта описания */
+        -webkit-line-clamp: 3;
     }
 }
 
-/* Фон и высота слайда */
-.carousel-item-bg {
-    min-height: 300px; /* Мобильные */
-    background: linear-gradient(
-        to right,
-        #0284c7,
-        #075985
-    ); /* sky-600 → sky-800 */
-}
-@media (min-width: 768px) {
+@media (max-width: 767.98px) {
     .carousel-item-bg {
-        min-height: 400px; /* Десктоп */
+        min-height: 300px; /* Меньшая высота для мобильных */
+    }
+    .carousel-image {
+        max-height: 200px; /* Меньшая высота изображения для мобильных */
+    }
+    .carousel-title {
+        font-size: 1.25rem; /* Уменьшение шрифта для мобильных */
+        -webkit-line-clamp: 2;
+    }
+    .carousel-description {
+        font-size: 1rem; /* Уменьшение шрифта описания */
+        -webkit-line-clamp: 3;
     }
 }
 
 /* Изображение */
-.carousel-image {
-    max-height: 100%;
-    object-fit: contain;
-}
+
 
 /* Анимация текста */
 .carousel-item.active .animate-text {
