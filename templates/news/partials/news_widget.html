@@ -1,62 +1,98 @@
-{% load static %}
 {% if latest_news %}
 <div class="container py-5 animate-fade-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fs-48 fw-black lh-custom text-gray-800">Последние новости</h2>
-        <a 
-            href="{% url 'news:news_list' city.slug %}" 
-            class="text-sky-600 hover-text-sky-700 text-decoration-none transition-200 fs-base fw-medium lh-sm d-flex align-items-center gap-1"
-            aria-label="Перейти ко всем новостям"
-        >
+        <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">Последние новости</h2>
+        <a href="{% url 'news:news_list' city.slug %}" 
+           class="text-sky-600 hover:text-sky-700 text-decoration-none transition-colors duration-200 text-base font-medium flex items-center gap-1"
+           aria-label="Перейти ко всем новостям">
             Все новости
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
         </a>
     </div>
-    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-        {% for news in latest_news %}
-            <div class="col">
-                <a 
-                    href="{% url 'news:news_detail' city.slug news.slug %}" 
-                    class="card border-0 shadow rounded-md text-decoration-none h-100 transition-200 animate-slide-up"
-                    aria-label="Читать новость: {{ news.title }}"
-                    data-animation-delay="{{ forloop.counter0 }}"
-                >
-                    {% if news.image %}
-                        <img 
-                            src="{{ news.image.url }}" 
-                            alt="{{ news.title }}" 
-                            loading="lazy" 
-                            class="card-img-top rounded-top-md object-fit-cover"
-                            style="height: 180px;"
-                        >
-                    {% else %}
-                        <div class="bg-gray-100 rounded-top-md d-flex align-items-center justify-content-center" style="height: 180px;">
-                            <span class="text-gray-400 fs-6">Нет изображения</span>
-                        </div>
-                    {% endif %}
-                    <div class="card-body p-4">
-                        <p class="text-gray-400 hover-text-sky-700 fs-6 fw-normal lh-sm mb-2 transition-200">{{ news.created_at|date:"d.m.Y" }}</p>
-                        <h3 class="card-title fs-5 fw-semibold lh-base text-gray-900 mb-0 line-clamp-2">{{ news.title }}</h3>
-                        {% if news.content %}
-                            <p class="fs-6 fw-normal lh-base text-gray-600 mt-2 mb-0 line-clamp-2">{{ news.content|striptags|truncatechars:100 }}</p>
+    <!-- Слайдер Swiper -->
+    <div class="swiper news-slider">
+        <div class="swiper-wrapper">
+            {% for news in latest_news %}
+                <div class="swiper-slide">
+                    <a href="{% url 'news:news_detail' city.slug news.slug %}" 
+                       class="card border-0 shadow rounded-lg text-decoration-none h-100 transition-transform duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-600"
+                       aria-label="Читать новость: {{ news.title }}">
+                        {% if news.image %}
+                            <img src="{{ news.image.url }}" 
+                                 alt="{{ news.title }}" 
+                                 loading="lazy" 
+                                 class="card-img-top rounded-t-lg object-cover w-full"
+                                 style="aspect-ratio: 16/9;">
+                        {% else %}
+                            <div class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-t-lg flex items-center justify-center w-full" 
+                                 style="aspect-ratio: 16/9;"
+                                 role="img" 
+                                 aria-label="Заполнитель изображения для новости">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-gray-400">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
                         {% endif %}
-                    </div>
-                </a>
-            </div>
-        {% endfor %}
+                        <div class="card-body p-4 sm:p-5">
+                            <p class="text-gray-400 hover:text-sky-700 text-sm sm:text-base transition-colors duration-200 mb-2">{{ news.created_at|date:"d.m.Y" }}</p>
+                            <h3 class="card-title text-lg sm:text-xl font-semibold text-gray-900 mb-2 line-clamp-2">{{ news.title }}</h3>
+                            {% if news.content %}
+                                <p class="text-gray-600 text-sm sm:text-base line-clamp-2">{{ news.content|striptags|truncatechars:100 }}</p>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+        <!-- Навигация -->
+        <div class="swiper-button-prev"></div>
+        <div class="swiper-button-next"></div>
+        <!-- Пагинация -->
+        <div class="swiper-pagination"></div>
     </div>
 </div>
 {% endif %}
 
-<!-- Скрипт для установки задержки анимации -->
+<!-- Скрипт для анимации -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         const cards = document.querySelectorAll('.animate-slide-up');
+        const delayStep = 0.2; // Задержка 0.2с между карточками
         cards.forEach((card, index) => {
-            const delay = (index / 3).toFixed(2); // 0.00, 0.33, 0.67, ...
-            card.style.animationDelay = `${delay}s`;
+            card.style.willChange = 'transform, opacity';
+            card.style.animationDelay = `${(index * delayStep).toFixed(2)}s`;
+        });
+    });
+</script>
+
+<!-- Инициализация Swiper -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        new Swiper('.news-slider', {
+            slidesPerView: 1,
+            spaceBetween: 16,
+            breakpoints: {
+                576: {
+                    slidesPerView: 2,
+                    spaceBetween: 16,
+                },
+                991: {
+                    slidesPerView: 3,
+                    spaceBetween: 24,
+                },
+            },
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+            loop: {% if latest_news.count > 3 %}true{% else %}false{% endif %},
+            grabCursor: true,
         });
     });
 </script>

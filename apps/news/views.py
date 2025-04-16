@@ -25,7 +25,7 @@ def news_widget(request, city_slug):
     city = get_object_or_404(City, slug=city_slug, is_active=True)
     latest_news = News.objects.filter(is_published=True, cities=city).order_by(
         "-created_at"
-    )[:3]
+    )
     return render(
         request,
         "news/partials/news_widget.html",

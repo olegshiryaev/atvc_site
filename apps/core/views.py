@@ -41,7 +41,7 @@ def index(request, city_slug):
     # Получаем последние 3 новости для текущего города
     latest_news = News.objects.filter(is_published=True, cities=city).order_by(
         "-created_at"
-    )[:3]
+    )
 
     banners = Banner.objects.filter(is_active=True, cities=city)
 
