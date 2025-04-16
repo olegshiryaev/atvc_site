@@ -407,22 +407,55 @@
     display: block;
 }
 
-/* Контролируем высоту секции */
-.container-fluid.py-5 {
-    min-height: 500px; /* Установите желаемую высоту баннера */
+.address-check-section {
     position: relative;
+    overflow: visible;
 }
 
-/* Контейнер для изображения */
-.col-lg-6.position-relative {
-    min-height: 600px; /* Высота для изображения */
+.form-container {
     position: relative;
+    z-index: 2; /* Форма поверх изображения */
 }
 
-/* Убедимся, что изображение привязано к нижнему краю */
-.img-fluid {
-    max-height: 700px; /* Высота изображения больше высоты секции */
-    object-fit: contain;
-    bottom: 0 !important;
-    margin-bottom: 0;
+.address-check-image {
+    max-width: 25%; /* Ограничиваем ширину для десктопов */
+    position: absolute;
+    bottom: 0;
+    left: 25%;
+    transform: translateX(-50%);
+    z-index: 1;
+    height: auto;
+}
+
+@media (max-width: 991.98px) {
+    .address-check-section {
+        padding-bottom: 100px; /* Место для изображения */
+        position: relative; /* Устанавливаем контекст для абсолютного позиционирования */
+        overflow: hidden;
+    }
+
+    /* Стили для мобильного изображения */
+    .address-check-image-mobile {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%; /* Полная ширина для мобильных */
+        height: auto; /* Сохраняем пропорции */
+        opacity: 0.7;
+        z-index: 1;
+    }
+
+    /* Если мобильное изображение не используется, корректируем десктопное изображение */
+    .address-check-image {
+        display: none; /* Скрываем десктопное изображение на мобильных */
+    }
+}
+
+/* Скрываем ошибку чекбокса по умолчанию */
+#privacyError {
+    display: none;
+}
+
+#privacy:invalid ~ #privacyError {
+    display: block;
 }

@@ -202,29 +202,33 @@
     {% endif %}
 
     <!-- Секция проверки адреса -->
-    <div class="container-fluid py-5" style="background: linear-gradient(135deg, #075e85 0%, #1e3a8a 100%); position: relative; overflow: visible;">
+    <div class="container-fluid py-5 address-check-section" style="background: linear-gradient(135deg, #075e85 0%, #1e3a8a 100%);">
+        <!-- Изображение для десктопов -->
+        <img src="{% static 'img/girl-with-laptop.png' %}" alt="Девушка с ноутбуком" class="img-fluid address-check-image d-none d-lg-block">
+        <!-- Изображение для мобильных -->
+        <img src="{% static 'img/girl-with-laptop-mobile.png' %}" alt="Девушка с ноутбуком" class="img-fluid address-check-image-mobile d-lg-none">
+    
         <div class="container">
             <div class="row align-items-end">
-                <!-- Левая часть с изображением -->
-                <div class="col-lg-6 text-center text-lg-start mb-4 mb-lg-0 position-relative">
-                    <img src="{% static 'img/girl-with-laptop.png' %}" alt="Девушка с ноутбуком" class="img-fluid" style="max-width: 80%; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%;">
-                </div>
+                <!-- Левая часть (пустая, сохраняет место в сетке) -->
+                <div class="col-lg-6 mb-4 mb-lg-0"></div>
                 <!-- Правая часть с формой -->
                 <div class="col-lg-6">
                     <div class="text-center mb-4">
                         <h2 class="fs-48 fw-black lh-custom text-white mb-4">Проверьте свой адрес на подключение</h2>
                     </div>
                     <form id="checkAddressForm" method="post" novalidate>
+                        <!-- Оригинальная форма без изменений -->
                         {% csrf_token %}
                         <div class="row g-3">
                             <!-- Улица -->
                             <div class="col-md-6">
-                                <input type="text" name="street" id="street" class="form-control" placeholder="Укажите улицу" required>
+                                <input type="text" name="street" id="street" class="form-control" placeholder="Укажите улицу">
                                 <div id="streetError" class="invalid-feedback"></div>
                             </div>
                             <!-- Номер дома -->
                             <div class="col-md-6">
-                                <input type="text" name="house_number" id="house_number" class="form-control" placeholder="Укажите номер дома" required>
+                                <input type="text" name="house_number" id="house_number" class="form-control" placeholder="Укажите номер дома">
                                 <div id="house_numberError" class="invalid-feedback"></div>
                             </div>
                             <!-- Имя -->
@@ -237,8 +241,6 @@
                                 <input type="tel" name="phone" id="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
                                 <div id="phoneError" class="invalid-feedback"></div>
                             </div>
-                            <!-- Скрытое поле для комментария -->
-                            <input type="hidden" name="comment" value="Проверка адреса">
                             <!-- Чекбокс и кнопка -->
                             <div class="col-12">
                                 <div class="row align-items-center">
@@ -249,9 +251,7 @@
                                                 Я соглашаюсь, что ознакомлен с 
                                                 <a href="#" class="text-white text-decoration-underline">политикой конфиденциальности</a>
                                             </label>
-                                            <div id="privacyError" class="invalid-feedback">
-                                                Необходимо согласиться с политикой конфиденциальности
-                                            </div>
+                                            <div id="privacyError" class="invalid-feedback d-none"></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -260,13 +260,7 @@
                                 </div>
                             </div>
                         </div>
-                        <div id="formErrors" class="text-danger mt-3 hidden"></div>
                     </form>
-                    <!-- Сообщение об успехе -->
-                    <div id="successMessage" class="hidden text-center text-white mt-4">
-                        <h5 class="fs-4 fw-bold mb-3">Заявка успешно отправлена</h5>
-                        <p class="fs-5 mb-0">Скоро мы свяжемся с вами и уточним детали</p>
-                    </div>
                 </div>
             </div>
         </div>
@@ -282,12 +276,12 @@
             const delay = (index / 3).toFixed(2);
             card.style.animationDelay = `${delay}s`;
         });
-    
+
         // Фильтры тарифов
         const tariffsContainer = document.querySelector('.row.row-cols-1');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const citySlug = window.location.pathname.split('/')[1];
-    
+
         async function loadTariffs(filterType) {
             try {
                 tariffsContainer.innerHTML = `
@@ -314,7 +308,7 @@
                 `;
             }
         }
-    
+
         function updateUI(activeFilter, tariffsHTML) {
             tariffsContainer.innerHTML = tariffsHTML;
             filterButtons.forEach(btn => {
@@ -327,7 +321,163 @@
                 btn.classList.toggle('hover-bg-gray-100', !isActive);
             });
         }
-    
+
+        // Общая функция для валидации телефона
+        function validatePhone(phoneValue) {
+            return phoneValue.replace(/[^0-9]/g, '').length === 11;
+        }
+
+        // Общая функция для проверки заполненности формы
+        function checkFormValidity(form) {
+            const nameInput = form.querySelector('[name="name"]');
+            const phoneInput = form.querySelector('[name="phone"]');
+            const privacyInput = form.querySelector('[name="privacy"]');
+            const submitBtn = form.querySelector('button[type="submit"]');
+
+            if (!nameInput || !phoneInput || !privacyInput || !submitBtn) return;
+
+            const isNameFilled = nameInput.value.trim() !== '';
+            const isPhoneFilled = validatePhone(phoneInput.value);
+            const isPrivacyChecked = privacyInput.checked;
+
+            submitBtn.disabled = !(isNameFilled && isPhoneFilled && isPrivacyChecked);
+        }
+
+        // Инициализация формы проверки адреса
+        function initAddressCheckForm() {
+            const addressForm = document.getElementById('checkAddressForm');
+            if (!addressForm) return;
+
+            const phoneInput = addressForm.querySelector('[name="phone"]');
+            if (phoneInput) {
+                IMask(phoneInput, {
+                    mask: '+7(000)000-0000',
+                    lazy: false,
+                    placeholderChar: '_'
+                });
+            }
+
+            // Слушатели изменений для обязательных полей
+            addressForm.querySelectorAll('[name="name"], [name="phone"], [name="privacy"]').forEach(input => {
+                input.addEventListener('input', () => checkFormValidity(addressForm));
+            });
+
+            // Обработчик отправки формы
+            addressForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                // Сброс предыдущих ошибок
+                addressForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                addressForm.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.classList.add('d-none');
+                    el.textContent = '';
+                });
+
+                // Валидация
+                let isValid = true;
+                const name = addressForm.querySelector('[name="name"]');
+                const phone = addressForm.querySelector('[name="phone"]');
+                const street = addressForm.querySelector('[name="street"]');
+                const houseNumber = addressForm.querySelector('[name="house_number"]');
+                const privacy = addressForm.querySelector('[name="privacy"]');
+
+                if (name.value.trim() === '') {
+                    name.classList.add('is-invalid');
+                    const errorDiv = addressForm.querySelector('#nameError');
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Пожалуйста, укажите ваше имя';
+                        errorDiv.classList.remove('d-none');
+                    }
+                    isValid = false;
+                }
+
+                if (!validatePhone(phone.value)) {
+                    phone.classList.add('is-invalid');
+                    const errorDiv = addressForm.querySelector('#phoneError');
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Пожалуйста, укажите корректный номер телефона';
+                        errorDiv.classList.remove('d-none');
+                    }
+                    isValid = false;
+                }
+
+                if (!privacy.checked) {
+                    privacy.classList.add('is-invalid');
+                    const errorDiv = addressForm.querySelector('#privacyError');
+                    if (errorDiv) {
+                        errorDiv.classList.remove('d-none');
+                    }
+                    isValid = false;
+                }
+
+                if (!isValid) {
+                    return;
+                }
+
+                // Отправка формы
+                try {
+                    const formData = new FormData(addressForm);
+                    formData.append('comment', ''); // Добавляем пустое поле comment
+                    const submitUrl = `/${citySlug}/application/submit/`;
+                    const response = await fetch(submitUrl, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    });
+
+                    const data = await response.json();
+
+                    if (response.ok && data.success) {
+                        // Открываем модальное окно с сообщением об успехе
+                        const modal = document.getElementById('applicationModal');
+                        const modalHeader = modal.querySelector('.modal-header');
+                        const formContainer = document.getElementById('formContainer');
+                        const successMessage = document.getElementById('successMessage');
+
+                        if (modal && modalHeader && formContainer && successMessage) {
+                            modalHeader.classList.add('hidden');
+                            formContainer.classList.add('hidden');
+                            successMessage.classList.remove('hidden');
+                            const bsModal = new bootstrap.Modal(modal);
+                            bsModal.show();
+
+                            // Автозакрытие через 5 секунд
+                            setTimeout(() => {
+                                bsModal.hide();
+                            }, 5000);
+                        }
+                    } else {
+                        if (data.errors) {
+                            for (const [field, errors] of Object.entries(data.errors)) {
+                                const errorDiv = addressForm.querySelector(`#${field}Error`);
+                                if (errorDiv) {
+                                    errorDiv.textContent = errors.join(' ');
+                                    errorDiv.classList.remove('d-none');
+                                    const input = addressForm.querySelector(`[name="${field}"]`);
+                                    if (input) input.classList.add('is-invalid');
+                                }
+                            }
+                        } else {
+                            const errorDiv = addressForm.querySelector('#formErrors');
+                            if (errorDiv) {
+                                errorDiv.textContent = data.error || 'Произошла ошибка при отправке';
+                                errorDiv.classList.remove('d-none');
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Ошибка при отправке формы:', error);
+                    const errorDiv = addressForm.querySelector('#formErrors');
+                    if (errorDiv) {
+                        errorDiv.textContent = 'Произошла ошибка при отправке';
+                        errorDiv.classList.remove('d-none');
+                    }
+                }
+            });
+        }
+
         function addConnectButtonListeners() {
             const connectButtons = document.querySelectorAll('.connect-btn');
             connectButtons.forEach(button => {
@@ -338,24 +488,24 @@
                     const modalHeader = modal.querySelector('.modal-header');
                     const modalTitle = document.getElementById('modalTitle');
                     const form = document.getElementById('applicationForm');
-                    const nameInput = document.getElementById('name');
-                    const phoneInput = document.getElementById('phone');
-                    const streetInput = document.getElementById('street');
-                    const houseNumberInput = document.getElementById('house_number');
-                    const commentInput = document.getElementById('comment');
-                    const privacyInput = document.getElementById('privacy');
+                    const nameInput = form.querySelector('[name="name"]');
+                    const phoneInput = form.querySelector('[name="phone"]');
+                    const streetInput = form.querySelector('[name="street"]');
+                    const houseNumberInput = form.querySelector('[name="house_number"]');
+                    const commentInput = form.querySelector('[name="comment"]');
+                    const privacyInput = form.querySelector('[name="privacy"]');
                     const formErrors = document.getElementById('formErrors');
                     const formContainer = document.getElementById('formContainer');
                     const successMessage = document.getElementById('successMessage');
-                    const submitBtn = document.getElementById('submitBtn');
-    
+                    const submitBtn = form.querySelector('button[type="submit"]');
+
                     modalTitle.textContent = 'Оставить заявку';
-                    modalHeader.classList.remove('hidden'); // Показываем заголовок для формы
+                    modalHeader.classList.remove('hidden');
                     const bsModal = new bootstrap.Modal(modal);
                     bsModal.show();
-    
+
                     setTimeout(() => { nameInput.focus(); }, 50);
-    
+
                     let phoneMask;
                     if (phoneInput) {
                         phoneMask = IMask(phoneInput, {
@@ -364,40 +514,36 @@
                             placeholderChar: '_'
                         });
                     }
-    
+
                     // Очистка формы и состояния
                     form.reset();
                     if (phoneMask) phoneMask.updateValue();
-                    commentInput.value = tariffName ? `Тариф: ${tariffName}` : '';
-                    formErrors.classList.add('hidden');
-                    formErrors.textContent = '';
+                    if (commentInput) commentInput.value = tariffName ? `Тариф: ${tariffName}` : '';
+                    if (formErrors) {
+                        formErrors.classList.add('hidden');
+                        formErrors.textContent = '';
+                    }
+
                     ['nameError', 'phoneError', 'streetError', 'house_numberError', 'commentError', 'privacyError'].forEach(id => {
                         const errorDiv = document.getElementById(id);
-                        errorDiv.textContent = '';
-                        errorDiv.classList.remove('d-block');
+                        if (errorDiv) {
+                            errorDiv.textContent = '';
+                            errorDiv.classList.remove('d-block');
+                        }
                     });
-                    ['name', 'phone', 'street', 'house_number', 'comment', 'privacy'].forEach(id => {
-                        document.getElementById(id).classList.remove('is-invalid');
+
+                    ['name', 'phone', 'street', 'house_number', 'comment', 'privacy'].forEach(name => {
+                        const input = form.querySelector(`[name="${name}"]`);
+                        if (input) input.classList.remove('is-invalid');
                     });
-                    submitBtn.disabled = true;
-    
-                    // Проверка заполненности формы
-                    function checkFormValidity() {
-                        const isNameFilled = nameInput.value.trim() !== '';
-                        const isPhoneFilled = phoneInput.value.replace(/[^0-9]/g, '').length === 11;
-                        const isPrivacyChecked = privacyInput.checked;
-    
-                        submitBtn.disabled = !(isNameFilled && isPhoneFilled && isPrivacyChecked);
-                    }
-    
+
+                    if (submitBtn) submitBtn.disabled = true;
+
                     // Слушатели для полей
-                    nameInput.addEventListener('input', checkFormValidity);
-                    phoneInput.addEventListener('input', checkFormValidity);
-                    streetInput.addEventListener('input', checkFormValidity);
-                    houseNumberInput.addEventListener('input', checkFormValidity);
-                    commentInput.addEventListener('input', checkFormValidity);
-                    privacyInput.addEventListener('change', checkFormValidity);
-    
+                    form.querySelectorAll('[name="name"], [name="phone"], [name="street"], [name="house_number"], [name="comment"], [name="privacy"]').forEach(input => {
+                        input.addEventListener('input', () => checkFormValidity(form));
+                    });
+
                     // Обработчик отправки формы
                     form.onsubmit = async function(e) {
                         e.preventDefault();
@@ -405,7 +551,7 @@
                         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
                         formData.append('csrfmiddlewaretoken', csrfToken);
                         formData.append('privacy', privacyInput.checked ? 'on' : 'off');
-    
+
                         try {
                             const submitUrl = `/${citySlug}/application/submit/`;
                             console.log('Отправка на:', submitUrl);
@@ -416,14 +562,14 @@
                                     'X-Requested-With': 'XMLHttpRequest'
                                 }
                             });
-    
+
                             const data = await response.json();
                             console.log('Ответ сервера:', data);
-    
+
                             if (response.ok && data.success) {
-                                formContainer.classList.add('hidden');
-                                modalHeader.classList.add('hidden'); // Скрываем заголовок
-                                successMessage.classList.remove('hidden');
+                                if (formContainer) formContainer.classList.add('hidden');
+                                if (modalHeader) modalHeader.classList.add('hidden');
+                                if (successMessage) successMessage.classList.remove('hidden');
                                 // Автозакрытие через 5 секунд
                                 setTimeout(() => {
                                     bsModal.hide();
@@ -435,45 +581,45 @@
                                         if (errorDiv) {
                                             errorDiv.textContent = errors.join(' ');
                                             errorDiv.classList.add('d-block');
-                                            document.getElementById(field).classList.add('is-invalid');
+                                            const input = form.querySelector(`[name="${field}"]`);
+                                            if (input) input.classList.add('is-invalid');
                                         }
                                     }
-                                } else {
+                                } else if (formErrors) {
                                     formErrors.classList.remove('hidden');
-                                    formErrors.textContent = data.error || 'Произошла ошибка при отправке';
+                                    formruheErrors.textContent = data.error || 'Произошла ошибка при отправке';
                                 }
                             }
                         } catch (error) {
                             console.error('Ошибка fetch:', error);
-                            formErrors.classList.remove('hidden');
-                            formErrors.textContent = `Ошибка: ${error.message}`;
+                            if (formErrors) {
+                                formErrors.classList.remove('hidden');
+                                formErrors.textContent = `Ошибка: ${error.message}`;
+                            }
                         }
                     };
-    
+
                     // Сброс состояния при открытии формы
                     modal.addEventListener('show.bs.modal', () => {
-                        modalHeader.classList.remove('hidden');
-                        formContainer.classList.remove('hidden');
-                        successMessage.classList.add('hidden');
+                        if (modalHeader) modalHeader.classList.remove('hidden');
+                        if (formContainer) formContainer.classList.remove('hidden');
+                        if (successMessage) successMessage.classList.add('hidden');
                     });
-    
+
                     // Очистка маски и слушателей при закрытии модального окна
                     modal.addEventListener('hidden.bs.modal', () => {
                         if (phoneMask) {
                             phoneMask.destroy();
                             phoneMask = null;
                         }
-                        nameInput.removeEventListener('input', checkFormValidity);
-                        phoneInput.removeEventListener('input', checkFormValidity);
-                        streetInput.removeEventListener('input', checkFormValidity);
-                        houseNumberInput.removeEventListener('input', checkFormValidity);
-                        commentInput.removeEventListener('input', checkFormValidity);
-                        privacyInput.removeEventListener('change', checkFormValidity);
+                        form.querySelectorAll('[name="name"], [name="phone"], [name="street"], [name="house_number"], [name="comment"], [name="privacy"]').forEach(input => {
+                            input.removeEventListener('input', () => checkFormValidity(form));
+                        });
                     }, { once: true });
                 });
             });
         }
-    
+
         filterButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -482,13 +628,15 @@
                 loadTariffs(filterType);
             });
         });
-    
+
         window.addEventListener('popstate', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const filterType = urlParams.get('type') || 'internet';
             loadTariffs(filterType);
         });
-    
+
+        // Инициализация всех функций
+        initAddressCheckForm();
         addConnectButtonListeners();
     });
 </script>
