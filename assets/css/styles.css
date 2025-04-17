@@ -538,10 +538,11 @@
 .swiper-slide {
     transition: opacity 0.3s ease;
     height: auto; /* Гарантирует одинаковую высоту слайдов */
+    opacity: 1; /* Полная прозрачность по умолчанию */
 }
 
-.swiper-slide:not(.swiper-slide-active) {
-    opacity: 0.7;
+.swiper-slide:not(.swiper-slide-visible) {
+    opacity: 0.7; /* Затемнение только для невидимых слайдов */
 }
 
 .card {
@@ -550,6 +551,15 @@
     min-height: 100%; /* Минимальная высота карточки */
     border: none; /* Удаление обводки */
     box-shadow: none; /* Удаление тени */
+}
+
+.card-title {
+    color: #212529; /* text-gray-900 */
+    transition: color 0.3s ease;
+}
+
+.card:hover .card-title {
+    color: #0369a1 !important; /* Фирменный синий цвет */
 }
 
 .card-body {
@@ -607,4 +617,21 @@
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+.btn-primary {
+    background-color: #0284c7;
+    border: none;
+}
+
+.btn-primary:hover {
+    background-color: #0369a1;
+}
+
+.bg-gray-100 {
+    background-color: #f5f5f5; /* Лёгкий серый фон */
+}
+
+.text-gray-500 {
+    color: #6c757d; /* Цвет текста, согласованный с Bootstrap */
 }

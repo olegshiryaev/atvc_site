@@ -215,43 +215,41 @@
         <div class="swiper news-slider position-relative">
             <div class="swiper-wrapper">
                 {% for news in latest_news %}
-                    <div class="swiper-slide">
-                        <a href="{% url 'news:news_detail' city.slug news.slug %}" 
-                        class="card text-decoration-none d-flex flex-column h-100"
-                        aria-label="Читать новость: {{ news.title }}">
-                            {% if news.image %}
-                                <div class="position-relative overflow-hidden rounded-top-3">
-                                    <img src="{{ news.image.url }}" 
-                                        alt="{{ news.title }}" 
-                                        loading="lazy" 
-                                        class="card-img-top object-fit-cover w-100 h-36 h-md-40"
-                                        style="aspect-ratio: 16/9;">
-                                </div>
-                            {% else %}
-                                <div class="bg-gradient-to-br from-gray-100 to-gray-200 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40" 
-                                    style="aspect-ratio: 16/9;"
-                                    role="img" 
-                                    aria-label="Заполнитель изображения для новости">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor" class="text-gray-400">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
+                <div class="swiper-slide">
+                    <a href="{% url 'news:news_detail' city.slug news.slug %}" 
+                    class="card text-decoration-none d-flex flex-column h-100"
+                    aria-label="Читать новость: {{ news.title }}">
+                        {% if news.image %}
+                        <div class="position-relative overflow-hidden rounded-top-3">
+                            <img src="{{ news.image.url }}" 
+                                alt="{{ news.title }}" 
+                                loading="lazy" 
+                                class="card-img-top object-fit-cover w-100 h-36 h-md-40"
+                                style="aspect-ratio: 16/9;">
+                        </div>
+                        {% else %}
+                        <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
+                            style="aspect-ratio: 16/9;"
+                            role="img" 
+                            aria-label="Изображение отсутствует">
+                            Изображение отсутствует
+                        </div>
+                        {% endif %}
+                        <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
+                            <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
+                                {{ news.created_at|date:"d.m.Y" }}
+                            </p>
+                            <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
+                                {{ news.title }}
+                            </h3>
+                            {% if news.content %}
+                            <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
+                                {{ news.content|striptags|truncatechars:100 }}
+                            </p>
                             {% endif %}
-                            <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
-                                <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
-                                    {{ news.created_at|date:"d.m.Y" }}
-                                </p>
-                                <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
-                                    {{ news.title }}
-                                </h3>
-                                {% if news.content %}
-                                    <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
-                                        {{ news.content|striptags|truncatechars:100 }}
-                                    </p>
-                                {% endif %}
-                            </div>
-                        </a>
-                    </div>
+                        </div>
+                    </a>
+                </div>
                 {% endfor %}
             </div>
 

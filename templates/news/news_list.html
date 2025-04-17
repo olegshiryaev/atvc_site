@@ -1,26 +1,150 @@
-{% extends "base.html" %}
-{% load static %}
+{% extends 'base.html' %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto px-4 py-10">
-  <h1 class="text-3xl font-bold mb-6 text-gray-800">Новости</h1>
+<div class="container py-4">
+    <!-- Заголовок и навигация -->
+    <div class="d-block d-sm-flex align-items-sm-center justify-content-between mb-4 animate-fade-in">
+        <h1 class="fs-3 fw-bold text-gray-800 mb-2 mb-sm-0" style="line-height: 38px;">Новости</h1>
+        <a href="#" 
+           class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-flex align-items-center gap-1"
+           style="font-size: 15px; line-height: 21px;"
+           aria-label="Вернуться на главную">
+            На главную
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </a>
+    </div>
 
-  <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-    {% for news in news_list %}
-    <a href="{{ news.get_absolute_url }}" class="block rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all bg-white">
-      {% if news.image %}
-      <img src="{{ news.image.url }}" alt="{{ news.title }}" class="w-full h-48 object-cover">
-      {% else %}
-      <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-400">
-        <span class="text-sm">Нет изображения</span>
-      </div>
-      {% endif %}
-      <div class="p-4">
-        <h2 class="text-xl font-semibold text-gray-800">{{ news.title }}</h2>
-        <p class="text-sm text-gray-600 mt-2">{{ news.created_at|date:"d.m.Y" }}</p>
-      </div>
-    </a>
-    {% endfor %}
-  </div>
+    <!-- Сетка новостей -->
+    <div class="row g-4" id="news-container">
+        {% for news in news_list %}
+        <div class="col-12 col-sm-6 col-lg-4">
+            <a href="{{ news.get_absolute_url }}" 
+               class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
+               aria-label="Читать новость: {{ news.title }}">
+                {% if news.image %}
+                <div class="position-relative overflow-hidden rounded-top-3">
+                    <img src="{{ news.image.url }}" 
+                         alt="{{ news.title }}" 
+                         loading="lazy" 
+                         class="card-img-top object-fit-cover w-100 h-36 h-md-40"
+                         style="aspect-ratio: 16/9;">
+                </div>
+                {% else %}
+                <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
+                     style="aspect-ratio: 16/9;"
+                     role="img" 
+                     aria-label="Изображение отсутствует">
+                    Изображение отсутствует
+                </div>
+                {% endif %}
+                <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
+                    <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
+                        {{ news.created_at|date:"d.m.Y" }}
+                    </p>
+                    <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
+                        {{ news.title }}
+                    </h3>
+                    {% if news.content %}
+                    <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
+                        {{ news.content|striptags|truncatechars:100 }}
+                    </p>
+                    {% endif %}
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Кнопка "Загрузить ещё" -->
+    {% if has_more_news %}
+    <div class="text-center mt-5">
+        <button id="load-more-btn" 
+                class="btn btn-primary fw-semibold px-4 py-2 transition-colors duration-300"
+                data-next-page="2"
+                data-city-slug="{{ city.slug }}"
+                aria-label="Загрузить больше новостей">
+            Загрузить больше
+        </button>
+    </div>
+    {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const newsContainer = document.getElementById('news-container');
+
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', async () => {
+            const nextPage = loadMoreBtn.getAttribute('data-next-page');
+            const citySlug = loadMoreBtn.getAttribute('data-city-slug');
+            const url = `{% url 'news:load_more_news' city.slug %}?page=${nextPage}`;
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+                const data = await response.json();
+
+                if (data.news && data.news.length > 0) {
+                    data.news.forEach(news => {
+                        const newsCard = document.createElement('div');
+                        newsCard.className = 'col-12 col-sm-6 col-lg-4';
+                        newsCard.innerHTML = `
+                            <a href="/${citySlug}/news/${news.slug}/" 
+                               class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
+                               aria-label="Читать новость: ${news.title}">
+                                ${news.image ? `
+                                <div class="position-relative overflow-hidden rounded-top-3">
+                                    <img src="${news.image}" 
+                                         alt="${news.title}" 
+                                         loading="lazy" 
+                                         class="card-img-top object-fit-cover w-100 h-36 h-md-40"
+                                         style="aspect-ratio: 16/9;">
+                                </div>
+                                ` : `
+                                <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
+                                     style="aspect-ratio: 16/9;"
+                                     role="img" 
+                                     aria-label="Изображение отсутствует">
+                                    Изображение отсутствует
+                                </div>
+                                `}
+                                <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
+                                    <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
+                                        ${news.date}
+                                    </p>
+                                    <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
+                                        ${news.title}
+                                    </h3>
+                                    ${news.content ? `
+                                    <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
+                                        ${news.content}
+                                    </p>
+                                    ` : ''}
+                                </div>
+                            </a>
+                        `;
+                        newsContainer.appendChild(newsCard);
+                    });
+
+                    // Обновляем номер следующей страницы
+                    loadMoreBtn.setAttribute('data-next-page', parseInt(nextPage) + 1);
+
+                    // Проверяем, есть ли ещё новости
+                    if (!data.has_more_news) {
+                        loadMoreBtn.remove();
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при загрузке новостей:', error);
+            }
+        });
+    }
+});
+</script>
 {% endblock %}
