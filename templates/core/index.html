@@ -4,7 +4,7 @@
 {% block title %}Главная страница{% endblock %}
 
 {% block content %}
-<div class="bg-white min-h-screen font-sans">
+<div class="min-h-screen font-sans">
     <!-- Карусель -->
     {% if banners %}
     <div id="bannerCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
@@ -734,6 +734,47 @@
         // Инициализация всех функций
         initAddressCheckForm();
         addConnectButtonListeners();
+    });
+</script>
+
+<!-- JavaScript для поиска каналов -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function initChannelSearch() {
+            document.querySelectorAll('.channel-search').forEach(function (searchInput) {
+                const tariffId = searchInput.id.split('-')[1];
+                const channelList = document.getElementById('channelList-' + tariffId);
+                const channelItems = channelList.querySelectorAll('.channel-item');
+                const categoryHeaders = channelList.querySelectorAll('.category-header');
+    
+                searchInput.addEventListener('input', function () {
+                    const searchTerm = this.value.toLowerCase();
+                    let visibleCategories = new Set();
+    
+                    channelItems.forEach(function (item) {
+                        const channelName = item.querySelector('span').textContent.toLowerCase();
+                        const isVisible = channelName.includes(searchTerm);
+                        item.style.display = isVisible ? '' : 'none';
+                        if (isVisible) {
+                            visibleCategories.add(item.dataset.category);
+                        }
+                    });
+    
+                    categoryHeaders.forEach(function (header) {
+                        const categoryName = header.textContent;
+                        header.style.display = visibleCategories.has(categoryName) ? '' : 'none';
+                    });
+                });
+            });
+        }
+    
+        // Инициализация при загрузке страницы
+        initChannelSearch();
+    
+        // Повторная инициализация после AJAX (для HTMX)
+        document.addEventListener('htmx:afterSwap', function () {
+            initChannelSearch();
+        });
     });
 </script>
 {% endblock %}

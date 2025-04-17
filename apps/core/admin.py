@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 import csv
 from django.http import HttpResponse
 
@@ -10,6 +11,7 @@ from .models import (
     Feedback,
     Office,
     Service,
+    TVChannel,
     Tariff,
     WorkSchedule,
 )
@@ -36,6 +38,7 @@ class CityFilter(admin.SimpleListFilter):
     def queryset(self, request, queryset):
         if self.value():
             return queryset.filter(cities__id=self.value())
+        return queryset
 
 
 @admin.register(Service)
@@ -43,6 +46,20 @@ class ServiceAdmin(admin.ModelAdmin):
     list_display = ("name", "slug")
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
+
+
+@admin.register(TVChannel)
+class TVChannelAdmin(admin.ModelAdmin):
+    list_display = ["name", "category", "is_hd", "logo_preview"]
+    list_filter = ["category", "is_hd"]
+    search_fields = ["name"]
+    fields = ["name", "category", "is_hd", "description", "logo"]
+
+    def logo_preview(self, obj):
+        if obj.logo:
+            return mark_safe(f'<img src="{obj.logo.url}" width="50" />')
+        return "-"
+    logo_preview.short_description = "Логотип"
 
 
 @admin.register(Tariff)
@@ -54,10 +71,12 @@ class TariffAdmin(admin.ModelAdmin):
         "speed",
         "price",
         "is_active",
-        "cities_list",
+        "get_cities",
     )
     list_editable = ("price", "is_active")
     list_filter = (CityFilter, "service")
+    filter_horizontal = ["cities", "included_channels"]
+    search_fields = ["name", "description"]
     actions = ["export_as_csv"]
 
     fieldsets = (
@@ -70,12 +89,12 @@ class TariffAdmin(admin.ModelAdmin):
             },
         ),
         ("Привязка к городам", {"fields": ("cities",)}),
+        ("ТВ каналы", {"fields": ("included_channels",)}),
     )
 
-    def cities_list(self, obj):
-        return ", ".join([city.name for city in obj.cities.all()])
-
-    cities_list.short_description = "Города"
+    def get_cities(self, obj):
+        return ", ".join(obj.cities.values_list("name", flat=True))
+    get_cities.short_description = "Города"
 
     def export_as_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
