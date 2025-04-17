@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator
 from ..cities.models import City
 from .models import News
+import re
 
 
 def news_list(request, city_slug):
@@ -52,10 +53,13 @@ def load_more_news(request, city_slug):
 
 def news_detail(request, city_slug, news_slug):
     city = get_object_or_404(City, slug=city_slug, is_active=True)
-    news_item = get_object_or_404(News, slug=news_slug, cities=city)
+    news_item = get_object_or_404(News, slug=news_slug, cities=city, is_published=True)
 
-    return render(request, "news/news_detail.html", {"city": city, "news": news_item})
-
+    
+    return render(request, "news/news_detail.html", {
+        "city": city,
+        "news": news_item,
+    })
 
 def news_widget(request, city_slug):
     city = get_object_or_404(City, slug=city_slug, is_active=True)

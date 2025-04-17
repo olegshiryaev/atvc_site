@@ -635,3 +635,58 @@
 .text-gray-500 {
     color: #6c757d; /* Цвет текста, согласованный с Bootstrap */
 }
+
+.news-detail {
+    max-width: 800px; /* Ограничиваем ширину для читаемости */
+    margin: 0 auto; /* Центрируем контент */
+}
+
+.news-title {
+    color: #212529; /* text-gray-900 */
+    transition: color 0.3s ease;
+}
+
+.news-detail:hover .news-title {
+    color: #0d6efd; /* Фирменный синий цвет при наведении */
+}
+
+.news-content {
+    word-break: break-word; /* Перенос длинных слов */
+}
+
+.text-gray-500 {
+    color: #6c757d; /* Цвет текста, согласованный с Bootstrap */
+}
+
+/* Стили для HTML-контента */
+.news-content h2, .news-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 1.5rem 0 1rem;
+}
+
+.news-content p {
+    margin-bottom: 1rem;
+}
+
+.news-content ul, .news-content ol {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem;
+}
+
+.news-content blockquote {
+    border-left: 4px solid #0d6efd;
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Кнопки "Поделиться" */
+.share-icon {
+    transition: color 0.3s ease;
+}
+
+.share-icon:hover {
+    color: #0d6efd;
+}
