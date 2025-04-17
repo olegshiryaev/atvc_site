@@ -68,23 +68,29 @@
                     <div class="mb-3">
                         <input type="text" class="form-control channel-search" id="channelSearch-{{ tariff.id }}" placeholder="Поиск каналов..." aria-label="Поиск каналов" />
                     </div>
-                    <div class="row channel-container g-3" id="channelList-{{ tariff.id }}">
-                        {% for channel in tariff.included_channels.all %}
-                        <div class="col-4 channel-item">
-                            <div class="channel-card">
-                                {% if channel.logo %}
-                                <img src="{{ channel.logo.url }}" alt="{{ channel.name }} logo" />
-                                {% else %}
-                                <div style="width: 60px; height: 60px; background-color: #e5e7eb; margin-right: 12px;"></div>
-                                {% endif %}
-                                <span>{{ channel.name }}{% if channel.is_hd %} (HD){% endif %}</span>
+                    <div class="channel-container" id="channelList-{{ tariff.id }}">
+                        {% for category in tariff.included_channels.all|dictsort:"category"|groupby:"category" %}
+                        <h6 class="category-header">{{ category.grouper|title }}</h6>
+                        <div class="row g-3">
+                            {% for channel in category.list %}
+                            <div class="col-4 channel-item" data-category="{{ channel.get_category_display }}">
+                                <div class="channel-card">
+                                    {% if channel.logo %}
+                                    <img src="{{ channel.logo.url }}" alt="{{ channel.name }} logo" />
+                                    {% else %}
+                                    <div style="width: 60px; height: 60px; background-color: #e5e7eb; margin-right: 12px;"></div>
+                                    {% endif %}
+                                    <span>{{ channel.name }}{% if channel.is_hd %} (HD){% endif %}</span>
+                                </div>
                             </div>
+                            {% endfor %}
                         </div>
-                        {% empty %}
+                        {% endfor %}
+                        {% if not tariff.included_channels.all %}
                         <div class="col-12 text-center">
                             <p class="text-gray-500">Каналы не указаны</p>
                         </div>
-                        {% endfor %}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -93,9 +99,8 @@
             </div>
         </div>
     </div>
-</div>
 {% empty %}
-<div class="col-12 text-center py-5">
-    <p class="text-gray-500 fs-5">Тарифы не найдены</p>
-</div>
+    <div class="col-12 text-center py-5">
+        <p class="text-gray-500 fs-5">Тарифы не найдены</p>
+    </div>
 {% endfor %}
