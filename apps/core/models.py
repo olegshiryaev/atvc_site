@@ -116,6 +116,9 @@ class TVChannel(models.Model):
         ordering = ["name"]
 
 
+from django.db import models
+from django.core.validators import MinValueValidator
+
 class Tariff(models.Model):
     SERVICE_CHOICES = [
         ("internet", "Интернет"),
@@ -143,6 +146,7 @@ class Tariff(models.Model):
     )
     speed = models.IntegerField("Скорость (Мбит/с)", null=True, blank=True, validators=[MinValueValidator(0)])
     channels = models.IntegerField("Количество каналов", null=True, blank=True, validators=[MinValueValidator(0)])
+    hd_channels = models.IntegerField("Количество HD каналов", null=True, blank=True, validators=[MinValueValidator(0)])
     included_channels = models.ManyToManyField(
         TVChannel,
         verbose_name="Включённые ТВ каналы",

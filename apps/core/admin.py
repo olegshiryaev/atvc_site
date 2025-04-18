@@ -84,7 +84,7 @@ class TariffAdmin(admin.ModelAdmin):
         (
             "Характеристики",
             {
-                "fields": ("technology", "speed", "channels", "description"),
+                "fields": ("technology", "speed", "channels", "hd_channels", "description"),
                 "classes": ("collapse",),
             },
         ),
