@@ -740,19 +740,22 @@ html {
 .channel-card {
     display: flex;
     align-items: center;
-    min-height: 60px;
-    padding: 8px;
+    min-height: 80px;
+    padding: 12px;
     background-color: #fff;
+    border-radius: 8px;
 }
 .channel-card img {
-    max-width: 60px;
-    max-height: 60px;
+    width: 100px;
+    height: auto;
     object-fit: contain;
-    margin-right: 12px;
+    margin-right: 16px;
+    border-radius: 8px;
 }
 .channel-card span {
     font-size: 14px;
     color: #374151;
+    flex: 1;
 }
 .channel-container {
     max-height: 400px;
@@ -814,5 +817,102 @@ html {
     /* Добавляем небольшой отступ справа для визуальной подсказки прокрутки */
     .scrollable-buttons {
         padding-right: 16px;
+    }
+}
+
+/* Базовые стили для тарифов */
+.scrollable-tariffs {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+    scrollbar-width: none; /* Скрываем полосу прокрутки в Firefox */
+}
+
+/* Скрываем полосу прокрутки в WebKit-браузерах */
+.scrollable-tariffs::-webkit-scrollbar {
+    display: none;
+}
+
+/* Предотвращаем сжатие карточек */
+.scrollable-tariffs .col {
+    flex: 0 0 auto;
+    width: 280px; /* Фиксированная ширина карточек на мобильных */
+}
+
+/* Базовые стили для карточек */
+.card {
+    transition: all 0.3s ease;
+    border-radius: 12px;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 576px) {
+    /* Уменьшаем размеры карточек */
+    .scrollable-tariffs .col {
+        width: 250px; /* Уменьшенная ширина для мобильных */
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    /* Уменьшаем внутренние отступы и шрифты в карточках */
+    .card-body {
+        padding: 16px !important;
+    }
+
+    .card-footer {
+        padding: 16px !important;
+    }
+
+    .card h3.fs-2 {
+        font-size: 20px !important; /* Уменьшаем заголовок */
+    }
+
+    .card .fs-1 {
+        font-size: 24px !important; /* Уменьшаем крупные шрифты */
+    }
+
+    .card .fs-5 {
+        font-size: 14px !important; /* Уменьшаем мелкие шрифты */
+    }
+
+    .card .fs-3 {
+        font-size: 16px !important; /* Уменьшаем шрифт кнопки */
+    }
+
+    /* Уменьшаем кнопку "Подключить" */
+    .connect-btn {
+        padding: 8px !important;
+    }
+
+    /* Добавляем отступ справа для визуальной подсказки */
+    .scrollable-tariffs {
+        padding-right: 16px;
+    }
+
+    /* Уменьшаем заголовок раздела */
+    h2.fs-48 {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+
+    /* Уменьшаем отступы контейнера */
+    .container.py-5 {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+}
+
+/* Сохраняем сетку на больших экранах */
+@media (min-width: 576px) {
+    .scrollable-tariffs {
+        display: flex;
+        flex-wrap: wrap;
+        overflow-x: visible;
+        white-space: normal;
+    }
+
+    .scrollable-tariffs .col {
+        width: auto;
     }
 }
