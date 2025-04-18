@@ -46,6 +46,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "ckeditor",
+    "ckeditor_uploader",
     "compressor",
     "django_htmx",
     "apps.cities",
@@ -202,6 +204,44 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_SERVER = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = list(EMAIL_HOST_USER)
+
+# CKEditor settings
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": "full",
+        "height": 300,
+        "width": "100%",
+        "extraPlugins": "",
+        "toolbar_full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "TextColor",
+                "BGColor",
+            ],
+            [
+                "Link",
+                "Unlink",
+                "Image",
+                "Table",
+                "HorizontalRule",
+                "Smiley",
+                "SpecialChar",
+            ],
+            ["Source"],
+        ],
+        "language": "ru",
+        "versionCheck": False,
+        "contentsCss": [
+            "/static/fontawesome/css/all.min.css",  # Подключаем FontAwesome к CKEditor
+        ],
+    },
+}
 
 # Другие параметры
 

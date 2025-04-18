@@ -59,6 +59,7 @@ class TVChannelAdmin(admin.ModelAdmin):
         if obj.logo:
             return mark_safe(f'<img src="{obj.logo.url}" width="50" />')
         return "-"
+
     logo_preview.short_description = "Логотип"
 
 
@@ -84,7 +85,13 @@ class TariffAdmin(admin.ModelAdmin):
         (
             "Характеристики",
             {
-                "fields": ("technology", "speed", "channels", "hd_channels", "description"),
+                "fields": (
+                    "technology",
+                    "speed",
+                    "channels",
+                    "hd_channels",
+                    "description",
+                ),
                 "classes": ("collapse",),
             },
         ),
@@ -94,6 +101,7 @@ class TariffAdmin(admin.ModelAdmin):
 
     def get_cities(self, obj):
         return ", ".join(obj.cities.values_list("name", flat=True))
+
     get_cities.short_description = "Города"
 
     def export_as_csv(self, request, queryset):
@@ -117,6 +125,9 @@ class TariffAdmin(admin.ModelAdmin):
         return response
 
     export_as_csv.short_description = "Экспорт в CSV"
+
+    class Media:
+        css = {"all": ("fontawesome/css/all.min.css",)}
 
 
 @admin.register(Device)

@@ -1,4 +1,5 @@
 from django.db import models
+from ckeditor.fields import RichTextField
 from django.core.validators import MinValueValidator
 from pytils.translit import slugify as pytils_slugify
 import os
@@ -72,23 +73,24 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
-    
+
 
 def channel_logo_upload_to(instance, filename):
     ext = os.path.splitext(filename)[1]
     filename = f"{pytils_slugify(instance.name)}{ext}"
     return os.path.join("channel_logos", filename)
 
+
 class TVChannel(models.Model):
     CATEGORY_CHOICES = [
-        ('broadcast', 'Эфирные'),
-        ('education', 'Познавательные'),
-        ('entertainment', 'Развлекательные'),
-        ('kids', 'Детям'),
-        ('movie', 'Кино'),
-        ('music', 'Музыка'),
-        ('news', 'Бизнес, новости'),
-        ('sport', 'Спорт'),
+        ("broadcast", "Эфирные"),
+        ("education", "Познавательные"),
+        ("entertainment", "Развлекательные"),
+        ("kids", "Детям"),
+        ("movie", "Кино"),
+        ("music", "Музыка"),
+        ("news", "Бизнес, новости"),
+        ("sport", "Спорт"),
     ]
 
     name = models.CharField("Название канала", max_length=100)
@@ -119,13 +121,8 @@ class TVChannel(models.Model):
 from django.db import models
 from django.core.validators import MinValueValidator
 
-class Tariff(models.Model):
-    SERVICE_CHOICES = [
-        ("internet", "Интернет"),
-        ("tv", "Телевидение"),
-        ("combo", "Комбо"),
-    ]
 
+class Tariff(models.Model):
     TECHNOLOGY_CHOICES = [
         ("fttx", "FTTx"),
         ("pon", "PON"),
@@ -144,9 +141,18 @@ class Tariff(models.Model):
         choices=TECHNOLOGY_CHOICES,
         blank=True,
     )
-    speed = models.IntegerField("Скорость (Мбит/с)", null=True, blank=True, validators=[MinValueValidator(0)])
-    channels = models.IntegerField("Количество каналов", null=True, blank=True, validators=[MinValueValidator(0)])
-    hd_channels = models.IntegerField("Количество HD каналов", null=True, blank=True, validators=[MinValueValidator(0)])
+    speed = models.IntegerField(
+        "Скорость (Мбит/с)", null=True, blank=True, validators=[MinValueValidator(0)]
+    )
+    channels = models.IntegerField(
+        "Количество каналов", null=True, blank=True, validators=[MinValueValidator(0)]
+    )
+    hd_channels = models.IntegerField(
+        "Количество HD каналов",
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+    )
     included_channels = models.ManyToManyField(
         TVChannel,
         verbose_name="Включённые ТВ каналы",
@@ -154,13 +160,13 @@ class Tariff(models.Model):
         blank=True,
     )
     price = models.IntegerField("Цена (руб/мес)", validators=[MinValueValidator(0)])
-    description = models.TextField("Описание", blank=True)
+    description = RichTextField("Описание", blank=True)
     cities = models.ManyToManyField(City, verbose_name="Города", related_name="tariffs")
     is_active = models.BooleanField("Активен", default=True)
 
     def __str__(self):
         return f"{self.name} ({', '.join(city.name for city in self.cities.all())})"
-    
+
     class Meta:
         verbose_name = "Тариф"
         verbose_name_plural = "Тарифы"

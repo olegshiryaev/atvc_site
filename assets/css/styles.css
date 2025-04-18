@@ -2,45 +2,45 @@
     --color-black: #000000;
     --color-black-rgb: 0, 0, 0;
     --color-rich-black: #333333;
-    --color-white: #FFFFFF;
+    --color-white: #ffffff;
     --color-white-rgb: 255, 255, 255;
-    --color-blue: #229FFF;
+    --color-blue: #229fff;
     --color-blue-rgb: 34, 159, 255;
-    --color-clear-blue: #BDE3FF;
-    --color-light-blue: #28A8E9;
-    --color-dark-blue: #0077FF;
+    --color-clear-blue: #bde3ff;
+    --color-light-blue: #28a8e9;
+    --color-dark-blue: #0077ff;
     --color-dark-blue-new: #0a58ca;
-    --color-red: #C93238;
-    --color-bright-red: #FF0000;
-    --color-green: #CEE800;
+    --color-red: #c93238;
+    --color-bright-red: #ff0000;
+    --color-green: #cee800;
     --color-green-rgb: 206, 232, 0;
-    --color-light-grey: #F0F2F8;
+    --color-light-grey: #f0f2f8;
     --color-dark-grey: #909090;
-    --color-border-grey: #ECEEF0;
-    --color-button-grey: #EFEFEF;
-    --color-dirty-grey: #EFF3F3;
-    --color-grey: #E7E7E7;
+    --color-border-grey: #eceef0;
+    --color-button-grey: #efefef;
+    --color-dirty-grey: #eff3f3;
+    --color-grey: #e7e7e7;
     --color-grey-new: #787878;
-    --color-grey-hr: #D6D6D6;
+    --color-grey-hr: #d6d6d6;
     --color-blue-shadow: 34, 60, 80;
-    --color-clear-grey: #9FA8B0;
-    --color-text-grey: #6F767E;
-    --color-bg-grey: #F9FAFF;
-    --color-link-grey: #727D99;
+    --color-clear-grey: #9fa8b0;
+    --color-text-grey: #6f767e;
+    --color-bg-grey: #f9faff;
+    --color-link-grey: #727d99;
     --color-brown: #954213;
-    --color-dark-green: #32D318;
+    --color-dark-green: #32d318;
     --color-ligt-orange: #ffecb5;
 }
 
-body, html {
-    font-family: 'Roboto', sans-serif;
+body,
+html {
+    font-family: "Roboto", sans-serif;
     color: var(--color-rich-black);
     background-color: var(--color-white);
     font-style: normal;
     font-weight: 400;
     font-size: 14px;
 }
-
 
 /* Цвета фона */
 .bg-gray-100 {
@@ -703,7 +703,8 @@ body, html {
 }
 
 /* Стили для HTML-контента */
-.news-content h2, .news-content h3 {
+.news-content h2,
+.news-content h3 {
     font-size: 1.5rem;
     font-weight: 600;
     margin: 1.5rem 0 1rem;
@@ -713,7 +714,8 @@ body, html {
     margin-bottom: 1rem;
 }
 
-.news-content ul, .news-content ol {
+.news-content ul,
+.news-content ol {
     margin-bottom: 1rem;
     padding-left: 1.5rem;
 }
@@ -759,4 +761,58 @@ body, html {
 .channel-search {
     border-radius: 0.375rem;
     padding: 0.5rem 1rem;
+}
+
+/* Базовые стили для кнопок */
+.filter-btn {
+    transition: all 0.3s ease;
+    border-radius: 8px;
+    flex-shrink: 0; /* Предотвращаем сжатие кнопок */
+}
+
+/* Стили для контейнера кнопок */
+.scrollable-buttons {
+    overflow-x: auto;
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+    scrollbar-width: none; /* Скрываем полосу прокрутки в Firefox */
+}
+
+/* Скрываем полосу прокрутки в WebKit-браузерах (Chrome, Safari) */
+.scrollable-buttons::-webkit-scrollbar {
+    display: none;
+}
+
+/* Адаптивные стили для мобильных устройств */
+@media (max-width: 576px) {
+    /* Уменьшаем размеры кнопок */
+    .filter-btn {
+        min-width: 100px; /* Уменьшаем минимальную ширину */
+        padding: 8px 12px; /* Уменьшаем отступы */
+        font-size: 14px; /* Уменьшаем шрифт */
+    }
+
+    /* Уменьшаем размер иконок */
+    .filter-btn svg {
+        width: 14px;
+        height: 14px;
+        margin-right: 6px;
+    }
+
+    /* Уменьшаем заголовок */
+    h2.fs-48 {
+        font-size: 24px; /* Уменьшаем размер шрифта заголовка */
+        line-height: 1.2;
+    }
+
+    /* Уменьшаем отступы контейнера */
+    .container.py-5 {
+        padding-top: 1.5rem;
+        padding-bottom: 1.5rem;
+    }
+
+    /* Добавляем небольшой отступ справа для визуальной подсказки прокрутки */
+    .scrollable-buttons {
+        padding-right: 16px;
+    }
 }
