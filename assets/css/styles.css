@@ -820,6 +820,24 @@ html {
     }
 }
 
+@media (max-width: 575.98px) {
+    .channel-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px; /* Space between channel cards */
+    }
+
+    .channel-item {
+        width: 100%; /* Full width for each channel */
+        max-width: 100%; /* Ensure no overflow */
+    }
+
+    .channel-item .col-4 {
+        flex: 0 0 100%; /* Override Bootstrap col-4 */
+        max-width: 100%; /* Ensure full width */
+    }
+}
+
 /* Базовые стили для тарифов */
 .scrollable-tariffs {
     display: flex;
