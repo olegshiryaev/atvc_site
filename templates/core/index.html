@@ -260,66 +260,60 @@
     {% endif %}
 
     <!-- Секция проверки адреса -->
-    <div class="container-fluid py-5 address-check-section" style="background: linear-gradient(135deg, #0284c7 0%, #075985 100%);">
-        <!-- Изображение для десктопов -->
-        <img src="{% static 'img/girl-with-laptop.png' %}" alt="Девушка с ноутбуком" class="img-fluid address-check-image d-none d-lg-block">
-        <!-- Изображение для мобильных -->
-        <img src="{% static 'img/girl-with-laptop-mobile.png' %}" alt="Девушка с ноутбуком" class="img-fluid address-check-image-mobile d-lg-none">
-    
-        <div class="container">
-            <div class="row align-items-end">
-                <!-- Левая часть (пустая, сохраняет место в сетке) -->
-                <div class="col-lg-6 mb-4 mb-lg-0"></div>
-                <!-- Правая часть с формой -->
-                <div class="col-lg-6">
-                    <div class="text-center mb-4">
-                        <h2 class="fs-1 fw-bold text-white mb-2 mb-sm-0">Проверьте доступность подключения</h2>
-                    </div>
-                    <form id="checkAddressForm" method="post" novalidate>
-                        <!-- Оригинальная форма без изменений -->
-                        {% csrf_token %}
-                        <div class="row g-3">
-                            <!-- Улица -->
-                            <div class="col-md-6">
-                                <input type="text" name="street" id="street" class="form-control" placeholder="Укажите улицу">
-                                <div id="streetError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Номер дома -->
-                            <div class="col-md-6">
-                                <input type="text" name="house_number" id="house_number" class="form-control" placeholder="Укажите номер дома">
-                                <div id="house_numberError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Имя -->
-                            <div class="col-md-6">
-                                <input type="text" name="name" id="name" class="form-control" placeholder="Ваше имя" required>
-                                <div id="nameError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Телефон -->
-                            <div class="col-md-6">
-                                <input type="tel" name="phone" id="phone" class="form-control" placeholder="+7 (___) ___-__-__" required>
-                                <div id="phoneError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Чекбокс и кнопка -->
-                            <div class="col-12">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <div class="form-check">
-                                            <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
-                                            <label for="privacy" class="form-check-label text-white">
-                                                Я соглашаюсь, что ознакомлен с 
-                                                <a href="#" class="text-white text-decoration-underline">политикой конфиденциальности</a>
-                                            </label>
-                                            <div id="privacyError" class="invalid-feedback d-none"></div>
-                                        </div>
+    <div class="container address-check-section py-5 my-5" style="background: linear-gradient(135deg, #0284c7 0%, #075985 100%);">
+        <img src="{% static 'img/girl-with-laptop.png' %}" alt="Девушка с ноутбуком" class="address-check-image d-none d-lg-block">
+        <div class="row align-items-center">
+            <!-- Левая часть (пустая, для изображения) -->
+            <div class="col-lg-6 mb-4 mb-lg-0"></div>
+            <!-- Правая часть с формой -->
+            <div class="col-lg-6 px-lg-4 py-lg-4">
+                <div class="text-center mb-4">
+                    <h2 class="fs-1 fw-bold text-white mb-2">Проверьте доступность услуг</h2>
+                    <p class="fs-5 text-white mb-0 subtitle">Узнайте, какие услуги можно подключить по вашему адресу</p>
+                </div>
+                <form id="checkAddressForm" method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="row g-4">
+                        <!-- Улица -->
+                        <div class="col-md-6">
+                            <input type="text" name="street" id="street" class="form-control shadow-sm" placeholder="Укажите улицу">
+                            <div id="streetError" class="invalid-feedback"></div>
+                        </div>
+                        <!-- Номер дома -->
+                        <div class="col-md-6">
+                            <input type="text" name="house_number" id="house_number" class="form-control shadow-sm" placeholder="Укажите номер дома">
+                            <div id="house_numberError" class="invalid-feedback"></div>
+                        </div>
+                        <!-- Имя -->
+                        <div class="col-md-6">
+                            <input type="text" name="name" id="name" class="form-control shadow-sm" placeholder="Ваше имя" required>
+                            <div id="nameError" class="invalid-feedback"></div>
+                        </div>
+                        <!-- Телефон -->
+                        <div class="col-md-6">
+                            <input type="tel" name="phone" id="phone" class="form-control shadow-sm" placeholder="+7 (___) ___-__-__" required>
+                            <div id="phoneError" class="invalid-feedback"></div>
+                        </div>
+                        <!-- Чекбокс и кнопка -->
+                        <div class="col-12">
+                            <div class="row align-items-center g-4">
+                                <div class="col-md-6 mb-3 mb-md-0">
+                                    <div class="form-check">
+                                        <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
+                                        <label for="privacy" class="form-check-label text-white">
+                                            Я соглашаюсь, что ознакомлен с 
+                                            <a href="#" class="text-white text-decoration-underline">политикой конфиденциальности</a>
+                                        </label>
+                                        <div id="privacyError" class="invalid-feedback d-none"></div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <button type="submit" class="btn bg-white text-sky-600 hover-bg-gray-100 w-100 py-2 py-md-3 fs-6 text-uppercase" id="submitAddressBtn" disabled>Оставить заявку</button>
-                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn bg-white text-sky-600 hover-bg-gray-100 w-100 py-2 py-md-3 fs-6 text-uppercase shadow-sm" id="submitAddressBtn" disabled>Оставить заявку</button>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -372,12 +366,12 @@
             const delay = (index / 3).toFixed(2);
             card.style.animationDelay = `${delay}s`;
         });
-
+    
         // Фильтры тарифов
         const tariffsContainer = document.querySelector('.row.row-cols-1');
         const filterButtons = document.querySelectorAll('.filter-btn');
         const citySlug = window.location.pathname.split('/')[1];
-
+    
         async function loadTariffs(filterType) {
             try {
                 tariffsContainer.innerHTML = `
@@ -404,7 +398,7 @@
                 `;
             }
         }
-
+    
         function updateUI(activeFilter, tariffsHTML) {
             tariffsContainer.innerHTML = tariffsHTML;
             filterButtons.forEach(btn => {
@@ -417,58 +411,59 @@
                 btn.classList.toggle('hover-bg-gray-100', !isActive);
             });
         }
-
+    
         // Общая функция для валидации телефона
         function validatePhone(phoneValue) {
             return phoneValue.replace(/[^0-9]/g, '').length === 11;
         }
-
+    
         // Общая функция для проверки заполненности формы
         function checkFormValidity(form) {
             const nameInput = form.querySelector('[name="name"]');
             const phoneInput = form.querySelector('[name="phone"]');
             const privacyInput = form.querySelector('[name="privacy"]');
             const submitBtn = form.querySelector('button[type="submit"]');
-
+    
             if (!nameInput || !phoneInput || !privacyInput || !submitBtn) return;
-
+    
             const isNameFilled = nameInput.value.trim() !== '';
             const isPhoneFilled = validatePhone(phoneInput.value);
             const isPrivacyChecked = privacyInput.checked;
-
+    
             submitBtn.disabled = !(isNameFilled && isPhoneFilled && isPrivacyChecked);
         }
-
+    
         // Инициализация формы проверки адреса
         function initAddressCheckForm() {
             const addressForm = document.getElementById('checkAddressForm');
             if (!addressForm) return;
-
+    
             const phoneInput = addressForm.querySelector('[name="phone"]');
+            let phoneMask;
             if (phoneInput) {
-                IMask(phoneInput, {
+                phoneMask = IMask(phoneInput, {
                     mask: '+7(000)000-0000',
                     lazy: false,
                     placeholderChar: '_'
                 });
             }
-
+    
             // Слушатели изменений для обязательных полей
             addressForm.querySelectorAll('[name="name"], [name="phone"], [name="privacy"]').forEach(input => {
                 input.addEventListener('input', () => checkFormValidity(addressForm));
             });
-
+    
             // Обработчик отправки формы
             addressForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
-
+    
                 // Сброс предыдущих ошибок
                 addressForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
                 addressForm.querySelectorAll('.invalid-feedback').forEach(el => {
                     el.classList.add('d-none');
                     el.textContent = '';
                 });
-
+    
                 // Валидация
                 let isValid = true;
                 const name = addressForm.querySelector('[name="name"]');
@@ -476,7 +471,7 @@
                 const street = addressForm.querySelector('[name="street"]');
                 const houseNumber = addressForm.querySelector('[name="house_number"]');
                 const privacy = addressForm.querySelector('[name="privacy"]');
-
+    
                 if (name.value.trim() === '') {
                     name.classList.add('is-invalid');
                     const errorDiv = addressForm.querySelector('#nameError');
@@ -486,7 +481,7 @@
                     }
                     isValid = false;
                 }
-
+    
                 if (!validatePhone(phone.value)) {
                     phone.classList.add('is-invalid');
                     const errorDiv = addressForm.querySelector('#phoneError');
@@ -496,7 +491,7 @@
                     }
                     isValid = false;
                 }
-
+    
                 if (!privacy.checked) {
                     privacy.classList.add('is-invalid');
                     const errorDiv = addressForm.querySelector('#privacyError');
@@ -505,15 +500,15 @@
                     }
                     isValid = false;
                 }
-
+    
                 if (!isValid) {
                     return;
                 }
-
+    
                 // Отправка формы
                 try {
                     const formData = new FormData(addressForm);
-                    formData.append('comment', ''); // Добавляем пустое поле comment
+                    formData.set('comment', 'Проверка доступности услуг'); // Устанавливаем комментарий
                     const submitUrl = `/${citySlug}/application/submit/`;
                     const response = await fetch(submitUrl, {
                         method: 'POST',
@@ -522,23 +517,28 @@
                             'X-Requested-With': 'XMLHttpRequest'
                         }
                     });
-
+    
                     const data = await response.json();
-
+    
                     if (response.ok && data.success) {
+                        // Сброс формы
+                        addressForm.reset();
+                        if (phoneMask) phoneMask.updateValue(); // Обновляем маску телефона
+                        document.getElementById('submitAddressBtn').disabled = true; // Отключаем кнопку
+    
                         // Открываем модальное окно с сообщением об успехе
                         const modal = document.getElementById('applicationModal');
                         const modalHeader = modal.querySelector('.modal-header');
                         const formContainer = document.getElementById('formContainer');
                         const successMessage = document.getElementById('successMessage');
-
+    
                         if (modal && modalHeader && formContainer && successMessage) {
                             modalHeader.classList.add('hidden');
                             formContainer.classList.add('hidden');
                             successMessage.classList.remove('hidden');
                             const bsModal = new bootstrap.Modal(modal);
                             bsModal.show();
-
+    
                             // Автозакрытие через 5 секунд
                             setTimeout(() => {
                                 bsModal.hide();
@@ -573,7 +573,7 @@
                 }
             });
         }
-
+    
         function addConnectButtonListeners() {
             const connectButtons = document.querySelectorAll('.connect-btn');
             connectButtons.forEach(button => {
@@ -594,14 +594,14 @@
                     const formContainer = document.getElementById('formContainer');
                     const successMessage = document.getElementById('successMessage');
                     const submitBtn = form.querySelector('button[type="submit"]');
-
+    
                     modalTitle.textContent = 'Оставить заявку';
                     modalHeader.classList.remove('hidden');
                     const bsModal = new bootstrap.Modal(modal);
                     bsModal.show();
-
+    
                     setTimeout(() => { nameInput.focus(); }, 50);
-
+    
                     let phoneMask;
                     if (phoneInput) {
                         phoneMask = IMask(phoneInput, {
@@ -610,7 +610,7 @@
                             placeholderChar: '_'
                         });
                     }
-
+    
                     // Очистка формы и состояния
                     form.reset();
                     if (phoneMask) phoneMask.updateValue();
@@ -619,7 +619,7 @@
                         formErrors.classList.add('hidden');
                         formErrors.textContent = '';
                     }
-
+    
                     ['nameError', 'phoneError', 'streetError', 'house_numberError', 'commentError', 'privacyError'].forEach(id => {
                         const errorDiv = document.getElementById(id);
                         if (errorDiv) {
@@ -627,19 +627,19 @@
                             errorDiv.classList.remove('d-block');
                         }
                     });
-
+    
                     ['name', 'phone', 'street', 'house_number', 'comment', 'privacy'].forEach(name => {
                         const input = form.querySelector(`[name="${name}"]`);
                         if (input) input.classList.remove('is-invalid');
                     });
-
+    
                     if (submitBtn) submitBtn.disabled = true;
-
+    
                     // Слушатели для полей
                     form.querySelectorAll('[name="name"], [name="phone"], [name="street"], [name="house_number"], [name="comment"], [name="privacy"]').forEach(input => {
                         input.addEventListener('input', () => checkFormValidity(form));
                     });
-
+    
                     // Обработчик отправки формы
                     form.onsubmit = async function(e) {
                         e.preventDefault();
@@ -647,7 +647,7 @@
                         const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
                         formData.append('csrfmiddlewaretoken', csrfToken);
                         formData.append('privacy', privacyInput.checked ? 'on' : 'off');
-
+    
                         try {
                             const submitUrl = `/${citySlug}/application/submit/`;
                             console.log('Отправка на:', submitUrl);
@@ -658,10 +658,10 @@
                                     'X-Requested-With': 'XMLHttpRequest'
                                 }
                             });
-
+    
                             const data = await response.json();
                             console.log('Ответ сервера:', data);
-
+    
                             if (response.ok && data.success) {
                                 if (formContainer) formContainer.classList.add('hidden');
                                 if (modalHeader) modalHeader.classList.add('hidden');
@@ -683,7 +683,7 @@
                                     }
                                 } else if (formErrors) {
                                     formErrors.classList.remove('hidden');
-                                    formruheErrors.textContent = data.error || 'Произошла ошибка при отправке';
+                                    formErrors.textContent = data.error || 'Произошла ошибка при отправке';
                                 }
                             }
                         } catch (error) {
@@ -694,14 +694,14 @@
                             }
                         }
                     };
-
+    
                     // Сброс состояния при открытии формы
                     modal.addEventListener('show.bs.modal', () => {
                         if (modalHeader) modalHeader.classList.remove('hidden');
                         if (formContainer) formContainer.classList.remove('hidden');
                         if (successMessage) successMessage.classList.add('hidden');
                     });
-
+    
                     // Очистка маски и слушателей при закрытии модального окна
                     modal.addEventListener('hidden.bs.modal', () => {
                         if (phoneMask) {
@@ -715,7 +715,7 @@
                 });
             });
         }
-
+    
         filterButtons.forEach(button => {
             button.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -724,13 +724,13 @@
                 loadTariffs(filterType);
             });
         });
-
+    
         window.addEventListener('popstate', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const filterType = urlParams.get('type') || 'internet';
             loadTariffs(filterType);
         });
-
+    
         // Инициализация всех функций
         initAddressCheckForm();
         addConnectButtonListeners();

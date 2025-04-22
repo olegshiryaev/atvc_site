@@ -486,50 +486,6 @@ html {
     display: block;
 }
 
-.address-check-section {
-    position: relative;
-    overflow: visible;
-}
-
-.form-container {
-    position: relative;
-    z-index: 2; /* Форма поверх изображения */
-}
-
-.address-check-image {
-    max-width: 25%; /* Ограничиваем ширину для десктопов */
-    position: absolute;
-    bottom: 0;
-    left: 25%;
-    transform: translateX(-50%);
-    z-index: 1;
-    height: auto;
-}
-
-@media (max-width: 991.98px) {
-    .address-check-section {
-        padding-bottom: 100px; /* Место для изображения */
-        position: relative; /* Устанавливаем контекст для абсолютного позиционирования */
-        overflow: hidden;
-    }
-
-    /* Стили для мобильного изображения */
-    .address-check-image-mobile {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%; /* Полная ширина для мобильных */
-        height: auto; /* Сохраняем пропорции */
-        opacity: 0.7;
-        z-index: 1;
-    }
-
-    /* Если мобильное изображение не используется, корректируем десктопное изображение */
-    .address-check-image {
-        display: none; /* Скрываем десктопное изображение на мобильных */
-    }
-}
-
 /* Скрываем ошибку чекбокса по умолчанию */
 #privacyError {
     display: none;
@@ -932,5 +888,55 @@ html {
 
     .scrollable-tariffs .col {
         width: auto;
+    }
+}
+
+
+/* Стили для блока проверки адреса */
+.address-check-section {
+    border-radius: 12px; /* Закругленные углы */
+    position: relative;
+}
+
+/* Фиксированная высота и стили изображения на десктопах */
+@media (min-width: 992px) {
+    .address-check-section {
+        height: 350px; /* Фиксированная высота блока */
+    }
+    .address-check-image {
+        width: 400px; /* Фиксированная ширина изображения */
+        height: 380px; /* Высота, чтобы голова выходила за блок */
+        object-fit: cover; /* Сохраняет пропорции */
+        position: absolute;
+        left: 25%; /* Центрирование по горизонтали */
+        transform: translateX(-50%); /* Смещение для точного центрирования */
+        bottom: 0; /* Прижато к нижнему краю */
+        z-index: 1; /* Под формой */
+    }
+}
+
+/* Стили для полей формы */
+.address-check-section .form-control,
+.address-check-section .btn {
+    transition: all 0.3s ease; /* Плавные переходы */
+}
+
+.address-check-section .form-control:focus {
+    border-color: #0284c7;
+    box-shadow: 0 0 0 0.25rem rgba(2, 132, 199, 0.25);
+}
+
+/* Убрать подчеркивание кнопки при наведении */
+.address-check-section .btn:hover {
+    text-decoration: none;
+}
+
+/* На разрешениях 994px–1200px: форма к верхнему краю, скрыть подзаголовок */
+@media (min-width: 994px) and (max-width: 1200px) {
+    .address-check-section .row {
+        align-items: start; /* Форма прижата к верхнему краю */
+    }
+    .address-check-section .subtitle {
+        display: none; /* Скрыть подзаголовок */
     }
 }

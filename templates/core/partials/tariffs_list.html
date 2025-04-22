@@ -65,7 +65,7 @@
                     </div>
                     <div class="row channel-container g-3" id="channelList-{{ tariff.id }}">
                         {% for channel in tariff.included_channels.all %}
-                        <div class="col-4 channel-item">
+                        <div class="col-12 col-md-6 col-xl-4 channel-item">
                             <div class="channel-card">
                                 {% if channel.logo %}
                                 <img src="{{ channel.logo.url }}" alt="{{ channel.name }} logo" />
@@ -85,8 +85,8 @@
             </div>
         </div>
     </div>
-    {% empty %}
-    <div class="col-12 text-center py-5">
-        <p class="text-gray-500 fs-5">Тарифы не найдены</p>
-    </div>
-    {% endfor %}
+{% empty %}
+<div class="col-12 text-center py-5">
+    <p class="text-gray-500 fs-5">Тарифы не найдены</p>
+</div>
+{% endfor %}
