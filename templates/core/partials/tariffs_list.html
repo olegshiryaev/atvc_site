@@ -63,7 +63,7 @@
                     <div class="mb-3">
                         <input type="text" class="form-control channel-search" id="channelSearch-{{ tariff.id }}" placeholder="Поиск каналов..." aria-label="Поиск каналов" />
                     </div>
-                    <div class="row channel-container g-3" id="channelList-{{ tariff.id }}">
+                    <div class="row channel-container g-2" id="channelList-{{ tariff.id }}">
                         {% for channel in tariff.included_channels.all %}
                         <div class="col-12 col-md-6 col-xl-4 channel-item">
                             <div class="channel-card">
