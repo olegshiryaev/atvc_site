@@ -696,10 +696,8 @@ html {
 .channel-card {
     display: flex;
     align-items: center;
-    min-height: 80px;
-    padding: 12px;
+    padding: 8px;
     background-color: #fff;
-    border-radius: 8px;
 }
 .channel-card img {
     width: 100px;
@@ -711,15 +709,31 @@ html {
 .channel-card span {
     font-size: 14px;
     color: #374151;
-    flex: 1;
-}
-.channel-container {
-    max-height: 400px;
-    overflow-y: auto;
 }
 .channel-search {
     border-radius: 0.375rem;
     padding: 0.5rem 1rem;
+}
+
+/* Прокрутка и раскладка */
+.modal-body {
+    max-height: 80vh; /* Ограничение высоты для прокрутки */
+    overflow-y: auto; /* Вертикальная прокрутка */
+}
+
+/* Уменьшение отступов и раскладка на мобильных (<768px) */
+@media (max-width: 767.98px) {
+    .modal-body {
+        max-height: 70vh; /* Меньшая высота на мобильных */
+    }
+    .channel-container {
+        --bs-gutter-x: 0.25rem; /* 4px горизонтальный отступ */
+        --bs-gutter-y: 0.25rem; /* 4px вертикальный отступ */
+    }
+    .channel-item {
+        flex: 0 0 100%; /* Один канал в строке */
+        max-width: 100%; /* Полная ширина */
+    }
 }
 
 /* Базовые стили для кнопок */
