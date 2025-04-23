@@ -17,14 +17,14 @@
                     <div class="col-{% if tariff.hd_channels %}6{% else %}12{% endif %}">
                         <div class="d-flex flex-column">
                             <span class="fs-1 fw-medium lh-1">{{ tariff.channels }}</span>
-                            <span class="fs-4 fw-normal lh-tight">ТВ-каналов</span>
+                            <span class="fs-4 fw-normal lh-tight mt-2">ТВ-каналов</span>
                         </div>
                     </div>
                     {% if tariff.hd_channels %}
                     <div class="col-6">
                         <div class="d-flex flex-column">
                             <span class="fs-1 fw-medium lh-1">{{ tariff.hd_channels }}</span>
-                            <span class="fs-4 fw-normal lh-tight">HD-каналов</span>
+                            <span class="fs-4 fw-normal lh-tight mt-2">HD-каналов</span>
                         </div>
                     </div>
                     {% endif %}
