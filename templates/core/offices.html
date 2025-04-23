@@ -6,11 +6,11 @@
 {% block content %}
 <div class="bg-white w-100">
     <div class="container">
-        <h2 class="fs-2 fw-bold text-gray-800 mb-2 mb-sm-0" style="line-height: 38px;">Офис обслуживания в {{ city.name_prepositional }}</h2>
+        {% include 'partials/page_header.html' with title=title %}
         {% for office in offices %}
         <div class="row g-4 mb-5">
             <!-- Левая колонка -->
-            <div class="col-12 col-lg-3">
+            <div class="col-12 col-md-4 col-lg-3">
                 <div class="card shadow-md rounded h-100">
                     <div class="overflow-hidden" style="height: 224px;">
                         <img alt="Современный офис компании" 
@@ -71,11 +71,12 @@
                 </div>
             </div>
             <!-- Правая колонка -->
-            <div class="col-12 col-lg-9">
+            <div class="col-12 col-md-8 col-lg-9">
                 <div class="card shadow-md rounded h-100 border border-gray-200">
                     <div class="w-100 h-100" style="min-height: 400px;">
-                        <iframe class="h-100" style="min-height: 400px;" src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16&mode=map&pt={{ office.longitude }},{{ office.latitude }}" 
-                                width="100%" height="100%" frameborder="0" allowfullscreen="true"></iframe>
+                        <iframe class="h-100" style="min-height: 400px;" 
+                                src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16&mode=map&pt={{ office.longitude }},{{ office.latitude }}" 
+                                width="100%" height="100%" frameborder="0" allowfullscreen="true" loading="lazy"></iframe>
                     </div>
                 </div>
             </div>

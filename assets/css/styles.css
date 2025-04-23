@@ -912,6 +912,13 @@ html {
     position: relative;
 }
 
+/* Убрать скругленные углы на мобильных (<575px) */
+@media (max-width: 575px) {
+    .address-check-section {
+        border-radius: 0; /* Прямые углы */
+    }
+}
+
 /* Фиксированная высота и стили изображения на десктопах */
 @media (min-width: 992px) {
     .address-check-section {
@@ -953,4 +960,22 @@ html {
     .address-check-section .subtitle {
         display: none; /* Скрыть подзаголовок */
     }
+}
+
+@media (min-width: 912px) {
+    footer .col-lg-8 .row .col-md-6 {
+      flex: 0 0 25%; /* Возвращаем четыре колонки */
+      max-width: 25%;
+    }
+}
+
+.breadcrumb {
+    font-size: 0.9rem;
+    background-color: transparent;
+}
+.breadcrumb-item a {
+    color: #4b5563; /* text-gray-600 */
+}
+.breadcrumb-item.active {
+    color: #1f2937; /* text-gray-800 */
 }

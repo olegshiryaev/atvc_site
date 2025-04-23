@@ -79,17 +79,21 @@ def submit_application(request, city_slug):
 
 def office_list(request, city_slug):
     city = get_object_or_404(City, slug=city_slug, is_active=True)
-    offices = Office.objects.filter(city=city)
+    offices = Office.objects.filter(city=city).prefetch_related('schedules')
 
-    return render(
-        request,
-        "core/offices.html",
-        {
-            "city": city,
-            "offices": offices,
-            "cities": City.objects.filter(is_active=True).exclude(id=city.id),
-        },
-    )
+    context = {
+            'city': city,
+            'offices': offices,
+            'title': f"Офис обслуживания в {city.name_prepositional}",
+            'meta_title': f"Офисы обслуживания АТК в {city.name_prepositional}",
+            'meta_description': f"Контакты и адреса офисов обслуживания АТК в {city.name_prepositional}. Узнайте расписание работы и как связаться с нами.",
+            'breadcrumbs': [
+                {'title': 'Для дома', 'url': 'core:home'},
+                {'title': 'Офисы обслуживания', 'url': None},
+            ]
+        }
+    
+    return render(request, 'core/offices.html', context)
 
 
 def get_items(request):

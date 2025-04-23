@@ -17,11 +17,11 @@ class Office(models.Model):
     phone = models.CharField(
         max_length=20, verbose_name="Телефон", blank=True, null=True
     )
-    longitude = models.CharField(
-        max_length=50, verbose_name="Долгота", blank=True, null=True
-    )
     latitude = models.CharField(
         max_length=50, verbose_name="Широта", blank=True, null=True
+    )
+    longitude = models.CharField(
+        max_length=50, verbose_name="Долгота", blank=True, null=True
     )
 
     def __str__(self):
@@ -41,6 +41,7 @@ class WorkSchedule(models.Model):
         ("Пт", "Пятница"),
         ("Сб", "Суббота"),
         ("Вс", "Воскресенье"),
+        ("Сб-Вс", "Сб-Вс"),
         ("Пн-Чт", "Пн-Чт"),
         ("Пн-Пт", "Пн-Пт"),
     )
