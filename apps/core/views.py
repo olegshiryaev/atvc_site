@@ -8,20 +8,20 @@ from django.template.loader import render_to_string
 
 from .forms import ApplicationForm, FeedbackCreateForm
 from .models import Banner, Device, Office, Service, Tariff, Feedback
-from ..cities.models import City
+from ..cities.models import Locality
 from ..news.models import News
 from ..services.utils import get_client_ip
 from ..services.email import send_contact_email_message
 
 
-def index(request, city_slug):
-    city = get_object_or_404(City, slug=city_slug, is_active=True)
+def index(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     active_filter = request.GET.get("type", "internet")
 
     tariffs = (
-        Tariff.objects.filter(cities=city, is_active=True)
+        Tariff.objects.filter(localities=locality, is_active=True)
         .select_related()
-        .prefetch_related("cities")
+        .prefetch_related("localities")
     )
 
     if active_filter == "kombo":
@@ -29,7 +29,6 @@ def index(request, city_slug):
     else:
         displayed_tariffs = tariffs.filter(service__slug=active_filter)
 
-    # Если запрос AJAX (от JavaScript / HTMX), возвращаем JSON с HTML
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         tariffs_html = render_to_string(
             "core/partials/tariffs_list.html",
@@ -38,17 +37,16 @@ def index(request, city_slug):
         )
         return JsonResponse({"html": tariffs_html})
 
-    # Получаем последние 3 новости для текущего города
-    latest_news = News.objects.filter(is_published=True, cities=city).order_by(
+    latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
         "-created_at"
     )
 
-    banners = Banner.objects.filter(is_active=True, cities=city)
+    banners = Banner.objects.filter(is_active=True, localities=locality)
 
     context = {
         "displayed_tariffs": displayed_tariffs.order_by("price"),
         "active_filter": active_filter,
-        "city": city,
+        "locality": locality,
         "latest_news": latest_news,
         "banners": banners,
     }
@@ -57,7 +55,7 @@ def index(request, city_slug):
 
 
 @require_POST
-def submit_application(request, city_slug):
+def submit_application(request, locality_slug):
     if request.headers.get("X-Requested-With") != "XMLHttpRequest":
         return JsonResponse(
             {"success": False, "error": "Недопустимый запрос"}, status=400
@@ -66,8 +64,8 @@ def submit_application(request, city_slug):
     form = ApplicationForm(request.POST)
     if form.is_valid():
         application = form.save(commit=False)
-        if hasattr(request, "city") and request.city:
-            application.city = request.city
+        if hasattr(request, "locality") and request.locality:
+            application.locality = request.locality
         application.save()
         return JsonResponse({"success": True})
     else:
@@ -77,23 +75,23 @@ def submit_application(request, city_slug):
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
 
-def office_list(request, city_slug):
-    city = get_object_or_404(City, slug=city_slug, is_active=True)
-    offices = Office.objects.filter(city=city).prefetch_related('schedules')
+def office_list(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    offices = Office.objects.filter(locality=locality).prefetch_related("schedules")
 
     context = {
-            'city': city,
-            'offices': offices,
-            'title': f"Офис обслуживания в {city.name_prepositional}",
-            'meta_title': f"Офисы обслуживания АТК в {city.name_prepositional}",
-            'meta_description': f"Контакты и адреса офисов обслуживания АТК в {city.name_prepositional}. Узнайте расписание работы и как связаться с нами.",
-            'breadcrumbs': [
-                {'title': 'Для дома', 'url': 'core:home'},
-                {'title': 'Офисы обслуживания', 'url': None},
-            ]
-        }
-    
-    return render(request, 'core/offices.html', context)
+        "locality": locality,
+        "offices": offices,
+        "title": f"Офис обслуживания в {locality.name_prepositional}",
+        "meta_title": f"Офисы обслуживания АТК в {locality.name_prepositional}",
+        "meta_description": f"Контакты и адреса офисов обслуживания АТК в {locality.name_prepositional}. Узнайте расписание работы и как связаться с нами.",
+        "breadcrumbs": [
+            {"title": "Главная", "url": "core:home"},
+            {"title": "Офисы обслуживания", "url": None},
+        ],
+    }
+
+    return render(request, "core/offices.html", context)
 
 
 def get_items(request):
@@ -133,11 +131,11 @@ class FeedbackCreateView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-def internet_tariffs(request, city_slug):
-    city = get_object_or_404(City, slug=city_slug)
+def internet_tariffs(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug)
     service = get_object_or_404(Service, slug="internet")
     tariffs = Tariff.objects.filter(
-        service=service, cities__slug=city_slug, is_active=True
+        service=service, localities__slug=locality_slug, is_active=True
     )
     devices = Device.objects.filter(service_types=service).distinct()
     return render(
@@ -146,7 +144,7 @@ def internet_tariffs(request, city_slug):
         {
             "tariffs": tariffs,
             "devices": devices,
-            "city_slug": city_slug,
-            "city": city,
+            "locality_slug": locality_slug,
+            "locality": locality,
         },
     )

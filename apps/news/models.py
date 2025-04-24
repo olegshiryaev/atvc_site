@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 
-from ..cities.models import City
+from ..cities.models import Locality
 
 
 class News(models.Model):
@@ -13,7 +13,7 @@ class News(models.Model):
         upload_to="news/", null=True, blank=True, verbose_name="Изображение"
     )
     is_published = models.BooleanField(default=True, verbose_name="Опубликовано")
-    cities = models.ManyToManyField(City, related_name="news")
+    localities = models.ManyToManyField(Locality, related_name="news")  # Было cities
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата публикации")
 
     class Meta:
@@ -30,7 +30,10 @@ class News(models.Model):
         super().save(*args, **kwargs)
 
     def get_absolute_url(self):
-        city = self.cities.filter(is_active=True).first() or self.cities.first()
+        locality = (
+            self.localities.filter(is_active=True).first() or self.localities.first()
+        )
         return reverse(
-            "news:news_detail", kwargs={"city_slug": city.slug, "news_slug": self.slug}
+            "news:news_detail",
+            kwargs={"locality_slug": locality.slug, "news_slug": self.slug},
         )

@@ -1,10 +1,12 @@
 from django.db.utils import OperationalError
-from .models import City
+from .models import Locality
 
 
-def create_default_city(sender, **kwargs):
+def create_default_locality(sender, **kwargs):
     try:
-        if not City.objects.exists():
-            City.objects.create(name="Архангельск", slug="arkhangelsk", is_active=True)
+        if not Locality.objects.exists():
+            Locality.objects.create(
+                name="Архангельск", slug="arkhangelsk", is_active=True
+            )
     except OperationalError:
         pass

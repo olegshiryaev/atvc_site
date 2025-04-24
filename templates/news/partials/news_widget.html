@@ -2,7 +2,7 @@
 <div class="container py-5 animate-fade-in">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800">Последние новости</h2>
-        <a href="{% url 'news:news_list' city.slug %}" 
+        <a href="{% url 'news:news_list' locality.slug %}" 
            class="text-sky-600 hover:text-sky-700 text-decoration-none transition-colors duration-200 text-base font-medium flex items-center gap-1"
            aria-label="Перейти ко всем новостям">
             Все новости
@@ -16,7 +16,7 @@
         <div class="swiper-wrapper">
             {% for news in latest_news %}
                 <div class="swiper-slide">
-                    <a href="{% url 'news:news_detail' city.slug news.slug %}" 
+                    <a href="{% url 'news:news_detail' locality.slug news.slug %}" 
                        class="card border-0 shadow rounded-lg text-decoration-none h-100 transition-transform duration-200 hover:scale-105 focus:scale-105 focus:outline-none focus:ring-2 focus:ring-sky-600"
                        aria-label="Читать новость: {{ news.title }}">
                         {% if news.image %}

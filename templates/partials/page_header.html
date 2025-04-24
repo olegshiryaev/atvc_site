@@ -4,7 +4,7 @@
         <ol class="breadcrumb mb-2">
             {% for item in breadcrumbs %}
                 {% if item.url %}
-                    <li class="breadcrumb-item"><a href="{% url item.url city_slug=city.slug %}" class="text-gray-600 text-decoration-none">{{ item.title }}</a></li>
+                    <li class="breadcrumb-item"><a href="{% url item.url locality_slug=locality.slug %}" class="text-gray-600 text-decoration-none">{{ item.title }}</a></li>
                 {% else %}
                     <li class="breadcrumb-item active" aria-current="page">{{ item.title }}</li>
                 {% endif %}

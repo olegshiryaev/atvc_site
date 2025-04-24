@@ -1,110 +1,133 @@
 {% load static %}
-{% load city_tags %}
+{% load locality_tags %}
+{% get_localities request.locality as localities %}
+
 <div id="navbar" x-data="{
     searchQuery: '',
-    currentCitySlug: '{{ request.city.slug|escapejs }}',
-    cities: [{% get_cities request.city as cities %}{% for city in cities %}{'name': '{{ city.name|escapejs }}', 'slug': '{{ city.slug|escapejs }}'}{% if not forloop.last %},{% endif %}{% endfor %}],
-    getNewPath(citySlug) {
-        console.log('Current slug:', this.currentCitySlug, 'New slug:', citySlug);
-        const newPath = window.location.pathname.replace(`/${this.currentCitySlug}/`, `/${citySlug}/`);
-        console.log('New path:', newPath);
+    currentLocalitySlug: '{{ request.locality.slug|escapejs }}',
+    selectedDistrict: null,
+    localities: [
+        {% for locality in localities %}
+        {
+            'name': '{{ locality.name|escapejs }}',
+            'slug': '{{ locality.slug|escapejs }}',
+            'district': '{{ locality.district.name|escapejs }}',
+            'district_id': {{ locality.district.id|default:'null' }}
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ],
+    getNewPath(localitySlug) {
+        const newPath = window.location.pathname.replace(`/${this.currentLocalitySlug}/`, `/${localitySlug}/`);
         return newPath;
     },
     closeModal() {
-        try {
-            const modal = bootstrap.Modal.getInstance(document.getElementById('cityModal'));
-            if (modal) {
-                modal.hide();
-                console.log('Modal closed via JS');
-            } else {
-                console.log('Modal instance not found');
-            }
-        } catch (error) {
-            console.error('Error closing modal:', error);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('localityModal'));
+        if (modal) modal.hide();
+    },
+    filteredLocalities() {
+        // Фильтрация по названию населённых пунктов
+        if (!this.searchQuery) return this.localities;
+        return this.localities.filter(locality =>
+            locality.name.toLowerCase().includes(this.searchQuery.toLowerCase())
+        );
+    },
+    localitiesWithoutDistrict() {
+        // Населённые пункты без районов из отфильтрованного списка
+        return this.filteredLocalities().filter(locality => !locality.district_id);
+    },
+    districts() {
+        // Районы только для отфильтрованных населённых пунктов
+        const districts = [...new Set(this.filteredLocalities()
+            .filter(locality => locality.district_id)
+            .map(locality => locality.district))].sort();
+        return districts;
+    },
+    localitiesInSelectedDistrict() {
+        // Населённые пункты для выбранного района из отфильтрованного списка
+        if (!this.selectedDistrict) return [];
+        return this.filteredLocalities().filter(locality => locality.district === this.selectedDistrict);
+    },
+    initDistrict() {
+        // Инициализация выбранного района при открытии модального окна
+        const currentLocality = this.localities.find(l => l.slug === this.currentLocalitySlug);
+        if (currentLocality?.district_id) {
+            this.selectedDistrict = currentLocality.district;
         }
     },
-    filteredCities() {
-        if (!this.cities) {
-            console.log('Cities is empty');
-            return [];
-        }
-        if (!this.searchQuery) return this.cities;
-        return this.cities.filter(city => 
-            city.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-        );
+    updateDistrict() {
+        // Обновление выбранного района при изменении поискового запроса
+        const filtered = this.filteredLocalities();
+        const firstWithDistrict = filtered.find(locality => locality.district_id);
+        this.selectedDistrict = firstWithDistrict ? firstWithDistrict.district : null;
+    },
+    hasCurrentLocalityDistrict() {
+        // Проверка, имеет ли текущий населённый пункт район
+        const currentLocality = this.localities.find(l => l.slug === this.currentLocalitySlug);
+        return currentLocality?.district_id != null;
     }
-}">
-    <!-- Верхняя часть навбара -->
-    <div class="bg-gray-100 w-100 py-2">
+}" x-init="initDistrict()" @input.debounce.300ms="updateDistrict()">
+    <!-- Верхняя панель -->
+    <div class="bg-light py-2">
         <div class="container px-4">
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-gray-600 fs-6">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center text-muted small">
                 <nav class="d-flex gap-3 mb-2 mb-md-0">
-                    <a href="#" class="text-decoration-none text-gray-600 hover-text-sky-600 transition-200">Для частных лиц</a>
+                    <a href="#" class="text-decoration-none text-muted">Для частных лиц</a>
                     <span>|</span>
-                    <a href="#" class="text-decoration-none text-gray-600 hover-text-sky-600 transition-200">Для бизнеса</a>
+                    <a href="#" class="text-decoration-none text-muted">Для бизнеса</a>
                     <span>|</span>
-                    <a href="#" class="text-decoration-none text-gray-600 hover-text-sky-600 transition-200">Техническая поддержка</a>
+                    <a href="#" class="text-decoration-none text-muted">Техническая поддержка</a>
                 </nav>
                 <div class="d-flex flex-column flex-sm-row gap-4">
                     <div class="d-flex align-items-center">
-                        <span class="fw-medium me-2">Подключить:</span>
-                        <a href="tel:+78512666687" class="text-decoration-none text-gray-600 hover-text-sky-600 transition-200">8 (8182) 639-639</a>
+                        <span class="fw-semibold me-2">Подключить:</span>
+                        <a href="tel:+78512666687" class="text-decoration-none text-muted">8 (8182) 639-639</a>
                     </div>
                     <div class="d-flex align-items-center mt-1 mt-sm-0">
-                        <span class="fw-medium me-2">Техподдержка:</span>
-                        <a href="tel:+78512666678" class="text-decoration-none text-gray-600 hover-text-sky-600 transition-200">8 (8182) 423-505</a>
+                        <span class="fw-semibold me-2">Техподдержка:</span>
+                        <a href="tel:+78512666678" class="text-decoration-none text-muted">8 (8182) 423-505</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Основная часть навбара -->
-    <nav class="container px-4 py-2">
-        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between w-100">
+    <!-- Основной navbar -->
+    <nav class="container px-4 py-3">
+        <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
             <div class="d-flex flex-column flex-md-row align-items-center mb-4 mb-md-0">
-                <a href="/{{ request.city.slug }}/" class="d-flex align-items-center">
+                <a href="/{{ request.locality.slug }}/" class="d-flex align-items-center me-md-4">
                     <img src="{% static 'img/logo.png' %}" alt="Company name" style="width: 128px;">
                 </a>
-                <ul class="nav ms-md-4">
+                <ul class="nav">
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle text-gray-700 fw-medium hover-text-sky-600 transition-200" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle fw-semibold text-dark" href="#" data-bs-toggle="dropdown" aria-expanded="false">
                             Тарифы
                         </a>
-                        <ul class="dropdown-menu rounded-md shadow-lg">
-                            <li><a class="dropdown-item text-gray-700 hover-bg-sky-100 hover-text-sky-600 transition-200" href="#">Для частных лиц</a></li>
-                            <li><a class="dropdown-item text-gray-700 hover-bg-sky-100 hover-text-sky-600 transition-200" href="#">Для юр. лиц</a></li>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#">Для частных лиц</a></li>
+                            <li><a class="dropdown-item" href="#">Для юр. лиц</a></li>
                         </ul>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-gray-700 fw-medium hover-text-sky-600 transition-200" href="#">Акции</a>
+                        <a class="nav-link fw-semibold text-dark" href="#">Акции</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-gray-700 fw-medium hover-text-sky-600 transition-200" href="#">Услуги</a>
+                        <a class="nav-link fw-semibold text-dark" href="#">Услуги</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-gray-700 fw-medium hover-text-sky-600 transition-200" href="#">Контакты</a>
+                        <a class="nav-link fw-semibold text-dark" href="#">Контакты</a>
                     </li>
                 </ul>
             </div>
-            <div class="d-flex align-items-center gap-4">
-                <div>
-                    <a 
-                        href="#"
-                        data-bs-toggle="modal"
-                        data-bs-target="#cityModal"
-                        class="d-flex align-items-center text-gray-700 hover-text-sky-600 text-decoration-none transition-200">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                        </svg>
-                        <span x-text="'{{ request.city.name|escapejs }}'" class="fw-medium"></span>
-                    </a>
-                </div>
-                <a href="https://archangelsk.rt.ru/payment" 
-                   class="btn bg-orange-400 text-white hover-bg-orange-500 rounded-md transition-200" 
-                   target="_blank" 
-                   rel="noopener noreferrer">
+            <div class="d-flex align-items-center gap-3">
+                <a href="#" data-bs-toggle="modal" data-bs-target="#localityModal" class="d-flex align-items-center text-dark text-decoration-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span class="fw-semibold">{{ request.locality.name }}</span>
+                </a>
+                <a href="https://archangelsk.rt.ru/payment" target="_blank" rel="noopener noreferrer" class="btn btn-warning text-white fw-semibold">
                     Оплатить
                 </a>
             </div>
@@ -112,50 +135,85 @@
     </nav>
 
     <!-- Модальное окно -->
-    <div 
-        class="modal fade" 
-        id="cityModal" 
-        tabindex="-1" 
-        aria-labelledby="cityModalLabel" 
-        aria-hidden="true"
-        x-data
-    >
-        <div class="modal-dialog modal-dialog-centered" style="max-width: 32rem;">
-            <div class="modal-content border-0 bg-white rounded-lg shadow-xl">
-                <div class="modal-header border-0 px-4 pt-4 pb-2">
-                    <h2 class="modal-title text-gray-800 fs-5 fw-semibold" id="cityModalLabel">Выберите город</h2>
-                    <button 
-                        type="button"
-                        class="btn-close text-gray-400 hover-text-gray-600 transition-200" 
-                        data-bs-dismiss="modal" 
-                        aria-label="Закрыть">
-                    </button>
+    <div class="modal fade" id="localityModal" tabindex="-1" aria-labelledby="localityModalLabel" aria-hidden="true" x-data>
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="localityModalLabel">Выберите населённый пункт</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
                 </div>
-                <div class="modal-body px-4 pb-4">
-                    <input 
-                        x-model="searchQuery"
-                        x-ref="searchInput"
-                        type="text"
-                        placeholder="Поиск города"
-                        class="form-control border-gray-200 rounded-md focus-ring-sky-500 transition-200 mb-3 py-2"
-                        autofocus
-                    >
-                    <div class="overflow-y-auto" style="max-height: 50vh;">
-                        <template x-for="city in filteredCities()" :key="city.slug">
-                            <a 
-                                :href="getNewPath(city.slug)"
-                                class="d-block px-3 py-2 rounded-md text-decoration-none transition-200 mb-1"
-                                :class="{
-                                    'bg-sky-100 text-sky-600': city.slug === currentCitySlug,
-                                    'text-gray-700 hover-bg-gray-100 hover-text-sky-600': true
-                                }"
-                                @click="console.log('City clicked:', city.slug); closeModal()">
-                                <span x-text="city.name" class="fs-base"></span>
-                            </a>
-                        </template>
-                        <div x-show="filteredCities().length === 0" class="p-3 text-gray-500 text-center fs-base">
-                            Городов не найдено
+                <div class="modal-body">
+                    <!-- Поле поиска с иконкой -->
+                    <div class="search-container mb-3">
+                        <svg class="search-icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+                        </svg>
+                        <input
+                            x-model="searchQuery"
+                            type="text"
+                            placeholder="Поиск города"
+                            class="form-control"
+                            x-ref="searchInput"
+                            autofocus
+                        >
+                    </div>
+                    <!-- Облако тегов для населённых пунктов без районов -->
+                    <div class="tag-cloud mb-4">
+                        <div class="d-flex flex-wrap gap-2">
+                            <template x-for="locality in localitiesWithoutDistrict()" :key="locality.slug">
+                                <a
+                                    :href="getNewPath(locality.slug)"
+                                    class="badge"
+                                    :class="{
+                                        'bg-primary text-white': locality.slug === currentLocalitySlug
+                                    }"
+                                    @click="closeModal()"
+                                >
+                                    <span x-text="locality.name"></span>
+                                </a>
+                            </template>
                         </div>
+                    </div>
+                    <!-- Двухколоночная сетка для районов и населённых пунктов -->
+                    <div class="row">
+                        <!-- Левая колонка: список районов -->
+                        <div class="col-md-4 district-list">
+                            <template x-for="district in districts()" :key="district">
+                                <a
+                                    href="#"
+                                    class="d-block"
+                                    :class="{ 'active': selectedDistrict === district }"
+                                    @click.prevent="selectedDistrict = district"
+                                >
+                                    <span x-text="district"></span>
+                                </a>
+                            </template>
+                        </div>
+                        <!-- Правая колонка: населённые пункты выбранного района -->
+                        <div class="col-md-8 locality-list">
+                            <template x-for="locality in localitiesInSelectedDistrict()" :key="locality.slug">
+                                <a
+                                    :href="getNewPath(locality.slug)"
+                                    class="d-block"
+                                    :class="{
+                                        'bg-primary text-white': locality.slug === currentLocalitySlug
+                                    }"
+                                    @click="closeModal()"
+                                >
+                                    <span x-text="locality.name"></span>
+                                </a>
+                            </template>
+                            <div x-show="selectedDistrict && localitiesInSelectedDistrict().length === 0 && !(localitiesWithoutDistrict().length === 0 && districts().length === 0 && searchQuery)" class="text-muted small">
+                                Населённые пункты не найдены
+                            </div>
+                            <div x-show="!selectedDistrict && districts().length > 0 && hasCurrentLocalityDistrict()" class="text-muted small">
+                                Выберите район
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Сообщение, если ничего не найдено -->
+                    <div x-show="localitiesWithoutDistrict().length === 0 && districts().length === 0 && searchQuery" class="text-center text-muted py-2">
+                        Городов не найдено
                     </div>
                 </div>
             </div>

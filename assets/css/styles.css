@@ -905,7 +905,6 @@ html {
     }
 }
 
-
 /* Стили для блока проверки адреса */
 .address-check-section {
     border-radius: 12px; /* Закругленные углы */
@@ -964,8 +963,8 @@ html {
 
 @media (min-width: 912px) {
     footer .col-lg-8 .row .col-md-6 {
-      flex: 0 0 25%; /* Возвращаем четыре колонки */
-      max-width: 25%;
+        flex: 0 0 25%; /* Возвращаем четыре колонки */
+        max-width: 25%;
     }
 }
 
@@ -978,4 +977,100 @@ html {
 }
 .breadcrumb-item.active {
     color: #1f2937; /* text-gray-800 */
+}
+
+/* Стили для модального окна */
+.modal-content {
+    border-radius: 1rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+.modal-header {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+.modal-body {
+    padding-top: 0;
+}
+/* Увеличение ширины модального окна */
+.modal-lg {
+    max-width: 800px;
+}
+
+/* Стили для поля поиска */
+.search-container {
+    position: relative;
+}
+.search-container input {
+    padding-left: 2.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ced4da;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+.search-container input:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+.search-container .search-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+/* Стили для облака тегов */
+.tag-cloud .badge {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+    border-radius: 1.5rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-decoration: none;
+    background-color: #f8f9fa;
+}
+.tag-cloud .badge:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background-color: #e9ecef;
+}
+.tag-cloud .badge.bg-primary {
+    background-color: #007bff !important;
+    color: white !important;
+}
+
+/* Стили для двухколоночной сетки */
+.district-list,
+.locality-list {
+    max-height: 40vh;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+.district-list a,
+.locality-list a {
+    display: block;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    color: #343a40;
+    text-decoration: none;
+    transition: background-color 0.3s, color 0.3s;
+}
+.district-list a:hover,
+.locality-list a:hover {
+    background-color: #f1f3f5;
+    color: #007bff;
+}
+.district-list a.active,
+.locality-list a.bg-primary {
+    background-color: #007bff !important;
+    color: white !important;
+}
+/* Убираем стандартные полосы прокрутки для эстетики */
+.district-list::-webkit-scrollbar,
+.locality-list::-webkit-scrollbar {
+    width: 6px;
+}
+.district-list::-webkit-scrollbar-thumb,
+.locality-list::-webkit-scrollbar-thumb {
+    background-color: #ced4da;
+    border-radius: 3px;
 }

@@ -20,16 +20,26 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.shortcuts import redirect
-from apps.cities.models import City
+from apps.cities.models import Locality  # Заменили импорт
+
+
+def redirect_to_active_locality(request):
+    locality = Locality.objects.filter(is_active=True).first()
+    if locality:
+        return redirect(f"/{locality.slug}/")
+    return redirect("/admin/")  # Если нет активных населённых пунктов
+
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("<slug:city_slug>/", include("apps.core.urls")),
+    # Корневой путь редиректит на первую активную локализацию
+    path("", redirect_to_active_locality),
+    # Пути без slug (например, список всех населённых пунктов)
     path("", include("apps.cities.urls")),
-    path("<slug:city_slug>/news/", include("apps.news.urls", namespace="news")),
-    path(
-        "", lambda r: redirect(f"/{City.objects.filter(is_active=True).first().slug}/")
-    ),
+    # Пути с <locality_slug>/news/
+    path("<slug:locality_slug>/news/", include("apps.news.urls", namespace="news")),
+    # Общие маршруты по <locality_slug>/
+    path("<slug:locality_slug>/", include("apps.core.urls")),
 ]
 
 if settings.DEBUG:

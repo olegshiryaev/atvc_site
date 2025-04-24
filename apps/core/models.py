@@ -4,14 +4,18 @@ from django.core.validators import MinValueValidator
 from pytils.translit import slugify as pytils_slugify
 import os
 
-from apps.cities.models import City
+from apps.cities.models import Locality
 from django.contrib.auth.models import User
 
 
 class Office(models.Model):
     image = models.ImageField(upload_to="office_images/", verbose_name="Изображение")
-    city = models.ForeignKey(
-        City, on_delete=models.CASCADE, related_name="offices", verbose_name="Город"
+    locality = models.ForeignKey(
+        Locality,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Населённый пункт",
     )
     address = models.CharField(max_length=200, verbose_name="Адрес")
     phone = models.CharField(
@@ -25,7 +29,7 @@ class Office(models.Model):
     )
 
     def __str__(self):
-        return f"{self.city} - {self.address}"
+        return f"{self.locality} - {self.address}"
 
     class Meta:
         verbose_name = "Офис"
@@ -162,11 +166,13 @@ class Tariff(models.Model):
     )
     price = models.IntegerField("Цена (руб/мес)", validators=[MinValueValidator(0)])
     description = RichTextField("Описание", blank=True)
-    cities = models.ManyToManyField(City, verbose_name="Города", related_name="tariffs")
+    localities = models.ManyToManyField(
+        Locality, verbose_name="Населённые пункты", related_name="tariffs"
+    )
     is_active = models.BooleanField("Активен", default=True)
 
     def __str__(self):
-        return f"{self.name} ({', '.join(city.name for city in self.cities.all())})"
+        return f"{self.name} ({', '.join(loc.name for loc in self.localities.all())})"
 
     class Meta:
         verbose_name = "Тариф"
@@ -199,8 +205,12 @@ class Application(models.Model):
         ("completed", "Завершена"),
     )
 
-    city = models.ForeignKey(
-        City, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Город"
+    locality = models.ForeignKey(
+        Locality,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Населённый пункт",
     )
     name = models.CharField(max_length=100, verbose_name="Имя")
     phone = models.CharField(max_length=20, verbose_name="Телефон")
@@ -216,8 +226,10 @@ class Application(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def __str__(self):
-        city_name = self.city.name if self.city else "без города"
-        return f"Заявка #{self.id} от {self.name} ({city_name})"
+        locality_name = (
+            self.locality.name if self.locality else "без населённого пункта"
+        )
+        return f"Заявка #{self.id} от {self.name} ({locality_name})"
 
     class Meta:
         verbose_name = "Заявка"
@@ -317,7 +329,9 @@ class Banner(models.Model):
     button_text = models.CharField("Текст кнопки", max_length=100, default="Подробнее")
     link = models.URLField("Ссылка", blank=True)
     is_active = models.BooleanField("Активен", default=True)
-    cities = models.ManyToManyField(City, verbose_name="Города", related_name="banners")
+    localities = models.ManyToManyField(
+        Locality, verbose_name="Населённые пункты", related_name="banners"
+    )
     order = models.PositiveIntegerField("Порядок показа", default=0)
 
     created_at = models.DateTimeField("Создан", auto_now_add=True)

@@ -40,7 +40,7 @@
                         <h3 class="text-uppercase fw-semibold text-white fs-6">Сервис и помощь</h3>
                         <ul class="list-unstyled mt-3">
                             <li class="mb-2">
-                                <a href="{% url 'core:office_list' city_slug=request.city.slug %}" class="text-gray-400 text-decoration-none fs-6">Офисы обслуживания</a>
+                                <a href="{% url 'core:office_list' locality_slug=request.locality.slug %}" class="text-gray-400 text-decoration-none fs-6">Офисы обслуживания</a>
                             </li>
                             <li class="mb-2">
                                 <a href="https://archangelsk.rt.ru/payment" class="text-gray-400 text-decoration-none fs-6" target="_blank" rel="noopener noreferrer">Способы оплаты</a>
@@ -58,7 +58,7 @@
                         <h3 class="text-uppercase fw-semibold text-white fs-6">Услуги</h3>
                         <ul class="list-unstyled mt-3">
                             <li class="mb-2">
-                                <a href="{% url 'core:internet_tariffs' city_slug=request.city.slug %}" class="text-gray-400 text-decoration-none fs-6">Интернет</a>
+                                <a href="{% url 'core:internet_tariffs' locality_slug=request.locality.slug %}" class="text-gray-400 text-decoration-none fs-6">Интернет</a>
                             </li>
                             <li class="mb-2">
                                 <a href="#" class="text-gray-400 text-decoration-none fs-6">ТВ</a>

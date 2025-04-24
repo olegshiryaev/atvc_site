@@ -46,10 +46,10 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "compressor",
-    "django_htmx",
     "ckeditor",
     "ckeditor_uploader",
+    "compressor",
+    "django_htmx",
     "apps.cities",
     "apps.core",
     "apps.services",
@@ -65,7 +65,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
-    "apps.cities.middleware.CityMiddleware",
+    "apps.cities.middleware.LocalityMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -81,7 +81,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "apps.cities.context_processors.city_context",
+                "apps.cities.context_processors.locality_context",
             ],
         },
     },
@@ -205,10 +205,45 @@ EMAIL_SERVER = EMAIL_HOST_USER
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = list(EMAIL_HOST_USER)
 
+# CKEditor settings
+CKEDITOR_UPLOAD_PATH = "uploads/"
+CKEDITOR_CONFIGS = {
+    "default": {
+        "toolbar": "full",
+        "height": 300,
+        "width": "100%",
+        "extraPlugins": "",
+        "toolbar_full": [
+            [
+                "Styles",
+                "Format",
+                "Bold",
+                "Italic",
+                "Underline",
+                "Strike",
+                "TextColor",
+                "BGColor",
+            ],
+            [
+                "Link",
+                "Unlink",
+                "Image",
+                "Table",
+                "HorizontalRule",
+                "Smiley",
+                "SpecialChar",
+            ],
+            ["Source"],
+        ],
+        "language": "ru",
+        "versionCheck": False,
+        "contentsCss": [
+            "/static/fontawesome/css/all.min.css",  # Подключаем FontAwesome к CKEditor
+        ],
+    },
+}
+
 # Другие параметры
 
 RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
-
-# Настройки CKEditor
-CKEDITOR_UPLOAD_PATH = 'uploads/ckeditor/'

@@ -62,7 +62,7 @@
     {% if displayed_tariffs.exists %}
         <div class="container py-5 animate-fade-in">
             <div class="mb-5">
-                <h2 class="fs-2 fw-bold text-gray-800 mb-4" style="text-align: center;">Тарифы в {{ city.name_prepositional }}</h2>
+                <h2 class="fs-2 fw-bold text-gray-800 mb-4" style="text-align: center;">Тарифы в {{ locality.name_prepositional }}</h2>
                 <div class="d-flex scrollable-buttons flex-nowrap gap-3 justify-content-start justify-content-sm-center">
                     <!-- Кнопка Интернет -->
                     <button class="filter-btn btn {% if active_filter == 'internet' %}bg-sky-600 text-white hover-bg-sky-700{% else %}btn-outline-sky-700 text-sky-700 hover-bg-gray-100{% endif %} 
@@ -190,7 +190,7 @@
         <div class="d-block d-sm-flex align-items-sm-center justify-content-between mb-4">
             <div>
                 <h2 class="fs-2 fw-bold text-gray-800 mb-2 mb-sm-0" style="line-height: 38px;">Последние новости</h2>
-                <a href="{% url 'news:news_list' city.slug %}" 
+                <a href="{% url 'news:news_list' locality.slug %}" 
                 class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-flex align-items-center gap-1 d-sm-none"
                 style="font-size: 15px; line-height: 21px;"
                 aria-label="Перейти ко всем новостям">
@@ -200,7 +200,7 @@
                     </svg>
                 </a>
             </div>
-            <a href="{% url 'news:news_list' city.slug %}" 
+            <a href="{% url 'news:news_list' locality.slug %}" 
             class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-none d-sm-flex align-items-center gap-1"
             style="font-size: 15px; line-height: 21px;"
             aria-label="Перейти ко всем новостям">
@@ -216,7 +216,7 @@
             <div class="swiper-wrapper">
                 {% for news in latest_news %}
                 <div class="swiper-slide">
-                    <a href="{% url 'news:news_detail' city.slug news.slug %}" 
+                    <a href="{% url 'news:news_detail' locality.slug news.slug %}" 
                     class="card text-decoration-none d-flex flex-column h-100"
                     aria-label="Читать новость: {{ news.title }}">
                         {% if news.image %}
@@ -370,7 +370,7 @@
         // Фильтры тарифов
         const tariffsContainer = document.querySelector('.row.row-cols-1');
         const filterButtons = document.querySelectorAll('.filter-btn');
-        const citySlug = window.location.pathname.split('/')[1];
+        const localitySlug = window.location.pathname.split('/')[1];
     
         async function loadTariffs(filterType) {
             try {
@@ -509,7 +509,7 @@
                 try {
                     const formData = new FormData(addressForm);
                     formData.set('comment', 'Проверка доступности услуг'); // Устанавливаем комментарий
-                    const submitUrl = `/${citySlug}/application/submit/`;
+                    const submitUrl = `/${localitySlug}/application/submit/`;
                     const response = await fetch(submitUrl, {
                         method: 'POST',
                         body: formData,
@@ -579,7 +579,7 @@
             connectButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     const tariffName = this.dataset.tariffName || '';
-                    const citySlug = this.dataset.citySlug || window.citySlug || '';
+                    const localitySlug = this.dataset.localitySlug || window.localitySlug || '';
                     const modal = document.getElementById('applicationModal');
                     const modalHeader = modal.querySelector('.modal-header');
                     const modalTitle = document.getElementById('modalTitle');
@@ -649,7 +649,7 @@
                         formData.append('privacy', privacyInput.checked ? 'on' : 'off');
     
                         try {
-                            const submitUrl = `/${citySlug}/application/submit/`;
+                            const submitUrl = `/${localitySlug}/application/submit/`;
                             console.log('Отправка на:', submitUrl);
                             const response = await fetch(submitUrl, {
                                 method: 'POST',

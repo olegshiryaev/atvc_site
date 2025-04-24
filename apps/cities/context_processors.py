@@ -1,17 +1,13 @@
 from django.core.serializers.json import DjangoJSONEncoder
 import json
 
-from apps.cities.models import City
+from apps.cities.models import Locality
 
 
-def city_context(request):
-    current_city = getattr(request, "city", None)
-    cities = City.objects.filter(is_active=True).values(
-        "name", "slug"
-    )  # Преобразуем в QuerySet словарей
+def locality_context(request):
+    current_locality = getattr(request, "locality", None)
+    localities = Locality.objects.filter(is_active=True).values("name", "slug")
     return {
-        "current_city": current_city,
-        "cities_json": json.dumps(
-            list(cities), cls=DjangoJSONEncoder
-        ),  # Сериализуем в JSON
+        "current_locality": current_locality,
+        "localities_json": json.dumps(list(localities), cls=DjangoJSONEncoder),
     }

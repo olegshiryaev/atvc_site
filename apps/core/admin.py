@@ -3,7 +3,7 @@ from django.utils.safestring import mark_safe
 import csv
 from django.http import HttpResponse
 
-from apps.cities.models import City
+from apps.cities.models import Locality
 from .models import (
     Application,
     Banner,
@@ -27,17 +27,17 @@ class OfficeAdmin(admin.ModelAdmin):
     inlines = [WorkScheduleInline]
 
 
-class CityFilter(admin.SimpleListFilter):
+class LocalityFilter(admin.SimpleListFilter):
     title = "Город"
-    parameter_name = "city"
+    parameter_name = "locality"
 
     def lookups(self, request, model_admin):
-        cities = City.objects.filter(is_active=True)
-        return [(city.id, city.name) for city in cities]
+        localities = Locality.objects.filter(is_active=True)
+        return [(locality.id, locality.name) for locality in localities]
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(cities__id=self.value())
+            return queryset.filter(localities__id=self.value())
         return queryset
 
 
@@ -72,11 +72,11 @@ class TariffAdmin(admin.ModelAdmin):
         "speed",
         "price",
         "is_active",
-        "get_cities",
+        "get_localities",
     )
     list_editable = ("price", "is_active")
-    list_filter = (CityFilter, "service")
-    filter_horizontal = ["cities", "included_channels"]
+    list_filter = (LocalityFilter, "service")
+    filter_horizontal = ["localities", "included_channels"]
     search_fields = ["name", "description"]
     actions = ["export_as_csv"]
 
@@ -95,14 +95,14 @@ class TariffAdmin(admin.ModelAdmin):
                 "classes": ("collapse",),
             },
         ),
-        ("Привязка к городам", {"fields": ("cities",)}),
+        ("Привязка к городам", {"fields": ("localities",)}),
         ("ТВ каналы", {"fields": ("included_channels",)}),
     )
 
-    def get_cities(self, obj):
-        return ", ".join(obj.cities.values_list("name", flat=True))
+    def get_localities(self, obj):
+        return ", ".join(obj.localities.values_list("name", flat=True))
 
-    get_cities.short_description = "Города"
+    get_localities.short_description = "Города"
 
     def export_as_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
@@ -112,14 +112,16 @@ class TariffAdmin(admin.ModelAdmin):
         writer.writerow(["Название", "Тип", "Цена", "Скорость", "Города"])
 
         for tariff in queryset:
-            cities = ", ".join([city.name for city in tariff.cities.all()])
+            localities = ", ".join(
+                [locality.name for locality in tariff.localities.all()]
+            )
             writer.writerow(
                 [
                     tariff.name,
                     tariff.get_service_display(),
                     tariff.price,
                     tariff.speed or "-",
-                    cities,
+                    localities,
                 ]
             )
         return response
@@ -148,12 +150,12 @@ class ApplicationAdmin(admin.ModelAdmin):
         "id",
         "name",
         "phone",
-        "city",
+        "locality",
         "status",
         "created_at",
         "updated_at",
     )
-    list_filter = ("status", "city", "created_at")
+    list_filter = ("status", "locality", "created_at")
     search_fields = ("name", "phone", "street", "house_number", "comment")
     list_editable = ("status",)
     date_hierarchy = "created_at"
@@ -161,7 +163,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_per_page = 25
     fieldsets = (
         (None, {"fields": ("name", "phone", "status")}),
-        ("Адрес", {"fields": ("city", "street", "house_number")}),
+        ("Адрес", {"fields": ("locality", "street", "house_number")}),
         ("Дополнительно", {"fields": ("comment",)}),
         ("Даты", {"fields": ("created_at", "updated_at")}),
     )
@@ -169,7 +171,7 @@ class ApplicationAdmin(admin.ModelAdmin):
     actions = ["mark_as_in_progress", "mark_as_completed"]
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related("city")
+        return super().get_queryset(request).select_related("locality")
 
     # Кастомное действие: "Пометить как в обработке"
     @admin.action(description="Пометить выбранные заявки как 'В обработке'")

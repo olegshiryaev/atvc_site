@@ -3,6 +3,6 @@ from . import views
 
 
 urlpatterns = [
-    path("select_city/", views.select_city, name="select_city"),
-    path("get_cities/", views.get_cities, name="get_cities"),
+    path("select_locality/", views.select_locality, name="select_locality"),
+    path("get_localities/", views.get_localities, name="get_localities"),
 ]
