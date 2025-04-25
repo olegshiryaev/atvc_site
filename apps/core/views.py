@@ -7,7 +7,7 @@ from django.views.generic import CreateView
 from django.template.loader import render_to_string
 
 from .forms import ApplicationForm, FeedbackCreateForm
-from .models import Banner, Device, Office, Service, Tariff, Feedback
+from .models import Banner, Company, Device, Office, Service, Tariff, Feedback
 from ..cities.models import Locality
 from ..news.models import News
 from ..services.utils import get_client_ip
@@ -148,3 +148,22 @@ def internet_tariffs(request, locality_slug):
             "locality": locality,
         },
     )
+
+
+def company_detail(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    company = get_object_or_404(Company)
+    context = {
+        "locality": locality,
+        "company": company,
+        "meta_title": f"{company.short_name} — реквизиты и документы",
+        "meta_description": f"Узнайте реквизиты, контактные данные и документы компании {company.short_name}.",
+        "title": "Реквизиты и документы",
+        "documents": company.documents.order_by('-uploaded_at'),
+        "breadcrumbs": [
+            {"title": "Главная", "url": "core:home"},
+            {"title": "Реквизиты и документы", "url": None},
+        ],
+    }
+
+    return render(request, 'core/company_detail.html', context)

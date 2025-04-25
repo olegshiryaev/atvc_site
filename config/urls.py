@@ -20,7 +20,7 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.shortcuts import redirect
-from apps.cities.models import Locality  # Заменили импорт
+from apps.cities.models import Locality
 
 
 def redirect_to_active_locality(request):

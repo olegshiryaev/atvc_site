@@ -66,6 +66,7 @@
         return currentLocality?.district_id != null;
     }
 }" x-init="initDistrict()" @input.debounce.300ms="updateDistrict()">
+
     <!-- Верхняя панель -->
     <div class="bg-light py-2">
         <div class="container px-4">
@@ -165,7 +166,9 @@
                                     :href="getNewPath(locality.slug)"
                                     class="badge"
                                     :class="{
-                                        'bg-primary text-white': locality.slug === currentLocalitySlug
+                                        'bg-light text-dark': locality.slug !== currentLocalitySlug,
+                                        'bg-primary text-white': locality.slug === currentLocalitySlug,
+                                        'hover:bg-[#0369a1] hover:text-white': locality.slug !== currentLocalitySlug
                                     }"
                                     @click="closeModal()"
                                 >
@@ -189,7 +192,7 @@
                                 </a>
                             </template>
                         </div>
-                        <!-- Правая колонка: населённые пункты выбранного района -->
+                        <!-- Правая колонка: населённые пункты для выбранного района -->
                         <div class="col-md-8 locality-list">
                             <template x-for="locality in localitiesInSelectedDistrict()" :key="locality.slug">
                                 <a
@@ -203,17 +206,7 @@
                                     <span x-text="locality.name"></span>
                                 </a>
                             </template>
-                            <div x-show="selectedDistrict && localitiesInSelectedDistrict().length === 0 && !(localitiesWithoutDistrict().length === 0 && districts().length === 0 && searchQuery)" class="text-muted small">
-                                Населённые пункты не найдены
-                            </div>
-                            <div x-show="!selectedDistrict && districts().length > 0 && hasCurrentLocalityDistrict()" class="text-muted small">
-                                Выберите район
-                            </div>
                         </div>
-                    </div>
-                    <!-- Сообщение, если ничего не найдено -->
-                    <div x-show="localitiesWithoutDistrict().length === 0 && districts().length === 0 && searchQuery" class="text-center text-muted py-2">
-                        Городов не найдено
                     </div>
                 </div>
             </div>

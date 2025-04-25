@@ -1,5 +1,5 @@
 from django import forms
-from .models import Application, Feedback
+from .models import Application, Document, Feedback
 
 
 class ApplicationForm(forms.ModelForm):
@@ -64,3 +64,14 @@ class FeedbackCreateForm(forms.ModelForm):
             self.fields[field].widget.attrs.update(
                 {"class": "form-control", "autocomplete": "off"}
             )
+
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = '__all__'
+
+    def clean(self):
+        super().clean()
+        # Вызываем метод clean модели для валидации файла
+        self.instance.clean()

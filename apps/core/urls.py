@@ -1,5 +1,6 @@
 from django.urls import path
 from .views import (
+    company_detail,
     index,
     internet_tariffs,
     office_list,
@@ -12,6 +13,7 @@ app_name = "core"
 urlpatterns = [
     path("", index, name="home"),
     path("offices/", office_list, name="office_list"),
+    path('rekvizity-i-dokumenty/', company_detail, name='company_detail'),
     path("internet/", internet_tariffs, name="internet_tariffs"),
     path(
         "application/submit/",

@@ -1,13 +1,15 @@
 from django.shortcuts import redirect
+from django.conf import settings
 from .models import Locality
 
 
 class LocalityMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
+        self.excluded_paths = getattr(settings, "LOCALITY_MIDDLEWARE_EXCLUDED_PATHS", [])
 
     def __call__(self, request):
-        if request.path.startswith(("/static/", "/media/", "/admin/")):
+        if any(request.path.startswith(p) for p in self.excluded_paths):
             return self.get_response(request)
 
         path_parts = [p for p in request.path.split("/") if p]

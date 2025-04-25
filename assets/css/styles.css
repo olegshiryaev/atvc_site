@@ -30,6 +30,9 @@
     --color-brown: #954213;
     --color-dark-green: #32d318;
     --color-ligt-orange: #ffecb5;
+    --color-footer-bg: #1f2a44;
+    --color-footer-link: #ffffff;
+    --color-footer-link-hover: #e0e0e0;
 }
 
 body,
@@ -1073,4 +1076,77 @@ html {
 .locality-list::-webkit-scrollbar-thumb {
     background-color: #ced4da;
     border-radius: 3px;
+}
+
+.footer-bg {
+    background-color: var(--color-footer-bg);
+}
+
+.footer-bg a {
+    font-size: 0.95rem; /* Увеличиваем размер шрифта */
+    line-height: 1.6; /* Делаем строки менее сжатыми */
+    margin-bottom: 0.3rem;
+    display: inline-block; /* Чтобы сработал margin-bottom */
+    transition: color 0.2s ease-in-out;
+}
+
+.footer-bg a:hover {
+    color: #ffffff !important; /* При наведении — белый */
+    text-decoration: underline;
+}
+
+.footer-bg ul {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.footer-bg ul li {
+    margin-bottom: 0.4rem; /* Расстояние между ссылками */
+}
+
+
+@media (max-width: 576px) {
+    footer .fs-6 {
+        font-size: 0.875rem !important;
+    }
+    footer .fs-4 {
+        font-size: 1rem !important;
+    }
+    footer .mb-4 {
+        margin-bottom: 1rem !important;
+    }
+    footer .py-5 {
+        padding-top: 1.5rem !important;
+        padding-bottom: 1.5rem !important;
+    }
+}
+
+.documents-section {
+    padding-top: 3rem; /* Отступ сверху на мобильных устройствах */
+    padding-bottom: 3rem; /* Отступ снизу */
+}
+
+@media (min-width: 992px) { /* Для больших экранов */
+    .documents-section {
+        padding-top: 0; /* Убираем отступ сверху на десктопах */
+    }
+}
+
+.badge {
+    transition: none !important; /* Отключаем все переходы */
+}
+
+.badge:hover {
+    background-color: #0369a1 !important; /* Цвет при наведении */
+    color: white !important; /* Цвет текста при наведении */
+}
+
+.badge.bg-primary {
+    background-color: #0284c7 !important; /* Цвет для выбранного тега */
+    color: white !important; /* Цвет текста для выбранного тега */
+}
+
+.badge.bg-light {
+    background-color: #f8f9fa !important; /* Серый фон */
+    color: black !important; /* Черный текст */
 }

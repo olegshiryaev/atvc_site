@@ -1,11 +1,22 @@
+import logging
 from django.db import models
 from ckeditor.fields import RichTextField
 from django.core.validators import MinValueValidator
 from pytils.translit import slugify as pytils_slugify
 import os
+from django.core.exceptions import ValidationError
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFit
+from pdf2image import convert_from_bytes
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+from django.contrib import messages
 
 from apps.cities.models import Locality
 from django.contrib.auth.models import User
+
+logger = logging.getLogger(__name__)
 
 
 class Office(models.Model):
@@ -268,49 +279,41 @@ class Feedback(models.Model):
 
 class Company(models.Model):
     # Основные наименования
-    full_name = models.CharField(max_length=255, verbose_name="Полное наименование")
-    short_name = models.CharField(
-        max_length=100, verbose_name="Сокращенное наименование"
-    )
+    full_name = models.CharField(max_length=255, verbose_name="Полное наименование", blank=True, null=True)
+    short_name = models.CharField(max_length=100, verbose_name="Сокращенное наименование", blank=True, null=True)
 
     # Идентификационные номера
-    inn = models.CharField(max_length=12, verbose_name="ИНН")
-    kpp = models.CharField(max_length=9, verbose_name="КПП")
-    okved = models.CharField(max_length=100, verbose_name="ОКВЭД")
-    okpo = models.CharField(max_length=10, verbose_name="ОКПО")
-    ogrn = models.CharField(max_length=13, verbose_name="ОГРН")
-    ogrn_date = models.DateField(verbose_name="Дата ОГРН", null=True, blank=True)
-    okfs = models.CharField(max_length=10, verbose_name="ОКФС")
-    okogu = models.CharField(max_length=10, verbose_name="ОКОГУ")
-    okopf = models.CharField(max_length=10, verbose_name="ОКОПФ")
-    oktmo = models.CharField(max_length=10, verbose_name="ОКТМО")
+    inn = models.CharField(max_length=12, verbose_name="ИНН", blank=True, null=True)
+    kpp = models.CharField(max_length=9, verbose_name="КПП", blank=True, null=True)
+    okved = models.CharField(max_length=100, verbose_name="ОКВЭД", blank=True, null=True)
+    okpo = models.CharField(max_length=10, verbose_name="ОКПО", blank=True, null=True)
+    ogrn = models.CharField(max_length=13, verbose_name="ОГРН", blank=True, null=True)
+    ogrn_date = models.DateField(verbose_name="Дата ОГРН", blank=True, null=True)
+    okfs = models.CharField(max_length=10, verbose_name="ОКФС", blank=True, null=True)
+    okogu = models.CharField(max_length=10, verbose_name="ОКОГУ", blank=True, null=True)
+    okopf = models.CharField(max_length=10, verbose_name="ОКОПФ", blank=True, null=True)
+    oktmo = models.CharField(max_length=10, verbose_name="ОКТМО", blank=True, null=True)
 
     # Адреса
-    legal_address = models.CharField(max_length=255, verbose_name="Юридический адрес")
-    postal_address = models.CharField(
-        max_length=255, verbose_name="Фактический (почтовый) адрес"
-    )
+    legal_address = models.CharField(max_length=255, verbose_name="Юридический адрес", blank=True, null=True)
+    postal_address = models.CharField(max_length=255, verbose_name="Фактический (почтовый) адрес", blank=True, null=True)
 
     # Контакты
-    phone_fax = models.CharField(max_length=100, verbose_name="Телефон-факс")
-    email = models.EmailField(verbose_name="E-mail")
+    phone_fax = models.CharField(max_length=100, verbose_name="Телефон-факс", blank=True, null=True)
+    email = models.EmailField(verbose_name="E-mail", blank=True, null=True)
 
     # Банковские реквизиты
-    bank_account = models.CharField(max_length=20, verbose_name="Расчетный счет")
-    bank_name = models.CharField(max_length=255, verbose_name="Наименование банка")
-    correspondent_account = models.CharField(max_length=20, verbose_name="Кор/счет")
-    bik = models.CharField(max_length=9, verbose_name="БИК")
+    bank_account = models.CharField(max_length=20, verbose_name="Расчетный счет", blank=True, null=True)
+    bank_name = models.CharField(max_length=255, verbose_name="Наименование банка", blank=True, null=True)
+    correspondent_account = models.CharField(max_length=20, verbose_name="Кор/счет", blank=True, null=True)
+    bik = models.CharField(max_length=9, verbose_name="БИК", blank=True, null=True)
 
     # Руководитель
-    director_name = models.CharField(
-        max_length=255, verbose_name="Генеральный директор"
-    )
-    director_basis = models.CharField(
-        max_length=255, verbose_name="Действует на основании"
-    )
+    director_name = models.CharField(max_length=255, verbose_name="Генеральный директор", blank=True, null=True)
+    director_basis = models.CharField(max_length=255, verbose_name="Действует на основании", blank=True, null=True)
 
     def __str__(self):
-        return self.short_name
+        return self.short_name or "Компания"
 
     class Meta:
         verbose_name = "Компания"
@@ -344,3 +347,82 @@ class Banner(models.Model):
 
     def __str__(self):
         return self.title
+
+
+class Document(models.Model):
+    company      = models.ForeignKey(Company, related_name='documents', on_delete=models.CASCADE, verbose_name="Компания")
+    title        = models.CharField(max_length=255, verbose_name="Название документа")
+    file         = models.FileField(upload_to='company_documents/', verbose_name="Файл")
+    thumbnail = ProcessedImageField(
+        upload_to='company_documents/thumbnails/',
+        processors=[ResizeToFit(300, 400)],
+        format='JPEG',
+        options={'quality': 80},
+        blank=True, null=True,
+        verbose_name="Превью документа",
+    )
+    uploaded_at = models.DateField(auto_now_add=True, verbose_name="Дата загрузки")
+
+    class Meta:
+        verbose_name = "Документ"
+        verbose_name_plural = "Документы"
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def extension(self):
+        """Возвращает расширение файла в верхнем регистре, например PDF, DOCX."""
+        return os.path.splitext(self.file.name)[1][1:].upper()
+    
+    def clean(self):
+        """Валидация загружаемого файла."""
+        if self.file:
+            # Ограничение размера файла (10 МБ)
+            if self.file.size > 10 * 1024 * 1024:
+                raise ValidationError("Размер файла не должен превышать 10 МБ.")
+            # Ограничение типов файлов
+            allowed_extensions = ('.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx')
+            if not self.file.name.lower().endswith(allowed_extensions):
+                raise ValidationError("Разрешены только файлы PDF, JPG и PNG.")
+
+    def generate_thumbnail(self, request=None):
+        """Генерация миниатюры для PDF и изображений."""
+        try:
+            if self.extension == 'PDF':
+                # Генерация миниатюры из первой страницы PDF
+                self.file.seek(0)  # Сбрасываем указатель файла
+                pages = convert_from_bytes(self.file.read(), dpi=150, first_page=1, last_page=1)
+                buffer = BytesIO()
+                pages[0].save(buffer, format='JPEG')
+                self.thumbnail.save(f'{self.pk}_thumb.jpg', ContentFile(buffer.getvalue()), save=False)
+            elif self.extension in ('JPG', 'JPEG', 'PNG'):
+                # Генерация миниатюры из изображения
+                self.file.seek(0)  # Сбрасываем указатель файла
+                image = Image.open(self.file)
+                image.thumbnail((300, 400))
+                buffer = BytesIO()
+                image.save(buffer, format='JPEG')
+                self.thumbnail.save(f'{self.pk}_thumb.jpg', ContentFile(buffer.getvalue()), save=False)
+            elif self.extension in ('DOC', 'DOCX'):
+                pass
+        except Exception as e:
+            logger.error(f"Не удалось создать миниатюру для {self.file.name}: {e}")
+            if request:
+                messages.error(request, f"Не удалось создать миниатюру для {self.file.name}. Проверьте файл.")
+
+    def save(self, *args, request=None, **kwargs):
+        """Пользовательский метод сохранения с генерацией миниатюры."""
+        needs_thumbnail = (
+            self.file and 
+            self.extension in ('PDF', 'JPG', 'JPEG', 'PNG') and 
+            (not self.thumbnail or self.file != self._original_file)
+        )
+
+        super().save(*args, **kwargs)
+
+        if needs_thumbnail:
+            self.generate_thumbnail(request=request)
+            super().save(*args, **kwargs)
+
+        self._original_file = self.file

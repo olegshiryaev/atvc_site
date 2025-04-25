@@ -247,3 +247,11 @@ CKEDITOR_CONFIGS = {
 
 RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
+
+LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
+    "/admin/",
+    "/static/",
+    "/media/",
+    "/sitemap.xml",
+    "/robots.txt",
+]

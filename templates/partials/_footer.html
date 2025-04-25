@@ -1,132 +1,92 @@
 {% load static %}
-<footer class="bg-gray-800 w-100">
-    <div class="container px-4 py-5 py-lg-4">
-        <div class="row">
-            <!-- Левая колонка -->
-            <div class="col-lg-4 col-md-6 mb-4">
-                <img src="{% static 'img/footer-logo.png' %}" alt="Company name" class="mb-3">
-                <p class="text-gray-300 fs-6">
-                    АТК - это интернет на скорости до 100 Мбит/сек, качество цвета, звука
-                    и богатство выбора цифрового телевидения и всегда доступные цены.
-                    Загружайте файлы, смотрите онлайн-видео и наслаждайтесь
-                    HD-качеством на вашем телевизоре. Все это — АТК.
-                </p>
-                <div class="d-flex mt-3">
-                    <a href="#" class="text-gray-400 me-3">
-                        <span class="visually-hidden">Vk</span>
-                        <!-- Вставьте ваш SVG для VK -->
-                    </a>
-                    <a href="#" class="text-gray-400">
-                        <span class="visually-hidden">Odnoklassniki</span>
-                        <!-- Вставьте ваш SVG для Odnoklassniki -->
-                    </a>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-12 col-sm-6 mb-3">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">Сопровождение</h3>
-                        <p class="text-gray-300 fs-4">8 (8182) 639-639</p>
-                    </div>
-                    <div class="col-12 col-sm-6 mb-3">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">Служба поддержки</h3>
-                        <p class="text-gray-300 fs-4">8 (8182) 423-505</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Правая часть -->
-            <div class="col-lg-8 col-md-6">
-                <div class="row">
+<footer class="footer-bg text-white pt-5 pb-4">
+    <div class="container">
+        <div class="row gy-4">
+            <!-- Правая часть (меню) -->
+            <div class="col-lg-8 order-1 order-lg-0">
+                <div class="row row-cols-2 row-cols-md-2 row-cols-lg-4 g-4">
                     <!-- Сервис и помощь -->
-                    <div class="col-6 col-md-6 col-lg-3 mb-4">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">Сервис и помощь</h3>
-                        <ul class="list-unstyled mt-3">
-                            <li class="mb-2">
-                                <a href="{% url 'core:office_list' locality_slug=request.locality.slug %}" class="text-gray-400 text-decoration-none fs-6">Офисы обслуживания</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="https://archangelsk.rt.ru/payment" class="text-gray-400 text-decoration-none fs-6" target="_blank" rel="noopener noreferrer">Способы оплаты</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Вопросы и ответы</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Техническая поддержка</a>
-                            </li>
+                    <div>
+                        <h6 class="text-uppercase fw-semibold">Сервис и помощь</h6>
+                        <ul class="list-unstyled small">
+                            <li><a href="{% url 'core:office_list' locality_slug=request.locality.slug %}" class="text-white-50 text-decoration-none">Офисы обслуживания</a></li>
+                            <li><a href="https://archangelsk.rt.ru/payment" target="_blank" class="text-white-50 text-decoration-none">Способы оплаты</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Вопросы и ответы</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Техническая поддержка</a></li>
                         </ul>
                     </div>
                     <!-- Услуги -->
-                    <div class="col-6 col-md-6 col-lg-3 mb-4">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">Услуги</h3>
-                        <ul class="list-unstyled mt-3">
-                            <li class="mb-2">
-                                <a href="{% url 'core:internet_tariffs' locality_slug=request.locality.slug %}" class="text-gray-400 text-decoration-none fs-6">Интернет</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">ТВ</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Телефония</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Пакеты услуг</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Бонусная программа</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Акции</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Подключение в частном секторе</a>
-                            </li>
+                    <div>
+                        <h6 class="text-uppercase fw-semibold">Услуги</h6>
+                        <ul class="list-unstyled small">
+                            <li><a href="{% url 'core:internet_tariffs' locality_slug=request.locality.slug %}" class="text-white-50 text-decoration-none">Интернет</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">ТВ</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Телефония</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Пакеты услуг</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Бонусная программа</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Акции</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Подключение в частном секторе</a></li>
                         </ul>
                     </div>
                     <!-- О компании -->
-                    <div class="col-6 col-md-6 col-lg-3 mb-4">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">О компании</h3>
-                        <ul class="list-unstyled mt-3">
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Новости</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Вакансии</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Реквизиты</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Контакты</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Политика конфиденциальности</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Общая информация</a>
-                            </li>
+                    <div>
+                        <h6 class="text-uppercase fw-semibold">О компании</h6>
+                        <ul class="list-unstyled small">
+                            <li><a href="#" class="text-white-50 text-decoration-none">Новости</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Вакансии</a></li>
+                            <li><a href="{% url 'core:company_detail' locality_slug=request.locality.slug %}" class="text-white-50 text-decoration-none">Реквизиты и документы</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Контакты</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Политика конфиденциальности</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Общая информация</a></li>
                         </ul>
                     </div>
                     <!-- Другие разделы -->
-                    <div class="col-6 col-md-6 col-lg-3 mb-4">
-                        <h3 class="text-uppercase fw-semibold text-white fs-6">Другие разделы</h3>
-                        <ul class="list-unstyled mt-3">
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Телегид</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Для бизнеса</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Бланки и документы</a>
-                            </li>
-                            <li class="mb-2">
-                                <a href="#" class="text-gray-400 text-decoration-none fs-6">Онлайн-общение</a>
-                            </li>
+                    <div>
+                        <h6 class="text-uppercase fw-semibold">Другие разделы</h6>
+                        <ul class="list-unstyled small">
+                            <li><a href="#" class="text-white-50 text-decoration-none">Телегид</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Для бизнеса</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Бланки и документы</a></li>
+                            <li><a href="#" class="text-white-50 text-decoration-none">Онлайн-общение</a></li>
                         </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Левая колонка -->
+            <div class="col-lg-4 order-0 order-lg-1">
+                <div class="text-center text-lg-start">
+                    <img src="{% static 'img/footer-logo.png' %}" alt="АТК" class="mb-3" style="max-width: 160px;">
+                    <p class="text-white-50 small mb-3">
+                        АТК — это интернет на скорости до 100 Мбит/сек, качество цвета, звука и богатство выбора цифрового телевидения и всегда доступные цены.
+                    </p>
+                    <div class="d-flex justify-content-center justify-content-lg-start gap-3 mb-3">
+                        <a href="#" class="text-white me-3" aria-label="VK">
+                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.002 0C5.373 0 0 5.373 0 12.002c0 6.628 5.373 12.001 12.002 12.001 6.628 0 12.001-5.373 12.001-12.001C24.003 5.373 18.63 0 12.002 0zm5.651 17.084h-1.696c-.53 0-.683-.429-2.007-1.748-1.029-1.017-1.475-.936-1.74-.936-.286 0-.366-.228-.366-.43v-2.265c0-.228.097-.428.392-.428.31 0 .843.151 2.084 1.32.529.504 1.016.786 1.308.786.257 0 .352-.114.352-.423V7.162c0-.31-.095-.425-.352-.425-.293 0-.779.282-1.308.786-1.24 1.169-1.774 1.32-2.084 1.32-.295 0-.392-.2-.392-.428V6.15c0-.202.08-.43.366-.43.265 0 .711.081 1.74-.936 1.324-1.319 1.477-1.748 2.007-1.748h1.696c.265 0 .391.094.391.425v11.998c0 .33-.126.425-.391.425z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="text-white" aria-label="Odnoklassniki">
+                            <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0C5.373 0 0 5.373 0 12c0 6.627 5.373 12 12 12s12-5.373 12-12c0-6.628-5.373-12-12-12zm0 5.375a3.625 3.625 0 110 7.25 3.625 3.625 0 010-7.25zm0 9.497c2.3 0 4.281-1.278 4.281-1.278s.877 1.342.935 1.438c.051.09.079.19.079.298 0 .41-.32.74-.731.74-.102 0-.203-.02-.298-.06-.555-.215-2.085-.812-4.266-.812-2.181 0-3.711.597-4.266.812a.743.743 0 01-.298.06.738.738 0 01-.731-.74c0-.108.028-.208.08-.298.058-.096.935-1.438.935-1.438s1.981 1.278 4.281 1.278zm0 1.375c.76 0 1.375.615 1.375 1.375S12.76 19 12 19s-1.375-.615-1.375-1.375.615-1.375 1.375-1.375z"/>
+                            </svg>
+                        </a>
+                    </div>
+                    <div class="row text-white-50 small">
+                        <div class="col-6">
+                            <strong>Сопровождение:</strong><br>8 (8182) 639-639
+                        </div>
+                        <div class="col-6">
+                            <strong>Поддержка:</strong><br>8 (8182) 423-505
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="border-top border-white-10 mt-5 pt-4">
-            <p class="text-gray-400 fs-6">© 2025 ООО «АТК». Все права защищены.</p>
+
+        <!-- Нижняя полоса -->
+        <div class="border-top border-secondary mt-4 pt-3 text-center">
+            <p class="mb-0 small text-white-50">© 2025 ООО «АТК». Все права защищены.</p>
         </div>
     </div>
 </footer>

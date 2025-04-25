@@ -2,12 +2,16 @@ from django.contrib import admin
 from django.utils.safestring import mark_safe
 import csv
 from django.http import HttpResponse
+from django.utils.html import format_html
 
 from apps.cities.models import Locality
+from apps.core.forms import DocumentForm
 from .models import (
     Application,
     Banner,
+    Company,
     Device,
+    Document,
     Feedback,
     Office,
     Service,
@@ -198,3 +202,40 @@ class FeedbackAdmin(admin.ModelAdmin):
 class BannerAdmin(admin.ModelAdmin):
     list_display = ("title", "is_active", "order")
     list_editable = ("is_active", "order")
+
+
+class DocumentInline(admin.TabularInline):
+    model = Document
+    fields = ('title', 'file', 'thumbnail_preview')
+    readonly_fields = ('thumbnail_preview',)
+
+    def thumbnail_preview(self, obj):
+        if obj.thumbnail:
+            return format_html('<img src="{}" style="max-height:100px;" />', obj.thumbnail.url)
+        return "-"
+    thumbnail_preview.short_description = "Превью"
+
+@admin.register(Company)
+class CompanyAdmin(admin.ModelAdmin):
+    list_display = ('short_name', 'full_name', 'inn', 'kpp', 'email')
+    search_fields = ('short_name', 'full_name', 'inn')
+    inlines = [DocumentInline]
+
+@admin.register(Document)
+class DocumentAdmin(admin.ModelAdmin):
+    form = DocumentForm
+    list_display = ('title', 'company', 'uploaded_at', 'thumbnail_preview')
+    list_filter = ('company', 'uploaded_at')
+    search_fields = ('title',)
+    readonly_fields = ('uploaded_at',)
+
+    def thumbnail_preview(self, obj):
+        """Отображение миниатюры в списке."""
+        if obj.thumbnail:
+            return format_html('<img src="{}" style="max-height: 100px;" />', obj.thumbnail.url)
+        return "Нет миниатюры"
+    thumbnail_preview.short_description = "Превью"
+
+    def save_model(self, request, obj, form, change):
+        """Передача request в метод save модели через kwargs."""
+        obj.save(request=request)

@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        {% include 'partials/page_header.html' with title=title %}
+
+        <div class="row">
+            <div class="col-12">
+                <table class="table table-borderless">
+                    <tbody>
+                        {% if company.full_name %}
+                        <tr><th>Полное наименование</th><td>{{ company.full_name }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.short_name %}
+                        <tr><th>Сокращённое наименование</th><td>{{ company.short_name }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.legal_address %}
+                        <tr><th>Юридический адрес</th><td>{{ company.legal_address }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.postal_address %}
+                        <tr><th>Фактический адрес</th><td>{{ company.postal_address }}</td></tr>
+                        {% endif %}
+
+                        {% if company.inn %}
+                        <tr><th>ИНН</th><td>{{ company.inn }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.kpp %}
+                        <tr><th>КПП</th><td>{{ company.kpp }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.ogrn %}
+                        <tr><th>ОГРН</th>
+                            <td>
+                                {{ company.ogrn }}
+                                {% if company.ogrn_date %} от {{ company.ogrn_date|date:"d.m.Y" }}{% endif %}
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        {% if company.bank_account %}
+                        <tr><th>Расчетный счет</th><td>{{ company.bank_account }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.bank_name %}
+                        <tr><th>Наименование банка</th><td>{{ company.bank_name }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.correspondent_account %}
+                        <tr><th>К/счет</th><td>{{ company.correspondent_account }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.bik %}
+                        <tr><th>БИК</th><td>{{ company.bik }}</td></tr>
+                        {% endif %}
+
+                        {% if company.okved %}
+                        <tr><th>ОКВЭД</th><td>{{ company.okved }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.okpo %}
+                        <tr><th>ОКПО</th><td>{{ company.okpo }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.okfs or company.okogu or company.okopf or company.oktmo %}
+                        <tr>
+                            <th>ОКФС / ОКОГУ / ОКОПФ / ОКТМО</th>
+                            <td>
+                                {{ company.okfs }}{% if company.okfs %} / {% endif %}
+                                {{ company.okogu }}{% if company.okogu %} / {% endif %}
+                                {{ company.okopf }}{% if company.okopf %} / {% endif %}
+                                {{ company.oktmo }}
+                            </td>
+                        </tr>
+                        {% endif %}
+
+                        {% if company.phone_fax %}
+                        <tr><th>Телефон</th><td>{{ company.phone_fax }}</td></tr>
+                        {% endif %}
+                        
+                        {% if company.email %}
+                        <tr><th>E-mail</th><td>{{ company.email }}</td></tr>
+                        {% endif %}
+
+                        {% if company.director_name %}
+                        <tr>
+                            <th>Генеральный директор</th>
+                            <td>{{ company.director_name }}{% if company.director_basis %}, {{ company.director_basis }}{% endif %}</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Блок документов -->
+        <section class="documents-section pt-5 pt-lg-0 pb-5">
+            <h2 class="mt-5 mb-4">Документы</h2>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+                {% for doc in documents %}
+                    <div class="col">
+                        <a href="{{ doc.file.url }}" download class="text-decoration-none text-dark">
+                            <div class="card h-100 shadow-sm hover-shadow transition-all">
+                                <div class="position-relative">
+                                    {% if doc.thumbnail %}
+                                        <img src="{{ doc.thumbnail.url }}" class="card-img-top object-fit-contain" style="height: 160px;" alt="{{ doc.title }}">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:160px;">
+                                            <i class="bi 
+                                                {% if doc.extension == 'PDF' %}bi-file-earmark-pdf
+                                                {% elif doc.extension == 'DOC' or doc.extension == 'DOCX' %}bi-file-earmark-word
+                                                {% elif doc.extension in 'JPG JPEG PNG' %}bi-file-earmark-image
+                                                {% else %}bi-file-earmark
+                                                {% endif %}
+                                                display-4 text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="badge bg-danger position-absolute top-0 start-0 m-2">
+                                        {{ doc.extension }}
+                                    </span>
+                                </div>
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="card-title text-center mb-0">{{ doc.title }}</h6>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                {% empty %}
+                    <p>Документы ещё не добавлены.</p>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock content %}
