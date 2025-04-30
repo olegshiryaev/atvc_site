@@ -7,9 +7,27 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="{% block meta_description %}Интернет, телевидение и комбо-тарифы в вашем городе{% endblock %}">
-    <meta name="keywords" content="{% block meta_keywords %}интернет, телевидение, тарифы, провайдер{% endblock %}">
-    <title>{% block title %}ATVC Site{% endblock %}</title>
+    <title>{{ title }}</title>
+    <meta name="description" content="{{ meta_tag.description|default:'Default Description' }}">
+    <meta name="keywords" content="{{ meta_tag.keywords|default:'default, keywords' }}">
+    <meta name="robots" content="{{ meta_tag.robots|default:'robots' }}">
+
+    <!-- Open Graph meta tags -->
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:type" content="website">
+    {% if meta_tag.og_title %}
+        <meta property="og:title" content="{{ meta_tag.og_title }}">
+    {% endif %}
+    <meta property="og:site_name" content="{{ site_name }}">
+    {% if meta_tag.og_description %}
+        <meta property="og:description" content="{{ meta_tag.og_description }}">
+    {% endif %}
+    {% if meta_tag.og_image %}
+        <meta property="og:image" content="{{ meta_tag.og_image.url }}">
+    {% endif %}
+    <meta property="og:url" content="{{ canonical_url }}">
+
+    <link rel="canonical" href="{{ canonical_url }}" />
 
     <!-- Bootstrap CSS -->
     {% compress css %}
@@ -34,7 +52,7 @@
 
     {% include 'partials/_navbar.html' %}
 
-    <main class="py-2">
+    <main>
         {% block content %}{% endblock %}
     </main>
 

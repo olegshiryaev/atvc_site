@@ -3,7 +3,7 @@ from django.urls import resolve, reverse_lazy
 from django.views.decorators.http import require_POST
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import JsonResponse
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 
 from .forms import ApplicationForm, FeedbackCreateForm
@@ -20,7 +20,7 @@ def index(request, locality_slug):
 
     tariffs = (
         Tariff.objects.filter(localities=locality, is_active=True)
-        .select_related()
+        .select_related("service")
         .prefetch_related("localities")
     )
 
@@ -32,7 +32,10 @@ def index(request, locality_slug):
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         tariffs_html = render_to_string(
             "core/partials/tariffs_list.html",
-            {"displayed_tariffs": displayed_tariffs.order_by("price")},
+            {
+                "displayed_tariffs": displayed_tariffs.order_by("price"),
+                "locality": locality,
+            },
             request=request,
         )
         return JsonResponse({"html": tariffs_html})
@@ -159,11 +162,29 @@ def company_detail(request, locality_slug):
         "meta_title": f"{company.short_name} — реквизиты и документы",
         "meta_description": f"Узнайте реквизиты, контактные данные и документы компании {company.short_name}.",
         "title": "Реквизиты и документы",
-        "documents": company.documents.order_by('-uploaded_at'),
+        "documents": company.documents.order_by("-uploaded_at"),
         "breadcrumbs": [
             {"title": "Главная", "url": "core:home"},
             {"title": "Реквизиты и документы", "url": None},
         ],
     }
 
-    return render(request, 'core/company_detail.html', context)
+    return render(request, "core/company_detail.html", context)
+
+
+class TariffDetailView(DetailView):
+    model = Tariff
+    template_name = "core/tariffs/tariff_detail.html"
+    context_object_name = "tariff"
+
+    def get_queryset(self):
+        locality_slug = self.kwargs["locality_slug"]
+        locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+        return Tariff.objects.filter(localities=locality, is_active=True)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["locality"] = get_object_or_404(
+            Locality, slug=self.kwargs["locality_slug"], is_active=True
+        )
+        return context

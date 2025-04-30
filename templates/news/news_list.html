@@ -1,74 +1,64 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container py-4">
-    <!-- Заголовок и навигация -->
-    <div class="d-block d-sm-flex align-items-sm-center justify-content-between mb-4 animate-fade-in">
-        <h1 class="fs-3 fw-bold text-gray-800 mb-2 mb-sm-0" style="line-height: 38px;">Новости</h1>
-        <a href="#" 
-           class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-flex align-items-center gap-1"
-           style="font-size: 15px; line-height: 21px;"
-           aria-label="Вернуться на главную">
-            На главную
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-        </a>
-    </div>
+<div class="bg-white w-100">
+    <div class="container">
+        {% include 'partials/page_header.html' with title=title %}
 
-    <!-- Сетка новостей -->
-    <div class="row g-4" id="news-container">
-        {% for news in news_list %}
-        <div class="col-12 col-sm-6 col-lg-4">
-            <a href="{{ news.get_absolute_url }}" 
-               class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
-               aria-label="Читать новость: {{ news.title }}">
-                {% if news.image %}
-                <div class="position-relative overflow-hidden rounded-top-3">
-                    <img src="{{ news.image.url }}" 
-                         alt="{{ news.title }}" 
-                         loading="lazy" 
-                         class="card-img-top object-fit-cover w-100 h-36 h-md-40"
-                         style="aspect-ratio: 16/9;">
-                </div>
-                {% else %}
-                <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
-                     style="aspect-ratio: 16/9;"
-                     role="img" 
-                     aria-label="Изображение отсутствует">
-                    Изображение отсутствует
-                </div>
-                {% endif %}
-                <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
-                    <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
-                        {{ news.created_at|date:"d.m.Y" }}
-                    </p>
-                    <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
-                        {{ news.title }}
-                    </h3>
-                    {% if news.content %}
-                    <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
-                        {{ news.content|striptags|truncatechars:100 }}
-                    </p>
+        <!-- Сетка новостей -->
+        <div class="row g-4" id="news-container">
+            {% for news in news_list %}
+            <div class="col-12 col-sm-6 col-lg-4">
+                <a href="{{ news.get_absolute_url }}" 
+                class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
+                aria-label="Читать новость: {{ news.title }}">
+                    {% if news.image %}
+                    <div class="position-relative overflow-hidden rounded-top-3">
+                        <img src="{{ news.image.url }}" 
+                            alt="{{ news.title }}" 
+                            loading="lazy" 
+                            class="card-img-top object-fit-cover w-100 h-36 h-md-40"
+                            style="aspect-ratio: 16/9;">
+                    </div>
+                    {% else %}
+                    <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
+                        style="aspect-ratio: 16/9;"
+                        role="img" 
+                        aria-label="Изображение отсутствует">
+                        Изображение отсутствует
+                    </div>
                     {% endif %}
-                </div>
-            </a>
+                    <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
+                        <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
+                            {{ news.created_at|date:"d.m.Y" }}
+                        </p>
+                        <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
+                            {{ news.title }}
+                        </h3>
+                        {% if news.content %}
+                        <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
+                            {{ news.content|striptags|truncatechars:100 }}
+                        </p>
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
-    </div>
 
-    <!-- Кнопка "Загрузить ещё" -->
-    {% if has_more_news %}
-    <div class="text-center mt-5">
-        <button id="load-more-btn" 
-                class="btn btn-primary fw-semibold px-4 py-2 transition-colors duration-300"
-                data-next-page="2"
-                data-city-slug="{{ city.slug }}"
-                aria-label="Загрузить больше новостей">
-            Загрузить больше
-        </button>
+        <!-- Кнопка "Загрузить ещё" -->
+        {% if has_more_news %}
+        <div class="text-center mt-5">
+            <button id="load-more-btn" 
+                    class="btn btn-primary fw-semibold px-4 py-2 transition-colors duration-300"
+                    data-next-page="2"
+                    data-city-slug="{{ locality.slug }}"
+                    aria-label="Загрузить больше новостей">
+                Загрузить больше
+            </button>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
 
 <script>
@@ -80,7 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadMoreBtn.addEventListener('click', async () => {
             const nextPage = loadMoreBtn.getAttribute('data-next-page');
             const citySlug = loadMoreBtn.getAttribute('data-city-slug');
-            const url = `{% url 'news:load_more_news' city.slug %}?page=${nextPage}`;
+            const url = `{% url 'news:load_more_news' locality.slug %}?page=${nextPage}`;
 
             try {
                 const response = await fetch(url, {

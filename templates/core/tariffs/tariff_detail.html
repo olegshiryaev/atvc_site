@@ -1,0 +1,23 @@
+<!-- templates/tariffs/tariff_detail.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ tariff.name }}</title>
+</head>
+<body>
+    <h1>{{ tarifficariff.name }}</h1>
+    <p>Цена: {{ tariff.price }} ₽/мес</p>
+    {% if tariff.speed %}
+        <p>Скорость: {{ tariff.speed }} Мбит/с</p>
+    {% endif %}
+    {% if tariff.channels %}
+        <p>ТВ-каналов: {{ tariff.channels }}</p>
+    {% endif %}
+    {% if tariff.hd_channels %}
+        <p>HD-каналов: {{ tariff.hd_channels }}</p>
+    {% endif %}
+    <p>{{ tariff.description|safe }}</p>
+    <p>Доступно в: {{ tariff.get_localities }}</p>
+    <a href="#">Назад к списку тарифов</a>
+</body>
+</html>

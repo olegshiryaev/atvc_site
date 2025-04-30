@@ -1,57 +1,60 @@
 {% for tariff in displayed_tariffs %}
-    <div class="col px-3 mb-4">
-        <div class="card h-100 bg-gray-100" style="display: flex; flex-direction: column;">
-            <div class="card-body p-4" style="flex: 1 1 auto;">
-                <h3 class="fs-2 fw-semibold lh-base text-gray-800 mb-4">{{ tariff.name }}</h3>
+    <div class="col mb-4">
+        <div class="card tariff-card h-100">
+            <div class="card-body p-4">
+                <h3 class="tariff-name">
+                    <a href="{% url 'core:tariff_detail' locality.slug tariff.slug %}" class="tariff-name-link" title="{{ tariff.name }}">{{ tariff.name }}</a>
+                </h3>
                 {% if tariff.speed %}
-                <div class="mb-4 pt-3">
-                    <span class="fs-1 fw-medium lh-1">{{ tariff.speed }}</span>
-                    <span class="fs-4 fw-normal lh-tight">Мбит/с</span>
+                <div class="tariff-speed mb-4 pt-3">
+                    <span class="speed-value">{{ tariff.speed }}</span>
+                    <span class="speed-unit">Мбит/с</span>
                 </div>
                 {% endif %}
-                <div class="mb-4">
-                    <p class="fs-5 fw-normal lh-base">{{ tariff.description|safe }}</p>
+                <div class="tariff-description mb-4">
+                    <p>{{ tariff.description|safe }}</p>
                 </div>
                 {% if tariff.channels %}
-                <div class="row mb-4">
+                <div class="row tariff-channels mb-4">
                     <div class="col-{% if tariff.hd_channels %}6{% else %}12{% endif %}">
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-medium lh-1">{{ tariff.channels }}</span>
-                            <span class="fs-4 fw-normal lh-tight mt-2">ТВ-каналов</span>
+                            <span class="channel-count">{{ tariff.channels }}</span>
+                            <span class="channel-label">ТВ-каналов</span>
                         </div>
                     </div>
                     {% if tariff.hd_channels %}
                     <div class="col-6">
                         <div class="d-flex flex-column">
-                            <span class="fs-1 fw-medium lh-1">{{ tariff.hd_channels }}</span>
-                            <span class="fs-4 fw-normal lh-tight mt-2">HD-каналов</span>
+                            <span class="channel-count">{{ tariff.hd_channels }}</span>
+                            <span class="channel-label">HD-каналов</span>
                         </div>
                     </div>
                     {% endif %}
                 </div>
                 {% if tariff.included_channels.exists %}
                 <div class="mb-4">
-                    <button class="btn btn-outline-dark px-3 py-1 fs-5 fw-medium hover:bg-dark hover:text-white" data-bs-toggle="modal" data-bs-target="#channelsModal-{{ tariff.id }}">Список каналов</button>
+                    <button class="btn btn-outline-dark tariff-channels-btn" data-bs-toggle="modal" data-bs-target="#channelsModal-{{ tariff.id }}">Список каналов</button>
                 </div>
                 {% endif %}
                 {% endif %}
             </div>
-            <div class="card-footer p-4 border-0 bg-gray-100" style="flex-shrink: 0;">
-                <div class="d-flex align-items-baseline mb-4">
-                    <span class="display-6 fw-medium lh-1 me-1">{{ tariff.price }} ₽</span>
-                    <span class="fs-4 fw-normal lh-tight">в месяц</span>
+            <div class="card-footer p-4 border-0">
+                <div class="tariff-price mb-4">
+                    <span class="price-value">{{ tariff.price }}</span>
+                    <span class="price-unit">₽/мес</span>
                 </div>
-                <button class="connect-btn btn bg-sky-600 text-white hover-bg-sky-700 w-100 py-2 fs-3 fw-normal"
-                        style="line-height: 1.55;"
+                <button class="connect-btn btn btn-primary w-100 tariff-connect-btn"
                         data-tariff-id="{{ tariff.id }}"
                         data-tariff-name="{{ tariff.name }}">
                     Подключить
                 </button>
+                <div class="tariff-details mt-3 text-center">
+                    <a href="{% url 'core:tariff_detail' locality.slug tariff.slug %}">Подробнее о тарифе</a>
+                </div>
             </div>
         </div>
     </div>
 
-    
     <!-- Модальное окно для списка каналов -->
     <div class="modal fade" id="channelsModal-{{ tariff.id }}" tabindex="-1" aria-labelledby="channelsModalLabel-{{ tariff.id }}" aria-hidden="true" role="dialog">
         <div class="modal-dialog modal-lg">

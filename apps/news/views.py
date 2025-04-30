@@ -12,16 +12,22 @@ def news_list(request, locality_slug):
     news_list = News.objects.filter(localities=locality, is_published=True).order_by(
         "-created_at"
     )
-    paginator = Paginator(news_list, 6)  # Первые 6 новостей
-    page_obj = paginator.get_page(1)
-
-    # Проверяем, есть ли ещё новости
-    has_more_news = paginator.count > 6
+    paginator = Paginator(news_list, 6)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
 
     return render(
         request,
         "news/news_list.html",
-        {"news_list": page_obj, "locality": locality, "has_more_news": has_more_news},
+        {
+            "news_list": page_obj,
+            "locality": locality,
+            "has_more_news": page_obj.has_next(),
+            "title": "Новости",
+            "breadcrumbs": [
+                {"title": "Главная", "url": "core:home"},
+                {"title": "Новости", "url": None},
+            ],
+        },
     )
 
 
@@ -67,7 +73,7 @@ def load_more_news(request, locality_slug):
 def news_detail(request, locality_slug, news_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     news_item = get_object_or_404(
-        News, slug=news_slug, localiies=locality, is_published=True
+        News, slug=news_slug, localities=locality, is_published=True
     )
 
     return render(
@@ -76,6 +82,12 @@ def news_detail(request, locality_slug, news_slug):
         {
             "locality": locality,
             "news": news_item,
+            "title": news_item.title,  # Передаём название новости в title
+            "breadcrumbs": [
+                {"title": "Главная", "url": "core:home"},
+                {"title": "Новости", "url": "news:news_list"},
+                {"title": news_item.title, "url": None},
+            ],
         },
     )
 

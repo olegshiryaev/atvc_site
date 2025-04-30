@@ -76,16 +76,18 @@ class TariffAdmin(admin.ModelAdmin):
         "speed",
         "price",
         "is_active",
+        "slug",
         "get_localities",
     )
     list_editable = ("price", "is_active")
     list_filter = (LocalityFilter, "service")
     filter_horizontal = ["localities", "included_channels"]
-    search_fields = ["name", "description"]
+    search_fields = ["name", "slug", "description"]
+    readonly_fields = ("slug",)
     actions = ["export_as_csv"]
 
     fieldsets = (
-        ("Основное", {"fields": ("name", "service", "price", "is_active")}),
+        ("Основное", {"fields": ("name", "slug", "service", "price", "is_active")}),
         (
             "Характеристики",
             {
@@ -113,7 +115,7 @@ class TariffAdmin(admin.ModelAdmin):
         response["Content-Disposition"] = 'attachment; filename="tariffs.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(["Название", "Тип", "Цена", "Скорость", "Города"])
+        writer.writerow(["Название", "Слаг", "Тип", "Цена", "Скорость", "Города"])
 
         for tariff in queryset:
             localities = ", ".join(
@@ -122,6 +124,7 @@ class TariffAdmin(admin.ModelAdmin):
             writer.writerow(
                 [
                     tariff.name,
+                    tariff.slug,
                     tariff.get_service_display(),
                     tariff.price,
                     tariff.speed or "-",
@@ -206,34 +209,42 @@ class BannerAdmin(admin.ModelAdmin):
 
 class DocumentInline(admin.TabularInline):
     model = Document
-    fields = ('title', 'file', 'thumbnail_preview')
-    readonly_fields = ('thumbnail_preview',)
+    fields = ("title", "file", "thumbnail_preview")
+    readonly_fields = ("thumbnail_preview",)
 
     def thumbnail_preview(self, obj):
         if obj.thumbnail:
-            return format_html('<img src="{}" style="max-height:100px;" />', obj.thumbnail.url)
+            return format_html(
+                '<img src="{}" style="max-height:100px;" />', obj.thumbnail.url
+            )
         return "-"
+
     thumbnail_preview.short_description = "Превью"
+
 
 @admin.register(Company)
 class CompanyAdmin(admin.ModelAdmin):
-    list_display = ('short_name', 'full_name', 'inn', 'kpp', 'email')
-    search_fields = ('short_name', 'full_name', 'inn')
+    list_display = ("short_name", "full_name", "inn", "kpp", "email")
+    search_fields = ("short_name", "full_name", "inn")
     inlines = [DocumentInline]
+
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
     form = DocumentForm
-    list_display = ('title', 'company', 'uploaded_at', 'thumbnail_preview')
-    list_filter = ('company', 'uploaded_at')
-    search_fields = ('title',)
-    readonly_fields = ('uploaded_at',)
+    list_display = ("title", "company", "uploaded_at", "thumbnail_preview")
+    list_filter = ("company", "uploaded_at")
+    search_fields = ("title",)
+    readonly_fields = ("uploaded_at",)
 
     def thumbnail_preview(self, obj):
         """Отображение миниатюры в списке."""
         if obj.thumbnail:
-            return format_html('<img src="{}" style="max-height: 100px;" />', obj.thumbnail.url)
+            return format_html(
+                '<img src="{}" style="max-height: 100px;" />', obj.thumbnail.url
+            )
         return "Нет миниатюры"
+
     thumbnail_preview.short_description = "Превью"
 
     def save_model(self, request, obj, form, change):

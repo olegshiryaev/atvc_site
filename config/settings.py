@@ -255,3 +255,5 @@ LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
     "/sitemap.xml",
     "/robots.txt",
 ]
+
+SITE_NAME = "АТК"

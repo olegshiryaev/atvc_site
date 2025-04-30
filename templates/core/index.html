@@ -7,34 +7,37 @@
 <div class="min-h-screen font-sans">
     <!-- Карусель -->
     {% if banners %}
-    <div id="bannerCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+    <div id="bannerCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" role="region" aria-label="Рекламная карусель">
         <div class="carousel-inner">
             {% for banner in banners %}
             <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="carousel-item-bg" {% if banner.background_image %}style="background-image: url('{{ banner.background_image.url }}');"{% endif %}>
+                <div class="carousel-slide-background"
+                     {% if banner.background_image %}
+                     style="background-image: url('{{ banner.background_image.url }}');"
+                     {% endif %}>
                     <div class="container py-3 py-md-5">
                         <div class="row align-items-center">
                             <!-- Текстовая часть -->
-                            <div class="col-12 col-md-8 text-center text-md-start">
-                                <h2 class="fs-48 fw-black lh-custom carousel-title">{{ banner.title }}</h2>
-                                <p class="fs-5 carousel-description">{{ banner.description }}</p>
+                            <div class="col-12 col-md-8 text-center text-md-start carousel-text">
+                                <h2 class="carousel-title">{{ banner.title }}</h2>
+                                <p class="carousel-description">{{ banner.description }}</p>
                                 {% if banner.link %}
                                 <a href="{{ banner.link }}"
-                                   class="btn bg-sky-600 text-white fs-6 fw-medium carousel-button">
+                                   class="btn carousel-button">
                                     {{ banner.button_text }}
                                 </a>
                                 {% endif %}
                             </div>
                             <!-- Изображение -->
                             {% if banner.image %}
-                            <div class="col-12 col-md-4 d-none d-md-flex justify-content-end align-items-center">
+                            <div class="col-12 col-md-4 carousel-image-container">
                                 <img src="{{ banner.image.url }}"
                                      alt="{{ banner.title }}"
                                      loading="lazy"
                                      class="img-fluid carousel-image">
                             </div>
                             {% else %}
-                            <div class="col-12 col-md-4 d-none d-md-block"></div> <!-- Пустой блок для сохранения высоты -->
+                            <div class="col-12 col-md-4 carousel-image-placeholder"></div>
                             {% endif %}
                         </div>
                     </div>
@@ -50,7 +53,8 @@
                     data-bs-target="#bannerCarousel"
                     data-bs-slide-to="{{ forloop.counter0 }}"
                     {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                    aria-label="Слайд {{ forloop.counter1 }}"></button>
+                    aria-label="Слайд {{ forloop.counter1 }}"
+                    aria-controls="bannerCarousel"></button>
             {% endfor %}
         </div>
         {% endif %}
@@ -60,51 +64,54 @@
 
     <!-- Блок тарифов -->
     {% if displayed_tariffs.exists %}
-        <div class="container py-5 animate-fade-in">
-            <div class="mb-5">
-                <h2 class="fs-2 fw-bold text-gray-800 mb-4" style="text-align: center;">Тарифы в {{ locality.name_prepositional }}</h2>
-                <div class="d-flex scrollable-buttons flex-nowrap gap-3 justify-content-start justify-content-sm-center">
-                    <!-- Кнопка Интернет -->
-                    <button class="filter-btn btn {% if active_filter == 'internet' %}bg-sky-600 text-white hover-bg-sky-700{% else %}btn-outline-sky-700 text-sky-700 hover-bg-gray-100{% endif %} 
-                            fs-5 fw-medium px-3 py-2 w-auto min-w-120px"
-                            data-filter="internet">
-                        <span class="d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
-                            </svg>
-                            Интернет
-                        </span>
-                    </button>
-                    <!-- Кнопка Телевидение -->
-                    <button class="filter-btn btn {% if active_filter == 'televidenie' %}bg-sky-600 text-white hover-bg-sky-700{% else %}btn-outline-sky-700 text-sky-700 hover-bg-gray-100{% endif %} 
-                            fs-5 fw-medium px-3 py-2 w-auto min-w-120px"
-                            data-filter="televidenie">
-                        <span class="d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                            </svg>
-                            Телевидение
-                        </span>
-                    </button>
-                    <!-- Кнопка Комбо -->
-                    <button class="filter-btn btn {% if active_filter == 'kombo' %}bg-sky-600 text-white hover-bg-sky-700{% else %}btn-outline-sky-700 text-sky-700 hover-bg-gray-100{% endif %} 
-                            fs-5 fw-medium px-3 py-2 w-auto min-w-120px"
-                            data-filter="kombo">
-                        <span class="d-flex align-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
-                            </svg>
-                            Интернет + ТВ
-                        </span>
-                    </button>
-                </div>
+    <section class="tariffs">
+        <div class="container">
+            <div class="tariffs__title-container">
+                <h2 class="fs-2 fw-bold mb-2 mb-sm-0">Тарифы в {{ locality.name_prepositional }}</h2>
             </div>
-
+            <div class="d-flex scrollable-buttons flex-nowrap gap-3 justify-content-start">
+                <!-- Кнопка Интернет -->
+                <button class="filter-btn btn {% if active_filter == 'internet' %}btn-primary{% else %}btn-outline-primary{% endif %} w-auto min-w-120px"
+                        data-filter="internet" aria-pressed="{% if active_filter == 'internet' %}true{% else %}false{% endif %}">
+                    <span class="d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                        </svg>
+                        Интернет
+                    </span>
+                </button>
+                <!-- Кнопка Телевидение -->
+                <button class="filter-btn btn {% if active_filter == 'televidenie' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                        data-filter="televidenie" aria-pressed="{% if active_filter == 'televidenie' %}true{% else %}false{% endif %}">
+                    <span class="d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        Телевидение
+                    </span>
+                </button>
+                <!-- Кнопка Комбо -->
+                <button class="filter-btn btn {% if active_filter == 'kombo' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                        data-filter="kombo" aria-pressed="{% if active_filter == 'kombo' %}true{% else %}false{% endif %}">
+                    <span class="d-flex align-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                        Интернет + ТВ
+                    </span>
+                </button>
+            </div>
+    
             <!-- Контейнер с тарифами -->
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4 justify-content-center">
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
                 {% include 'core/partials/tariffs_list.html' %}
             </div>
         </div>
+    </section>
+    {% else %}
+    <div class="container py-5 text-start">
+        <p>Тарифы в {{ locality.name_prepositional }} временно недоступны.</p>
+    </div>
     {% endif %}
 
     <!-- Модальное окно -->
@@ -184,15 +191,78 @@
         </div>
     </div>
 
+    <!-- Секция проверки адреса -->
+    <section class="address-check-section">
+        <div class="container py-5 my-5">
+            <div class="row align-items-center">
+                <!-- Левая часть с изображением -->
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <img src="{% static 'img/girl-with-laptop.png' %}" alt="..." class="address-check-image d-none d-lg-block img-fluid">
+                </div>
+                <!-- Правая часть с формой -->
+                <div class="col-lg-6 px-lg-4 py-lg-4">
+                    <div class="text-center mb-4">
+                        <h2 class="fs-1 fw-bold text-white mb-2">Проверьте доступность услуг</h2>
+                        <p class="fs-5 text-white mb-0 subtitle">Узнайте, какие услуги можно подключить по вашему адресу</p>
+                    </div>
+                    <form id="checkAddressForm" method="post" novalidate autocomplete="off">
+                        {% csrf_token %}
+                        <div class="row g-4">
+                            <!-- Улица -->
+                            <div class="col-md-6">
+                                <input type="text" name="street" id="street" class="form-control shadow-sm" placeholder="Укажите улицу">
+                                <div id="streetError" class="invalid-feedback"></div>
+                            </div>
+                            <!-- Номер дома -->
+                            <div class="col-md-6">
+                                <input type="text" name="house_number" id="house_number" class="form-control shadow-sm" placeholder="Укажите номер дома">
+                                <div id="house_numberError" class="invalid-feedback"></div>
+                            </div>
+                            <!-- Имя -->
+                            <div class="col-md-6">
+                                <input type="text" name="name" id="name" class="form-control shadow-sm" placeholder="Ваше имя" required>
+                                <div id="nameError" class="invalid-feedback">Пожалуйста, укажите имя</div>
+                            </div>
+                            <!-- Телефон -->
+                            <div class="col-md-6">
+                                <input type="tel" name="phone" id="phone" class="form-control shadow-sm" placeholder="+7 (___) ___-__-__" required>
+                                <div id="phoneError" class="invalid-feedback">Пожалуйста, укажите номер телефона</div>
+                            </div>
+                            <!-- Чекбокс и кнопка -->
+                            <div class="col-12">
+                                <div class="row align-items-center g-4">
+                                    <div class="col-md-6 mb-3 mb-md-0">
+                                        <div class="form-check">
+                                            <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
+                                            <label for="privacy" class="form-check-label text-white">
+                                                Я соглашаюсь, что ознакомлен с 
+                                                <a href="#" class="link-light text-decoration-underline">политикой конфиденциальности</a>
+                                            </label>
+                                            <div id="privacyError" class="invalid-feedback">Необходимо согласие</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-light text-primary w-100 py-2 py-md-3 fs-6 text-uppercase shadow-sm" id="submitAddressBtn" disabled>
+                                            Оставить заявку
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Последние новости -->
     {% if latest_news %}
-    <div class="container py-4 animate-fade-in">
-        <div class="d-block d-sm-flex align-items-sm-center justify-content-between mb-4">
-            <div>
-                <h2 class="fs-2 fw-bold text-gray-800 mb-2 mb-sm-0" style="line-height: 38px;">Последние новости</h2>
+    <section class="news-widget">
+        <div class="container news-widget__container">
+            <div class="news-widget__header mb-4">
+                <h2 class="news-widget__title">Последние новости</h2>
                 <a href="{% url 'news:news_list' locality.slug %}" 
-                class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-flex align-items-center gap-1 d-sm-none"
-                style="font-size: 15px; line-height: 21px;"
+                class="news-widget__link"
                 aria-label="Перейти ко всем новостям">
                     Смотреть все
                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,123 +270,48 @@
                     </svg>
                 </a>
             </div>
-            <a href="{% url 'news:news_list' locality.slug %}" 
-            class="text-primary text-decoration-none transition-colors duration-300 fw-semibold d-none d-sm-flex align-items-center gap-1"
-            style="font-size: 15px; line-height: 21px;"
-            aria-label="Перейти ко всем новостям">
-                Смотреть все
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                </svg>
-            </a>
-        </div>
 
-        <!-- Слайдер Swiper -->
-        <div class="swiper news-slider position-relative">
-            <div class="swiper-wrapper">
-                {% for news in latest_news %}
-                <div class="swiper-slide">
-                    <a href="{% url 'news:news_detail' locality.slug news.slug %}" 
-                    class="card text-decoration-none d-flex flex-column h-100"
-                    aria-label="Читать новость: {{ news.title }}">
-                        {% if news.image %}
-                        <div class="position-relative overflow-hidden rounded-top-3">
-                            <img src="{{ news.image.url }}" 
-                                alt="{{ news.title }}" 
-                                loading="lazy" 
-                                class="card-img-top object-fit-cover w-100 h-36 h-md-40"
-                                style="aspect-ratio: 16/9;">
-                        </div>
-                        {% else %}
-                        <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
-                            style="aspect-ratio: 16/9;"
-                            role="img" 
-                            aria-label="Изображение отсутствует">
-                            Изображение отсутствует
-                        </div>
-                        {% endif %}
-                        <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
-                            <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
-                                {{ news.created_at|date:"d.m.Y" }}
-                            </p>
-                            <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
-                                {{ news.title }}
-                            </h3>
-                            {% if news.content %}
-                            <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
-                                {{ news.content|striptags|truncatechars:100 }}
-                            </p>
-                            {% endif %}
-                        </div>
-                    </a>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Пагинация -->
-            <div class="swiper-pagination mt-3 bottom-0"></div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Секция проверки адреса -->
-    <div class="container address-check-section py-5 my-5" style="background: linear-gradient(135deg, #0284c7 0%, #075985 100%);">
-        <img src="{% static 'img/girl-with-laptop.png' %}" alt="Девушка с ноутбуком" class="address-check-image d-none d-lg-block">
-        <div class="row align-items-center">
-            <!-- Левая часть (пустая, для изображения) -->
-            <div class="col-lg-6 mb-4 mb-lg-0"></div>
-            <!-- Правая часть с формой -->
-            <div class="col-lg-6 px-lg-4 py-lg-4">
-                <div class="text-center mb-4">
-                    <h2 class="fs-1 fw-bold text-white mb-2">Проверьте доступность услуг</h2>
-                    <p class="fs-5 text-white mb-0 subtitle">Узнайте, какие услуги можно подключить по вашему адресу</p>
-                </div>
-                <form id="checkAddressForm" method="post" novalidate>
-                    {% csrf_token %}
-                    <div class="row g-4">
-                        <!-- Улица -->
-                        <div class="col-md-6">
-                            <input type="text" name="street" id="street" class="form-control shadow-sm" placeholder="Укажите улицу">
-                            <div id="streetError" class="invalid-feedback"></div>
-                        </div>
-                        <!-- Номер дома -->
-                        <div class="col-md-6">
-                            <input type="text" name="house_number" id="house_number" class="form-control shadow-sm" placeholder="Укажите номер дома">
-                            <div id="house_numberError" class="invalid-feedback"></div>
-                        </div>
-                        <!-- Имя -->
-                        <div class="col-md-6">
-                            <input type="text" name="name" id="name" class="form-control shadow-sm" placeholder="Ваше имя" required>
-                            <div id="nameError" class="invalid-feedback"></div>
-                        </div>
-                        <!-- Телефон -->
-                        <div class="col-md-6">
-                            <input type="tel" name="phone" id="phone" class="form-control shadow-sm" placeholder="+7 (___) ___-__-__" required>
-                            <div id="phoneError" class="invalid-feedback"></div>
-                        </div>
-                        <!-- Чекбокс и кнопка -->
-                        <div class="col-12">
-                            <div class="row align-items-center g-4">
-                                <div class="col-md-6 mb-3 mb-md-0">
-                                    <div class="form-check">
-                                        <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
-                                        <label for="privacy" class="form-check-label text-white">
-                                            Я соглашаюсь, что ознакомлен с 
-                                            <a href="#" class="text-white text-decoration-underline">политикой конфиденциальности</a>
-                                        </label>
-                                        <div id="privacyError" class="invalid-feedback d-none"></div>
-                                    </div>
+            <!-- Swiper Slider -->
+            <div class="swiper news-slider">
+                <div class="swiper-wrapper">
+                    {% for news in latest_news %}
+                    <div class="swiper-slide">
+                        <a href="{% url 'news:news_detail' locality.slug news.slug %}" 
+                        class="news-card"
+                        aria-label="Читать новость: {{ news.title }}">
+                            <div class="news-card__image">
+                                {% if news.image %}
+                                <img src="{{ news.image.url }}" 
+                                    alt="{{ news.title }}" 
+                                    loading="lazy">
+                                {% else %}
+                                <div class="news-card__placeholder">
+                                    Изображение отсутствует
                                 </div>
-                                <div class="col-md-6">
-                                    <button type="submit" class="btn bg-white text-sky-600 hover-bg-gray-100 w-100 py-2 py-md-3 fs-6 text-uppercase shadow-sm" id="submitAddressBtn" disabled>Оставить заявку</button>
-                                </div>
+                                {% endif %}
                             </div>
-                        </div>
+                            <div class="news-card__content">
+                                <p class="news-card__date">
+                                    {{ news.created_at|date:"d.m.Y" }}
+                                </p>
+                                <h3 class="news-card__title">
+                                    {{ news.title }}
+                                </h3>
+                                {% if news.content %}
+                                <p class="news-card__excerpt">
+                                    {{ news.content|striptags|truncatechars:100 }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </a>
                     </div>
-                </form>
+                    {% endfor %}
+                </div>
+                <div class="swiper-pagination"></div>
             </div>
         </div>
-    </div>
+    </section>
+    {% endif %}
 </div>
 
 <!-- Инициализация Swiper -->
@@ -374,13 +369,6 @@
     
         async function loadTariffs(filterType) {
             try {
-                tariffsContainer.innerHTML = `
-                    <div class="col-12 py-12 text-center">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Загрузка...</span>
-                        </div>
-                    </div>
-                `;
                 const response = await fetch(`?type=${filterType}`, {
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
@@ -403,12 +391,9 @@
             tariffsContainer.innerHTML = tariffsHTML;
             filterButtons.forEach(btn => {
                 const isActive = btn.dataset.filter === activeFilter;
-                btn.classList.toggle('bg-sky-600', isActive);
-                btn.classList.toggle('text-white', isActive);
-                btn.classList.toggle('hover-bg-sky-700', isActive);
-                btn.classList.toggle('btn-outline-sky-700', !isActive);
-                btn.classList.toggle('text-sky-700', !isActive);
-                btn.classList.toggle('hover-bg-gray-100', !isActive);
+                btn.classList.toggle('btn-primary', isActive);
+                btn.classList.toggle('btn-outline-primary', !isActive);
+                btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
         }
     
@@ -723,7 +708,7 @@
                 history.pushState({}, '', `?type=${filterType}`);
                 loadTariffs(filterType);
             });
-        });
+        });    
     
         window.addEventListener('popstate', function() {
             const urlParams = new URLSearchParams(window.location.search);
