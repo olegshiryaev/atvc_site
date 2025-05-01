@@ -930,6 +930,9 @@ html {
 }
 
 /* News Card */
+.news-section {
+    margin-bottom: 2.5rem; /* Отступ снизу для отделения от футера */
+}
 .news-card {
     display: flex;
     flex-direction: column;
@@ -1053,4 +1056,26 @@ html {
     max-width: 50%;
     object-fit: contain;
     pointer-events: none;
+}
+
+.channel-card {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background-color: #fff;
+}
+.channel-card img {
+    width: 100px;
+    height: auto;
+    object-fit: contain;
+    margin-right: 16px;
+    border-radius: 8px;
+}
+.channel-card span {
+    font-size: 14px;
+    color: #374151;
+}
+.channel-search {
+    border-radius: 0.375rem;
+    padding: 0.5rem 1rem;
 }

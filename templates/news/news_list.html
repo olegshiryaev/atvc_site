@@ -1,140 +1,147 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="bg-white w-100">
-    <div class="container">
-        {% include 'partials/page_header.html' with title=title %}
+<section class="news-section">
+    <div class="bg-white w-100">
+        <div class="container">
+            {% include 'partials/page_header.html' with title=title %}
 
-        <!-- Сетка новостей -->
-        <div class="row g-4" id="news-container">
-            {% for news in news_list %}
-            <div class="col-12 col-sm-6 col-lg-4">
-                <a href="{{ news.get_absolute_url }}" 
-                class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
-                aria-label="Читать новость: {{ news.title }}">
-                    {% if news.image %}
-                    <div class="position-relative overflow-hidden rounded-top-3">
-                        <img src="{{ news.image.url }}" 
-                            alt="{{ news.title }}" 
-                            loading="lazy" 
-                            class="card-img-top object-fit-cover w-100 h-36 h-md-40"
-                            style="aspect-ratio: 16/9;">
-                    </div>
-                    {% else %}
-                    <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
-                        style="aspect-ratio: 16/9;"
-                        role="img" 
-                        aria-label="Изображение отсутствует">
-                        Изображение отсутствует
-                    </div>
-                    {% endif %}
-                    <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
-                        <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
-                            {{ news.created_at|date:"d.m.Y" }}
-                        </p>
-                        <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
-                            {{ news.title }}
-                        </h3>
-                        {% if news.content %}
-                        <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
-                            {{ news.content|striptags|truncatechars:100 }}
-                        </p>
-                        {% endif %}
-                    </div>
-                </a>
+            <!-- Сетка новостей -->
+            <div class="row g-4" id="news-container">
+                {% for news in news_list %}
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a href="{{ news.get_absolute_url }}" 
+                    class="news-card"
+                    aria-label="Читать новость: {{ news.title }}">
+                        <div class="news-card__image">
+                            {% if news.image %}
+                            <img src="{{ news.image.url }}" 
+                                alt="{{ news.title }}" 
+                                loading="lazy">
+                            {% else %}
+                            <div class="news-card__placeholder">
+                                Изображение отсутствует
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="news-card__content">
+                            <p class="news-card__date">
+                                {{ news.created_at|date:"d.m.Y" }}
+                            </p>
+                            <h3 class="news-card__title">
+                                {{ news.title }}
+                            </h3>
+                            {% if news.content %}
+                            <p class="news-card__excerpt">
+                                {{ news.content|striptags|truncatechars:140 }}
+                            </p>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
 
-        <!-- Кнопка "Загрузить ещё" -->
-        {% if has_more_news %}
-        <div class="text-center mt-5">
-            <button id="load-more-btn" 
-                    class="btn btn-primary fw-semibold px-4 py-2 transition-colors duration-300"
-                    data-next-page="2"
-                    data-city-slug="{{ locality.slug }}"
-                    aria-label="Загрузить больше новостей">
-                Загрузить больше
-            </button>
+            <!-- Кнопка "Загрузить ещё" -->
+            {% if has_more_news %}
+            <div class="text-center mt-5">
+                <button id="load-more-btn" 
+                        class="btn btn-primary fw-semibold px-4 py-2 transition-colors duration-300"
+                        data-next-page="2"
+                        data-city-slug="{{ locality.slug }}"
+                        aria-label="Загрузить больше новостей">
+                    Загрузить больше
+                </button>
+            </div>
+            {% endif %}
         </div>
-        {% endif %}
     </div>
-</div>
+</section>
 
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const loadMoreBtn = document.getElementById('load-more-btn');
-    const newsContainer = document.getElementById('news-container');
-
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', async () => {
-            const nextPage = loadMoreBtn.getAttribute('data-next-page');
-            const citySlug = loadMoreBtn.getAttribute('data-city-slug');
-            const url = `{% url 'news:load_more_news' locality.slug %}?page=${nextPage}`;
-
-            try {
-                const response = await fetch(url, {
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                });
-                const data = await response.json();
-
-                if (data.news && data.news.length > 0) {
-                    data.news.forEach(news => {
-                        const newsCard = document.createElement('div');
-                        newsCard.className = 'col-12 col-sm-6 col-lg-4';
-                        newsCard.innerHTML = `
-                            <a href="/${citySlug}/news/${news.slug}/" 
-                               class="card text-decoration-none d-flex flex-column h-100 animate-fade-in"
-                               aria-label="Читать новость: ${news.title}">
-                                ${news.image ? `
-                                <div class="position-relative overflow-hidden rounded-top-3">
-                                    <img src="${news.image}" 
-                                         alt="${news.title}" 
-                                         loading="lazy" 
-                                         class="card-img-top object-fit-cover w-100 h-36 h-md-40"
-                                         style="aspect-ratio: 16/9;">
-                                </div>
-                                ` : `
-                                <div class="bg-gray-100 rounded-top-3 d-flex align-items-center justify-content-center w-100 h-36 h-md-40 text-gray-500 fs-6 fw-medium" 
-                                     style="aspect-ratio: 16/9;"
-                                     role="img" 
-                                     aria-label="Изображение отсутствует">
-                                    Изображение отсутствует
-                                </div>
-                                `}
-                                <div class="card-body pt-3 pb-3 d-flex flex-column flex-grow-1">
-                                    <p class="text-muted fs-6 fw-medium mb-1 transition-colors duration-300 hover-text-primary">
-                                        ${news.date}
-                                    </p>
-                                    <h3 class="card-title fs-4 fw-semibold text-gray-900 mb-2 text-truncate-2 lh-base">
-                                        ${news.title}
-                                    </h3>
-                                    ${news.content ? `
-                                    <p class="text-muted fs-base fw-normal text-truncate-2 lh-base mt-auto">
-                                        ${news.content}
-                                    </p>
-                                    ` : ''}
-                                </div>
-                            </a>
-                        `;
-                        newsContainer.appendChild(newsCard);
+    document.addEventListener('DOMContentLoaded', () => {
+        const loadMoreBtn = document.getElementById('load-more-btn');
+        const newsContainer = document.getElementById('news-container');
+    
+        // Функция для удаления HTML-тегов
+        function stripTags(html) {
+            const div = document.createElement('div');
+            div.innerHTML = html;
+            return div.textContent || div.innerText || '';
+        }
+    
+        // Функция для обрезки текста
+        function truncateText(text, maxLength) {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '...';
+        }
+    
+        if (loadMoreBtn) {
+            loadMoreBtn.addEventListener('click', async () => {
+                const nextPage = loadMoreBtn.getAttribute('data-next-page');
+                const citySlug = loadMoreBtn.getAttribute('data-city-slug');
+                const url = `{% url 'news:load_more_news' locality.slug %}?page=${nextPage}`;
+    
+                try {
+                    const response = await fetch(url, {
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
                     });
-
-                    // Обновляем номер следующей страницы
-                    loadMoreBtn.setAttribute('data-next-page', parseInt(nextPage) + 1);
-
-                    // Проверяем, есть ли ещё новости
-                    if (!data.has_more_news) {
-                        loadMoreBtn.remove();
+                    const data = await response.json();
+    
+                    if (data.news && data.news.length > 0) {
+                        data.news.forEach(news => {
+                            const newsCard = document.createElement('div');
+                            newsCard.className = 'col-12 col-sm-6 col-lg-4';
+                            newsCard.innerHTML = `
+                                <a href="/${citySlug}/news/${news.slug}/" 
+                                   class="news-card"
+                                   aria-label="Читать новость: ${news.title}">
+                                    <div class="news-card__image">
+                                        ${news.image ? `
+                                        <img src="${news.image}" 
+                                             alt="${news.title}" 
+                                             loading="lazy">
+                                        ` : `
+                                        <div class="news-card__placeholder" 
+                                            role="img" 
+                                            aria-label="Изображение отсутствует">
+                                            Изображение отсутствует
+                                        </div>
+                                        `}
+                                    </div>
+                                    <div class="news-card__content">
+                                        <p class="news-card__date">
+                                            ${news.date}
+                                        </p>
+                                        <h3 class="news-card__title">
+                                            ${news.title}
+                                        </h3>
+                                        ${news.content ? `
+                                        <p class="news-card__excerpt">
+                                            ${truncateText(stripTags(news.content), 140)}
+                                        </p>
+                                        ` : ''}
+                                    </div>
+                                </a>
+                            `;
+                            newsContainer.appendChild(newsCard);
+                        });
+    
+                        // Обновляем номер следующей страницы
+                        loadMoreBtn.setAttribute('data-next-page', parseInt(nextPage) + 1);
+    
+                        // Проверяем, есть ли ещё новости
+                        if (!data.has_more_news) {
+                            loadMoreBtn.remove();
+                        }
                     }
+                } catch (error) {
+                    console.error('Ошибка при загрузке новостей:', error);
                 }
-            } catch (error) {
-                console.error('Ошибка при загрузке новостей:', error);
-            }
-        });
-    }
-});
+            });
+        }
+    });
 </script>
 {% endblock %}
