@@ -61,7 +61,7 @@
             </div>
             <div class="d-flex scrollable-buttons flex-nowrap gap-3 justify-content-start">
                 <!-- Кнопка Интернет -->
-                <button class="filter-btn btn {% if active_filter == 'internet' %}btn-primary{% else %}btn-outline-primary{% endif %} w-auto min-w-120px"
+                <button class="filter-btn btn {% if active_filter == 'internet' %}btn-primary{% else %}btn-neutral{% endif %} w-auto min-w-120px"
                         data-filter="internet" aria-pressed="{% if active_filter == 'internet' %}true{% else %}false{% endif %}">
                     <span class="d-flex align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -71,7 +71,7 @@
                     </span>
                 </button>
                 <!-- Кнопка Телевидение -->
-                <button class="filter-btn btn {% if active_filter == 'televidenie' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                <button class="filter-btn btn {% if active_filter == 'televidenie' %}btn-primary{% else %}btn-neutral{% endif %}"
                         data-filter="televidenie" aria-pressed="{% if active_filter == 'televidenie' %}true{% else %}false{% endif %}">
                     <span class="d-flex align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -81,7 +81,7 @@
                     </span>
                 </button>
                 <!-- Кнопка Комбо -->
-                <button class="filter-btn btn {% if active_filter == 'kombo' %}btn-primary{% else %}btn-outline-primary{% endif %}"
+                <button class="filter-btn btn {% if active_filter == 'kombo' %}btn-primary{% else %}btn-neutral{% endif %}"
                         data-filter="kombo" aria-pressed="{% if active_filter == 'kombo' %}true{% else %}false{% endif %}">
                     <span class="d-flex align-items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" class="icon me-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -247,9 +247,9 @@
 
     <!-- Последние новости -->
     {% if latest_news %}
-    <section class="news-widget">
-        <div class="container news-widget__container">
-            <div class="news-widget__header mb-4">
+    <section class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="news-widget__header mb-5">
                 <h2 class="news-widget__title">Последние новости</h2>
                 <a href="{% url 'news:news_list' locality.slug %}" 
                 class="news-widget__link"
@@ -281,9 +281,12 @@
                                 {% endif %}
                             </div>
                             <div class="news-card__content">
-                                <p class="news-card__date">
-                                    {{ news.created_at|date:"d.m.Y" }}
-                                </p>
+                                <div class="d-flex justify-content-between">
+                                    <small class="news-card__date">
+                                        {{ news.created_at|date:"d.m.Y" }}
+                                    </small>
+                                    <span class="badge bg-primary">Акция</span>
+                                </div>
                                 <h3 class="news-card__title">
                                     {{ news.title }}
                                 </h3>
@@ -382,7 +385,7 @@
             filterButtons.forEach(btn => {
                 const isActive = btn.dataset.filter === activeFilter;
                 btn.classList.toggle('btn-primary', isActive);
-                btn.classList.toggle('btn-outline-primary', !isActive);
+                btn.classList.toggle('btn-neutral', !isActive);
                 btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
             });
         }
