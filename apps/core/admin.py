@@ -141,14 +141,38 @@ class TariffAdmin(admin.ModelAdmin):
 
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
-    list_display = ("name", "get_service_types", "price")
-    list_filter = ("service_types",)
-    search_fields = ("name",)
+    list_display = ("image_thumb", "name", "device_type", "price", "get_service_types")
+    list_filter = ("device_type", "service_types")
+    search_fields = ("name", "description")
+    autocomplete_fields = ("service_types",)
+    filter_horizontal = ("service_types",)
+    readonly_fields = ("image_preview",)
+    fieldsets = (
+        (None, {"fields": ("name", "device_type", "price", "description")}),
+        ("Изображение", {"fields": ("image", "image_preview")}),
+        ("Услуги", {"fields": ("service_types",)}),
+    )
 
     def get_service_types(self, obj):
         return ", ".join([s.name for s in obj.service_types.all()])
 
     get_service_types.short_description = "Типы услуги"
+
+    def image_preview(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" style="max-height: 200px;" />', obj.image.url
+            )
+        return "Нет изображения"
+
+    image_preview.short_description = "Превью изображения"
+
+    def image_thumb(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="height: 50px;" />', obj.image.url)
+        return "—"
+
+    image_thumb.short_description = "Фото"
 
 
 @admin.register(Application)

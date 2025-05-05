@@ -1058,24 +1058,118 @@ html {
     pointer-events: none;
 }
 
+/* Фиксированные размеры модального окна */
+.modal-fixed-size {
+    max-width: 800px; /* Можно настроить под ваши нужды */
+    max-height: 80vh; /* 80% высоты видимой области */
+}
+
+/* Убедимся, что modal-content занимает всю высоту */
+.modal-fixed-size .modal-content {
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Закрепляем шапку */
+.modal-fixed-size .modal-header {
+    flex-shrink: 0; /* Не сжимается */
+}
+
+/* Закрепляем поле поиска */
+.modal-fixed-size .modal-search {
+    flex-shrink: 0; /* Не сжимается */
+    padding: 0.75rem 1rem; /* Bootstrap's p-3 px-4 */
+    background-color: #fff; /* Для визуальной целостности */
+    border-bottom: 1px solid #dee2e6; /* Bootstrap's border-color */
+}
+
+/* Прокручиваемая область для каналов */
+.modal-fixed-size .channel-scrollable {
+    flex-grow: 1; /* Занимает оставшееся пространство */
+    overflow-y: auto; /* Вертикальная прокрутка */
+    padding: 1rem; /* Bootstrap's p-4 */
+}
+
+/* Стили для карточек каналов (из вашего исходного CSS) */
 .channel-card {
     display: flex;
     align-items: center;
-    padding: 8px;
+    gap: 12px;
+    padding: 12px;
     background-color: #fff;
+    border-radius: 0.375rem;
 }
+
 .channel-card img {
-    width: 100px;
+    width: 88px;
     height: auto;
     object-fit: contain;
     margin-right: 16px;
     border-radius: 8px;
 }
+
 .channel-card span {
     font-size: 14px;
     color: #374151;
+    line-height: 1.5; /* Для читаемости */
 }
+
+/* Стили для заглушки логотипа */
+.channel-card div[style*="background-color"] {
+    width: 100px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e5e7eb; /* Bootstrap's gray-200 */
+    margin-right: 16px;
+    border-radius: 8px;
+}
+
+/* Стили для поля поиска */
 .channel-search {
     border-radius: 0.375rem;
     padding: 0.5rem 1rem;
+}
+
+.channel-search:focus {
+    border-color: #0d6efd; /* Bootstrap's primary */
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Bootstrap's focus */
+    outline: none;
+}
+
+/* Hover-эффект для карточек */
+.channel-card:hover {
+    background-color: #f8f9fa; /* Bootstrap's bg-light */
+    transition: background-color 0.2s ease;
+}
+
+/* Адаптивность для маленьких экранов */
+@media (max-width: 576px) {
+    .modal-fixed-size {
+        max-width: 95vw; /* Адаптация ширины */
+    }
+    .channel-card img,
+    .channel-card div[style*="background-color"] {
+        width: 60px;
+        margin-right: 8px;
+    }
+    .channel-card span {
+        font-size: 12px;
+    }
+    .channel-card {
+        padding: 6px;
+    }
+}
+
+.channel-category-tags .btn {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.channel-category-tags .btn.active {
+    background-color: var(--bs-primary);
+    color: white;
 }

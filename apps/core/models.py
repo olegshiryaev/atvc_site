@@ -179,7 +179,6 @@ class Tariff(models.Model):
     description = RichTextField("Описание", blank=True)
     localities = models.ManyToManyField(
         Locality,
-        null=True,
         blank=True,
         verbose_name="Населённые пункты",
         related_name="tariffs",
@@ -208,12 +207,24 @@ class Tariff(models.Model):
 
 
 class Device(models.Model):
+    DEVICE_TYPE_CHOICES = [
+        ("router", "Роутер"),
+        ("camera", "Видеокамера"),
+        ("tv_box", "ТВ-приставка"),
+        ("other", "Другое"),
+    ]
+
+    device_type = models.CharField(
+        verbose_name="Тип устройства", max_length=20, choices=DEVICE_TYPE_CHOICES
+    )
     name = models.CharField(verbose_name="Название", max_length=255)
-    description = models.TextField(verbose_name="Описание")
-    price = models.DecimalField(verbose_name="Цена", max_digits=6, decimal_places=2)
-    image = models.ImageField(verbose_name="Изображение", upload_to="devices/")
+    description = models.TextField(verbose_name="Описание", blank=True)
+    price = models.IntegerField(verbose_name="Цена")
+    image = models.ImageField(
+        verbose_name="Изображение", upload_to="devices/", blank=True, null=True
+    )
     service_types = models.ManyToManyField(
-        "Service", verbose_name="Типы услуги", related_name="devices"
+        "Service", verbose_name="Типы услуги", related_name="devices", blank=True
     )
 
     class Meta:
