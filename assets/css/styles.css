@@ -506,121 +506,132 @@ html {
 }
 
 /* Карусель */
-.carousel-inner {
-    min-height: var(
-        --height-sm
-    ); /* Минимальная высота для всех слайдов (мобильные) */
+.carousel.slide {
+    position: relative;
+    overflow: hidden;
 }
 
+/* Фон слайда */
 .carousel-slide-background {
+    position: relative;
+    height: 500px; /* Увеличенная высота карусели */
     background-size: cover;
     background-position: center;
-    min-height: var(--height-sm); /* Минимальная высота слайда (мобильные) */
-    background-color: var(
-        --color-light-grey
-    ); /* Запасной фон, если background_image отсутствует */
-    position: relative; /* Для корректного наложения текста */
-    display: flex; /* Для центрирования контента */
-    align-items: center; /* Вертикальное центрирование */
+    background-repeat: no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff; /* Цвет текста для контраста */
+}
+
+/* Оверлей для улучшения читаемости текста */
+.carousel-slide-background::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Полупрозрачный оверлей */
+    z-index: 1;
+}
+
+/* Контейнер контента */
+.carousel-slide-background .container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+}
+
+/* Текстовая часть */
+.badge-carousel {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
 }
 
 .carousel-text {
-    color: var(--color-black); /* Чёрный текст по умолчанию для светлого фона */
-    position: relative; /* Чтобы текст был поверх фона */
+    padding: 1.5rem;
 }
 
-/* Если есть фоновое изображение, используем белый текст для контраста */
-.carousel-slide-background[style*="background-image"] .carousel-text {
-    color: var(--color-white);
+.carousel-text h2 {
+    font-size: 3.5rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 1rem;
 }
 
-.carousel-title {
-    font-size: var(--font-size-xxl); /* 48px */
-    font-weight: 900; /* Эквивалент fw-black */
-    line-height: 1.2; /* Эквивалент lh-custom */
-    margin-bottom: var(--spacing-md);
+.carousel-text p.lead {
+    font-size: 1.25rem;
+    font-weight: 400;
+    margin-bottom: 1.5rem;
 }
 
-.carousel-description {
-    font-size: var(--font-size-md);
-    margin-bottom: var(--spacing-lg);
-}
-
+/* Кнопка */
 .carousel-button {
-    background-color: var(--color-blue); /* #229fff */
-    color: var(--color-white);
-    font-size: var(--font-size-base); /* Bootstrap fs-6 */
-    font-weight: 500; /* Эквивалент fw-medium */
-    padding: var(--spacing-sm) var(--spacing-lg);
-    transition: background-color var(--transition-fast),
-        border-color var(--transition-fast);
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: #007bff; /* Основной цвет кнопки */
+    border: 2px solid transparent;
+    border-radius: 0.25rem;
+    transition: all 0.3s ease;
 }
 
 .carousel-button:hover {
-    background-color: var(--color-light-blue); /* #28a8e9 */
-    border-color: var(--color-light-blue);
+    background-color: #0056b3; /* Цвет при наведении */
+    border-color: #fff;
+    text-decoration: none;
 }
 
 .carousel-button:focus {
-    outline: 2px solid var(--color-blue);
+    outline: 3px solid rgba(255, 255, 255, 0.5);
     outline-offset: 2px;
 }
 
-.carousel-image-container {
-    display: none;
-    justify-content: flex-end;
-    align-items: center;
-    height: 100%; /* Растягиваем контейнер на всю высоту слайда */
+/* Индикаторы пагинации */
+.carousel-indicators {
+    position: absolute;
+    bottom: 1rem;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
-.carousel-image-container img {
-    max-height: 100%; /* Ограничиваем высоту изображения */
-    object-fit: contain; /* Сохраняем пропорции изображения */
+.carousel-indicators button {
+    width: 12px;
+    height: 12px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    margin: 0 5px;
+    border: none;
+    background-color: rgba(255,255,255,0.5);
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+.carousel-indicators button.active {
+    background-color: white;
+    transform: scale(1.2);
 }
 
-.carousel-image-placeholder {
-    display: none;
-    min-height: 200px; /* Минимальная высота для сохранения структуры */
-}
-
-@media (min-width: 768px) {
-    .carousel-inner {
-        min-height: 400px; /* Большая высота для планшетов и десктопов */
-    }
-
+/* Адаптивность */
+@media (max-width: 768px) {
     .carousel-slide-background {
-        min-height: 400px; /* Синхронизировано с .carousel-inner */
+        height: 400px;
     }
-
-    .carousel-image-container {
-        display: flex;
-    }
-
-    .carousel-image-placeholder {
-        display: block;
+    .carousel-text {
+        left: 5%;
+        right: 5%;
+        max-width: 90%;
     }
 }
 
-@media (min-width: 992px) {
-    .carousel-inner {
-        min-height: 500px; /* Ещё большая высота для больших экранов */
-    }
-
-    .carousel-slide-background {
-        min-height: 500px;
-    }
-}
-
-/* Улучшение пагинации */
-.carousel-indicators [data-bs-target] {
-    background-color: var(--color-grey); /* #e7e7e7 */
-    opacity: 0.5;
-}
-
-.carousel-indicators .active {
-    background-color: var(--color-blue); /* #229fff */
-    opacity: 1;
-}
 
 /* Блок тарифов */
 .tariffs {

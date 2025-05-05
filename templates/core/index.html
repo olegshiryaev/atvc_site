@@ -18,9 +18,10 @@
                     <div class="container py-3 py-md-5">
                         <div class="row align-items-center">
                             <!-- Текстовая часть -->
-                            <div class="col-12 col-md-8 text-center text-md-start carousel-text">
-                                <h2 class="carousel-title">{{ banner.title }}</h2>
-                                <p class="carousel-description">{{ banner.description }}</p>
+                            <div class="col-12 col-md-8 carousel-text">
+                                <span class="badge-carousel bg-primary mb-2">Акция</span>
+                                <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
+                                <p class="lead mb-4">{{ banner.description }}</p>
                                 {% if banner.link %}
                                 <a href="{{ banner.link }}"
                                    class="btn carousel-button">
@@ -28,17 +29,6 @@
                                 </a>
                                 {% endif %}
                             </div>
-                            <!-- Изображение -->
-                            {% if banner.image %}
-                            <div class="col-12 col-md-4 carousel-image-container">
-                                <img src="{{ banner.image.url }}"
-                                     alt="{{ banner.title }}"
-                                     loading="lazy"
-                                     class="img-fluid carousel-image">
-                            </div>
-                            {% else %}
-                            <div class="col-12 col-md-4 carousel-image-placeholder"></div>
-                            {% endif %}
                         </div>
                     </div>
                 </div>

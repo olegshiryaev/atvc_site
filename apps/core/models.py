@@ -375,9 +375,6 @@ class Company(models.Model):
 class Banner(models.Model):
     title = models.CharField("Заголовок", max_length=255)
     description = models.TextField("Описание", blank=True)
-    image = models.ImageField(
-        "Изображение", upload_to="banners/", blank=True, null=True
-    )
     background_image = models.ImageField(
         "Фоновое изображение", upload_to="banners/backgrounds/", blank=True, null=True
     )
@@ -388,7 +385,6 @@ class Banner(models.Model):
         Locality, verbose_name="Населённые пункты", related_name="banners"
     )
     order = models.PositiveIntegerField("Порядок показа", default=0)
-
     created_at = models.DateTimeField("Создан", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлён", auto_now=True)
 
