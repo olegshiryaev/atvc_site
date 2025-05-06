@@ -1,4 +1,5 @@
 :root {
+    --bs-body-color: #212529;
     --color-black: #000000;
     --color-black-rgb: 0, 0, 0;
     --color-rich-black: #333333;
@@ -121,7 +122,7 @@
 body,
 html {
     font-family: "Roboto", sans-serif;
-    color: #272727;
+    color: var(--bs-body-color);
     font-style: normal;
     font-weight: 400;
     font-size: var(--font-size-base);
@@ -722,8 +723,8 @@ html {
     -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     font-size: 1.375rem;
-    font-weight: 500;
-    line-height: 24px;
+    font-weight: 600;
+    line-height: 27px;
     letter-spacing: 0;
     margin-bottom: var(--spacing-lg);
 }
@@ -773,7 +774,7 @@ html {
 }
 
 .channel-label {
-    font-size: 1.25rem; /* Bootstrap fs-4 */
+    font-size: 1rem; /* Bootstrap fs-4 */
     font-weight: 400; /* fw-normal */
     margin-top: 0.5rem;
 }
