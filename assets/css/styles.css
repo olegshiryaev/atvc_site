@@ -526,7 +526,7 @@ html {
 
 /* Оверлей для улучшения читаемости текста */
 .carousel-slide-background::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
@@ -614,7 +614,6 @@ html {
     }
 }
 
-
 /* Блок тарифов */
 .tariffs {
     padding: var(--spacing-xxl) 0; /* Аналог py-5 */
@@ -646,7 +645,9 @@ html {
     font-weight: 500; /* fw-medium */
     padding: var(--spacing-sm) var(--spacing-md);
     white-space: nowrap; /* Предотвращаем перенос текста */
-    background-color: var(--color-button-grey); /* Белый фон для неактивных кнопок */
+    background-color: var(
+        --color-button-grey
+    ); /* Белый фон для неактивных кнопок */
     border-radius: var(--radius-sm); /* Bootstrap border-radius */
     transition: all 0.3s ease;
 }
@@ -1174,4 +1175,56 @@ html {
 
 .hidden {
     display: none !important;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 50px;
+}
+
+.timeline::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #3b82f6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -38px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #3b82f6;
+    border: 4px solid white;
+}
+
+.hero {
+    position: relative;
+    background: url("path/to/hero-bg.jpg") center/cover no-repeat;
+    color: #fff;
+}
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+}
+.hero .container {
+    position: relative;
+    z-index: 1;
+}
+.counter {
+    font-size: 2.5rem;
+    font-weight: bold;
 }

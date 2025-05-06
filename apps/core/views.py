@@ -188,3 +188,15 @@ class TariffDetailView(DetailView):
             Locality, slug=self.kwargs["locality_slug"], is_active=True
         )
         return context
+
+
+def about_company(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    return render(
+        request,
+        "core/about/company.html",
+        {
+            "year": 2025,
+            "locality": locality,
+        },
+    )
