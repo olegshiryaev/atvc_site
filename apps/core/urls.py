@@ -2,6 +2,7 @@ from django.urls import path
 from .views import (
     TariffDetailView,
     about_company,
+    b2b_internet_view,
     company_detail,
     index,
     internet_tariffs,
@@ -25,4 +26,5 @@ urlpatterns = [
         name="submit_application",
     ),
     path("feedback/", FeedbackCreateView.as_view(), name="feedback"),
+    path("b2b/internet/", b2b_internet_view, name="b2b_internet"),
 ]

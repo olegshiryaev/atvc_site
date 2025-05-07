@@ -69,9 +69,21 @@ class FeedbackCreateForm(forms.ModelForm):
 class DocumentForm(forms.ModelForm):
     class Meta:
         model = Document
-        fields = '__all__'
+        fields = "__all__"
 
     def clean(self):
         super().clean()
         # Вызываем метод clean модели для валидации файла
         self.instance.clean()
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        label="Имя", widget=forms.TextInput(attrs={"class": "form-control"})
+    )
+    email = forms.EmailField(
+        label="Email", widget=forms.EmailInput(attrs={"class": "form-control"})
+    )
+    message = forms.CharField(
+        label="Сообщение", widget=forms.Textarea(attrs={"class": "form-control"})
+    )

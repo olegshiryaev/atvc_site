@@ -6,12 +6,13 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 
-from .forms import ApplicationForm, FeedbackCreateForm
+from .forms import ApplicationForm, ContactForm, FeedbackCreateForm
 from .models import Banner, Company, Device, Office, Service, Tariff, Feedback
 from ..cities.models import Locality
 from ..news.models import News
 from ..services.utils import get_client_ip
 from ..services.email import send_contact_email_message
+from django.core.mail import send_mail
 
 
 def index(request, locality_slug):
@@ -199,4 +200,33 @@ def about_company(request, locality_slug):
             "year": 2025,
             "locality": locality,
         },
+    )
+
+
+def b2b_internet_view(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    success = False
+    if request.method == "POST":
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data["name"]
+            email = form.cleaned_data["email"]
+            message = form.cleaned_data["message"]
+            # Отправка письма
+            send_mail(
+                subject=f"Заявка с сайта от {name}",
+                message=f"Имя: {name}\nEmail: {email}\nСообщение:\n{message}",
+                from_email="site@atvc.ru",
+                recipient_list=["дежурный@atvc.ru"],
+                fail_silently=False,
+            )
+            success = True
+            form = ContactForm()
+    else:
+        form = ContactForm()
+
+    return render(
+        request,
+        "core/b2b_internet.html",
+        {"form": form, "success": success, "locality": locality},
     )
