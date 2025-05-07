@@ -7,48 +7,52 @@
 <div class="min-h-screen font-sans">
     <!-- Карусель -->
     {% if banners %}
-    <div id="bannerCarousel" class="carousel slide mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" role="region" aria-label="Рекламная карусель">
-        <div class="carousel-inner">
-            {% for banner in banners %}
-            <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                <div class="carousel-slide-background"
-                     {% if banner.background_image %}
-                     style="background-image: url('{{ banner.background_image.url }}');"
-                     {% endif %}>
-                    <div class="container py-3 py-md-5">
-                        <div class="row align-items-center">
-                            <!-- Текстовая часть -->
-                            <div class="col-12 col-md-8 carousel-text">
-                                <span class="badge-carousel bg-primary mb-2">Акция</span>
-                                <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
-                                <p class="lead mb-4">{{ banner.description }}</p>
-                                {% if banner.link %}
-                                <a href="{{ banner.link }}"
-                                   class="btn carousel-button">
-                                    {{ banner.button_text }}
-                                </a>
-                                {% endif %}
+    <section class="hero-section">
+        <div class="container">
+            <div id="bannerCarousel" class="carousel slide carousel-fade mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" role="region" aria-label="Рекламная карусель">
+                <div class="carousel-inner">
+                    {% for banner in banners %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <div class="carousel-slide-background"
+                            {% if banner.background_image %}
+                            style="background-image: url('{{ banner.background_image.url }}');"
+                            {% endif %}>
+                            <div class="container py-3 py-md-5">
+                                <div class="row align-items-center">
+                                    <!-- Текстовая часть -->
+                                    <div class="col-12 col-md-8 carousel-text">
+                                        <span class="badge-carousel bg-primary mb-2">Акция</span>
+                                        <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
+                                        <p class="lead mb-4">{{ banner.description }}</p>
+                                        {% if banner.link %}
+                                        <a href="{{ banner.link }}"
+                                        class="btn carousel-button">
+                                            {{ banner.button_text }}
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
+                    {% endfor %}
                 </div>
+                <!-- Пагинация -->
+                {% if banners|length > 1 %}
+                <div class="carousel-indicators">
+                    {% for banner in banners %}
+                    <button type="button"
+                            data-bs-target="#bannerCarousel"
+                            data-bs-slide-to="{{ forloop.counter0 }}"
+                            {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                            aria-label="Слайд {{ forloop.counter1 }}"
+                            aria-controls="bannerCarousel"></button>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
-            {% endfor %}
         </div>
-        <!-- Пагинация -->
-        {% if banners|length > 1 %}
-        <div class="carousel-indicators">
-            {% for banner in banners %}
-            <button type="button"
-                    data-bs-target="#bannerCarousel"
-                    data-bs-slide-to="{{ forloop.counter0 }}"
-                    {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                    aria-label="Слайд {{ forloop.counter1 }}"
-                    aria-controls="bannerCarousel"></button>
-            {% endfor %}
-        </div>
-        {% endif %}
-    </div>
+    </section>
     {% endif %}
 
 

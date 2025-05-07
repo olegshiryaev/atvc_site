@@ -510,12 +510,20 @@ html {
 .carousel.slide {
     position: relative;
     overflow: hidden;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-card);
+}
+
+/* Внутренняя часть карусели */
+.carousel-inner {
+    border-radius: 1rem; /* Скругление углов внутренней части */
+    overflow: hidden; /* Убедитесь, что содержимое не выходит за скругленные углы */
 }
 
 /* Фон слайда */
 .carousel-slide-background {
     position: relative;
-    height: 500px; /* Увеличенная высота карусели */
+    height: 420px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -523,6 +531,7 @@ html {
     align-items: center;
     justify-content: center;
     color: #fff; /* Цвет текста для контраста */
+    border-radius: 1rem; /* Скругление углов фона слайда */
 }
 
 /* Оверлей для улучшения читаемости текста */
@@ -550,10 +559,12 @@ html {
     font-size: 0.9rem;
     font-weight: 500;
     padding: 0.35rem 0.75rem;
+    display: inline-block;
+    border-radius: 0.25rem;
 }
 
 .carousel-text {
-    padding: 1.5rem;
+    padding: 1.5rem 3rem;
 }
 
 .carousel-text h2 {
@@ -577,14 +588,13 @@ html {
     font-weight: 500;
     text-transform: uppercase;
     color: #fff;
-    background-color: #007bff; /* Основной цвет кнопки */
-    border: 2px solid transparent;
-    border-radius: 0.25rem;
+    background-color: var(--color-ocean-blue);
+    border: none;
     transition: all 0.3s ease;
 }
 
 .carousel-button:hover {
-    background-color: #0056b3; /* Цвет при наведении */
+    background-color: var(--color-ocean-blue);
     border-color: #fff;
     text-decoration: none;
 }
@@ -594,12 +604,47 @@ html {
     outline-offset: 2px;
 }
 
+/* Пагинация карусели */
+.carousel-indicators {
+    position: absolute;
+    bottom: 1rem; /* Отступ от нижнего края */
+    left: 0; /* Растягиваем на всю ширину */
+    right: 0; /* Растягиваем на всю ширину */
+    margin: 0 auto; /* Центрируем контейнер */
+    display: flex;
+    justify-content: center !important; /* Центрируем кнопки */
+    z-index: 3; /* Поверх оверлея */
+    width: auto !important; /* Ограничиваем ширину */
+}
+
+/* Кнопки индикаторов */
+.carousel-indicators button {
+    width: 12px !important; /* Размер кружочка */
+    height: 12px !important; /* Размер кружочка */
+    border-radius: 50% !important; /* Круглая форма */
+    background-color: rgba(255, 255, 255, 0.5) !important; /* Полупрозрачный фон */
+    border: none !important; /* Убираем границу */
+    margin: 0 6px !important; /* Отступы между кружочками */
+    padding: 0 !important; /* Убираем внутренние отступы */
+    transition: background-color 0.3s ease;
+}
+
+/* Активный индикатор */
+.carousel-indicators .active {
+    background-color: #fff !important; /* Полностью белый для активного */
+    opacity: 1 !important;
+}
+
 /* Адаптивность */
 @media (max-width: 768px) {
+    .carousel.slide {
+        box-shadow: var(--shadow-card);
+    }
     .carousel-slide-background {
-        height: 400px;
+        height: 500px;
     }
     .carousel-text {
+        padding: 1rem 2rem;
         left: 5%;
         right: 5%;
         max-width: 90%;
@@ -612,6 +657,14 @@ html {
     .carousel-text p.lead {
         font-size: 1rem;
         margin-bottom: 1rem;
+    }
+    .carousel-indicators {
+        bottom: 0.5rem;
+    }
+    .carousel-indicators button {
+        width: 10px !important;
+        height: 10px !important;
+        margin: 0 4px !important;
     }
 }
 
@@ -1036,8 +1089,6 @@ html {
     position: relative;
     overflow: hidden;
     border-radius: 1rem;
-    margin-left: 1.5rem;
-    margin-right: 1.5rem;
 }
 
 .address-check-section .container {
