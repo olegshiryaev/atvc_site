@@ -381,6 +381,7 @@ class Company(models.Model):
 
 class Banner(models.Model):
     BANNER_TYPES = (
+        ('', 'Не выбрано'),
         ('promo', 'Акция'),
         ('new', 'Новинка'),
         ('service', 'Услуга'),
@@ -397,7 +398,9 @@ class Banner(models.Model):
         "Тип баннера",
         max_length=50,
         choices=BANNER_TYPES,
-        default='promo'
+        default='',
+        blank=True,
+        null=True
     )
     is_active = models.BooleanField("Активен", default=True)
     localities = models.ManyToManyField(
@@ -413,7 +416,9 @@ class Banner(models.Model):
         verbose_name_plural = "Баннеры"
 
     def get_banner_type_display(self):
-        return dict(self.BANNER_TYPES)[self.banner_type]
+        if self.banner_type:
+            return dict(self.BANNER_TYPES).get(self.banner_type, '')
+        return ''
 
     def get_banner_type_color(self):
         colors = {

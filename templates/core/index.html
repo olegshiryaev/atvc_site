@@ -21,9 +21,11 @@
                                 <div class="row align-items-center">
                                     <!-- Текстовая часть -->
                                     <div class="col-12 col-md-8 carousel-text">
-                                        <span class="badge-carousel bg-{{ banner.get_banner_type_color }} mb-2">
+                                        {% if banner.get_banner_type_display %}
+                                        <span class="badge bg-{{ banner.get_banner_type_color }}">
                                             {{ banner.get_banner_type_display }}
                                         </span>
+                                        {% endif %}
                                         <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
                                         <p class="lead mb-4">{{ banner.description }}</p>
                                         {% if banner.link %}
