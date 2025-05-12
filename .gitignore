@@ -1,4 +1,6 @@
+####################
 # Python
+####################
 __pycache__/
 *.py[cod]
 *.pyo
@@ -8,13 +10,17 @@ __pycache__/
 *.egg
 *.log
 
-# Virtual env
+####################
+# Virtual Environment
+####################
 venv/
 ENV/
 env.bak/
 env/
 
+####################
 # Django
+####################
 db.sqlite3
 *.sqlite3
 static/
@@ -23,42 +29,50 @@ media/
 *.pyc
 *.mo
 
-# PyCharm/VS Code
+# Миграции (игнорируем все .py в папках migrations, кроме __init__.py)
+**/migrations/*.py
+!**/migrations/__init__.py
+
+####################
+# IDE / Редакторы
+####################
 .idea/
 .vscode/
-
-# Mac OS
 .DS_Store
 
-# dotenv
+####################
+# ENV
+####################
 .env
 .env.*
 !docker/env/.env.example
 
+####################
 # Celery
+####################
 celerybeat-schedule
 celerybeat-schedule-shm
 celerybeat-schedule-wal
 
-# Coverage
+####################
+# Тестирование и покрытие
+####################
 htmlcov/
 .coverage
 .tox/
-
-# pytest
 .cache/
 pytest_cache/
 
-# migrations compiled
-**/migrations/*.pyc
-**/migrations/__pycache__/
-
-# Logs
+####################
+# Логи
+####################
 *.log
 docker/logs/*
 !docker/logs/
 
+####################
 # Docker
+####################
 *.pid
 *.sock
 
@@ -70,8 +84,9 @@ docker/redis/data/
 docker/redis/*
 !docker/redis/
 
-
+####################
 # Certbot
+####################
 docker/certbot/*
 !docker/certbot/conf/
 !docker/certbot/www/
