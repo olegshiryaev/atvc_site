@@ -392,8 +392,8 @@ class Banner(models.Model):
     background_image = models.ImageField(
         "Фоновое изображение", upload_to="banners/backgrounds/", blank=True, null=True
     )
-    button_text = models.CharField("Текст кнопки", max_length=100, default="Подробнее")
-    link = models.URLField("Ссылка", blank=True)
+    button_text = models.CharField("Текст кнопки", blank=True, null=True, max_length=100)
+    link = models.URLField("Ссылка", blank=True, null=True)
     banner_type = models.CharField(
         "Тип баннера",
         max_length=50,
