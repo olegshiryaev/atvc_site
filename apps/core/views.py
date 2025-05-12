@@ -17,19 +17,28 @@ from django.core.mail import send_mail
 
 def index(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    active_filter = request.GET.get("type", "internet")
 
+    # Все тарифы в этом населённом пункте
     tariffs = (
         Tariff.objects.filter(localities=locality, is_active=True)
         .select_related("service")
         .prefetch_related("localities")
     )
 
-    if active_filter == "kombo":
-        displayed_tariffs = tariffs.filter(service__slug="kombo")
-    else:
-        displayed_tariffs = tariffs.filter(service__slug=active_filter)
+    # Получаем все доступные услуги для этого населённого пункта
+    available_services = Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
 
+    # Активный фильтр
+    active_filter = request.GET.get("type", "")
+    if not active_filter or not available_services.filter(slug=active_filter).exists():
+        # Если фильтр не указан или его нет в доступных — берем первую из списка
+        first_service = available_services.first()
+        active_filter = first_service.slug if first_service else ""
+
+    # Фильтруем тарифы по активной услуге
+    displayed_tariffs = tariffs.filter(service__slug=active_filter) if active_filter else tariffs
+
+    # AJAX-запрос для подгрузки тарифов
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
         tariffs_html = render_to_string(
             "core/partials/tariffs_list.html",
@@ -41,15 +50,13 @@ def index(request, locality_slug):
         )
         return JsonResponse({"html": tariffs_html})
 
-    latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
-        "-created_at"
-    )
-
+    latest_news = News.objects.filter(is_published=True, localities=locality).order_by("-created_at")
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
     context = {
         "displayed_tariffs": displayed_tariffs.order_by("price"),
         "active_filter": active_filter,
+        "available_services": available_services,
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,

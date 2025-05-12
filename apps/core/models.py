@@ -82,8 +82,17 @@ class WorkSchedule(models.Model):
 class Service(models.Model):
     slug = models.SlugField("Код", unique=True)
     name = models.CharField("Название услуги", max_length=100)
+    description = models.TextField("Описание", blank=True, null=True)
+    localities = models.ManyToManyField(
+        Locality,
+        related_name='services',
+        verbose_name="Населённые пункты",
+        blank=True
+    )
+    is_active = models.BooleanField("Активна", default=True)
 
     class Meta:
+        ordering = ["name"]
         verbose_name = "Тип услуги"
         verbose_name_plural = "Типы услуг"
 

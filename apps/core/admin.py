@@ -47,8 +47,9 @@ class LocalityFilter(admin.SimpleListFilter):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    list_display = ("name", "slug")
-    search_fields = ("name", "slug")
+    filter_horizontal = ('localities',)
+    list_display = ("name", "slug", "is_active")
+    search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
 
 
