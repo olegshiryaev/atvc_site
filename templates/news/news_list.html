@@ -42,7 +42,7 @@
                 {% endfor %}
             </div>
 
-            <!-- Кнопка "Загрузить ещё" -->
+            <!-- Кнопка "Читать ещё" -->
             {% if has_more_news %}
             <div class="text-center mt-5">
                 <button id="load-more-btn" 
@@ -50,7 +50,7 @@
                         data-next-page="2"
                         data-city-slug="{{ locality.slug }}"
                         aria-label="Загрузить больше новостей">
-                    Загрузить больше
+                    Читать ещё
                 </button>
             </div>
             {% endif %}

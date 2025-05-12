@@ -1,0 +1,43 @@
+<form method="post" hx-post="{% url 'core:feedback_form' locality_slug=locality.slug %}" hx-target="#feedback-form-wrapper" hx-swap="innerHTML">
+    {% csrf_token %}
+    <h2 class="fw-bold mb-4">Ваши отзывы и предложения</h2>
+    <p class="mb-4 text-muted">
+        У вас возникли вопросы, предложения по улучшению работы или вы хотите оставить отзыв о компании? Напишите нам!
+    </p>
+    <div class="mb-3">
+        {{ form.name.label_tag }}
+        {{ form.name }}
+    </div>
+    <div class="mb-3">
+        {{ form.phone.label_tag }}
+        {{ form.phone }}
+    </div>
+    <div class="mb-3">
+        {{ form.content.label_tag }}
+        {{ form.content }}
+    </div>
+    <div class="d-flex justify-content-between align-items-center">
+        <button type="submit" class="btn btn-primary">Отправить</button>
+        <small class="text-muted ms-3">
+            Отправляя свои данные, вы соглашаетесь на <a href="#" class="text-decoration-none">обработку персональных данных</a>
+        </small>
+    </div>
+</form>
+<script>
+    function applyPhoneMask() {
+        const phoneInput = document.querySelector('#id_phone');
+        if (phoneInput && !phoneInput.IMask) { // Проверяем, не применена ли уже маска
+            IMask(phoneInput, {
+                mask: '+7 (000) 000-00-00',
+                lazy: false,
+                placeholderChar: '_'
+            });
+        }
+    }
+
+    // Применяем маску при загрузке страницы
+    document.addEventListener('DOMContentLoaded', applyPhoneMask);
+
+    // Применяем маску после HTMX-обновления
+    document.addEventListener('htmx:afterSwap', applyPhoneMask);
+</script>

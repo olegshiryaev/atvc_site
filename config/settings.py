@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "ckeditor",
     "ckeditor_uploader",
+    "widget_tweaks",
     "compressor",
     "django_htmx",
     "apps.cities",

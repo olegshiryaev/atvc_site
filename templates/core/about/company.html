@@ -1,146 +1,111 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% load static %}
 {% block title %}О компании{% endblock %}
 
 {% block content %}
-  <!-- History Section -->
-  <section id="history" class="container py-5">
-    <h2 class="mb-4 text-center">Наша история</h2>
-    <div class="row gx-4 gy-4">
-      <div class="col-md-6">
-        <div class="card p-4 h-100">
-          <h3>21 августа 1990</h3>
-          <p>Основание Архангельской телевизионной компании. Начало кабельного ТВ в регионе.</p>
+<section class="about-section">
+    <div class="bg-white w-100">
+        <div class="container">
+            {% include 'partials/page_header.html' with title=title %}
         </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-4 h-100">
-          <h3>2000</h3>
-          <p>Запуск направления высокоскоростного доступа в Интернет.</p>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-4 h-100">
-          <h3>2005</h3>
-          <p>Полный переход на цифровое кабельное телевидение.</p>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-4 h-100">
-          <h3>2015</h3>
-          <p>Запуск HD-каналов без дополнительной приставки.</p>
-        </div>
-      </div>
-      <div class="col-md-6">
-        <div class="card p-4 h-100">
-          <h3>2020</h3>
-          <p>Внедрение технологии Metro Ethernet для корпоративных клиентов.</p>
-        </div>
-      </div>
     </div>
-  </section>
 
-  <!-- Stats Section -->
-  <section id="stats" class="bg-light py-5">
-    <div class="container text-center">
-      <div class="row g-4">
-        <div class="col-md-3">
-          <h2 class="counter" data-target="127000">0</h2>
-          <p>домохозяйств</p>
+    <!-- История компании -->
+    <section class="py-5 bg-light">
+        <div class="container py-5">
+            <div class="text-center mb-5">
+                <h2 class="fw-bold">Наша история</h2>
+                <p class="lead text-muted">Ключевые этапы развития компании</p>
+            </div>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <div class="timeline">
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">21 августа 1990 года</h4>
+                            <p>Дата основания Архангельской телевизионной компании. Основной вид деятельности в первые годы развития компании - предоставление услуги кабельного телевидения жителям Архангельска.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">2000 год</h4>
+                            <p>Стало развиваться другое направление деятельности компании – высокоскоростной доступ в Интернет.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">1 марта 2008 года</h4>
+                            <p>Состоялся запуск цифрового телевидения в Архангельске.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">Осень 2009 года</h4>
+                            <p>Началась трансляция телеканалов в формате «High-Definition TV».</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">2010 год</h4>
+                            <p>ООО «АТК» стала первым оператором в Архангельске предложившим своим абонентам безлимитные тарифные планы интернет.</p>
+                        </div>
+                        <div class="timeline-item">
+                            <h4 class="fw-bold">2012 год</h4>
+                            <p>Завершено строительство мультисервисной сети передачи данных в городе Новодвинск. К сети подключено более 10 тыс. домохозяйств.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-3">
-          <h2 class="counter" data-target="170">0</h2>
-          <p>цифровых каналов</p>
-        </div>
-        <div class="col-md-3">
-          <h2 class="counter" data-target="22">0</h2>
-          <p>канала HDTV</p>
-        </div>
-        <div class="col-md-3">
-          <h2 class="counter" data-target="100">0</h2>
-          <p>Мбит/с макс. скорость</p>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Network Section -->
-  <section id="network" class="py-5">
-    <div class="container">
-      <h2 class="mb-4 text-center">Наша сеть</h2>
-      <div class="row g-4">
-        <div class="col-md-4">
-          <div class="card p-4 text-center h-100">
-            <i class="bi bi-hdd-network display-4 mb-3"></i>
-            <h5>Опорная оптика</h5>
-            <p>Собственная волоконно-оптическая сеть по Архангельску и Новодвинску.</p>
+    <section class="about-network py-5">
+        <div class="container">
+          <h2 class="fw-bold mb-4">О сети АТК</h2>
+          <p class="mb-5">
+            В настоящее время кабельная сеть АТК охватывает свыше <strong>127 000</strong> домохозяйств в многоквартирном жилом фонде Архангельска и Новодвинска. Сегодня компания в цифровом вещании транслирует более <strong>170</strong> лучших российских и зарубежных телеканалов и предоставляет юридическим и физическим лицам высокоскоростной доступ в Интернет по собственной общегородской оптико-волоконной сети.
+          </p>
+
+          <div class="mb-4 text-center">
+            <img src="https://www.atvc.ru/media/content/2017/07/05/info2.png" class="img-fluid rounded" alt="Схема сети АТК">
           </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card p-4 text-center h-100">
-            <i class="bi bi-speedometer2 display-4 mb-3"></i>
-            <h5>Скорость до 100 Мбит/с</h5>
-            <p>Технология Metro Ethernet для больших объемов трафика.</p>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card p-4 text-center h-100">
-            <i class="bi bi-tv display-4 mb-3"></i>
-            <h5>170+ каналов</h5>
-            <p>Включая 22 канала HDTV без доп. приставки.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Why Us Section -->
-  <section id="why-us" class="bg-light py-5">
-    <div class="container">
-      <h2 class="mb-4 text-center">Почему выбирают нас</h2>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-check-circle-fill me-3 text-success"></i>
-          Стабильное соединение и 24/7 поддержка
-        </li>
-        <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-check-circle-fill me-3 text-success"></i>
-          Лидер цифрового кабельного ТВ с HD-форматом
-        </li>
-        <li class="list-group-item d-flex align-items-center">
-          <i class="bi bi-check-circle-fill me-3 text-success"></i>
-          Решения «Умный город» и услуги для бизнеса
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- Call to Action Section -->
-  <section id="connect" class="text-center py-5" style="background: #0056b3; color: #fff;">
-    <div class="container">
-      <h2 class="mb-3">Готовы присоединиться?</h2>
-      <a href="/order" class="btn btn-light btn-lg">Оставить заявку</a>
-    </div>
-  </section>
-  <!-- Counter Animation Script -->
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const counters = document.querySelectorAll('.counter');
-      counters.forEach(counter => {
-        const updateCount = () => {
-          const target = +counter.getAttribute('data-target');
-          const count = +counter.innerText;
-          const increment = Math.ceil(target / 200);
-          if (count < target) {
-            counter.innerText = count + increment;
-            requestAnimationFrame(updateCount);
-          } else {
-            counter.innerText = target;
-          }
-        };
-        updateCount();
-      });
-    });
-  </script>
-
+          <ul class="list-group list-group-flush custom-bullet-list">
+            <li class="list-group-item">
+                Мультисервисная сеть Архангельской телевизионной компании базируется на собственной опорной волоконно-оптической сети, практически полностью покрывающей территорию городов Архангельска и Новодвинска.
+            </li>
+            <li class="list-group-item">
+                В сети передачи данных, построенной по одной из самых передовых и специально разработанной для больших городов технологии <strong>"MetroEthernet"</strong> нашим абонентам доступны скорости передачи информации до <strong>100 Мбит/с.</strong>, что позволяет комфортно работать как в сети Интернет так и обмениваться большими объемами информации между собой.
+            </li>
+            <li class="list-group-item">
+                Сеть цифрового кабельного телевидения предоставляет абонентам более <strong>170</strong> телевизионных каналов самой разнообразной тематики и превосходного качества. При подписке на услуги цифрового телевидения, аналоговый пакет абоненты получают бонусом совершенно бесплатно.
+            </li>
+            <li class="list-group-item">
+                Архангельская телевизионная компания одной из первых в России запустила трансляцию в своей сети телеканалов в формате телевидения высокой четкости. В настоящее время нашим абонентам доступны <strong>22</strong> каналов HDTV. Благодаря тому, что применяемая технология <strong>"DVB-C"</strong> является мировым стандартом цифрового кабельного телевидения, абоненты Архангельской телевизионной компании могут полностью использовать возможности своих "цифровых" телевизоров, которых все больше появляется на прилавках торговых сетей. Дополнительная приставка для просмотра цифрового телевидения от АТК совершенно не обязательна!
+            </li>
+            <li class="list-group-item">
+                Для юридических лиц Архангельская телевизионная компания предоставляет дополнительные услуги связи по передаче данных в пределах городов Архангельска и Новодвинска. Эти услуги могут быть интересны предприятиям, обладающим филиальной сетью для объединения филиалов в единое информационное пространство.
+            </li>
+            <li class="list-group-item">
+                Городские коммунальные службы могут воспользоваться услугой "Умный город" позволяющей контролировать расход тепловой и электрической энергии, управлять лифтовым хозяйством и многое другое.
+            </li>
+            <li class="list-group-item">
+                Активно развивается новое направление услуг АТК - цифровая телефонная связь.
+            </li>
+          </ul>
+            <div class="mb-4 text-center">
+                <img src="https://www.atvc.ru/media/content/2017/07/05/map1.jpg" class="img-fluid rounded" alt="Схема сети АТК">
+            </div>
+        </div>
+    </section>
+    <section class="feedback-section py-5 bg-light">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-6">
+                    <div id="feedback-container" class="shadow-sm p-4 rounded bg-white">
+                        <h2 class="text-center mb-4">Ваш отзыв и предложения</h2>
+                        <p class="text-muted text-center mb-4">
+                            У вас возникли вопросы, предложения по улучшению работы или вы хотите оставить отзыв о компании? Напишите нам!
+                        </p>
+                        <div id="feedback-form-wrapper">
+                            {% include "includes/feedback_form.html" %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>      
+      
 {% endblock %}
-

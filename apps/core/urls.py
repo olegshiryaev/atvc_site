@@ -4,6 +4,7 @@ from .views import (
     about_company,
     b2b_internet_view,
     company_detail,
+    feedback_form,
     index,
     internet_tariffs,
     office_list,
@@ -25,6 +26,6 @@ urlpatterns = [
         submit_application,
         name="submit_application",
     ),
-    path("feedback/", FeedbackCreateView.as_view(), name="feedback"),
+    path("feedback/", feedback_form, name="feedback_form"),
     path("b2b/internet/", b2b_internet_view, name="b2b_internet"),
 ]

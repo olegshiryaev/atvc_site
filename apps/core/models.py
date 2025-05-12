@@ -279,9 +279,11 @@ class Feedback(models.Model):
     Модель обратной связи
     """
 
-    subject = models.CharField(max_length=255, verbose_name="Тема письма")
-    email = models.EmailField(max_length=255, verbose_name="Электронный адрес (email)")
-    content = models.TextField(verbose_name="Содержимое письма")
+    name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя")
+    phone = models.CharField(
+        max_length=20, blank=True, null=True, verbose_name="Номер телефона"
+    )
+    content = models.TextField(verbose_name="Сообщение")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
     ip_address = models.GenericIPAddressField(
         verbose_name="IP отправителя", blank=True, null=True
@@ -301,7 +303,7 @@ class Feedback(models.Model):
         db_table = "app_feedback"
 
     def __str__(self):
-        return f"Вам письмо от {self.email}"
+        return f"Сообщение от {self.phone}"
 
 
 class Company(models.Model):

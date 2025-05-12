@@ -1,5 +1,6 @@
 from django import forms
 from .models import Application, Document, Feedback
+from django.core.validators import RegexValidator
 
 
 class ApplicationForm(forms.ModelForm):
@@ -53,7 +54,7 @@ class FeedbackCreateForm(forms.ModelForm):
 
     class Meta:
         model = Feedback
-        fields = ("subject", "email", "content")
+        fields = ("name", "phone", "content")
 
     def __init__(self, *args, **kwargs):
         """
@@ -87,3 +88,43 @@ class ContactForm(forms.Form):
     message = forms.CharField(
         label="Сообщение", widget=forms.Textarea(attrs={"class": "form-control"})
     )
+
+
+class FeedbackForm(forms.ModelForm):
+    phone_validator = RegexValidator(
+        regex=r"^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$",
+        message="Введите номер в формате +7 (XXX) XXX-XX-XX",
+    )
+
+    class Meta:
+        model = Feedback
+        fields = ["name", "phone", "content"]
+        widgets = {
+            "name": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Как вас зовут?",
+                    "required": True,
+                }
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "+7 (XXX) XXX-XX-XX",
+                    "required": True,
+                }
+            ),
+            "content": forms.Textarea(
+                attrs={
+                    "class": "form-control",
+                    "placeholder": "Сообщение",
+                    "rows": 4,
+                }
+            ),
+        }
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone")
+        if phone:
+            self.phone_validator(phone)
+        return phone

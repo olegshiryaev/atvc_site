@@ -1,11 +1,11 @@
 {% load static %}
 {% load locality_tags %}
 {% get_localities request.locality as localities %}
-
 <header id="navbar" x-data="{
     searchQuery: '',
     currentLocalitySlug: '{{ request.locality.slug|escapejs }}',
     selectedDistrict: null,
+    highlightedIndex: null,
     localities: [
         {% for locality in localities %}
         {
@@ -55,8 +55,39 @@
         const filtered = this.filteredLocalities();
         const firstWithDistrict = filtered.find(locality => locality.district_id);
         this.selectedDistrict = firstWithDistrict ? firstWithDistrict.district : null;
+    },
+    saveSelection(slug) {
+        localStorage.setItem('selectedLocality', slug);
     }
-}" x-init="initDistrict()" @input.debounce.300ms="updateDistrict()">
+}" x-init="initDistrict(); $watch('searchQuery', () => { updateDistrict(); })">
+    
+    <!-- Скрипты для работы клавиатуры -->
+    <script>
+        document.addEventListener('keydown', function(e) {
+            const input = document.querySelector('input[x-model="searchQuery"]');
+            if (!input || document.activeElement !== input) return;
+
+            const results = document.querySelectorAll('.list-group-item');
+            const data = Alpine.raw(Alpine.getComponentData(input.closest('[x-data]')));
+            if (!results.length) return;
+
+            let idx = data.highlightedIndex;
+
+            if (e.key === 'ArrowDown') {
+                idx = Math.min(idx + 1, results.length - 1);
+                data.highlightedIndex = idx;
+            }
+            if (e.key === 'ArrowUp') {
+                idx = Math.max(idx - 1, 0);
+                data.highlightedIndex = idx;
+            }
+            if (e.key === 'Enter' && idx !== null) {
+                e.preventDefault();
+                const selected = results[idx];
+                window.location.href = selected.getAttribute('data-href');
+            }
+        });
+    </script>
 
     <!-- Верхняя панель (десктоп) -->
     <div class="top-bar bg-light border-bottom d-none d-lg-flex">
@@ -80,7 +111,6 @@
             <a class="navbar-brand me-4" href="/{{ request.locality.slug }}/">
                 <img src="{% static 'img/logo.png' %}" alt="Logo" style="max-height:48px;">
             </a>
-
             <!-- Десктоп‐меню -->
             <ul class="navbar-nav d-none d-lg-flex gap-4 mb-0">
                 <li class="nav-item dropdown">
@@ -94,7 +124,6 @@
                 <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
             </ul>
-
             <!-- Действия (десктоп) -->
             <div class="d-none d-lg-flex align-items-center gap-3 ms-auto">
                 <button class="btn btn-link text-dark p-0 d-flex align-items-center text-decoration-none"
@@ -107,9 +136,8 @@
                     </svg>
                     <span class="nav-link">{{ request.locality.name }}</span>
                 </button>
-                <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning btn-sm">Оплатить</a>
+                <a href="https://archangelsk.rt.ru/payment " class="btn btn-warning btn-sm">Оплатить</a>
             </div>
-
             <!-- Мобильный toggler -->
             <button class="navbar-toggler d-lg-none" type="button"
                     data-bs-toggle="offcanvas"
@@ -128,11 +156,11 @@
         <div class="offcanvas-body">
             <ul class="navbar-nav mb-3">
                 <li class="nav-item dropdown">
-                <a class="nav-link" href="#" data-bs-toggle="dropdown">Тарифы</a>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item" href="#">Для частных лиц</a></li>
-                    <li><a class="dropdown-item" href="#">Для юр. лиц</a></li>
-                </ul>
+                    <a class="nav-link" href="#" data-bs-toggle="dropdown">Тарифы</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Для частных лиц</a></li>
+                        <li><a class="dropdown-item" href="#">Для юр. лиц</a></li>
+                    </ul>
                 </li>
                 <li class="nav-item"><a class="nav-link" href="#">Акции</a></li>
                 <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li>
@@ -143,59 +171,63 @@
                 <button class="btn btn-link text-start p-0"
                         data-bs-toggle="offcanvas"
                         data-bs-target="#citySelectorOffcanvas">
-                {{ request.locality.name }}
+                    {{ request.locality.name }}
                 </button>
-                <a href="https://archangelsk.rt.ru/payment"
-                class="btn btn-warning">Оплатить</a>
+                <a href="https://archangelsk.rt.ru/payment "
+                   class="btn btn-warning">Оплатить</a>
             </div>
         </div>
     </div>
 
     <!-- Offcanvas выбора населенного пункта (моб.) -->
-    <div
-        class="offcanvas offcanvas-bottom offcanvas-fullscreen d-block d-md-none"
-        tabindex="-1"
-        id="citySelectorOffcanvas"
-        aria-labelledby="citySelectorOffcanvasLabel"
-        @shown.bs.offcanvas="$refs.searchInput.focus()"
-        >
+    <div class="offcanvas offcanvas-bottom offcanvas-fullscreen d-block d-md-none"
+         id="citySelectorOffcanvas"
+         @shown.bs.offcanvas="$refs.searchInput.focus()">
         <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="citySelectorOffcanvasLabel">
-            Выберите населенный пункт
-        </h5>
-        <button type="button"
-                class="btn-close text-reset"
-                data-bs-dismiss="offcanvas"
-                aria-label="Закрыть"></button>
+            <h5 class="offcanvas-title">Выберите населенный пункт</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas"></button>
         </div>
-
         <div class="offcanvas-body px-3 pb-3">
             <!-- Поиск -->
-            <div class="search-container mb-3">
+            <div class="search-container mb-3 position-relative">
                 <svg class="search-icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M11.742 10.344a6.5 6.5 0 …"></path>
+                    <path d="M11.742..."/>
                 </svg>
-                <input
-                x-model="searchQuery"
-                type="text"
-                class="form-control"
-                placeholder="Поиск"
-                x-ref="searchInput"
-                autofocus
-                >
+                <input x-model="searchQuery" type="text" class="form-control" placeholder="Поиск" x-ref="searchInput">
+                <!-- Результаты автозаполнения -->
+                <template x-if="searchQuery && filteredLocalities().length > 0">
+                    <ul class="list-group position-absolute w-100 mt-1 shadow-sm border rounded overflow-hidden z-3">
+                        <template x-for="(locality, index) in filteredLocalities().slice(0, 5)" :key="index">
+                            <li class="list-group-item list-group-item-action"
+                                :class="{ 'active': highlightedIndex === index }"
+                                @click="
+                                    window.location.href = getNewPath(locality.slug);
+                                    saveSelection(locality.slug);
+                                    searchQuery = '';
+                                "
+                                @mouseenter="highlightedIndex = index"
+                                @mouseleave="highlightedIndex = null"
+                                x-text="locality.name"
+                                data-href="getNewPath(locality.slug)"
+                            ></li>
+                        </template>
+                    </ul>
+                </template>
             </div>
 
-            <!-- Популярные города (тэг-клауд) -->
+            <!-- Популярные города -->
             <div class="tag-cloud mb-4">
                 <template x-for="locality in localitiesWithoutDistrict()" :key="locality.slug">
-                    <a
-                        :href="getNewPath(locality.slug)"
-                        class="badge locality-tag"
-                        :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                        @click.prevent="() => { window.location.href = getNewPath(locality.slug); bootstrap.Offcanvas.getInstance(document.getElementById('citySelectorOffcanvas')).hide(); }"
-                    >
-                        <span x-text="locality.name"></span>
-                    </a>
+                    <a :href="getNewPath(locality.slug)"
+                       class="badge locality-tag"
+                       :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                       @click.prevent="() => {
+                           window.location.href = getNewPath(locality.slug);
+                           saveSelection(locality.slug);
+                           bootstrap.Offcanvas.getInstance(document.getElementById('citySelectorOffcanvas')).hide();
+                       }"
+                       x-text="locality.name"
+                    ></a>
                 </template>
             </div>
 
@@ -203,14 +235,8 @@
             <h6 class="mb-2 mt-4">Район</h6>
             <div class="region-list mb-3">
                 <template x-for="district in districts()" :key="district">
-                    <a
-                        href="#"
-                        class="region-item"
-                        :class="{ 'active': selectedDistrict === district }"
-                        @click.prevent="selectedDistrict = district"
-                    >
-                        <span x-text="district"></span>
-                    </a>
+                    <a href="#" class="region-item" :class="{ 'active': selectedDistrict === district }"
+                       @click.prevent="selectedDistrict = district" x-text="district"></a>
                 </template>
             </div>
 
@@ -218,93 +244,104 @@
             <h6 class="mb-2 mt-4">Населенный пункт</h6>
             <div class="locality-list">
                 <template x-for="locality in localitiesInSelectedDistrict()" :key="locality.slug">
-                    <a
-                        :href="getNewPath(locality.slug)"
-                        class="city-item"
-                        :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                        @click.prevent="() => { window.location.href = getNewPath(locality.slug); bootstrap.Offcanvas.getInstance(document.getElementById('citySelectorOffcanvas')).hide(); }"
-                    >
-                        <span x-text="locality.name"></span>
-                    </a>
+                    <div x-transition.opacity>
+                        <a :href="getNewPath(locality.slug)"
+                           class="city-item"
+                           :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                           @click.prevent="() => {
+                               window.location.href = getNewPath(locality.slug);
+                               saveSelection(locality.slug);
+                               bootstrap.Offcanvas.getInstance(document.getElementById('citySelectorOffcanvas')).hide();
+                           }"
+                           x-text="locality.name"
+                        ></a>
+                    </div>
                 </template>
             </div>
         </div>
     </div>
 
     <!-- Модальное окно выбора населенного пункта -->
-    <div class="modal fade" id="localityModal" tabindex="-1"
-        aria-labelledby="localityModalLabel" aria-hidden="true" x-data>
+    <div class="modal fade" id="localityModal" tabindex="-1" aria-labelledby="localityModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
-
                 <div class="modal-header">
-                    <h5 class="modal-title" id="localityModalLabel">
-                        Выберите ваш населенный пункт
-                    </h5>
+                    <h5 class="modal-title">Выберите ваш населенный пункт</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-
                 <div class="modal-body">
                     <!-- Поиск -->
-                    <div class="search-container mb-3">
-                        <svg class="search-icon" width="16" height="16"
-                            fill="currentColor" viewBox="0 0 16 16">
-                        <path d="M11.742 …"/>
+                    <div class="search-container mb-3 position-relative">
+                        <svg class="search-icon" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M11.742..."/>
                         </svg>
-                        <input x-model="searchQuery"
-                            type="text"
-                            class="form-control"
-                            placeholder="Поиск"
-                            x-ref="searchInput"
-                            autofocus>
+                        <input x-model="searchQuery" type="text" class="form-control" placeholder="Поиск" x-ref="searchInput">
+                        <!-- Результаты автозаполнения -->
+                        <template x-if="searchQuery && filteredLocalities().length > 0">
+                            <ul class="list-group position-absolute w-100 mt-1 shadow-sm border rounded overflow-hidden z-3">
+                                <template x-for="(locality, index) in filteredLocalities().slice(0, 5)" :key="index">
+                                    <li class="list-group-item list-group-item-action"
+                                        :class="{ 'active': highlightedIndex === index }"
+                                        @click="
+                                            window.location.href = getNewPath(locality.slug);
+                                            saveSelection(locality.slug);
+                                            closeModal();
+                                        "
+                                        @mouseenter="highlightedIndex = index"
+                                        @mouseleave="highlightedIndex = null"
+                                        x-text="locality.name"
+                                        data-href="getNewPath(locality.slug)"
+                                    ></li>
+                                </template>
+                            </ul>
+                        </template>
                     </div>
 
                     <!-- Популярные города -->
                     <div class="tag-cloud mb-4">
                         <template x-for="locality in localitiesWithoutDistrict()" :key="locality.slug">
-                        <a :href="getNewPath(locality.slug)"
-                            class="badge locality-tag"
-                            :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                            @click="closeModal()">
-                            <span x-text="locality.name"></span>
-                        </a>
+                            <a :href="getNewPath(locality.slug)"
+                               class="badge locality-tag"
+                               :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                               @click.prevent="() => {
+                                   window.location.href = getNewPath(locality.slug);
+                                   saveSelection(locality.slug);
+                                   closeModal();
+                               }"
+                               x-text="locality.name"
+                            ></a>
                         </template>
                     </div>
 
-                    <!-- Заголовки для md+ -->
-                    <div class="row mb-2 d-none d-md-flex">
-                        <div class="col-6"><strong>Район</strong></div>
-                        <div class="col-6"><strong>Населенный пункт</strong></div>
-                    </div>
-
-                    <!-- Сетка с двумя колонками -->
+                    <!-- Две колонки -->
                     <div class="row">
                         <!-- Колонка «Район» -->
                         <div class="col-12 col-md-6">
-                        <h6 class="d-block d-md-none mb-2">Район</h6>
+                            <h6 class="mb-2">Район</h6>
                             <div class="region-list">
                                 <template x-for="district in districts()" :key="district">
-                                <a href="#"
-                                    class="region-item"
-                                    :class="{ 'active': selectedDistrict === district }"
-                                    @click.prevent="selectedDistrict = district">
-                                    <span x-text="district"></span>
-                                </a>
+                                    <a href="#" class="region-item" :class="{ 'active': selectedDistrict === district }"
+                                       @click.prevent="selectedDistrict = district" x-text="district"></a>
                                 </template>
                             </div>
                         </div>
-
                         <!-- Колонка «Населенный пункт» -->
                         <div class="col-12 col-md-6">
-                        <h6 class="d-block d-md-none mb-2">Населенный пункт</h6>
+                            <h6 class="mb-2">Населенный пункт</h6>
                             <div class="locality-list">
                                 <template x-for="locality in localitiesInSelectedDistrict()" :key="locality.slug">
-                                <a :href="getNewPath(locality.slug)"
-                                    class="city-item"
-                                    :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                                    @click="closeModal()">
-                                    <span x-text="locality.name"></span>
-                                </a>
+                                    <div x-transition.opacity>
+                                        <a :href="getNewPath(locality.slug)"
+                                           class="city-item"
+                                           :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                                           @click.prevent="() => {
+                                               window.location.href = getNewPath(locality.slug);
+                                               saveSelection(locality.slug);
+                                               closeModal();
+                                           }"
+                                           x-text="locality.name"
+                                        ></a>
+                                    </div>
                                 </template>
                             </div>
                         </div>

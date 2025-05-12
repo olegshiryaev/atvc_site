@@ -217,12 +217,22 @@ class ApplicationAdmin(admin.ModelAdmin):
 
 @admin.register(Feedback)
 class FeedbackAdmin(admin.ModelAdmin):
-    """
-    Админ-панель модели профиля
-    """
+    list_display = (
+        "name",
+        "phone",
+        "short_content",
+        "time_create",
+        "ip_address",
+        "user",
+    )
+    list_filter = ("time_create", "user")
+    search_fields = ("name", "phone", "content", "ip_address")
+    readonly_fields = ("time_create", "ip_address", "user")
 
-    list_display = ("email", "ip_address", "user")
-    list_display_links = ("email", "ip_address")
+    def short_content(self, obj):
+        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+
+    short_content.short_description = "Сообщение"
 
 
 @admin.register(Banner)

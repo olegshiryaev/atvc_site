@@ -1,0 +1,9 @@
+<p class="text-success fw-bold">Спасибо за ваш отзыв!</p>
+<p class="text-muted">Мы обязательно с вами свяжемся.</p>
+<button class="btn btn-outline-secondary mt-3"
+        hx-debug="true"
+        hx-get="{% url 'core:feedback_form' locality_slug=locality.slug %}"
+        hx-target="#feedback-form-wrapper"
+        hx-swap="innerHTML">
+    Оставить еще один отзыв
+</button>

@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 
-from .forms import ApplicationForm, ContactForm, FeedbackCreateForm
+from .forms import ApplicationForm, ContactForm, FeedbackCreateForm, FeedbackForm
 from .models import Banner, Company, Device, Office, Service, Tariff, Feedback
 from ..cities.models import Locality
 from ..news.models import News
@@ -193,14 +193,28 @@ class TariffDetailView(DetailView):
 
 def about_company(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    return render(
-        request,
-        "core/about/company.html",
-        {
-            "year": 2025,
-            "locality": locality,
-        },
-    )
+
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.ip_address = request.META.get("REMOTE_ADDR")
+            feedback.save()
+            return render(request, "includes/feedback_thanks.html")
+    else:
+        form = FeedbackForm()
+
+    context = {
+        "locality": locality,
+        "title": "О компании",
+        "breadcrumbs": [
+            {"title": "Главная", "url": "core:home"},
+            {"title": "О компании", "url": None},
+        ],
+        "form": form,  # Передаем форму в контекст
+    }
+
+    return render(request, "core/about/company.html", context)
 
 
 def b2b_internet_view(request, locality_slug):
@@ -230,3 +244,25 @@ def b2b_internet_view(request, locality_slug):
         "core/b2b_internet.html",
         {"form": form, "success": success, "locality": locality},
     )
+
+
+def feedback_form(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.ip_address = request.META.get("REMOTE_ADDR")
+            feedback.save()
+            return render(
+                request, "includes/feedback_thanks.html", {"locality": locality}
+            )
+        return render(
+            request, "includes/feedback_form.html", {"form": form, "locality": locality}
+        )
+    else:
+        form = FeedbackForm()
+        return render(
+            request, "includes/feedback_form.html", {"form": form, "locality": locality}
+        )
