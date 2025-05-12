@@ -994,6 +994,10 @@ a {
 2. News Cards (общие)
 ======================== */
 
+.news-section {
+    margin-bottom: 2.5rem;
+}
+
 .news-card {
 display: flex;
 flex-direction: column;
