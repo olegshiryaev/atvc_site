@@ -14,22 +14,17 @@
                 </div>
             </header>
 
-            {% if news.image %}
-            <div class="position-relative overflow-hidden rounded-3 mb-4">
+            <div class="news-card__image">
+                {% if news.image %}
                 <img src="{{ news.image.url }}" 
                     alt="{{ news.title }}" 
-                    loading="lazy" 
-                    class="w-100 object-fit-cover"
-                    style="max-height: 400px; aspect-ratio: 16/9;">
+                    loading="lazy">
+                {% else %}
+                <div class="news-card__placeholder">
+                    Изображение отсутствует
+                </div>
+                {% endif %}
             </div>
-            {% else %}
-            <div class="bg-gray-100 rounded-3 d-flex align-items-center justify-content-center w-100 text-gray-500 fs-6 fw-medium mb-4" 
-                style="max-height: 400px; aspect-ratio: 16/9;"
-                role="img" 
-                aria-label="Изображение отсутствует">
-                Изображение отсутствует
-            </div>
-            {% endif %}
 
             <div class="news-content fs-base text-gray-800 lh-lg mb-5">
                 {{ news.content|safe }}
@@ -38,29 +33,29 @@
             <!-- Кнопки "Поделиться" -->
             <div class="share-buttons d-flex align-items-center gap-3 mb-5 animate-fade-in">
                 <span class="text-gray-700 fs-6 fw-medium">Поделиться:</span>
-                <a href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}&text={{ news.title|urlencode }}" 
-                target="_blank" 
-                class="share-icon text-gray-500 hover-text-primary"
-                aria-label="Поделиться в Telegram">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.597 17.954l-1.615-7.649 4.99-4.52-6.143-.013 3.463-2.462-9.896 6.135-2.615-2.76 10.29-6.326L2.83 13.054l5.258 2.462 2.615 7.649 3.894-5.211z"/>
-                    </svg>
+                
+                <!-- Telegram -->
+                <a href="https://t.me/share/url?url= {{ request.build_absolute_uri|urlencode }}&text={{ news.title|urlencode }}" 
+                   target="_blank" 
+                   class="share-icon text-gray-500 hover-text-primary"
+                   aria-label="Поделиться в Telegram">
+                    <svg>...</svg>
                 </a>
-                <a href="https://api.whatsapp.com/send?text={{ news.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
-                target="_blank" 
-                class="share-icon text-gray-500 hover-text-primary"
-                aria-label="Поделиться в WhatsApp">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.948 17.354c-.31.853-.868 1.548-1.735 2.021-.867.474-1.873.66-2.948.474-1.075-.186-2.108-.706-3.098-1.548-.99-.842-1.798-1.897-2.424-3.166-.626-1.268-.939-2.683-.939-4.245 0-1.562.313-3.008.939-4.338.626-1.33 1.487-2.44 2.583-3.33 1.096-.89 2.34-1.335 3.732-1.335 1.392 0 2.657.445 3.794 1.335 1.137.89 2.008 2.008 2.613 3.354.605 1.346.908 2.81.908 4.392 0 1.582-.303 3.016-.908 4.302-.605 1.286-1.456 2.366-2.517 3.24zm-4.948-2.717c.682 0 1.314-.186 1.897-.558l.155-.093 1.177.682-.403 1.177c-.744.465-1.612.697-2.606.697-.93 0-1.784-.217-2.562-.652-.778-.435-1.426-1.037-1.945-1.806-.519-.769-.778-1.674-.778-2.717 0-1.043.259-1.963.778-2.76.519-.797 1.177-1.42 1.975-1.867.798-.447 1.674-.67 2.627-.67.953 0 1.83.223 2.627.67.797.447 1.455 1.07 1.975 1.867.519.797.778 1.717.778 2.76 0 .976-.248 1.856-.744 2.64-.496.784-1.167 1.4-2.013 1.85-.846.449-1.784.674-2.813.674zm0-1.953c-.744 0-1.403-.186-1.975-.558-.572-.372-1.026-.893-1.364-1.562-.338-.669-.507-1.446-.507-2.33 0-.885.169-1.668.507-2.35.338-.682.792-1.21 1.364-1.583.572-.372 1.231-.558 1.975-.558.744 0 1.403.186 1.975.558.572.372 1.026.901 1.364 1.583.338.682.507 1.465.507 2.35 0 .885-.169 1.661-.507 2.33-.338.669-.792 1.19-1.364 1.562-.572.372-1.231.558-1.975.558z"/>
-                    </svg>
+            
+                <!-- WhatsApp -->
+                <a href="https://api.whatsapp.com/send?text= {{ news.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
+                   target="_blank" 
+                   class="share-icon text-gray-500 hover-text-primary"
+                   aria-label="Поделиться в WhatsApp">
+                    <svg>...</svg>
                 </a>
-                <a href="https://vk.com/share.php?url={{ request.build_absolute_uri|urlencode }}&title={{ news.title|urlencode }}" 
-                target="_blank" 
-                class="share-icon text-gray-500 hover-text-primary"
-                aria-label="Поделиться в VK">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm4.597 17.954c-.496 0-.992-.124-1.488-.372-.496-.248-1.116-.62-1.86-1.116-.744-.496-1.612-1.054-2.604-1.674-1.054-.62-1.86-1.24-2.418-1.86-.558-.62-.837-1.364-.837-2.232 0-.744.186-1.426.558-2.046.372-.62.868-1.116 1.488-1.488.62-.372 1.364-.558 2.232-.558h1.116c.868 0 1.612.186 2.232.558.62.372 1.116.868 1.488 1.488.372.62.558 1.302.558 2.046 0 .868-.279 1.612-.837 2.232-.558.62-1.364 1.24-2.418 1.86-.992.62-1.86 1.178-2.604 1.674-.744.496-1.364.868-1.86 1.116-.496.248-.992.372-1.488.372zm0-1.953c.372 0 .744-.062 1.116-.186.372-.124.744-.31 1.116-.558.372-.248.682-.558.992-.93.31-.372.558-.806.744-1.302.186-.496.279-1.054.279-1.674 0-.62-.093-1.178-.279-1.674-.186-.496-.434-.93-.744-1.302-.31-.372-.62-.682-.992-.93-.372-.248-.744-.434-1.116-.558-.372-.124-.744-.186-1.116-.186h-1.116c-.372 0-.744.062-1.116.186-.372.124-.744.31-1.116.558-.372.248-.682.558-.992.93-.31.372-.558.806-.744 1.302-.186.496-.279 1.054-.279 1.674 0 .62.093 1.178.279 1.674.186.496.434.93.744 1.302.31.372.62.682.992.93.372.248.744.434 1.116.558.372.124.744.186 1.116.186z"/>
-                    </svg>
+            
+                <!-- VK -->
+                <a href="https://vk.com/share.php?url= {{ request.build_absolute_uri|urlencode }}&title={{ news.title|urlencode }}" 
+                   target="_blank" 
+                   class="share-icon text-gray-500 hover-text-primary"
+                   aria-label="Поделиться в VK">
+                    <svg>...</svg>
                 </a>
             </div>
         </article>

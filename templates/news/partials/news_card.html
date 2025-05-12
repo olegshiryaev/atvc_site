@@ -1,0 +1,24 @@
+<a href="{{ news.get_absolute_url }}" class="news-card" aria-label="Читать новость: {{ news.title }}">
+    <div class="news-card__image">
+        {% if news.image %}
+            <img src="{{ news.image.url }}" alt="{{ news.title }}" loading="lazy">
+        {% else %}
+            <div class="news-card__placeholder" role="img" aria-label="Изображение отсутствует">
+                Изображение отсутствует
+            </div>
+        {% endif %}
+    </div>
+    <div class="news-card__content">
+        <p class="news-card__date">{{ news.created_at|date:"d.m.Y" }}</p>
+        <h3 class="news-card__title">{{ news.title }}</h3>
+        {% if news.content %}
+            <p class="news-card__excerpt">
+                {% if is_preview %}
+                    {{ news.content|safe|striptags|truncatechars:140 }}
+                {% else %}
+                    {{ news.content|safe|striptags|truncatewords_html:20 }}
+                {% endif %}
+            </p>
+        {% endif %}
+    </div>
+</a>

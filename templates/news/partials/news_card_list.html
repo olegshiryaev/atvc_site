@@ -1,0 +1,5 @@
+{% for news in news_list %}
+<div class="col-12 col-sm-6 col-lg-4">
+    {% include 'news/partials/news_card.html' with news=news is_preview=False %}
+</div>
+{% endfor %}

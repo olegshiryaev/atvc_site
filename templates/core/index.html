@@ -234,11 +234,11 @@
 
     <!-- Последние новости -->
     {% if latest_news %}
-    <section class="py-5 bg-light">
+    <section class="py-5 bg-light news-section">
         <div class="container py-5">
-            <div class="news-widget__header mb-5">
+            <div class="news-widget__header mb-5 d-flex justify-content-between align-items-center">
                 <h2 class="news-widget__title">Последние новости</h2>
-                <a href="{% url 'news:news_list' locality.slug %}" 
+                <a href="{% url 'news:news_list' locality.slug %}"
                 class="news-widget__link"
                 aria-label="Перейти ко всем новостям">
                     Смотреть все
@@ -249,41 +249,11 @@
             </div>
 
             <!-- Swiper Slider -->
-            <div class="swiper news-slider">
+            <div class="swiper news-slider position-relative" style="padding-bottom: 3rem;">
                 <div class="swiper-wrapper">
                     {% for news in latest_news %}
                     <div class="swiper-slide">
-                        <a href="{% url 'news:news_detail' locality.slug news.slug %}" 
-                        class="news-card"
-                        aria-label="Читать новость: {{ news.title }}">
-                            <div class="news-card__image">
-                                {% if news.image %}
-                                <img src="{{ news.image.url }}" 
-                                    alt="{{ news.title }}" 
-                                    loading="lazy">
-                                {% else %}
-                                <div class="news-card__placeholder">
-                                    Изображение отсутствует
-                                </div>
-                                {% endif %}
-                            </div>
-                            <div class="news-card__content">
-                                <div class="d-flex justify-content-between">
-                                    <small class="news-card__date">
-                                        {{ news.created_at|date:"d.m.Y" }}
-                                    </small>
-                                    <span class="badge bg-primary">Акция</span>
-                                </div>
-                                <h3 class="news-card__title">
-                                    {{ news.title }}
-                                </h3>
-                                {% if news.content %}
-                                <p class="news-card__excerpt">
-                                    {{ news.content|striptags|truncatechars:100 }}
-                                </p>
-                                {% endif %}
-                            </div>
-                        </a>
+                        {% include 'news/partials/news_card.html' with news=news is_preview=True %}
                     </div>
                     {% endfor %}
                 </div>

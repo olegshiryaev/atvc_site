@@ -93,8 +93,8 @@ class Service(models.Model):
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "Тип услуги"
-        verbose_name_plural = "Типы услуг"
+        verbose_name = "Услуга"
+        verbose_name_plural = "Услуги"
 
     def __str__(self):
         return self.name
@@ -141,10 +141,6 @@ class TVChannel(models.Model):
         verbose_name = "ТВ канал"
         verbose_name_plural = "ТВ каналы"
         ordering = ["name"]
-
-
-from django.db import models
-from django.core.validators import MinValueValidator
 
 
 class Tariff(models.Model):
