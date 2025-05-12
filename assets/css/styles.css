@@ -556,7 +556,7 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff; /* Цвет текста для контраста */
+    color: #fff;
 }
 
 /* Оверлей для улучшения читаемости текста */

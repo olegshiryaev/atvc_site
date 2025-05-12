@@ -380,6 +380,12 @@ class Company(models.Model):
 
 
 class Banner(models.Model):
+    BANNER_TYPES = (
+        ('promo', 'Акция'),
+        ('new', 'Новинка'),
+        ('service', 'Услуга'),
+        ('offer', 'Предложение'),
+    )
     title = models.CharField("Заголовок", max_length=255)
     description = models.TextField("Описание", blank=True)
     background_image = models.ImageField(
@@ -387,6 +393,12 @@ class Banner(models.Model):
     )
     button_text = models.CharField("Текст кнопки", max_length=100, default="Подробнее")
     link = models.URLField("Ссылка", blank=True)
+    banner_type = models.CharField(
+        "Тип баннера",
+        max_length=50,
+        choices=BANNER_TYPES,
+        default='promo'
+    )
     is_active = models.BooleanField("Активен", default=True)
     localities = models.ManyToManyField(
         Locality, verbose_name="Населённые пункты", related_name="banners"
@@ -400,8 +412,17 @@ class Banner(models.Model):
         verbose_name = "Баннер"
         verbose_name_plural = "Баннеры"
 
-    def __str__(self):
-        return self.title
+    def get_banner_type_display(self):
+        return dict(self.BANNER_TYPES)[self.banner_type]
+
+    def get_banner_type_color(self):
+        colors = {
+            'promo': 'danger',
+            'new': 'success',
+            'service': 'primary',
+            'offer': 'info',
+        }
+        return colors.get(self.banner_type, 'secondary')
 
 
 class Document(models.Model):

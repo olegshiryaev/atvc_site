@@ -238,8 +238,18 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ("title", "is_active", "order")
-    list_editable = ("is_active", "order")
+    list_display = ['title', 'banner_type', 'is_active', 'order']
+    list_filter = ['banner_type', 'is_active']
+    search_fields = ['title', 'description']
+    ordering = ['order']
+    fieldsets = (
+        (None, {
+            'fields': ('title', 'description', 'background_image', 'button_text', 'link')
+        }),
+        ('Тип и настройки', {
+            'fields': ('banner_type', 'is_active', 'localities', 'order')
+        }),
+    )
 
 
 class DocumentInline(admin.TabularInline):
