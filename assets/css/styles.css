@@ -995,55 +995,55 @@ a {
 ======================== */
 
 .news-card {
-display: flex;
-flex-direction: column;
-background: var(--color-white);
-border-radius: var(--radius-md);
-overflow: hidden;
-text-decoration: none;
-height: 420px;
-box-shadow: var(--shadow-card);
-transition: box-shadow var(--transition-normal);
+    display: flex;
+    flex-direction: column;
+    background: var(--color-white);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    text-decoration: none;
+    height: 420px;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--transition-normal);
 }
 
 .news-card__image {
-height: 200px;
-overflow: hidden;
-position: relative;
+    height: 200px;
+    overflow: hidden;
+    position: relative;
 }
 
 .news-card__image img {
-width: 100%;
-height: 100%;
-object-fit: cover;
-transition: transform 0.4s ease;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
 }
 
 .news-card:hover .news-card__image img {
-transform: scale(1.05);
+    transform: scale(1.05);
 }
 
 .news-card__placeholder {
-height: 100%;
-background: #e9ecef;
-color: var(--color-gray);
-font-size: var(--font-size-sm);
-display: flex;
-align-items: center;
-justify-content: center;
+    height: 100%;
+    background: #e9ecef;
+    color: var(--color-gray);
+    font-size: var(--font-size-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .news-card__content {
-padding: 1.5rem;
-display: flex;
-flex-direction: column;
-flex-grow: 1;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .news-card__date {
-font-size: var(--font-size-sm);
-color: var(--color-gray);
-margin-bottom: 0.5rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-gray);
+    margin-bottom: 0.5rem;
 }
 
 .news-card__title {
@@ -1063,15 +1063,14 @@ margin-bottom: 0.5rem;
 }
 
 .news-card__excerpt {
-font-size: var(--font-size-sm);
-color: var(--color-gray);
-flex-grow: 1;
-display: -webkit-box;
--webkit-line-clamp: 3;
--webkit-box-orient: vertical;
-overflow: hidden;
+    font-size: var(--font-size-sm);
+    color: var(--color-gray);
+    flex-grow: 1;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
-
 
 /* ========================
     3. Главная страница — слайдер новостей
@@ -1089,17 +1088,17 @@ overflow: hidden;
 }
 
 .news-slider .news-card__image {
-height: 200px;
+    height: 200px;
 }
 
 .swiper-slide {
-opacity: 0.7;
-transition: opacity 0.3s ease;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
 }
 
 .swiper-slide-active,
 .swiper-slide-visible {
-opacity: 1;
+    opacity: 1;
 }
 
 .swiper-pagination {
@@ -1128,7 +1127,6 @@ opacity: 1;
     transform: scale(1.3);
 }
 
-
 /* ========================
     4. Страница списка новостей
     ======================== */
@@ -1139,42 +1137,41 @@ opacity: 1;
 }
 
 .load-more-btn {
-font-weight: 600;
-padding: 0.5rem 1rem;
-border: none;
-border-radius: var(--radius-md);
-cursor: pointer;
-transition: background-color 0.3s ease;
+    font-weight: 600;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .load-more-btn:hover {
-background-color: #0069d9;
+    background-color: #0069d9;
 }
-
 
 /* ========================
     5. Детальная страница новости
     ======================== */
 
 .news-detail {
-margin: 0 auto;
-padding: 2rem 0;
+    margin: 0 auto;
+    padding: 2rem 0;
 }
 
 .news-detail .news-card__image {
-height: 400px;
-margin-bottom: 1.5rem;
-border-radius: 0.25rem;
+    height: 400px;
+    margin-bottom: 1.5rem;
+    border-radius: 0.25rem;
 }
 
 .news-detail .news-card__image img {
-border-radius: var(--radius-md);
+    border-radius: var(--radius-md);
 }
 
 .news-content {
-font-size: var(--font-size-base);
-line-height: 1.8;
-color: #495057;
+    font-size: var(--font-size-base);
+    line-height: 1.8;
+    color: #495057;
 }
 
 .news-content h2,
@@ -1182,33 +1179,32 @@ color: #495057;
 .news-content h4,
 .news-content h5,
 .news-content h6 {
-margin-top: 1.5rem;
-margin-bottom: 1rem;
-font-weight: 600;
+    margin-top: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
 }
 
 .news-content p {
-margin-bottom: 1rem;
+    margin-bottom: 1rem;
 }
 
 .news-content ul,
 .news-content ol {
-margin-left: 1.5rem;
-margin-bottom: 1rem;
+    margin-left: 1.5rem;
+    margin-bottom: 1rem;
 }
 
 .news-content img {
-max-width: 100%;
-height: auto;
-border-radius: var(--radius-md);
-margin: 1.5rem 0;
+    max-width: 100%;
+    height: auto;
+    border-radius: var(--radius-md);
+    margin: 1.5rem 0;
 }
 
 .share-buttons a svg {
-width: 24px;
-height: 24px;
+    width: 24px;
+    height: 24px;
 }
-
 
 /* ========================
     6. Адаптивность
@@ -1231,7 +1227,6 @@ height: 24px;
         font-size: 0.85rem;
         margin-top: 0.5rem;
     }
-
 }
 
 .address-check-section {
@@ -1627,4 +1622,170 @@ height: 24px;
     #feedback-form-wrapper .btn {
         width: 100%;
     }
+}
+
+/* Основные стили для блока документов */
+
+/* Стили карточки */
+.documents-card {
+    border: none;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    background-color: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Область с изображением/иконкой */
+.documents-card .position-relative {
+    height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #eee;
+}
+
+@media screen and (max-width: 767px) {
+    .documents-card .position-relative {
+        display: none;
+    }
+}
+
+/* Стили для изображений */
+.documents-card .card-img-top {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    padding: 1rem;
+    object-fit: contain;
+}
+
+/* Стили для иконок (когда нет изображения) */
+.documents-card .bi {
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+/* Тело карточки (нижняя часть) */
+.documents-card .card-body {
+    padding: 1.25rem;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Заголовок документа */
+.documents-card .documents-card__title {
+    color: #212529;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* Ограничение в 2 строки */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    hyphens: auto;
+    min-height: 3em; /* Фиксированная высота для 2 строк */
+    line-height: 1.5em;
+    text-align: center;
+}
+
+@media screen and (max-width: 767px) {
+    .documents-card .documents-card__title {
+        text-align: left;
+    }
+}
+
+/* Размер файла */
+.documents-card .text-muted {
+    font-size: 0.8rem;
+    text-align: center;
+    margin-top: auto; /* Прижимаем к низу */
+}
+
+@media screen and (max-width: 767px) {
+    .documents-card .text-muted {
+        text-align: left;
+    }
+}
+
+/* Бейдж с расширением файла */
+.documents-card .badge {
+    font-size: 0.75rem;
+    padding: 0.35em 0.65em;
+    text-transform: uppercase;
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+}
+
+/* Цвета иконок по типам файлов */
+.bi-file-earmark-pdf {
+    color: #d63384 !important;
+}
+.bi-file-earmark-word {
+    color: #0d6efd !important;
+}
+.bi-file-earmark-image {
+    color: #198754 !important;
+}
+.bi-file-earmark-excel {
+    color: #20c997 !important;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .documents-card .position-relative {
+        height: 150px;
+    }
+
+    .documents-section {
+        padding: 1.5rem;
+    }
+}
+
+/* Accessibility focus styles */
+.documents-card:focus-within {
+    outline: 2px solid #0d6efd;
+    outline-offset: 2px;
+}
+
+.documents__row {
+    margin: 0 -20px;
+}
+
+.documents__col {
+    width: 25%;
+    margin-bottom: 40px;
+    padding: 0 20px;
+}
+
+@media screen and (max-width: 1199px) {
+    .documents__col {
+        width: 50%;
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .documents__col {
+        width: 100%;
+        margin-bottom: 16px;
+        padding: 0;
+    }
+}
+
+.flex,
+.flex-center {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -ms-flex-wrap: wrap;
+    flex-wrap: wrap;
 }

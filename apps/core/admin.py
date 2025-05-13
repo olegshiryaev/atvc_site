@@ -47,7 +47,7 @@ class LocalityFilter(admin.SimpleListFilter):
 
 @admin.register(Service)
 class ServiceAdmin(admin.ModelAdmin):
-    filter_horizontal = ('localities',)
+    filter_horizontal = ("localities",)
     list_display = ("name", "slug", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
@@ -238,17 +238,27 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ['title', 'banner_type', 'is_active', 'order']
-    list_filter = ['banner_type', 'is_active']
-    search_fields = ['title', 'description']
-    ordering = ['order']
+    list_display = ["title", "banner_type", "is_active", "order"]
+    list_filter = ["banner_type", "is_active"]
+    search_fields = ["title", "description"]
+    ordering = ["order"]
     fieldsets = (
-        (None, {
-            'fields': ('title', 'description', 'background_image', 'button_text', 'link')
-        }),
-        ('Тип и настройки', {
-            'fields': ('banner_type', 'is_active', 'localities', 'order')
-        }),
+        (
+            None,
+            {
+                "fields": (
+                    "title",
+                    "description",
+                    "background_image",
+                    "button_text",
+                    "link",
+                )
+            },
+        ),
+        (
+            "Тип и настройки",
+            {"fields": ("banner_type", "is_active", "localities", "order")},
+        ),
     )
 
 
@@ -276,22 +286,39 @@ class CompanyAdmin(admin.ModelAdmin):
 
 @admin.register(Document)
 class DocumentAdmin(admin.ModelAdmin):
-    form = DocumentForm
-    list_display = ("title", "company", "uploaded_at", "thumbnail_preview")
+    list_display = (
+        "title",
+        "company",
+        "file_link",
+        "file_type",
+        "uploaded_at",
+        "thumbnail_preview",
+    )
     list_filter = ("company", "uploaded_at")
-    search_fields = ("title",)
-    readonly_fields = ("uploaded_at",)
+    search_fields = ("title", "company__name")
+    readonly_fields = ("thumbnail_preview", "uploaded_at", "extension")
+
+    def file_type(self, obj):
+        return obj.extension
+
+    file_type.short_description = "Тип файла"
+
+    def file_link(self, obj):
+        if obj.file:
+            return format_html('<a href="{}" target="_blank">Скачать</a>', obj.file.url)
+        return "-"
+
+    file_link.short_description = "Файл"
 
     def thumbnail_preview(self, obj):
-        """Отображение миниатюры в списке."""
         if obj.thumbnail:
             return format_html(
-                '<img src="{}" style="max-height: 100px;" />', obj.thumbnail.url
+                '<img src="{}" style="max-height: 100px; max-width: 80px; object-fit: contain;">',
+                obj.thumbnail.url,
             )
-        return "Нет миниатюры"
+        elif obj.extension in ("PDF", "JPG", "JPEG", "PNG"):
+            return format_html('<span class="text-muted">В обработке...</span>')
+        else:
+            return "-"
 
-    thumbnail_preview.short_description = "Превью"
-
-    def save_model(self, request, obj, form, change):
-        """Передача request в метод save модели через kwargs."""
-        obj.save(request=request)
+    thumbnail_preview.short_description = "Миниатюра"

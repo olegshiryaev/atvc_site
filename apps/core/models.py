@@ -5,6 +5,8 @@ from django.core.validators import MinValueValidator
 from pytils.translit import slugify as pytils_slugify
 import os
 from django.core.exceptions import ValidationError
+from django.utils.functional import cached_property
+from apps.core.tasks import generate_thumbnail_async
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
 from pdf2image import convert_from_bytes
@@ -84,10 +86,7 @@ class Service(models.Model):
     name = models.CharField("Название услуги", max_length=100)
     description = models.TextField("Описание", blank=True, null=True)
     localities = models.ManyToManyField(
-        Locality,
-        related_name='services',
-        verbose_name="Населённые пункты",
-        blank=True
+        Locality, related_name="services", verbose_name="Населённые пункты", blank=True
     )
     is_active = models.BooleanField("Активна", default=True)
 
@@ -381,26 +380,28 @@ class Company(models.Model):
 
 class Banner(models.Model):
     BANNER_TYPES = (
-        ('', 'Не выбрано'),
-        ('promo', 'Акция'),
-        ('new', 'Новинка'),
-        ('service', 'Услуга'),
-        ('offer', 'Предложение'),
+        ("", "Не выбрано"),
+        ("promo", "Акция"),
+        ("new", "Новинка"),
+        ("service", "Услуга"),
+        ("offer", "Предложение"),
     )
     title = models.CharField("Заголовок", max_length=255)
     description = models.TextField("Описание", blank=True)
     background_image = models.ImageField(
         "Фоновое изображение", upload_to="banners/backgrounds/", blank=True, null=True
     )
-    button_text = models.CharField("Текст кнопки", blank=True, null=True, max_length=100)
+    button_text = models.CharField(
+        "Текст кнопки", blank=True, null=True, max_length=100
+    )
     link = models.URLField("Ссылка", blank=True, null=True)
     banner_type = models.CharField(
         "Тип баннера",
         max_length=50,
         choices=BANNER_TYPES,
-        default='',
+        default="",
         blank=True,
-        null=True
+        null=True,
     )
     is_active = models.BooleanField("Активен", default=True)
     localities = models.ManyToManyField(
@@ -417,33 +418,30 @@ class Banner(models.Model):
 
     def get_banner_type_display(self):
         if self.banner_type:
-            return dict(self.BANNER_TYPES).get(self.banner_type, '')
-        return ''
+            return dict(self.BANNER_TYPES).get(self.banner_type, "")
+        return ""
 
     def get_banner_type_color(self):
         colors = {
-            'promo': 'danger',
-            'new': 'success',
-            'service': 'primary',
-            'offer': 'info',
+            "promo": "danger",
+            "new": "success",
+            "service": "primary",
+            "offer": "info",
         }
-        return colors.get(self.banner_type, 'secondary')
+        return colors.get(self.banner_type, "secondary")
 
 
 class Document(models.Model):
     company = models.ForeignKey(
-        Company,
+        "Company",
         related_name="documents",
         on_delete=models.CASCADE,
         verbose_name="Компания",
     )
     title = models.CharField(max_length=255, verbose_name="Название документа")
     file = models.FileField(upload_to="company_documents/", verbose_name="Файл")
-    thumbnail = ProcessedImageField(
+    thumbnail = models.ImageField(
         upload_to="company_documents/thumbnails/",
-        processors=[ResizeToFit(300, 400)],
-        format="JPEG",
-        options={"quality": 80},
         blank=True,
         null=True,
         verbose_name="Превью документа",
@@ -454,71 +452,89 @@ class Document(models.Model):
         verbose_name = "Документ"
         verbose_name_plural = "Документы"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._original_file = self.file
+
     def __str__(self):
         return self.title
 
-    @property
+    @cached_property
     def extension(self):
-        """Возвращает расширение файла в верхнем регистре, например PDF, DOCX."""
         return os.path.splitext(self.file.name)[1][1:].upper()
 
     def clean(self):
-        """Валидация загружаемого файла."""
         if self.file:
-            # Ограничение размера файла (10 МБ)
             if self.file.size > 10 * 1024 * 1024:
                 raise ValidationError("Размер файла не должен превышать 10 МБ.")
-            # Ограничение типов файлов
-            allowed_extensions = (".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx")
-            if not self.file.name.lower().endswith(allowed_extensions):
-                raise ValidationError("Разрешены только файлы PDF, JPG и PNG.")
 
-    def generate_thumbnail(self, request=None):
-        """Генерация миниатюры для PDF и изображений."""
+            # Допустимые расширения
+            allowed_extensions = {
+                ".pdf",
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".doc",
+                ".docx",
+                ".xls",
+                ".xlsx",
+                ".ppt",
+                ".pptx",
+            }
+            ext = os.path.splitext(self.file.name)[1].lower()
+            if ext not in allowed_extensions:
+                raise ValidationError(
+                    "Разрешены только файлы: PDF, JPG, PNG, DOC(X), XLS(X), PPT(X)."
+                )
+
+    def generate_thumbnail(self):
+        """Генерация миниатюры для изображений и PDF"""
         try:
             if self.extension == "PDF":
-                # Генерация миниатюры из первой страницы PDF
-                self.file.seek(0)  # Сбрасываем указатель файла
+                self.file.seek(0)
                 pages = convert_from_bytes(
                     self.file.read(), dpi=150, first_page=1, last_page=1
                 )
-                buffer = BytesIO()
-                pages[0].save(buffer, format="JPEG")
-                self.thumbnail.save(
-                    f"{self.pk}_thumb.jpg", ContentFile(buffer.getvalue()), save=False
-                )
-            elif self.extension in ("JPG", "JPEG", "PNG"):
-                # Генерация миниатюры из изображения
-                self.file.seek(0)  # Сбрасываем указатель файла
-                image = Image.open(self.file)
-                image.thumbnail((300, 400))
-                buffer = BytesIO()
-                image.save(buffer, format="JPEG")
-                self.thumbnail.save(
-                    f"{self.pk}_thumb.jpg", ContentFile(buffer.getvalue()), save=False
-                )
-            elif self.extension in ("DOC", "DOCX"):
-                pass
-        except Exception as e:
-            logger.error(f"Не удалось создать миниатюру для {self.file.name}: {e}")
-            if request:
-                messages.error(
-                    request,
-                    f"Не удалось создать миниатюру для {self.file.name}. Проверьте файл.",
-                )
+                image = pages[0]
 
-    def save(self, *args, request=None, **kwargs):
-        """Пользовательский метод сохранения с генерацией миниатюры."""
+            elif self.extension in ("JPG", "JPEG", "PNG"):
+                self.file.seek(0)
+                image = Image.open(self.file)
+                image.load()
+                image.thumbnail((300, 400))
+
+            else:
+                logger.warning(
+                    f"Миниатюра не поддерживается для файла: {self.extension}"
+                )
+                return
+
+            buffer = BytesIO()
+            image.convert("RGB").save(buffer, format="JPEG", quality=80)
+            thumb_name = f"{self.pk}_thumb.jpg"
+            self.thumbnail.save(thumb_name, ContentFile(buffer.getvalue()), save=False)
+
+        except Exception as e:
+            logger.error(
+                f"Ошибка генерации миниатюры для документа #{self.id}: {e}",
+                exc_info=True,
+            )
+
+    def save(self, *args, **kwargs):
+        is_new = self._state.adding
+        super().save(*args, **kwargs)
+
         needs_thumbnail = (
             self.file
             and self.extension in ("PDF", "JPG", "JPEG", "PNG")
-            and (not self.thumbnail or self.file != self._original_file)
+            and (
+                not self.thumbnail
+                or self.file.name != getattr(self._original_file, "name", None)
+            )
         )
 
-        super().save(*args, **kwargs)
-
         if needs_thumbnail:
-            self.generate_thumbnail(request=request)
-            super().save(*args, **kwargs)
+            # Отправляем задачу в Celery
+            generate_thumbnail_async.delay(self.pk)
 
         self._original_file = self.file
