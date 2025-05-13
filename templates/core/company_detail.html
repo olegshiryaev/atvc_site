@@ -132,7 +132,7 @@
                                     </span>
                                 </div>
                                 <div class="card-body d-flex flex-column">
-                                    <h6 class="documents-card__title">{{ doc.title|truncatechars:100 }}</h6>
+                                    <div class="documents-card__title">{{ doc.title|truncatechars:100 }}</div>
                                     {% if doc.file.size %}
                                         <small class="text-muted">{{ doc.file.size|filesizeformat }}</small>
                                     {% endif %}
