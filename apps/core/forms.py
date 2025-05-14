@@ -1,5 +1,5 @@
 from django import forms
-from .models import Application, Document, Feedback
+from .models import Application, Document, Feedback, Order
 from django.core.validators import RegexValidator
 
 
@@ -128,3 +128,17 @@ class FeedbackForm(forms.ModelForm):
         if phone:
             self.phone_validator(phone)
         return phone
+
+
+
+class OrderForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['full_name', 'phone', 'street', 'house', 'comment']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7 (___) ___-__-__'}),
+            'street': forms.TextInput(attrs={'class': 'form-control'}),
+            'house': forms.TextInput(attrs={'class': 'form-control'}),
+            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }

@@ -1,23 +1,512 @@
-<!-- templates/tariffs/tariff_detail.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ tariff.name }}</title>
-</head>
-<body>
-    <h1>{{ tarifficariff.name }}</h1>
-    <p>Цена: {{ tariff.price }} ₽/мес</p>
-    {% if tariff.speed %}
-        <p>Скорость: {{ tariff.speed }} Мбит/с</p>
-    {% endif %}
-    {% if tariff.channels %}
-        <p>ТВ-каналов: {{ tariff.channels }}</p>
-    {% endif %}
-    {% if tariff.hd_channels %}
-        <p>HD-каналов: {{ tariff.hd_channels }}</p>
-    {% endif %}
-    <p>{{ tariff.description|safe }}</p>
-    <p>Доступно в: {{ tariff.get_localities }}</p>
-    <a href="#">Назад к списку тарифов</a>
-</body>
-</html>
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        {% include 'partials/page_header.html' with title=title %}
+        <!-- Основной контент -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Хлебные крошки -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Главная</a></li>
+                        <li class="breadcrumb-item"><a href="#">Интернет</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Подключение тарифа</li>
+                    </ol>
+                </nav>
+
+                <h1 class="mb-4">Подключение тарифа "Максимальный"</h1>
+                
+                <!-- Информация о тарифе -->
+                <div class="card mb-4 border-0 shadow-sm card-hover">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="mb-3">{{ tariff.name }}</h3>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="badge bg-primary tariff-badge"><i class="bi bi-speedometer2 me-1"></i>{{ tariff.speed }} Мбит/с</span>
+                                    <span class="badge bg-success tariff-badge"><i class="bi bi-router me-1"></i>Wi-Fi роутер в подарок</span>
+                                    <span class="badge bg-info tariff-badge"><i class="bi bi-tv me-1"></i>100 ТВ-каналов</span>
+                                </div>
+                                <p class="text-muted">Идеальный тариф для больших семей и активных пользователей. Высокая скорость для комфортного просмотра 4K-видео, онлайн-игр и работы с облачными сервисами.</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 text-primary">{{ tariff.price }} ₽</div>
+                                <small class="text-muted">в месяц</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Навигация по разделам -->
+                <ul class="nav nav-pills mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" type="button" role="tab">
+                            <i class="bi bi-router me-1"></i>Оборудование
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" type="button" role="tab">
+                            <i class="bi bi-plus-circle me-1"></i>Дополнительные услуги
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Контент разделов -->
+                <div class="tab-content" id="myTabContent">
+                    <!-- Оборудование -->
+                    <div class="tab-pane fade show active" id="equipment" role="tabpanel">
+                        <h3 class="mb-4">Выберите оборудование</h3>
+                        <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
+                        
+                        <div class="row g-4">
+                            <!-- Роутер 1 -->
+                            <div class="col-md-6">
+                                <div class="card equipment-item h-100" onclick="selectEquipment(this, 2990)">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-light p-3 rounded me-3">
+                                                <i class="bi bi-router text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0">Wi-Fi роутер TP-Link Archer C6</h5>
+                                                <span class="text-muted">AC1200</span>
+                                            </div>
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Двухдиапазонный (2.4 ГГц + 5 ГГц)</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>4 LAN порта</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Скорость до 1200 Мбит/с</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">2 990 ₽</div>
+                                            <div class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.7</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Роутер 2 -->
+                            <div class="col-md-6">
+                                <div class="card equipment-item h-100" onclick="selectEquipment(this, 4990)">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-light p-3 rounded me-3">
+                                                <i class="bi bi-router text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0">Wi-Fi роутер ASUS RT-AX55</h5>
+                                                <span class="text-muted">AX1800</span>
+                                            </div>
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Wi-Fi 6 (802.11ax)</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>4 LAN порта</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Скорость до 1800 Мбит/с</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">4 990 ₽</div>
+                                            <div class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.9</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Точка доступа -->
+                            <div class="col-md-6">
+                                <div class="card equipment-item h-100" onclick="selectEquipment(this, 2490)">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-light p-3 rounded me-3">
+                                                <i class="bi bi-wifi text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0">Точка доступа TP-Link EAP225</h5>
+                                                <span class="text-muted">AC1200</span>
+                                            </div>
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Для бизнеса и больших помещений</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Поддержка PoE</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Управление через облако</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">2 490 ₽</div>
+                                            <div class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.8</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Кабель -->
+                            <div class="col-md-6">
+                                <div class="card equipment-item h-100" onclick="selectEquipment(this, 490)">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-light p-3 rounded me-3">
+                                                <i class="bi bi-plug text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0">Кабель Ethernet 10 м</h5>
+                                                <span class="text-muted">Cat.6</span>
+                                            </div>
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Экранированный</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Поддержка до 10 Гбит/с</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>Долговечные коннекторы</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">490 ₽</div>
+                                            <div class="badge bg-light text-dark"><i class="bi bi-star-fill text-warning"></i> 4.5</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="noEquipment" onclick="toggleNoEquipment()">
+                            <label class="form-check-label" for="noEquipment">
+                                У меня есть свое оборудование, ничего не нужно
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Дополнительные услуги -->
+                    <div class="tab-pane fade" id="services" role="tabpanel">
+                        <h3 class="mb-4">Дополнительные услуги</h3>
+                        <p class="text-muted mb-4">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
+                        
+                        <div class="row g-4">
+                            <!-- Услуга 1 -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="staticIp" onclick="updateService('staticIp', 100)">
+                                            <label class="form-check-label" for="staticIp">
+                                                <h5>Статический IP-адрес</h5>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted">Фиксированный IP-адрес для доступа к вашим устройствам из интернета. Необходим для организации серверов, видеонаблюдения и удаленного доступа.</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">100 ₽/мес</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Услуга 2 -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="antivirus" onclick="updateService('antivirus', 150)">
+                                            <label class="form-check-label" for="antivirus">
+                                                <h5>Антивирусная защита</h5>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted">Комплексная защита всех ваших устройств от вирусов, троянов, шпионского ПО и других интернет-угроз. Лицензия на 5 устройств.</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">150 ₽/мес</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Услуга 3 -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="parentControl" onclick="updateService('parentControl', 50)">
+                                            <label class="form-check-label" for="parentControl">
+                                                <h5>Родительский контроль</h5>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted">Ограничение доступа к нежелательным сайтам, контроль времени использования интернета, защита детей от опасного контента.</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">50 ₽/мес</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Услуга 4 -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="cloudStorage" onclick="updateService('cloudStorage', 200)">
+                                            <label class="form-check-label" for="cloudStorage">
+                                                <h5>Облачное хранилище 1 ТБ</h5>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted">Надежное хранение ваших файлов с доступом из любой точки мира. Автоматическое резервное копирование фотографий и документов.</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">200 ₽/мес</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Форма заявки -->
+                <div class="card mt-5 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-4">Оформление заявки</h3>
+                        <form id="orderForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Ваше имя</label>
+                                    <input type="text" class="form-control" id="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Номер телефона</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="street" class="form-label">Улица</label>
+                                    <input type="text" class="form-control" id="street" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="house" class="form-label">Дом</label>
+                                    <input type="text" class="form-control" id="house" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="comments" class="form-label">Комментарий (необязательно)</label>
+                                    <textarea class="form-control" id="comments" rows="2"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agree" required>
+                                        <label class="form-check-label" for="agree">
+                                            Я согласен на обработку персональных данных и ознакомлен с <a href="#">договором оферты</a>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="bi bi-send-fill me-2"></i>Отправить заявку
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Блок с итоговой стоимостью -->
+            <div class="col-lg-4">
+                <div class="card summary-card shadow-sm border-0">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Итоговая стоимость</h3>
+                        
+                        <div class="mb-4">
+                            <h5>Тариф</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>{{ tariff.name }}</span>
+                                <span>1 500 ₽/мес</span>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4" id="equipmentSummary">
+                            <h5>Оборудование</h5>
+                            <div class="text-muted">Не выбрано</div>
+                        </div>
+                        
+                        <div class="mb-4" id="servicesSummary">
+                            <h5>Дополнительные услуги</h5>
+                            <div class="text-muted">Не выбрано</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <h5>Подключение</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>Разово</span>
+                                <span>200 ₽</span>
+                            </div>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5>Итого к оплате:</h5>
+                            <h5 id="totalPrice">200 ₽</h5>
+                        </div>
+                        
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+                        </div>
+                        
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-gift-fill me-2"></i>
+                            <small>При подключении вы получаете бесплатный месяц антивирусной защиты в подарок!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+        // Глобальные переменные для хранения выбранных опций
+        let selectedEquipment = null;
+        let selectedEquipmentPrice = 0;
+        let selectedServices = {};
+        let totalServicesPrice = 0;
+        const connectionPrice = 200;
+        
+        // Функция выбора оборудования
+        function selectEquipment(element, price) {
+            // Снимаем выделение со всех карточек оборудования
+            document.querySelectorAll('.equipment-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // Выделяем выбранную карточку
+            element.classList.add('selected');
+            
+            // Сохраняем выбранное оборудование
+            selectedEquipment = element.querySelector('h5').textContent;
+            selectedEquipmentPrice = price;
+            
+            // Обновляем блок с итоговой стоимостью
+            updateEquipmentSummary();
+            calculateTotal();
+            
+            // Снимаем галочку "У меня есть свое оборудование"
+            document.getElementById('noEquipment').checked = false;
+        }
+        
+        // Функция для галочки "У меня есть свое оборудование"
+        function toggleNoEquipment() {
+            const noEquipmentChecked = document.getElementById('noEquipment').checked;
+            
+            if (noEquipmentChecked) {
+                // Снимаем выделение со всех карточек оборудования
+                document.querySelectorAll('.equipment-item').forEach(item => {
+                    item.classList.remove('selected');
+                });
+                
+                selectedEquipment = "Свое оборудование";
+                selectedEquipmentPrice = 0;
+            } else {
+                selectedEquipment = null;
+                selectedEquipmentPrice = 0;
+            }
+            
+            updateEquipmentSummary();
+            calculateTotal();
+        }
+        
+        // Функция обновления дополнительных услуг
+        function updateService(serviceId, price) {
+            const serviceCheckbox = document.getElementById(serviceId);
+            const serviceName = serviceCheckbox.nextElementSibling.textContent.trim();
+            
+            if (serviceCheckbox.checked) {
+                selectedServices[serviceId] = {
+                    name: serviceName,
+                    price: price
+                };
+            } else {
+                delete selectedServices[serviceId];
+            }
+            
+            // Пересчитываем общую стоимость услуг
+            totalServicesPrice = Object.values(selectedServices).reduce((sum, service) => sum + service.price, 0);
+            
+            // Обновляем блок с итоговой стоимостью
+            updateServicesSummary();
+            calculateTotal();
+        }
+        
+        // Функция обновления блока с оборудованием в итоговой стоимости
+        function updateEquipmentSummary() {
+            const equipmentSummary = document.getElementById('equipmentSummary');
+            
+            if (selectedEquipment) {
+                equipmentSummary.innerHTML = `
+                    <h5>Оборудование</h5>
+                    <div class="d-flex justify-content-between">
+                        <span>${selectedEquipment}</span>
+                        <span>${selectedEquipmentPrice.toLocaleString()} ₽</span>
+                    </div>
+                `;
+            } else {
+                equipmentSummary.innerHTML = `
+                    <h5>Оборудование</h5>
+                    <div class="text-muted">Не выбрано</div>
+                `;
+            }
+        }
+        
+        // Функция обновления блока с услугами в итоговой стоимости
+        function updateServicesSummary() {
+            const servicesSummary = document.getElementById('servicesSummary');
+            
+            if (Object.keys(selectedServices).length > 0) {
+                let servicesHtml = '<h5>Дополнительные услуги</h5>';
+                
+                for (const serviceId in selectedServices) {
+                    servicesHtml += `
+                        <div class="d-flex justify-content-between">
+                            <span>${selectedServices[serviceId].name}</span>
+                            <span>${selectedServices[serviceId].price.toLocaleString()} ₽/мес</span>
+                        </div>
+                    `;
+                }
+                
+                servicesSummary.innerHTML = servicesHtml;
+            } else {
+                servicesSummary.innerHTML = `
+                    <h5>Дополнительные услуги</h5>
+                    <div class="text-muted">Не выбрано</div>
+                `;
+            }
+        }
+        
+        // Функция расчета общей стоимости
+        function calculateTotal() {
+            const totalPriceElement = document.getElementById('totalPrice');
+            const total = connectionPrice + selectedEquipmentPrice;
+            
+            totalPriceElement.textContent = `${total.toLocaleString()} ₽`;
+        }
+        
+        // Обработка отправки формы
+        document.getElementById('orderForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Здесь можно добавить отправку данных на сервер
+            alert('Заявка успешно отправлена! Наш менеджер свяжется с вами в ближайшее время.');
+            
+            // Очистка формы (для демонстрации)
+            this.reset();
+            
+            // Сброс выбранных опций
+            document.querySelectorAll('.equipment-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            document.querySelectorAll('.form-check-input').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            
+            selectedEquipment = null;
+            selectedEquipmentPrice = 0;
+            selectedServices = {};
+            totalServicesPrice = 0;
+            
+            updateEquipmentSummary();
+            updateServicesSummary();
+            calculateTotal();
+        });
+    </script>
+{% endblock %}

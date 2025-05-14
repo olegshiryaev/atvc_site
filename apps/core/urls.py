@@ -8,6 +8,7 @@ from .views import (
     index,
     internet_tariffs,
     office_list,
+    order_create,
     submit_application,
     FeedbackCreateView,
 )
@@ -17,6 +18,7 @@ app_name = "core"
 urlpatterns = [
     path("", index, name="home"),
     path("tariffs/<slug:slug>/", TariffDetailView.as_view(), name="tariff_detail"),
+    path('order/<slug:slug>/', order_create, name='order_create'),
     path("about/", about_company, name="about"),
     path("offices/", office_list, name="office_list"),
     path("rekvizity-i-dokumenty/", company_detail, name="company_detail"),

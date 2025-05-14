@@ -1,0 +1,333 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        {% include 'partials/page_header.html' with title=title %}
+        <!-- Основной контент -->
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Хлебные крошки -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="#">Главная</a></li>
+                        <li class="breadcrumb-item"><a href="#">Интернет</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Подключение тарифа</li>
+                    </ol>
+                </nav>
+                <h1 class="mb-4">Подключение тарифа "{{ tariff.name }}"</h1>
+
+                <!-- Информация о тарифе -->
+                <div class="card mb-4 border-0 shadow-sm card-hover">
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <h3 class="mb-3">{{ tariff.name }}</h3>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <span class="badge bg-primary tariff-badge">
+                                        <i class="bi bi-speedometer2 me-1"></i>{{ tariff.speed }} Мбит/с
+                                    </span>
+                                    {% if tariff.free_router %}
+                                        <span class="badge bg-success tariff-badge">
+                                            <i class="bi bi-router me-1"></i>Wi-Fi роутер в подарок
+                                        </span>
+                                    {% endif %}
+                                    {% if tariff.tv_channels %}
+                                        <span class="badge bg-info tariff-badge">
+                                            <i class="bi bi-tv me-1"></i>{{ tariff.tv_channels }} ТВ-каналов
+                                        </span>
+                                    {% endif %}
+                                </div>
+                                <p class="text-muted">{{ tariff.description }}</p>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                <div class="display-4 text-primary">{{ tariff.price }} ₽</div>
+                                <small class="text-muted">в месяц</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Навигация по разделам -->
+                <ul class="nav nav-pills mb-4" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" type="button" role="tab">
+                            <i class="bi bi-router me-1"></i>Оборудование
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" type="button" role="tab">
+                            <i class="bi bi-plus-circle me-1"></i>Дополнительные услуги
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Контент разделов -->
+                <div class="tab-content" id="myTabContent">
+
+                    <!-- Оборудование -->
+                    <div class="tab-pane fade show active" id="equipment" role="tabpanel">
+                        <h3 class="mb-4">Выберите оборудование</h3>
+                        <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
+                        <div class="row g-4">
+                            {% for equipment in equipments %}
+                            <div class="col-md-6">
+                                <div class="card equipment-item h-100" onclick="selectEquipment(this, {{ equipment.price }})">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="bg-light p-3 rounded me-3">
+                                                <i class="bi bi-router text-primary" style="font-size: 2rem;"></i>
+                                            </div>
+                                            <div>
+                                                <h5 class="mb-0">{{ equipment.name }}</h5>
+                                                <span class="text-muted">{{ equipment.model }}</span>
+                                            </div>
+                                        </div>
+                                        <ul class="list-unstyled">
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{{ equipment.feature_1 }}</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{{ equipment.feature_2 }}</li>
+                                            <li><i class="bi bi-check-circle-fill text-success me-2"></i>{{ equipment.feature_3 }}</li>
+                                        </ul>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">{{ equipment.price }} ₽</div>
+                                            {% if equipment.rating %}
+                                            <div class="badge bg-light text-dark">
+                                                <i class="bi bi-star-fill text-warning"></i> {{ equipment.rating }}
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <div class="form-check mt-4">
+                            <input class="form-check-input" type="checkbox" id="noEquipment" onclick="toggleNoEquipment()">
+                            <label class="form-check-label" for="noEquipment">
+                                У меня есть свое оборудование, ничего не нужно
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Дополнительные услуги -->
+                    <div class="tab-pane fade" id="services" role="tabpanel">
+                        <h3 class="mb-4">Дополнительные услуги</h3>
+                        <p class="text-muted mb-4">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
+                        <div class="row g-4">
+                            {% for service in services %}
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="{{ service.slug }}" onclick="updateService('{{ service.slug }}', {{ service.price }})">
+                                            <label class="form-check-label" for="{{ service.slug }}">
+                                                <h5>{{ service.name }}</h5>
+                                            </label>
+                                        </div>
+                                        <p class="text-muted">{{ service.description }}</p>
+                                        <div class="d-flex justify-content-between align-items-center mt-3">
+                                            <div class="h5 mb-0">{{ service.price }} ₽/мес</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Форма заявки -->
+                <div class="card mt-5 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h3 class="mb-4">Оформление заявки</h3>
+                        <form id="orderForm" method="post">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Ваше имя</label>
+                                    <input type="text" name="name" class="form-control" id="name" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Номер телефона</label>
+                                    <input type="tel" name="phone" class="form-control" id="phone" required>
+                                </div>
+                                <div class="col-md-8">
+                                    <label for="street" class="form-label">Улица</label>
+                                    <input type="text" name="street" class="form-control" id="street" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="house" class="form-label">Дом</label>
+                                    <input type="text" name="house" class="form-control" id="house" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="comments" class="form-label">Комментарий (необязательно)</label>
+                                    <textarea name="comments" class="form-control" id="comments" rows="2"></textarea>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="agree" required>
+                                        <label class="form-check-label" for="agree">
+                                            Я согласен на обработку персональных данных и ознакомлен с <a href="#">договором оферты</a>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-12 mt-3">
+                                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                                        <i class="bi bi-send-fill me-2"></i>Отправить заявку
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Итоговая стоимость -->
+            <div class="col-lg-4">
+                <div class="card summary-card shadow-sm border-0">
+                    <div class="card-body">
+                        <h3 class="card-title mb-4">Итоговая стоимость</h3>
+                        <div class="mb-4">
+                            <h5>Тариф</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>{{ tariff.name }}</span>
+                                <span>{{ tariff.price }} ₽/мес</span>
+                            </div>
+                        </div>
+                        <div class="mb-4" id="equipmentSummary">
+                            <h5>Оборудование</h5>
+                            <div class="text-muted">Не выбрано</div>
+                        </div>
+                        <div class="mb-4" id="servicesSummary">
+                            <h5>Дополнительные услуги</h5>
+                            <div class="text-muted">Не выбрано</div>
+                        </div>
+                        <div class="mb-4">
+                            <h5>Подключение</h5>
+                            <div class="d-flex justify-content-between">
+                                <span>Разово</span>
+                                <span id="connectionPrice">{{ tariff.connection_price }} ₽</span>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between mb-2">
+                            <h5>Итого к оплате:</h5>
+                            <h5 id="totalPrice">200 ₽</h5>
+                        </div>
+                        <div class="alert alert-info mt-4">
+                            <i class="bi bi-info-circle-fill me-2"></i>
+                            <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+                        </div>
+                        <div class="alert alert-success mt-3">
+                            <i class="bi bi-gift-fill me-2"></i>
+                            <small>При подключении вы получаете бесплатный месяц антивирусной защиты в подарок!</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedEquipment = null;
+    let selectedEquipmentPrice = 0;
+    let selectedServices = {};
+    let totalServicesPrice = 0;
+
+    const connectionPrice = parseInt(document.getElementById('connectionPrice').textContent);
+
+    function selectEquipment(element, price) {
+        document.querySelectorAll('.equipment-item').forEach(item => item.classList.remove('selected'));
+        element.classList.add('selected');
+        selectedEquipment = element.querySelector('h5').textContent;
+        selectedEquipmentPrice = price;
+        updateEquipmentSummary();
+        calculateTotal();
+        document.getElementById('noEquipment').checked = false;
+    }
+
+    function toggleNoEquipment() {
+        const noEquipmentChecked = document.getElementById('noEquipment').checked;
+        if (noEquipmentChecked) {
+            document.querySelectorAll('.equipment-item').forEach(item => item.classList.remove('selected'));
+            selectedEquipment = "Свое оборудование";
+            selectedEquipmentPrice = 0;
+        } else {
+            selectedEquipment = null;
+            selectedEquipmentPrice = 0;
+        }
+        updateEquipmentSummary();
+        calculateTotal();
+    }
+
+    function updateService(serviceId, price) {
+        const checkbox = document.getElementById(serviceId);
+        const name = checkbox.nextElementSibling.textContent.trim();
+        if (checkbox.checked) {
+            selectedServices[serviceId] = { name, price };
+        } else {
+            delete selectedServices[serviceId];
+        }
+        totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
+        updateServicesSummary();
+        calculateTotal();
+    }
+
+    function updateEquipmentSummary() {
+        const container = document.getElementById('equipmentSummary');
+        if (selectedEquipment) {
+            container.innerHTML = `
+                <h5>Оборудование</h5>
+                <div class="d-flex justify-content-between">
+                    <span>${selectedEquipment}</span>
+                    <span>${selectedEquipmentPrice.toLocaleString()} ₽</span>
+                </div>`;
+        } else {
+            container.innerHTML = `<h5>Оборудование</h5><div class="text-muted">Не выбрано</div>`;
+        }
+    }
+
+    function updateServicesSummary() {
+        const container = document.getElementById('servicesSummary');
+        if (Object.keys(selectedServices).length > 0) {
+            let html = '<h5>Дополнительные услуги</h5>';
+            for (const key in selectedServices) {
+                html += `
+                    <div class="d-flex justify-content-between">
+                        <span>${selectedServices[key].name}</span>
+                        <span>${selectedServices[key].price.toLocaleString()} ₽/мес</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<h5>Дополнительные услуги</h5><div class="text-muted">Не выбрано</div>`;
+        }
+    }
+
+    function calculateTotal() {
+        const totalPrice = connectionPrice + selectedEquipmentPrice;
+        document.getElementById('totalPrice').textContent = `${totalPrice.toLocaleString()} ₽`;
+    }
+
+    // Отправка формы
+    document.getElementById('orderForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Здесь можно отправить данные через fetch или axios
+        alert('Заявка успешно отправлена!');
+
+        this.reset();
+        document.querySelectorAll('.equipment-item').forEach(i => i.classList.remove('selected'));
+        document.querySelectorAll('.form-check-input').forEach(c => c.checked = false);
+        selectedEquipment = null;
+        selectedEquipmentPrice = 0;
+        selectedServices = {};
+        totalServicesPrice = 0;
+        updateEquipmentSummary();
+        updateServicesSummary();
+        calculateTotal();
+    });
+</script>
+
+{% endblock %}

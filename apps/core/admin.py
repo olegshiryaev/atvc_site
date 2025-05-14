@@ -7,13 +7,15 @@ from django.utils.html import format_html
 from apps.cities.models import Locality
 from apps.core.forms import DocumentForm
 from .models import (
+    AdditionalService,
     Application,
     Banner,
     Company,
-    Device,
+    Equipment,
     Document,
     Feedback,
     Office,
+    Order,
     Service,
     TVChannel,
     Tariff,
@@ -140,16 +142,16 @@ class TariffAdmin(admin.ModelAdmin):
         css = {"all": ("fontawesome/css/all.min.css",)}
 
 
-@admin.register(Device)
-class DeviceAdmin(admin.ModelAdmin):
-    list_display = ("image_thumb", "name", "device_type", "price", "get_service_types")
-    list_filter = ("device_type", "service_types")
+@admin.register(Equipment)
+class EquipmentAdmin(admin.ModelAdmin):
+    list_display = ("image_thumb", "name", "equipment_type", "price", "get_service_types")
+    list_filter = ("equipment_type", "service_types")
     search_fields = ("name", "description")
     autocomplete_fields = ("service_types",)
     filter_horizontal = ("service_types",)
     readonly_fields = ("image_preview",)
     fieldsets = (
-        (None, {"fields": ("name", "device_type", "price", "description")}),
+        (None, {"fields": ("name", "equipment_type", "price", "description")}),
         ("Изображение", {"fields": ("image", "image_preview")}),
         ("Услуги", {"fields": ("service_types",)}),
     )
@@ -322,3 +324,50 @@ class DocumentAdmin(admin.ModelAdmin):
             return "-"
 
     thumbnail_preview.short_description = "Миниатюра"
+
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    list_display = ('full_name', 'phone', 'tariff', 'equipment_summary', 'total_services', 'total_cost', 'created_at')
+    list_filter = ('tariff', 'equipment', 'created_at')
+    search_fields = ('full_name', 'phone', 'street', 'house')
+    readonly_fields = ('created_at',)
+    fieldsets = (
+        ('Информация о клиенте', {
+            'fields': ('full_name', 'phone')
+        }),
+        ('Адрес', {
+            'fields': ('street', 'house')
+        }),
+        ('Тариф и оборудование', {
+            'fields': ('tariff', 'equipment')
+        }),
+        ('Дополнительные услуги', {
+            'fields': ('services',)
+        }),
+        ('Комментарий и дата', {
+            'fields': ('comment', 'created_at')
+        }),
+    )
+
+    def equipment_summary(self, obj):
+        return obj.equipment.name if obj.equipment else '-'
+    equipment_summary.short_description = 'Оборудование'
+
+    def total_services(self, obj):
+        return ", ".join(service.name for service in obj.services.all()) or '-'
+    total_services.short_description = 'Услуги'
+
+    def total_cost(self, obj):
+        return f"{obj.total_cost()} ₽"
+    total_cost.short_description = 'Сумма к оплате'
+
+
+@admin.register(AdditionalService)
+class AdditionalServiceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price', 'description_short')
+    search_fields = ('name',)
+
+    def description_short(self, obj):
+        return obj.description[:50] + '...' if obj.description and len(obj.description) > 50 else obj.description
+    description_short.short_description = 'Описание'

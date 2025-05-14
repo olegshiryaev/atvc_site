@@ -6,8 +6,8 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 
-from .forms import ApplicationForm, ContactForm, FeedbackCreateForm, FeedbackForm
-from .models import Banner, Company, Device, Office, Service, Tariff, Feedback
+from .forms import ApplicationForm, ContactForm, FeedbackCreateForm, FeedbackForm, OrderForm
+from .models import AdditionalService, Banner, Company, Equipment, Office, Service, Tariff, Feedback
 from ..cities.models import Locality
 from ..news.models import News
 from ..services.utils import get_client_ip
@@ -148,13 +148,13 @@ def internet_tariffs(request, locality_slug):
     tariffs = Tariff.objects.filter(
         service=service, localities__slug=locality_slug, is_active=True
     )
-    devices = Device.objects.filter(service_types=service).distinct()
+    equipments = Equipment.objects.filter(service_types=service).distinct()
     return render(
         request,
         "tariffs/internet.html",
         {
             "tariffs": tariffs,
-            "devices": devices,
+            "equipments": equipments,
             "locality_slug": locality_slug,
             "locality": locality,
         },
@@ -273,3 +273,40 @@ def feedback_form(request, locality_slug):
         return render(
             request, "includes/feedback_form.html", {"form": form, "locality": locality}
         )
+
+
+def order_create(request, locality_slug, slug):
+    # Получаем активный населённый пункт
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+
+    # Получаем тариф
+    tariff = get_object_or_404(Tariff, slug=slug)
+
+    equipments = Equipment.objects.all()
+    services = AdditionalService.objects.all()
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.tariff = tariff
+            order.locality = locality  # если у модели Order есть поле locality
+            order.save()
+
+            selected_services = request.POST.getlist('services')
+            if selected_services:
+                order.services.set(selected_services)
+
+            return redirect('order_success', pk=order.pk)
+
+    else:
+        form = OrderForm()
+
+    return render(request, 'core/tariffs/order_create.html', {
+        'title': f'Заявка на подключение "{tariff.name}"',
+        'tariff': tariff,
+        'equipments': equipments,
+        'services': services,
+        'form': form,
+        'locality': locality,
+    })

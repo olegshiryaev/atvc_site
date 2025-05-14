@@ -180,7 +180,8 @@ class Tariff(models.Model):
         blank=True,
     )
     price = models.IntegerField("Цена (руб/мес)", validators=[MinValueValidator(0)])
-    description = RichTextField("Описание", blank=True)
+    connection_price = models.PositiveIntegerField("Стоимость подключения (₽)", default=200)
+    description = RichTextField("Описание", blank=True, null=True)
     localities = models.ManyToManyField(
         Locality,
         blank=True,
@@ -210,19 +211,19 @@ class Tariff(models.Model):
         ordering = ["name", "price"]
 
 
-class Device(models.Model):
-    DEVICE_TYPE_CHOICES = [
+class Equipment(models.Model):
+    EQUIPMENT_TYPE_CHOICES = [
         ("router", "Роутер"),
         ("camera", "Видеокамера"),
         ("tv_box", "ТВ-приставка"),
         ("other", "Другое"),
     ]
 
-    device_type = models.CharField(
-        verbose_name="Тип устройства", max_length=20, choices=DEVICE_TYPE_CHOICES
+    equipment_type = models.CharField(
+        verbose_name="Тип устройства", max_length=20, choices=EQUIPMENT_TYPE_CHOICES
     )
     name = models.CharField(verbose_name="Название", max_length=255)
-    description = models.TextField(verbose_name="Описание", blank=True)
+    description = models.TextField(verbose_name="Описание", blank=True, null=True)
     price = models.IntegerField(verbose_name="Цена")
     image = models.ImageField(
         verbose_name="Изображение", upload_to="devices/", blank=True, null=True
@@ -538,3 +539,34 @@ class Document(models.Model):
             generate_thumbnail_async.delay(self.pk)
 
         self._original_file = self.file
+
+
+class AdditionalService(models.Model):
+    name = models.CharField("Название услуги", max_length=200)
+    price = models.PositiveIntegerField("Цена в месяц (₽)")
+    description = models.TextField("Описание", blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
+
+class Order(models.Model):
+    tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, verbose_name="Тариф")
+    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Оборудование")
+    services = models.ManyToManyField(AdditionalService, blank=True, verbose_name="Доп. услуги")
+    full_name = models.CharField("ФИО", max_length=255)
+    phone = models.CharField("Телефон", max_length=20)
+    street = models.CharField("Улица", max_length=255)
+    house = models.CharField("Дом", max_length=20)
+    comment = models.TextField("Комментарий", blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def total_cost(self):
+        """Вычисляет общую сумму к оплате при подключении."""
+        equipment_price = self.equipment.price if self.equipment else 0
+        services_monthly = sum(service.price for service in self.services.all())
+        connection_fee = 200
+        return equipment_price + connection_fee
+
+    def __str__(self):
+        return f"Заявка от {self.full_name} на тариф {self.tariff.name}"
