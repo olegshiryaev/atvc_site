@@ -1808,7 +1808,7 @@ a {
 
 .card-hover:hover {
     transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
 .form-control:focus {
@@ -1845,4 +1845,26 @@ a {
 }
 .nav-pills .nav-link {
     color: #495057;
+}
+
+/* Стили для категорий */
+.category-filter {
+    cursor: pointer;
+    margin-right: 10px; /* Расстояние между категориями */
+    text-decoration: none; /* Убираем подчёркивание по умолчанию */
+    color: #333; /* Цвет текста */
+    transition: text-decoration 0.3s ease; /* Плавное подчёркивание */
+}
+
+/* Активная категория */
+.category-filter.active {
+    text-decoration: underline; /* Подчёркивание при активном состоянии */
+    color: #007bff; /* Цвет активной категории */
+}
+
+/* Стили для контейнера категорий */
+.category-filter-container {
+    display: flex;
+    flex-wrap: wrap; /* Разрешаем перенос строк при необходимости */
+    gap: 10px; /* Расстояние между категориями */
 }

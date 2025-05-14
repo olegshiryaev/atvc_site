@@ -18,6 +18,7 @@ from .models import (
     Order,
     Service,
     TVChannel,
+    TVChannelPackage,
     Tariff,
     WorkSchedule,
 )
@@ -144,7 +145,13 @@ class TariffAdmin(admin.ModelAdmin):
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):
-    list_display = ("image_thumb", "name", "equipment_type", "price", "get_service_types")
+    list_display = (
+        "image_thumb",
+        "name",
+        "equipment_type",
+        "price",
+        "get_service_types",
+    )
     list_filter = ("equipment_type", "service_types")
     search_fields = ("name", "description")
     autocomplete_fields = ("service_types",)
@@ -328,46 +335,82 @@ class DocumentAdmin(admin.ModelAdmin):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'phone', 'tariff', 'equipment_summary', 'total_services', 'total_cost', 'created_at')
-    list_filter = ('tariff', 'equipment', 'created_at')
-    search_fields = ('full_name', 'phone', 'street', 'house')
-    readonly_fields = ('created_at',)
+    list_display = (
+        "full_name",
+        "phone",
+        "locality",
+        "tariff",
+        "equipment_summary",
+        "total_services",
+        "total_cost",
+        "created_at",
+    )
+    list_filter = ("status", "locality", "tariff")
+    search_fields = ("full_name", "phone", "street", "house")
+    readonly_fields = ("created_at",)
     fieldsets = (
-        ('Информация о клиенте', {
-            'fields': ('full_name', 'phone')
-        }),
-        ('Адрес', {
-            'fields': ('street', 'house')
-        }),
-        ('Тариф и оборудование', {
-            'fields': ('tariff', 'equipment')
-        }),
-        ('Дополнительные услуги', {
-            'fields': ('services',)
-        }),
-        ('Комментарий и дата', {
-            'fields': ('comment', 'created_at')
-        }),
+        ("Информация о клиенте", {"fields": ("full_name", "phone")}),
+        ("Адрес", {"fields": ("street", "house")}),
+        ("Тариф и оборудование", {"fields": ("tariff", "equipment")}),
+        ("Дополнительные услуги", {"fields": ("services",)}),
+        ("Комментарий и дата", {"fields": ("comment", "created_at")}),
     )
 
     def equipment_summary(self, obj):
-        return obj.equipment.name if obj.equipment else '-'
-    equipment_summary.short_description = 'Оборудование'
+        return obj.equipment.name if obj.equipment else "-"
+
+    equipment_summary.short_description = "Оборудование"
 
     def total_services(self, obj):
-        return ", ".join(service.name for service in obj.services.all()) or '-'
-    total_services.short_description = 'Услуги'
+        return ", ".join(service.name for service in obj.services.all()) or "-"
+
+    total_services.short_description = "Услуги"
 
     def total_cost(self, obj):
         return f"{obj.total_cost()} ₽"
-    total_cost.short_description = 'Сумма к оплате'
+
+    total_cost.short_description = "Сумма к оплате"
 
 
 @admin.register(AdditionalService)
 class AdditionalServiceAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'description_short')
-    search_fields = ('name',)
+    list_display = ("name", "price", "service_types_short")
+    search_fields = ("name",)
+    filter_horizontal = ("service_types",)
+    fieldsets = (
+        (None, {"fields": ("name", "price")}),
+        ("Связь с услугами", {"fields": ("service_types",)}),
+        ("Описание", {"fields": ("description",)}),
+    )
 
-    def description_short(self, obj):
-        return obj.description[:50] + '...' if obj.description and len(obj.description) > 50 else obj.description
-    description_short.short_description = 'Описание'
+    def service_types_short(self, obj):
+        return ", ".join([s.name for s in obj.service_types.all()])
+
+    service_types_short.short_description = "Типы услуг"
+
+
+@admin.register(TVChannelPackage)
+class TVChannelPackageAdmin(admin.ModelAdmin):
+    list_display = ("name", "price", "tariff_list", "image_tag")
+    search_fields = ("name",)
+    filter_horizontal = ("channels", "tariffs")
+    readonly_fields = ("image_tag",)
+    fieldsets = (
+        (None, {"fields": ("name", "price", "description", "image", "image_tag")}),
+        ("Связь", {"fields": ("channels", "tariffs")}),
+    )
+
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html(
+                '<img src="{}" width="100" height="100" />'.format(obj.image.url)
+            )
+        return "-"
+
+    image_tag.short_description = "Изображение"
+    image_tag.allow_tags = True
+
+    def tariff_list(self, obj):
+        return ", ".join([t.name for t in obj.tariffs.all()])
+
+    tariff_list.short_description = "Тарифы"

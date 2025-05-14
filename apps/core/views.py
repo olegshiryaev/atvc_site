@@ -6,8 +6,24 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 
-from .forms import ApplicationForm, ContactForm, FeedbackCreateForm, FeedbackForm, OrderForm
-from .models import AdditionalService, Banner, Company, Equipment, Office, Service, Tariff, Feedback
+from .forms import (
+    ApplicationForm,
+    ContactForm,
+    FeedbackCreateForm,
+    FeedbackForm,
+    OrderForm,
+)
+from .models import (
+    AdditionalService,
+    Banner,
+    Company,
+    Equipment,
+    Office,
+    Service,
+    TVChannel,
+    Tariff,
+    Feedback,
+)
 from ..cities.models import Locality
 from ..news.models import News
 from ..services.utils import get_client_ip
@@ -26,7 +42,9 @@ def index(request, locality_slug):
     )
 
     # Получаем все доступные услуги для этого населённого пункта
-    available_services = Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
+    available_services = Service.objects.filter(
+        id__in=tariffs.values_list("service_id", flat=True)
+    )
 
     # Активный фильтр
     active_filter = request.GET.get("type", "")
@@ -36,7 +54,9 @@ def index(request, locality_slug):
         active_filter = first_service.slug if first_service else ""
 
     # Фильтруем тарифы по активной услуге
-    displayed_tariffs = tariffs.filter(service__slug=active_filter) if active_filter else tariffs
+    displayed_tariffs = (
+        tariffs.filter(service__slug=active_filter) if active_filter else tariffs
+    )
 
     # AJAX-запрос для подгрузки тарифов
     if request.headers.get("X-Requested-With") == "XMLHttpRequest":
@@ -50,13 +70,16 @@ def index(request, locality_slug):
         )
         return JsonResponse({"html": tariffs_html})
 
-    latest_news = News.objects.filter(is_published=True, localities=locality).order_by("-created_at")
+    latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
+        "-created_at"
+    )
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
     context = {
         "displayed_tariffs": displayed_tariffs.order_by("price"),
         "active_filter": active_filter,
         "available_services": available_services,
+        "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,
@@ -276,37 +299,49 @@ def feedback_form(request, locality_slug):
 
 
 def order_create(request, locality_slug, slug):
-    # Получаем активный населённый пункт
+    # Получаем населённый пункт и тариф
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-
-    # Получаем тариф
     tariff = get_object_or_404(Tariff, slug=slug)
 
-    equipments = Equipment.objects.all()
-    services = AdditionalService.objects.all()
+    # Фильтруем оборудование и доп. услуги по типу услуги тарифа
+    equipments = Equipment.objects.filter(service_types=tariff.service)
+    services = AdditionalService.objects.filter(service_types=tariff.service)
 
-    if request.method == 'POST':
+    # Получаем пакеты ТВ-каналов, связанные с этим тарифом
+    tv_packages = tariff.tv_packages.all()
+
+    if request.method == "POST":
         form = OrderForm(request.POST)
         if form.is_valid():
             order = form.save(commit=False)
             order.tariff = tariff
-            order.locality = locality  # если у модели Order есть поле locality
+            order.locality = locality
             order.save()
 
-            selected_services = request.POST.getlist('services')
+            selected_services = request.POST.getlist("services")
             if selected_services:
                 order.services.set(selected_services)
 
-            return redirect('order_success', pk=order.pk)
+            selected_tv_packages = request.POST.getlist("tv_packages")
+            if selected_tv_packages:
+                order.tv_packages.set(selected_tv_packages)
+
+            return redirect("order_success", pk=order.pk)
 
     else:
         form = OrderForm()
 
-    return render(request, 'core/tariffs/order_create.html', {
-        'title': f'Заявка на подключение "{tariff.name}"',
-        'tariff': tariff,
-        'equipments': equipments,
-        'services': services,
-        'form': form,
-        'locality': locality,
-    })
+    return render(
+        request,
+        "core/tariffs/order_create.html",
+        {
+            "title": f'Заявка на подключение "{tariff.name}"',
+            "tariff": tariff,
+            "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
+            "equipments": equipments,
+            "services": services,
+            "tv_packages": tv_packages,
+            "form": form,
+            "locality": locality,
+        },
+    )

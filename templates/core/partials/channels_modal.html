@@ -1,0 +1,69 @@
+<div class="modal fade" id="channelsModal-{{ object.id }}" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered modal-fixed-size">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{ object.name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <!-- Фильтр по категориям -->
+            <div class="modal-body channel-scrollable">
+                <div class="mb-3">
+                    <div class="category-filter-container">
+                        <span class="category-filter active" data-category="">Все</span>
+                        {% for category in CATEGORY_CHOICES %}
+                            <span class="category-filter" data-category="{{ category.0 }}">{{ category.1 }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="row channel-container g-2" id="channelList-{{ object.id }}">
+                    {% for channel in channels %}
+                    <div class="col-12 col-md-6 col-xl-4 channel-item" data-category="{{ channel.category }}">
+                        <div class="channel-card">
+                            {% if channel.logo %}
+                                <img src="{{ channel.logo.url }}" alt="{{ channel.name }} logo" />
+                            {% else %}
+                                <i class="bi bi-tv me-2 text-primary" style="font-size: 1.2rem;"></i>
+                            {% endif %}
+                            <span>{{ channel.name }}</span>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">Нет включённых каналов</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS для фильтрации -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const modalId = "{{ object.id }}";
+        const channelList = document.getElementById("channelList-" + modalId);
+        const filterButtons = document.querySelectorAll(`#channelsModal-${modalId} .category-filter`);
+    
+        if (!channelList || !filterButtons.length) return;
+    
+        filterButtons.forEach(button => {
+            button.addEventListener("click", function () {
+                // Убираем active у всех кнопок
+                filterButtons.forEach(btn => btn.classList.remove("active"));
+                // Добавляем active к нажатой
+                this.classList.add("active");
+    
+                const selectedCategory = this.getAttribute("data-category");
+    
+                const channels = channelList.querySelectorAll(".channel-item");
+    
+                channels.forEach(function (item) {
+                    const itemCategory = item.getAttribute("data-category");
+                    const show = !selectedCategory || itemCategory === selectedCategory;
+                    item.style.display = show ? "block" : "none";
+                });
+            });
+        });
+    });
+</script>

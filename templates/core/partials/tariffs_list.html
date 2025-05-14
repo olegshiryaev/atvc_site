@@ -31,11 +31,13 @@
                     </div>
                     {% endif %}
                 </div>
-                {% if tariff.included_channels.exists %}
-                <div class="mb-4">
-                    <button class="btn btn-outline-dark tariff-channels-btn" data-bs-toggle="modal" data-bs-target="#channelsModal-{{ tariff.id }}">Список каналов</button>
-                </div>
-                {% endif %}
+                    {% if tariff.included_channels.exists %}
+                    <button class="btn btn-outline-dark"
+                            data-bs-toggle="modal"
+                            data-bs-target="#channelsModal-{{ tariff.id }}">
+                        Посмотреть каналы
+                    </button>
+                    {% endif %}
                 {% endif %}
             </div>
             <div class="card-footer p-4 border-0">
@@ -56,39 +58,7 @@
     </div>
 
     <!-- Модальное окно для списка каналов -->
-    <div class="modal fade" id="channelsModal-{{ tariff.id }}" tabindex="-1" aria-labelledby="channelsModalLabel-{{ tariff.id }}" aria-hidden="true" role="dialog">
-        <div class="modal-dialog modal-lg modal-dialog-centered modal-fixed-size">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="channelsModalLabel-{{ tariff.id }}">Список каналов для тарифа "{{ tariff.name }}"</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-search">
-                    <input type="text" class="form-control channel-search" id="channelSearch-{{ tariff.id }}" placeholder="Поиск по каналам" aria-label="Поиск по каналам" />
-                </div>
-                <div class="modal-body channel-scrollable">
-                    <div class="row channel-container g-2" id="channelList-{{ tariff.id }}">
-                        {% for channel in tariff.included_channels.all %}
-                        <div class="col-12 col-md-6 col-xl-4 channel-item">
-                            <div class="channel-card">
-                                {% if channel.logo %}
-                                <img src="{{ channel.logo.url }}" alt="{{ channel.name }} logo" />
-                                {% else %}
-                                <div style="width: 100px; height: auto; background-color: #e5e7eb; margin-right: 16px; border-radius: 8px;"></div>
-                                {% endif %}
-                                <span>{{ channel.name }}{% if channel.is_hd %} (HD){% endif %}</span>
-                            </div>
-                        </div>
-                        {% empty %}
-                        <div class="col-12 text-center">
-                            <p class="text-muted">Каналы не указаны</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+    {% include 'core/partials/channels_modal.html' with object=tariff channels=tariff.included_channels.all category_choices=TVChannel.CATEGORY_CHOICES %}
 {% empty %}
 <div class="col-12 text-center py-5">
     <p class="text-muted fs-5">Тарифы не найдены</p>

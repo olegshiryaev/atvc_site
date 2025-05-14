@@ -105,6 +105,12 @@ def channel_logo_upload_to(instance, filename):
     return os.path.join("channel_logos", filename)
 
 
+def tv_package_image_upload_to(instance, filename):
+    ext = os.path.splitext(filename)[1]
+    filename = f"{pytils_slugify(instance.name)}{ext}"
+    return os.path.join("tv_packages", filename)
+
+
 class TVChannel(models.Model):
     CATEGORY_CHOICES = [
         ("broadcast", "Эфирные"),
@@ -180,7 +186,9 @@ class Tariff(models.Model):
         blank=True,
     )
     price = models.IntegerField("Цена (руб/мес)", validators=[MinValueValidator(0)])
-    connection_price = models.PositiveIntegerField("Стоимость подключения (₽)", default=200)
+    connection_price = models.PositiveIntegerField(
+        "Стоимость подключения (₽)", default=200
+    )
     description = RichTextField("Описание", blank=True, null=True)
     localities = models.ManyToManyField(
         Locality,
@@ -211,6 +219,10 @@ class Tariff(models.Model):
         ordering = ["name", "price"]
 
 
+def equipment_image_upload_to(instance, filename):
+    return f"devices/{instance.equipment_type}/{filename}"
+
+
 class Equipment(models.Model):
     EQUIPMENT_TYPE_CHOICES = [
         ("router", "Роутер"),
@@ -223,10 +235,13 @@ class Equipment(models.Model):
         verbose_name="Тип устройства", max_length=20, choices=EQUIPMENT_TYPE_CHOICES
     )
     name = models.CharField(verbose_name="Название", max_length=255)
-    description = models.TextField(verbose_name="Описание", blank=True, null=True)
+    description = RichTextField(verbose_name="Описание", blank=True, null=True)
     price = models.IntegerField(verbose_name="Цена")
     image = models.ImageField(
-        verbose_name="Изображение", upload_to="devices/", blank=True, null=True
+        verbose_name="Изображение",
+        upload_to=equipment_image_upload_to,
+        blank=True,
+        null=True,
     )
     service_types = models.ManyToManyField(
         "Service", verbose_name="Типы услуги", related_name="devices", blank=True
@@ -236,6 +251,7 @@ class Equipment(models.Model):
         verbose_name = "Оборудование"
         verbose_name_plural = "Оборудование"
         ordering = ["name"]
+        unique_together = ["equipment_type", "name"]
 
     def __str__(self):
         return self.name
@@ -542,6 +558,12 @@ class Document(models.Model):
 
 
 class AdditionalService(models.Model):
+    service_types = models.ManyToManyField(
+        "Service",
+        verbose_name="Типы услуг",
+        related_name="additional_services",
+        help_text="К каким базовым услугам относится эта доп. услуга",
+    )
     name = models.CharField("Название услуги", max_length=200)
     price = models.PositiveIntegerField("Цена в месяц (₽)")
     description = models.TextField("Описание", blank=True, null=True)
@@ -550,23 +572,93 @@ class AdditionalService(models.Model):
         return self.name
 
 
+class TVChannelPackage(models.Model):
+    name = models.CharField("Название пакета", max_length=100)
+    description = RichTextField(verbose_name="Описание", blank=True, null=True)
+    price = models.PositiveIntegerField("Цена в месяц (₽)")
+    image = models.ImageField(
+        "Изображение",
+        upload_to=tv_package_image_upload_to,
+        blank=True,
+        null=True,
+    )
+    channels = models.ManyToManyField("TVChannel", verbose_name="Каналы")
+    tariffs = models.ManyToManyField(
+        "Tariff", verbose_name="Тарифы", related_name="tv_packages", blank=True
+    )
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Пакет ТВ-каналов"
+        verbose_name_plural = "Пакеты ТВ-каналов"
+
+    def get_channel_stats(self):
+        channels = self.channels.all()
+        hd_channels = channels.filter(is_hd=True).count()
+        sd_channels = channels.count() - hd_channels
+        return {"sd": sd_channels, "hd": hd_channels}
+
+    def channel_count_display(self):
+        stats = self.get_channel_stats()
+        if stats["hd"] > 0:
+            return f"{stats['sd']} SD + {stats['hd']} HD"
+        return f"{stats['sd']} каналов"
+
+    def has_hd_channels(self):
+        return self.channels.filter(is_hd=True).exists()
+
+    def is_only_hd(self):
+        return self.channels.filter(is_hd=True).count() == self.channels.count()
+
+    def total_channels(self):
+        return self.channels.count()
+
+
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ("new", "Новая"),
+        ("processed", "В обработке"),
+        ("completed", "Выполнена"),
+    ]
+
+    locality = models.ForeignKey(
+        Locality,
+        on_delete=models.CASCADE,
+        verbose_name="Населенный пункт",
+        null=True,
+    )
     tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, verbose_name="Тариф")
-    equipment = models.ForeignKey(Equipment, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Оборудование")
-    services = models.ManyToManyField(AdditionalService, blank=True, verbose_name="Доп. услуги")
+    equipment = models.ManyToManyField(
+        "Equipment", blank=True, verbose_name="Оборудование"
+    )
+    services = models.ManyToManyField(
+        AdditionalService, blank=True, verbose_name="Доп. услуги"
+    )
+    tv_packages = models.ManyToManyField(
+        "TVChannelPackage", verbose_name="Пакеты ТВ-каналов", blank=True
+    )
     full_name = models.CharField("ФИО", max_length=255)
     phone = models.CharField("Телефон", max_length=20)
     street = models.CharField("Улица", max_length=255)
     house = models.CharField("Дом", max_length=20)
     comment = models.TextField("Комментарий", blank=True, null=True)
+    status = models.CharField(
+        "Статус", max_length=20, choices=STATUS_CHOICES, default="new"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def total_cost(self):
         """Вычисляет общую сумму к оплате при подключении."""
         equipment_price = self.equipment.price if self.equipment else 0
         services_monthly = sum(service.price for service in self.services.all())
-        connection_fee = 200
-        return equipment_price + connection_fee
+        connection_price = self.tariff.connection_price if self.tariff else 0
+        return equipment_price + connection_price
+
+    class Meta:
+        verbose_name = "Заявка"
+        verbose_name_plural = "Заявки"
 
     def __str__(self):
         return f"Заявка от {self.full_name} на тариф {self.tariff.name}"
