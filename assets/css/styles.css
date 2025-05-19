@@ -1871,9 +1871,11 @@ a {
 }
 
 .tab-nav-scroll .nav-link {
+    background-color: #e9ecef !important;
     flex-shrink: 0;
     font-size: 0.875rem;
     padding: 0.5rem 1rem;
     min-width: 120px;
     text-align: center;
+    transition: all 0.3s ease;
 }
