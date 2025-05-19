@@ -5,9 +5,8 @@
     <div class="container">
         {% include 'partials/page_header.html' with title=title %}
         <!-- Основной контент -->
-        <div class="row flex-column flex-lg-row">
+        <div class="row">
             <div class="col-lg-8">
-
                 <!-- Информация о тарифе -->
                 <div class="card mb-4 border-0 shadow-sm card-hover">
                     <div class="card-body">
@@ -38,7 +37,6 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- Навигация для десктопов -->
                 <ul class="nav nav-pills mb-4 d-none d-md-flex" id="myTab" role="tablist">
                     {% if tv_packages %}
@@ -59,7 +57,6 @@
                         </button>
                     </li>
                 </ul>
-
                 <!-- Навигация для мобильных -->
                 <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
                     <ul class="nav nav-pills nav-justified flex-nowrap" id="myTabMobile" role="tablist">
@@ -82,10 +79,8 @@
                         </li>
                     </ul>
                 </div>
-
                 <!-- Контент разделов -->
                 <div class="tab-content" id="myTabContent">
-
                     <!-- Пакеты ТВ-каналов -->
                     {% if tv_packages %}
                     <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
@@ -136,7 +131,6 @@
                         </div>
                     </div>
                     {% endif %}
-
                     <!-- Оборудование -->
                     <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="equipment" role="tabpanel">
                         <h3 class="mb-4">Выберите оборудование</h3>
@@ -182,7 +176,6 @@
                             </label>
                         </div>
                     </div>
-
                     <!-- Дополнительные услуги -->
                     <div class="tab-pane fade" id="services" role="tabpanel">
                         <h3 class="mb-4">Дополнительные услуги</h3>
@@ -210,49 +203,8 @@
                     </div>
                 </div>
 
-                <!-- Блок "Итоговая стоимость" (только для мобильных) -->
-                <div class="summary-card-mobile d-block d-lg-none mt-4">
-                    <div class="card summary-card shadow-sm border-0">
-                        <div class="card-body">
-                            <h3 class="card-title mb-4">Итоговая стоимость</h3>
-                            <div class="mb-4">
-                                <h5>Тариф</h5>
-                                <div class="d-flex justify-content-between">
-                                    <span>{{ tariff.name }}</span>
-                                    <span>{{ tariff.price }} ₽/мес</span>
-                                </div>
-                            </div>
-                            <div class="mb-4" id="equipmentSummary">
-                                <h5>Оборудование</h5>
-                                <div class="text-muted">Не выбрано</div>
-                            </div>
-                            <div class="mb-4" id="servicesSummary">
-                                <h5>Дополнительные услуги</h5>
-                                <div class="text-muted">Не выбрано</div>
-                            </div>
-                            <div class="mb-4" id="tvPackagesSummary">
-                                <h5>Пакеты ТВ</h5>
-                                <div class="text-muted">Не выбрано</div>
-                            </div>
-                            <div class="mb-4">
-                                <h5>Подключение</h5>
-                                <div class="d-flex justify-content-between">
-                                    <span>Разово</span>
-                                    <span id="connectionPrice">{{ tariff.connection_price }} ₽</span>
-                                </div>
-                            </div>
-                            <hr>
-                            <div class="d-flex justify-content-between mb-2">
-                                <h5>Итого к оплате:</h5>
-                                <h5 id="totalPrice">200 ₽</h5>
-                            </div>
-                            <div class="alert alert-info mt-4">
-                                <i class="bi bi-info-circle-fill me-2"></i>
-                                <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Место для вставки блока "Итоговая стоимость" на мобильных -->
+                <div id="mobileSummaryTarget" class="mt-4"></div>
 
                 <!-- Форма заявки -->
                 <div class="card mt-5 border-0 shadow-sm">
@@ -264,6 +216,11 @@
                             <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids">
                             <input type="hidden" name="selected_service_slugs" id="selected_service_slugs">
                             <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids">
+                            <!-- Вспомогательные скрытые поля для подсчета -->
+                            <input type="hidden" id="total_equipment_cost">
+                            <input type="hidden" id="total_services_cost">
+                            <input type="hidden" id="total_tv_packages_cost">
+                            <input type="hidden" id="total_price">
 
                             <!-- Основные поля формы -->
                             <div class="row g-3">
@@ -304,11 +261,10 @@
                         </form>
                     </div>
                 </div>
-
             </div>
 
-            <!-- Итоговая стоимость (только для десктопов) -->
-            <div class="col-lg-4 d-none d-lg-block">
+            <!-- Итоговая стоимость -->
+            <div class="col-lg-4" id="summaryCardContainer">
                 <div class="card summary-card shadow-sm border-0">
                     <div class="card-body">
                         <h3 class="card-title mb-4">Итоговая стоимость</h3>
@@ -354,6 +310,7 @@
     </div>
 </div>
 
+<!-- Скрипты -->
 <script>
     // === Переменные для хранения выбранных значений ===
     let selectedEquipment = {}; // Множественный выбор оборудования
@@ -488,23 +445,36 @@
     // === Отправка формы ===
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
-
         // Заполняем скрытые поля
         document.getElementById('selected_equipment_ids').value = Object.keys(selectedEquipment);
         document.getElementById('selected_service_slugs').value = Object.keys(selectedServices);
         document.getElementById('selected_tv_package_ids').value = Object.keys(selectedTVPackages);
-
         // Отправляем форму
         this.submit();
     });
 
-    // === Инициализация отображения при загрузке страницы ===
-    window.addEventListener('DOMContentLoaded', () => {
-        updateEquipmentSummary();
-        updateServicesSummary();
-        updateTVPackageSummary();
-        calculateTotal();
+    // === Перемещение блока "Итоговая стоимость" между секциями ===
+    function moveSummaryCard() {
+        const isMobile = window.innerWidth < 992;
+        const summaryCard = document.querySelector('#summaryCardContainer .summary-card');
+        if (!summaryCard) return;
+
+        if (!isMobile && summaryCard.closest('#mobileSummaryTarget')) {
+            const originalContainer = document.getElementById('summaryCardContainer');
+            originalContainer.appendChild(summaryCard);
+        } else if (isMobile && !summaryCard.closest('#mobileSummaryTarget')) {
+            const mobileTarget = document.getElementById('mobileSummaryTarget');
+            if (mobileTarget) {
+                mobileTarget.innerHTML = '';
+                mobileTarget.appendChild(summaryCard);
+            }
+        }
+    }
+
+    // === Инициализация ===
+    window.addEventListener('DOMContentLoaded', moveSummaryCard);
+    window.addEventListener('resize', () => {
+        setTimeout(moveSummaryCard, 100);
     });
 </script>
-
 {% endblock %}
