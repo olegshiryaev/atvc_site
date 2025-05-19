@@ -61,7 +61,7 @@
 
 
     <!-- Блок тарифов -->
-    {% if displayed_tariffs.exists %}
+    {% if grouped_tariffs and grouped_tariffs.items %}
     <section class="tariffs">
         <div class="container">
             <div class="tariffs__title-container">
@@ -69,23 +69,57 @@
             </div>
             <!-- Блок фильтров -->
             {% if available_services|length > 1 %}
-            <div class="d-flex scrollable-buttons flex-nowrap gap-3 justify-content-start">
+            <!-- Навигация для десктопов -->
+            <ul class="nav nav-pills mb-4 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
                 {% for service in available_services %}
-                    <button class="filter-btn btn {% if active_filter == service.slug %}btn-primary{% else %}btn-neutral{% endif %}"
-                            data-filter="{{ service.slug }}"
-                            aria-pressed="{% if active_filter == service.slug %}true{% else %}false{% endif %}">
-                        <span class="d-flex align-items-center">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %} d-flex align-items-center gap-2"
+                                data-bs-toggle="tab"
+                                data-bs-target="#{{ service.slug }}"
+                                type="button"
+                                role="tab"
+                                aria-controls="{{ service.slug }}"
+                                aria-selected="{% if service.slug == first_service_slug %}true{% else %}false{% endif %}">
+                            <!-- Иконка по типу услуги -->
                             {% include "core/icons/service_icon.html" with service_slug=service.slug %}
                             {{ service.name }}
-                        </span>
-                    </button>
+                        </button>
+                    </li>
                 {% endfor %}
+            </ul>
+
+            <!-- Навигация для мобильных -->
+            <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
+                <ul class="nav nav-pills nav-justified flex-nowrap" id="tariffTabsMobile" role="tablist">
+                    {% for service in available_services %}
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %}"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#{{ service.slug }}"
+                                    type="button"
+                                    role="tab"
+                                    aria-controls="{{ service.slug }}"
+                                    aria-selected="{% if service.slug == first_service_slug %}true{% else %}false{% endif %}">
+                                <!-- Иконка по типу услуги -->
+                                {% include "core/icons/service_icon.html" with service_slug=service.slug %}
+                                {{ service.name }}
+                            </button>
+                        </li>
+                    {% endfor %}
+                </ul>
             </div>
             {% endif %}
     
-            <!-- Контейнер с тарифами -->
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                {% include 'core/partials/tariffs_list.html' %}
+            <!-- Контент табов с тарифами -->
+            <div class="tab-content" id="tariffTabsContent">
+                {% for service, tariffs in grouped_tariffs.items %}
+                    <div class="tab-pane fade {% if service.slug == first_service_slug %}show active{% endif %}"
+                         id="{{ service.slug }}" role="tabpanel">
+                        <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                            {% include 'core/partials/tariffs_list.html' with displayed_tariffs=tariffs %}
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
         </div>
     </section>

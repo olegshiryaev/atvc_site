@@ -138,7 +138,7 @@
                         <div class="row g-4">
                             {% for equipment in equipments %}
                             <div class="col-md-6">
-                                <div class="card equipment-item h-100" onclick="selectEquipment(this, {{ equipment.price }})">
+                                <div class="card equipment-item h-100" data-id="{{ equipment.id }}" onclick="selectEquipment(this, {{ equipment.price }})">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-light p-3 rounded me-3">
