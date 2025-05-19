@@ -740,7 +740,7 @@ a {
 }
 
 .filter-btn {
-    font-size: var(--font-size-md); /* Bootstrap fs-5 */
+    font-size: var(--font-size-xs); /* Bootstrap fs-5 */
     font-weight: 500; /* fw-medium */
     padding: var(--spacing-sm) var(--spacing-md);
     white-space: nowrap; /* Предотвращаем перенос текста */
@@ -1876,8 +1876,4 @@ a {
     padding: 0.5rem 1rem;
     min-width: 120px;
     text-align: center;
-}
-
-.text-primary {
-    color: var(--color-ocean-blue);
 }
