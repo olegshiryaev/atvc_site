@@ -348,6 +348,7 @@ def order_create(request, locality_slug, slug):
             "equipments": equipments,
             "services": services,
             "tv_packages": tv_packages,
+            "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
             "form": form,
             "locality": locality,
         },
