@@ -313,68 +313,12 @@
 <!-- Скрипты -->
 <script>
     // === Переменные для хранения выбранных значений ===
-    let selectedEquipment = {};
+    let selectedEquipment = {}; // Множественный выбор оборудования
     let selectedEquipmentPrice = 0;
-    let selectedServices = {};
-    let totalServicesPrice = 0;
-    let selectedTVPackages = {};
+    let selectedServices = {};  // Храним доп. услуги
+    let totalServicesPrice = 0; // Сумма доп. услуг
+    let selectedTVPackages = {}; // ТВ-пакеты
     let totalTVPackagesPrice = 0;
-
-    // === Загружаем сохранённые данные из localStorage при старте ===
-    window.addEventListener('DOMContentLoaded', () => {
-        const savedData = JSON.parse(localStorage.getItem('tariffFormData')) || {};
-
-        if (savedData.equipment) {
-            selectedEquipment = savedData.equipment;
-        }
-        if (savedData.services) {
-            selectedServices = savedData.services;
-        }
-        if (savedData.tvPackages) {
-            selectedTVPackages = savedData.tvPackages;
-        }
-
-        // Восстанавливаем форму
-        document.getElementById('name')?.setAttribute('value', savedData.name || '');
-        document.getElementById('phone')?.setAttribute('value', savedData.phone || '');
-        document.getElementById('street')?.setAttribute('value', savedData.street || '');
-        document.getElementById('house')?.setAttribute('value', savedData.house || '');
-        document.getElementById('comments')?.value = savedData.comments || '';
-
-        // Восстанавливаем состояние чекбоксов
-        Object.keys(selectedEquipment).forEach(name => {
-            const item = Array.from(document.querySelectorAll('.equipment-item')).find(el =>
-                el.querySelector('h5')?.textContent.trim() === name
-            );
-            if (item) item.classList.add('selected');
-        });
-
-        Object.keys(selectedServices).forEach(slug => {
-            const checkbox = document.getElementById(slug);
-            if (checkbox) checkbox.checked = true;
-        });
-
-        Object.keys(selectedTVPackages).forEach(id => {
-            const checkbox = document.getElementById(`package-${id}`);
-            if (checkbox) checkbox.checked = true;
-        });
-
-        if (savedData.noEquipment) {
-            document.getElementById('noEquipment').checked = true;
-            document.querySelectorAll('.equipment-item').forEach(item => item.classList.remove('selected'));
-        }
-
-        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p, 0);
-        totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
-        totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
-
-        updateEquipmentSummary();
-        updateServicesSummary();
-        updateTVPackageSummary();
-        calculateTotal();
-
-        moveSummaryCard();
-    });
 
     // === Функция выбора оборудования (множественный выбор) ===
     function selectEquipment(element, price) {
@@ -390,7 +334,6 @@
         updateEquipmentSummary();
         calculateTotal();
         document.getElementById('noEquipment').checked = false;
-        saveToLocalStorage();
     }
 
     // === Выбор "у меня есть своё оборудование" ===
@@ -403,7 +346,6 @@
         }
         updateEquipmentSummary();
         calculateTotal();
-        saveToLocalStorage();
     }
 
     // === Выбор дополнительной услуги ===
@@ -419,7 +361,6 @@
         totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
         updateServicesSummary();
         calculateTotal();
-        saveToLocalStorage();
     }
 
     // === Выбор ТВ-пакета ===
@@ -434,7 +375,6 @@
         totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
         updateTVPackageSummary();
         calculateTotal();
-        saveToLocalStorage();
     }
 
     // === Обновление отображения оборудования ===
@@ -502,32 +442,16 @@
         document.getElementById('total_price').value = totalPrice;
     }
 
-    // === Отправка формы и очистка localStorage ===
+    // === Отправка формы ===
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        // Сохраняем финальные данные перед отправкой
-        saveToLocalStorage(true);
+        // Заполняем скрытые поля
+        document.getElementById('selected_equipment_ids').value = Object.keys(selectedEquipment);
+        document.getElementById('selected_service_slugs').value = Object.keys(selectedServices);
+        document.getElementById('selected_tv_package_ids').value = Object.keys(selectedTVPackages);
         // Отправляем форму
         this.submit();
-        // После отправки можно очистить localStorage
-        setTimeout(() => localStorage.removeItem('tariffFormData'), 100);
     });
-
-    // === Сохранение данных в localStorage ===
-    function saveToLocalStorage(final = false) {
-        const data = {
-            equipment: selectedEquipment,
-            services: selectedServices,
-            tvPackages: selectedTVPackages,
-            name: document.getElementById('name')?.value || '',
-            phone: document.getElementById('phone')?.value || '',
-            street: document.getElementById('street')?.value || '',
-            house: document.getElementById('house')?.value || '',
-            comments: document.getElementById('comments')?.value || '',
-            noEquipment: document.getElementById('noEquipment')?.checked || false,
-        };
-        localStorage.setItem('tariffFormData', JSON.stringify(data));
-    }
 
     // === Перемещение блока "Итоговая стоимость" между секциями ===
     function moveSummaryCard() {
@@ -547,6 +471,10 @@
         }
     }
 
-    window.addEventListener('resize', () => setTimeout(moveSummaryCard, 100));
+    // === Инициализация ===
+    window.addEventListener('DOMContentLoaded', moveSummaryCard);
+    window.addEventListener('resize', () => {
+        setTimeout(moveSummaryCard, 100);
+    });
 </script>
 {% endblock %}
