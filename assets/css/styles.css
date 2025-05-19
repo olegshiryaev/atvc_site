@@ -1859,3 +1859,21 @@ a {
     flex-wrap: wrap; /* Разрешаем перенос строк при необходимости */
     gap: 10px; /* Расстояние между категориями */
 }
+
+
+.tab-nav-scroll {
+    -webkit-overflow-scrolling: touch; /* Улучшенная прокрутка на iOS */
+}
+
+.tab-nav-scroll .nav-pills {
+    white-space: nowrap;
+    padding-bottom: 0.5rem;
+}
+
+.tab-nav-scroll .nav-link {
+    flex-shrink: 0;
+    font-size: 0.875rem;
+    padding: 0.5rem 1rem;
+    min-width: 120px;
+    text-align: center;
+}
