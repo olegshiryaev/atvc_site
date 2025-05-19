@@ -570,7 +570,7 @@ class AdditionalService(models.Model):
     )
     name = models.CharField("Название услуги", max_length=200)
     price = models.PositiveIntegerField("Цена в месяц (₽)")
-    description = models.TextField("Описание", blank=True, null=True)
+    description = RichTextField(verbose_name="Описание", blank=True, null=True)
     slug = models.SlugField("Слаг", blank=True, null=True)
 
     def save(self, *args, **kwargs):
@@ -580,6 +580,10 @@ class AdditionalService(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Дополнительная услуга"
+        verbose_name_plural = "Дополнительные услуги"
 
 
 class TVChannelPackage(models.Model):
