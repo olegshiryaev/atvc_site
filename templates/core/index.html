@@ -70,7 +70,7 @@
             <!-- Блок фильтров -->
             {% if available_services|length > 1 %}
             <!-- Навигация для десктопов -->
-            <ul class="nav nav-pills mb-4 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
+            <ul class="nav nav-pills mb-4 gap-3 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
                 {% for service in available_services %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %} d-flex align-items-center gap-2"
@@ -90,7 +90,7 @@
 
             <!-- Навигация для мобильных -->
             <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
-                <ul class="nav nav-pills nav-justified flex-nowrap" id="tariffTabsMobile" role="tablist">
+                <ul class="nav nav-pills nav-justified flex-nowrap gap-3" id="tariffTabsMobile" role="tablist">
                     {% for service in available_services %}
                         <li class="nav-item" role="presentation">
                             <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %}"

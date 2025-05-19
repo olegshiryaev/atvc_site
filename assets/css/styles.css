@@ -1836,6 +1836,10 @@ a {
 }
 .nav-pills .nav-link {
     color: #495057;
+    background-color: var(
+        --color-button-grey
+    );
+    transition: all 0.3s ease;
 }
 
 /* Стили для категорий */
@@ -1862,7 +1866,14 @@ a {
 
 
 .tab-nav-scroll {
-    -webkit-overflow-scrolling: touch; /* Улучшенная прокрутка на iOS */
+    overflow-x: auto; /* Для горизонтальной прокрутки на мобильных */
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+    white-space: nowrap;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    margin-bottom: var(
+        --spacing-xl
+    ); /* Добавлено расстояние до карточек тарифов */
 }
 
 .tab-nav-scroll .nav-pills {
@@ -1871,11 +1882,9 @@ a {
 }
 
 .tab-nav-scroll .nav-link {
-    background-color: #e9ecef !important;
     flex-shrink: 0;
     font-size: 0.875rem;
     padding: 0.5rem 1rem;
     min-width: 120px;
     text-align: center;
-    transition: all 0.3s ease;
 }

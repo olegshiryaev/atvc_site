@@ -38,7 +38,7 @@
                     </div>
                 </div>
                 <!-- Навигация для десктопов -->
-                <ul class="nav nav-pills mb-4 d-none d-md-flex" id="myTab" role="tablist">
+                <ul class="nav nav-pills mb-4 d-none d-md-flex gap-3" id="myTab" role="tablist">
                     {% if tv_packages %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#tv-packages" role="tab">
@@ -59,7 +59,7 @@
                 </ul>
                 <!-- Навигация для мобильных -->
                 <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
-                    <ul class="nav nav-pills nav-justified flex-nowrap" id="myTabMobile" role="tablist">
+                    <ul class="nav nav-pills nav-justified flex-nowrap gap-3 " id="myTabMobile" role="tablist">
                         {% if tv_packages %}
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#tv-packages" role="tab">
