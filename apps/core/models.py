@@ -396,12 +396,14 @@ class Company(models.Model):
 
 
 class Banner(models.Model):
-    BANNER_TYPES = (
-        ("", "Не выбрано"),
-        ("promo", "Акция"),
-        ("new", "Новинка"),
-        ("service", "Услуга"),
-        ("offer", "Предложение"),
+    BADGE_COLOR_CHOICES = (
+        ("primary", "Синий"),
+        ("secondary", "Серый"),
+        ("success", "Зелёный"),
+        ("danger", "Красный"),
+        ("warning", "Жёлтый"),
+        ("info", "Голубой"),
+        ("dark", "Чёрный"),
     )
     title = models.CharField("Заголовок", max_length=255)
     description = models.TextField("Описание", blank=True)
@@ -412,11 +414,12 @@ class Banner(models.Model):
         "Текст кнопки", blank=True, null=True, max_length=100
     )
     link = models.URLField("Ссылка", blank=True, null=True)
-    banner_type = models.CharField(
-        "Тип баннера",
+    badge = models.CharField("Бейдж", max_length=50, blank=True, null=True)
+    badge_color = models.CharField(
+        "Цвет бейджa",
         max_length=50,
-        choices=BANNER_TYPES,
-        default="",
+        choices=BADGE_COLOR_CHOICES,
+        default="primary",
         blank=True,
         null=True,
     )
@@ -428,24 +431,25 @@ class Banner(models.Model):
     created_at = models.DateTimeField("Создан", auto_now_add=True)
     updated_at = models.DateTimeField("Обновлён", auto_now=True)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         ordering = ["order"]
         verbose_name = "Баннер"
         verbose_name_plural = "Баннеры"
 
-    def get_banner_type_display(self):
-        if self.banner_type:
-            return dict(self.BANNER_TYPES).get(self.banner_type, "")
-        return ""
+    def get_badge(self):
+        """Возвращает текст бейджа или None"""
+        return self.badge.strip() if self.badge else None
 
-    def get_banner_type_color(self):
-        colors = {
-            "promo": "danger",
-            "new": "success",
-            "service": "primary",
-            "offer": "info",
-        }
-        return colors.get(self.banner_type, "secondary")
+    def get_badge_color_display_ru(self):
+        """Возвращает название цвета на русском"""
+        return dict(self.BADGE_COLOR_CHOICES).get(self.badge_color, "Неизвестный цвет")
+
+    def get_badge_color(self):
+        """Возвращает CSS-класс цвета бейджа"""
+        return self.badge_color if self.badge_color else "secondary"
 
 
 class Document(models.Model):
@@ -567,6 +571,12 @@ class AdditionalService(models.Model):
     name = models.CharField("Название услуги", max_length=200)
     price = models.PositiveIntegerField("Цена в месяц (₽)")
     description = models.TextField("Описание", blank=True, null=True)
+    slug = models.SlugField("Слаг", blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = pytils_slugify(self.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -615,6 +625,9 @@ class TVChannelPackage(models.Model):
     def total_channels(self):
         return self.channels.count()
 
+    def price_display(self):
+        return f"{self.price} ₽/мес."
+
 
 class Order(models.Model):
     STATUS_CHOICES = [
@@ -641,20 +654,36 @@ class Order(models.Model):
     )
     full_name = models.CharField("ФИО", max_length=255)
     phone = models.CharField("Телефон", max_length=20)
+    email = models.EmailField(blank=True, null=True)
     street = models.CharField("Улица", max_length=255)
     house = models.CharField("Дом", max_length=20)
+    apartment = models.CharField("Квартира", max_length=10, blank=True, null=True)
     comment = models.TextField("Комментарий", blank=True, null=True)
     status = models.CharField(
         "Статус", max_length=20, choices=STATUS_CHOICES, default="new"
     )
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def total_equipment_cost(self):
+        return sum(eq.price for eq in self.equipment.all())
+
+    def total_services_cost(self):
+        return sum(s.price for s in self.services.all())
 
     def total_cost(self):
-        """Вычисляет общую сумму к оплате при подключении."""
-        equipment_price = self.equipment.price if self.equipment else 0
-        services_monthly = sum(service.price for service in self.services.all())
-        connection_price = self.tariff.connection_price if self.tariff else 0
-        return equipment_price + connection_price
+        equipment_cost = sum(eq.price for eq in self.equipment.all())
+        services_cost = sum(s.price for s in self.services.all())
+        tariff_price = self.tariff.price if self.tariff else 0
+        return equipment_cost + services_cost + tariff_price
+
+    def mark_as_processed(self):
+        self.status = "processed"
+        self.save()
+
+    def mark_as_completed(self):
+        self.status = "completed"
+        self.save()
 
     class Meta:
         verbose_name = "Заявка"

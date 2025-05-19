@@ -759,15 +759,14 @@ a {
 
 .btn-primary {
     background-color: var(--color-ocean-blue);
-    color: var(--color-white);
-    border: none;
+    border-color: var(--color-ocean-blue);
 }
 
 .btn-primary:hover,
 .btn-primary:focus,
 .btn-primary:active {
     background-color: var(--color-ocean-blue);
-    color: var(--color-white);
+    border-color: var(--color-ocean-blue);
 }
 
 .btn-neutral {
@@ -1815,14 +1814,6 @@ a {
     border-color: #6c63ff;
     box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
 }
-.btn-primary {
-    background-color: #6c63ff;
-    border-color: #6c63ff;
-}
-.btn-primary:hover {
-    background-color: #5a52d6;
-    border-color: #5a52d6;
-}
 .tariff-badge {
     font-size: 0.8rem;
     padding: 5px 10px;
@@ -1833,15 +1824,15 @@ a {
     border: 2px solid transparent;
 }
 .equipment-item.selected {
-    border-color: #6c63ff;
-    background-color: rgba(108, 99, 255, 0.05);
+    border-color: var(--color-ocean-blue);
+    background-color: rgba(0, 145, 213, 0.05);
 }
 .summary-card {
     position: sticky;
     top: 20px;
 }
 .nav-pills .nav-link.active {
-    background-color: #6c63ff;
+    background-color: var(--color-ocean-blue);
 }
 .nav-pills .nav-link {
     color: #495057;

@@ -247,28 +247,45 @@ class FeedbackAdmin(admin.ModelAdmin):
 
 @admin.register(Banner)
 class BannerAdmin(admin.ModelAdmin):
-    list_display = ["title", "banner_type", "is_active", "order"]
-    list_filter = ["banner_type", "is_active"]
-    search_fields = ["title", "description"]
-    ordering = ["order"]
+    list_display = (
+        "title",
+        "badge",
+        "badge_color",
+        "is_active",
+        "order",
+        "localities_count",
+        "updated_at",
+    )
+    list_editable = ("order", "is_active", "badge", "badge_color")
+    list_filter = ("is_active", "badge_color")
+    search_fields = ("title", "description", "badge")
+    filter_horizontal = ("localities",)
     fieldsets = (
         (
-            None,
-            {
-                "fields": (
-                    "title",
-                    "description",
-                    "background_image",
-                    "button_text",
-                    "link",
-                )
-            },
+            "Основная информация",
+            {"fields": ("title", "description", "badge", "badge_color")},
         ),
         (
-            "Тип и настройки",
-            {"fields": ("banner_type", "is_active", "localities", "order")},
+            "Кнопка и ссылка",
+            {"fields": ("button_text", "link"), "classes": ("collapse",)},
         ),
+        ("Изображение", {"fields": ("background_image",)}),
+        ("Настройки отображения", {"fields": ("is_active", "order", "localities")}),
     )
+    readonly_fields = ("created_at", "updated_at")
+
+    def get_queryset(self, request):
+        queryset = super().get_queryset(request)
+        return queryset.prefetch_related("localities")
+
+    @admin.display(description="Кол-во локаций")
+    def localities_count(self, obj):
+        return obj.localities.count()
+
+    @admin.display(description="Цвет")
+    def get_badge_color_display(self, obj):
+        color_map = dict(Banner.BADGE_COLOR_CHOICES)
+        return color_map.get(obj.badge_color, "—")
 
 
 class DocumentInline(admin.TabularInline):

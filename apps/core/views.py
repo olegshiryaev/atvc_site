@@ -299,15 +299,11 @@ def feedback_form(request, locality_slug):
 
 
 def order_create(request, locality_slug, slug):
-    # Получаем населённый пункт и тариф
-    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    locality = get_object_or_404(Locality, slug=locality_slug)
     tariff = get_object_or_404(Tariff, slug=slug)
 
-    # Фильтруем оборудование и доп. услуги по типу услуги тарифа
     equipments = Equipment.objects.filter(service_types=tariff.service)
     services = AdditionalService.objects.filter(service_types=tariff.service)
-
-    # Получаем пакеты ТВ-каналов, связанные с этим тарифом
     tv_packages = tariff.tv_packages.all()
 
     if request.method == "POST":
@@ -318,13 +314,20 @@ def order_create(request, locality_slug, slug):
             order.locality = locality
             order.save()
 
-            selected_services = request.POST.getlist("services")
-            if selected_services:
-                order.services.set(selected_services)
+            # Получаем ID из формы
+            equipment_ids = request.POST.getlist("selected_equipment_ids")
+            service_slugs = request.POST.getlist("selected_service_slugs")
+            tv_package_ids = request.POST.getlist("selected_tv_package_ids")
 
-            selected_tv_packages = request.POST.getlist("tv_packages")
-            if selected_tv_packages:
-                order.tv_packages.set(selected_tv_packages)
+            # Сохраняем ManyToMany связи
+            if equipment_ids:
+                order.equipment.set(equipment_ids)
+            if service_slugs:
+                order.services.set(
+                    AdditionalService.objects.filter(slug__in=service_slugs)
+                )
+            if tv_package_ids:
+                order.tv_packages.set(tv_package_ids)
 
             return redirect("order_success", pk=order.pk)
 
@@ -337,7 +340,6 @@ def order_create(request, locality_slug, slug):
         {
             "title": f'Заявка на подключение "{tariff.name}"',
             "tariff": tariff,
-            "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
             "equipments": equipments,
             "services": services,
             "tv_packages": tv_packages,

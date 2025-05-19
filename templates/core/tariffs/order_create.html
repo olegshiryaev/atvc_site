@@ -52,16 +52,18 @@
                 <ul class="nav nav-pills mb-4" id="myTab" role="tablist">
                     {% if tv_packages %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tv-packages">Пакеты каналов</button>
+                        <button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#tv-packages" role="tab">
+                            Пакеты каналов
+                        </button>
                     </li>
                     {% endif %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" type="button" role="tab">
+                        <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" role="tab">
                             <i class="bi bi-router me-1"></i>Оборудование
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" type="button" role="tab">
+                        <button class="nav-link" type="button" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" role="tab">
                             <i class="bi bi-plus-circle me-1"></i>Дополнительные услуги
                         </button>
                     </li>
@@ -81,7 +83,6 @@
                                 <div class="card h-100">
                                     <div class="card-body d-flex flex-column justify-content-between">
                                         <div>
-                                            <!-- Заголовок пакета и изображение -->
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
                                                     <div class="form-check form-switch mb-2">
@@ -93,11 +94,10 @@
                                                             <small class="text-muted me-2">
                                                                 {{ package.total_channels }} каналов
                                                             </small>
-                                                            <!-- Ссылка рядом с количеством -->
                                                             <a href="#"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#channelsModal-{{ package.id }}"
-                                                            style="font-size: 0.875rem; text-decoration: none; color: #0d6efd;">
+                                                               data-bs-toggle="modal"
+                                                               data-bs-target="#channelsModal-{{ package.id }}"
+                                                               style="font-size: 0.875rem; text-decoration: none; color: #0d6efd;">
                                                                 Список каналов
                                                             </a>
                                                         </label>
@@ -109,19 +109,13 @@
                                                 </div>
                                                 {% endif %}
                                             </div>
-
-                                            <!-- Описание пакета -->
                                             <p class="text-muted mt-3">{{ package.description|safe }}</p>
                                         </div>
-
-                                        <!-- Цена пакета -->
                                         <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
                                             <div class="h5 mb-0">{{ package.price }} ₽/мес</div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Подключение общего модального окна -->
                                 {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all %}
                             </div>
                             {% endfor %}
@@ -130,7 +124,7 @@
                     {% endif %}
 
                     <!-- Оборудование -->
-                    <div class="tab-pane fade" id="equipment" role="tabpanel">
+                    <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="equipment" role="tabpanel">
                         <h3 class="mb-4">Выберите оборудование</h3>
                         <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
                         <div class="row g-4">
@@ -200,6 +194,7 @@
                             {% endfor %}
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Форма заявки -->
@@ -208,10 +203,16 @@
                         <h3 class="mb-4">Оформление заявки</h3>
                         <form id="orderForm" method="post">
                             {% csrf_token %}
+                            <!-- Скрытые поля для ManyToMany -->
+                            <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids">
+                            <input type="hidden" name="selected_service_slugs" id="selected_service_slugs">
+                            <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids">
+
+                            <!-- Основные поля формы -->
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="name" class="form-label">Ваше имя</label>
-                                    <input type="text" name="name" class="form-control" id="name" required>
+                                    <input type="text" name="full_name" class="form-control" id="name" required>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="phone" class="form-label">Номер телефона</label>
@@ -227,7 +228,7 @@
                                 </div>
                                 <div class="col-12">
                                     <label for="comments" class="form-label">Комментарий (необязательно)</label>
-                                    <textarea name="comments" class="form-control" id="comments" rows="2"></textarea>
+                                    <textarea name="comment" class="form-control" id="comments" rows="2"></textarea>
                                 </div>
                                 <div class="col-12">
                                     <div class="form-check">
@@ -246,6 +247,7 @@
                         </form>
                     </div>
                 </div>
+
             </div>
 
             <!-- Итоговая стоимость -->
@@ -266,6 +268,10 @@
                         </div>
                         <div class="mb-4" id="servicesSummary">
                             <h5>Дополнительные услуги</h5>
+                            <div class="text-muted">Не выбрано</div>
+                        </div>
+                        <div class="mb-4" id="tvPackagesSummary">
+                            <h5>Пакеты ТВ</h5>
                             <div class="text-muted">Не выбрано</div>
                         </div>
                         <div class="mb-4">
@@ -296,50 +302,49 @@
 </div>
 
 <script>
-    let selectedEquipment = null;
+    // === Переменные для хранения выбранных значений ===
+    let selectedEquipment = {}; // Множественный выбор оборудования
     let selectedEquipmentPrice = 0;
-    let selectedServices = {};
-    let totalServicesPrice = 0;
+    let selectedServices = {};  // Храним доп. услуги
+    let totalServicesPrice = 0; // Сумма доп. услуг
+    let selectedTVPackages = {}; // ТВ-пакеты
+    let totalTVPackagesPrice = 0;
 
-    const connectionPrice = parseInt(document.getElementById('connectionPrice').textContent);
-
+    // === Функция выбора оборудования (множественный выбор) ===
     function selectEquipment(element, price) {
-        element.classList.toggle('selected');
-    
-        const name = element.querySelector('h5').textContent;
-    
+        const name = element.querySelector('h5').textContent.trim();
         if (element.classList.contains('selected')) {
-            selectedEquipment[name] = price;
-        } else {
+            element.classList.remove('selected');
             delete selectedEquipment[name];
+        } else {
+            element.classList.add('selected');
+            selectedEquipment[name] = price;
         }
-    
         selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p, 0);
         updateEquipmentSummary();
         calculateTotal();
-    
         document.getElementById('noEquipment').checked = false;
     }
 
+    // === Выбор "у меня есть своё оборудование" ===
     function toggleNoEquipment() {
         const noEquipmentChecked = document.getElementById('noEquipment').checked;
         if (noEquipmentChecked) {
             document.querySelectorAll('.equipment-item').forEach(item => item.classList.remove('selected'));
-            selectedEquipment = "Свое оборудование";
-            selectedEquipmentPrice = 0;
-        } else {
-            selectedEquipment = null;
+            selectedEquipment = {};
             selectedEquipmentPrice = 0;
         }
         updateEquipmentSummary();
         calculateTotal();
     }
 
+    // === Выбор дополнительной услуги ===
     function updateService(serviceId, price) {
         const checkbox = document.getElementById(serviceId);
-        const name = checkbox.nextElementSibling.textContent.trim();
+        const label = checkbox.nextElementSibling;
+        const serviceName = label ? label.textContent.trim() : 'Неизвестная услуга';
         if (checkbox.checked) {
-            selectedServices[serviceId] = { name, price };
+            selectedServices[serviceId] = { name: serviceName, price: parseInt(price) };
         } else {
             delete selectedServices[serviceId];
         }
@@ -348,20 +353,39 @@
         calculateTotal();
     }
 
+    // === Выбор ТВ-пакета ===
+    function updateTVPackage(packageId, price) {
+        const checkbox = document.getElementById(`package-${packageId}`);
+        const name = checkbox?.nextElementSibling?.querySelector('h5')?.textContent?.trim() || 'Пакет каналов';
+        if (checkbox.checked) {
+            selectedTVPackages[packageId] = { name, price: parseInt(price) };
+        } else {
+            delete selectedTVPackages[packageId];
+        }
+        totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
+        updateTVPackageSummary();
+        calculateTotal();
+    }
+
+    // === Обновление отображения оборудования ===
     function updateEquipmentSummary() {
         const container = document.getElementById('equipmentSummary');
-        if (selectedEquipment) {
-            container.innerHTML = `
-                <h5>Оборудование</h5>
-                <div class="d-flex justify-content-between">
-                    <span>${selectedEquipment}</span>
-                    <span>${selectedEquipmentPrice.toLocaleString()} ₽</span>
-                </div>`;
+        if (Object.keys(selectedEquipment).length > 0) {
+            let html = '<h5>Оборудование</h5>';
+            for (const [name, price] of Object.entries(selectedEquipment)) {
+                html += `
+                    <div class="d-flex justify-content-between">
+                        <span>${name}</span>
+                        <span>${price.toLocaleString()} ₽</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
         } else {
             container.innerHTML = `<h5>Оборудование</h5><div class="text-muted">Не выбрано</div>`;
         }
     }
 
+    // === Обновление отображения доп. услуг ===
     function updateServicesSummary() {
         const container = document.getElementById('servicesSummary');
         if (Object.keys(selectedServices).length > 0) {
@@ -379,27 +403,53 @@
         }
     }
 
-    function calculateTotal() {
-        const totalPrice = connectionPrice + selectedEquipmentPrice;
-        document.getElementById('totalPrice').textContent = `${totalPrice.toLocaleString()} ₽`;
+    // === Обновление отображения ТВ-пакетов ===
+    function updateTVPackageSummary() {
+        const container = document.getElementById('tvPackagesSummary');
+        if (Object.keys(selectedTVPackages).length > 0) {
+            let html = '<h5>Пакеты ТВ</h5>';
+            for (const key in selectedTVPackages) {
+                html += `
+                    <div class="d-flex justify-content-between">
+                        <span>${selectedTVPackages[key].name}</span>
+                        <span>${selectedTVPackages[key].price.toLocaleString()} ₽/мес</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<h5>Пакеты ТВ</h5><div class="text-muted">Не выбрано</div>`;
+        }
     }
 
-    // Отправка формы
+    // === Подсчет итоговой суммы ===
+    function calculateTotal() {
+        const connectionPrice = parseInt(document.getElementById('connectionPrice').textContent) || 0;
+        const totalPrice = connectionPrice + selectedEquipmentPrice + totalServicesPrice + totalTVPackagesPrice;
+        document.getElementById('totalPrice').textContent = `${totalPrice.toLocaleString()} ₽`;
+        document.getElementById('total_equipment_cost').value = selectedEquipmentPrice;
+        document.getElementById('total_services_cost').value = totalServicesPrice;
+        document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
+        document.getElementById('total_price').value = totalPrice;
+    }
+
+    // === Отправка формы ===
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
 
-        // Здесь можно отправить данные через fetch или axios
-        alert('Заявка успешно отправлена!');
+        // Заполняем скрытые поля
+        document.getElementById('selected_equipment_ids').value = Object.keys(selectedEquipment);
+        document.getElementById('selected_service_slugs').value = Object.keys(selectedServices);
+        document.getElementById('selected_tv_package_ids').value = Object.keys(selectedTVPackages);
 
-        this.reset();
-        document.querySelectorAll('.equipment-item').forEach(i => i.classList.remove('selected'));
-        document.querySelectorAll('.form-check-input').forEach(c => c.checked = false);
-        selectedEquipment = null;
-        selectedEquipmentPrice = 0;
-        selectedServices = {};
-        totalServicesPrice = 0;
+        // Отправляем форму
+        this.submit();
+    });
+
+    // === Инициализация отображения при загрузке страницы ===
+    window.addEventListener('DOMContentLoaded', () => {
         updateEquipmentSummary();
         updateServicesSummary();
+        updateTVPackageSummary();
         calculateTotal();
     });
 </script>
