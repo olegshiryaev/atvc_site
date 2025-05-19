@@ -51,7 +51,9 @@
                     Подключить
                 </button>
                 <div class="tariff-details mt-3 text-center">
-                    <a href="{% url 'core:tariff_detail' locality.slug tariff.slug %}">Подробнее о тарифе</a>
+                    <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}">
+                        Подробнее о тарифе
+                    </a>
                 </div>
             </div>
         </div>

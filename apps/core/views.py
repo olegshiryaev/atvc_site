@@ -338,7 +338,12 @@ def order_create(request, locality_slug, slug):
         request,
         "core/tariffs/order_create.html",
         {
-            "title": f'Заявка на подключение "{tariff.name}"',
+            "title": f'Заявка на подключение',
+            "breadcrumbs": [
+                {"title": "Главная", "url": "core:home"},
+                {"title": tariff.service.name, "url": None},
+                {"title": "Заявка на подключение", "url": None},
+            ],
             "tariff": tariff,
             "equipments": equipments,
             "services": services,
