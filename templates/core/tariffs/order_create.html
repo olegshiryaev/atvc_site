@@ -5,8 +5,8 @@
     <div class="container">
         {% include 'partials/page_header.html' with title=title %}
         <!-- Основной контент -->
-        <div class="row">
-            <div class="col-lg-8 order-2 order-lg-1">
+        <div class="row flex-column flex-lg-row">
+            <div class="col-lg-8">
 
                 <!-- Информация о тарифе -->
                 <div class="card mb-4 border-0 shadow-sm card-hover">
@@ -208,7 +208,50 @@
                             {% endfor %}
                         </div>
                     </div>
+                </div>
 
+                <!-- Блок "Итоговая стоимость" (только для мобильных) -->
+                <div class="summary-card-mobile d-block d-lg-none mt-4">
+                    <div class="card summary-card shadow-sm border-0">
+                        <div class="card-body">
+                            <h3 class="card-title mb-4">Итоговая стоимость</h3>
+                            <div class="mb-4">
+                                <h5>Тариф</h5>
+                                <div class="d-flex justify-content-between">
+                                    <span>{{ tariff.name }}</span>
+                                    <span>{{ tariff.price }} ₽/мес</span>
+                                </div>
+                            </div>
+                            <div class="mb-4" id="equipmentSummary">
+                                <h5>Оборудование</h5>
+                                <div class="text-muted">Не выбрано</div>
+                            </div>
+                            <div class="mb-4" id="servicesSummary">
+                                <h5>Дополнительные услуги</h5>
+                                <div class="text-muted">Не выбрано</div>
+                            </div>
+                            <div class="mb-4" id="tvPackagesSummary">
+                                <h5>Пакеты ТВ</h5>
+                                <div class="text-muted">Не выбрано</div>
+                            </div>
+                            <div class="mb-4">
+                                <h5>Подключение</h5>
+                                <div class="d-flex justify-content-between">
+                                    <span>Разово</span>
+                                    <span id="connectionPrice">{{ tariff.connection_price }} ₽</span>
+                                </div>
+                            </div>
+                            <hr>
+                            <div class="d-flex justify-content-between mb-2">
+                                <h5>Итого к оплате:</h5>
+                                <h5 id="totalPrice">200 ₽</h5>
+                            </div>
+                            <div class="alert alert-info mt-4">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Форма заявки -->
@@ -264,8 +307,8 @@
 
             </div>
 
-            <!-- Итоговая стоимость -->
-            <div class="col-lg-4 order-1 order-lg-2">
+            <!-- Итоговая стоимость (только для десктопов) -->
+            <div class="col-lg-4 d-none d-lg-block">
                 <div class="card summary-card shadow-sm border-0">
                     <div class="card-body">
                         <h3 class="card-title mb-4">Итоговая стоимость</h3>
