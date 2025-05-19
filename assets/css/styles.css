@@ -1877,3 +1877,7 @@ a {
     min-width: 120px;
     text-align: center;
 }
+
+.text-primary {
+    color: var(--color-ocean-blue);
+}
