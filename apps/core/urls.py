@@ -6,9 +6,9 @@ from .views import (
     company_detail,
     feedback_form,
     index,
-    internet_tariffs,
     office_list,
     order_create,
+    services,
     submit_application,
     FeedbackCreateView,
 )
@@ -18,11 +18,11 @@ app_name = "core"
 urlpatterns = [
     path("", index, name="home"),
     path("tariffs/<slug:slug>/", TariffDetailView.as_view(), name="tariff_detail"),
-    path('order/<slug:slug>/', order_create, name='order_create'),
+    path("order/<slug:slug>/", order_create, name="order_create"),
     path("about/", about_company, name="about"),
     path("offices/", office_list, name="office_list"),
     path("rekvizity-i-dokumenty/", company_detail, name="company_detail"),
-    path("internet/", internet_tariffs, name="internet_tariffs"),
+    path("<str:service_slug>/", services, name="services"),
     path(
         "application/submit/",
         submit_application,

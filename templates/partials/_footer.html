@@ -50,19 +50,25 @@
         </ul>
       </div>
 
-      <!-- Услуги -->
-      <div class="col-12 col-md-6 col-lg-3">
+    <!-- Услуги -->
+    <div class="col-12 col-md-6 col-lg-3">
         <h6 class="text-uppercase fw-semibold">Услуги</h6>
         <ul class="list-unstyled small">
-          <li><a href="{% url 'core:internet_tariffs' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Интернет</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">ТВ</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Телефония</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Пакеты услуг</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Бонусная программа</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Акции</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Подключение в частном секторе</a></li>
+            {% for service in available_services %}
+            <li>
+                <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}">
+                    {{ service.name }}
+                </a>
+            </li>
+            {% endfor %}
+            <li><a href="#" class="footer-link text-decoration-none">ТВ</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Телефония</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Пакеты услуг</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Бонусная программа</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Акции</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Подключение в частном секторе</a></li>
         </ul>
-      </div>
+    </div>
 
       <!-- О компании -->
       <div class="col-12 col-md-6 col-lg-3">

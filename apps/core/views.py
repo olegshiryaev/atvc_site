@@ -49,9 +49,11 @@ def index(request, locality_slug):
         grouped_tariffs[tariff.service].append(tariff)
 
     # Список доступных услуг (сортированный)
-    available_services = Service.objects.filter(
-        id__in=tariffs.values_list("service_id", flat=True)
-    ).distinct().order_by('name')
+    available_services = (
+        Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
+        .distinct()
+        .order_by("name")
+    )
 
     # Преобразуем defaultdict в обычный dict
     grouped_dict = dict(grouped_tariffs)
@@ -59,7 +61,9 @@ def index(request, locality_slug):
     # Определяем первую услугу для установки активного таба
     first_service_slug = available_services[0].slug if available_services else ""
 
-    latest_news = News.objects.filter(is_published=True, localities=locality).order_by("-created_at")
+    latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
+        "-created_at"
+    )
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
     context = {
@@ -152,23 +156,23 @@ class FeedbackCreateView(SuccessMessageMixin, CreateView):
         return super().form_valid(form)
 
 
-def internet_tariffs(request, locality_slug):
-    locality = get_object_or_404(Locality, slug=locality_slug)
-    service = get_object_or_404(Service, slug="internet")
-    tariffs = Tariff.objects.filter(
-        service=service, localities__slug=locality_slug, is_active=True
-    )
-    equipments = Equipment.objects.filter(service_types=service).distinct()
-    return render(
-        request,
-        "tariffs/internet.html",
-        {
-            "tariffs": tariffs,
-            "equipments": equipments,
-            "locality_slug": locality_slug,
-            "locality": locality,
-        },
-    )
+# def internet_tariffs(request, locality_slug):
+#     locality = get_object_or_404(Locality, slug=locality_slug)
+#     service = get_object_or_404(Service, slug="internet")
+#     tariffs = Tariff.objects.filter(
+#         service=service, localities__slug=locality_slug, is_active=True
+#     )
+#     equipments = Equipment.objects.filter(service_types=service).distinct()
+#     return render(
+#         request,
+#         "tariffs/internet.html",
+#         {
+#             "tariffs": tariffs,
+#             "equipments": equipments,
+#             "locality_slug": locality_slug,
+#             "locality": locality,
+#         },
+#     )
 
 
 def company_detail(request, locality_slug):
@@ -325,7 +329,7 @@ def order_create(request, locality_slug, slug):
         request,
         "core/tariffs/order_create.html",
         {
-            "title": f'Заявка на подключение',
+            "title": f"Заявка на подключение",
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},
                 {"title": tariff.service.name, "url": None},
@@ -340,3 +344,20 @@ def order_create(request, locality_slug, slug):
             "locality": locality,
         },
     )
+
+
+def services(request, service_slug, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug)
+    service = get_object_or_404(Service, slug=service_slug)
+
+    tariffs = Tariff.objects.filter(
+        service=service, localities=locality, is_active=True
+    ).select_related("service")
+
+    context = {
+        "service": service,
+        "tariffs": tariffs,
+        "locality": locality,
+    }
+
+    return render(request, "core/services.html", context)
