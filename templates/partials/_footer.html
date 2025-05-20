@@ -56,12 +56,11 @@
         <ul class="list-unstyled small">
             {% for service in available_services %}
             <li>
-                <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}">
+                <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}" class="footer-link text-decoration-none">
                     {{ service.name }}
                 </a>
             </li>
             {% endfor %}
-            <li><a href="#" class="footer-link text-decoration-none">ТВ</a></li>
             <li><a href="#" class="footer-link text-decoration-none">Телефония</a></li>
             <li><a href="#" class="footer-link text-decoration-none">Пакеты услуг</a></li>
             <li><a href="#" class="footer-link text-decoration-none">Бонусная программа</a></li>

@@ -791,26 +791,31 @@ a {
     transition: all 0.2s ease-in-out;
 }
 
-.btn-outline-dark:hover,
-.btn-outline-dark:focus {
-    background-color: var(--color-black);
-    color: var(--color-white);
-}
-
 /* Карточки тарифов */
 .tariff-card {
-    background-color: var(--color-white); /* Белый фон вместо серого */
+    background-color: var(--color-white);
+    position: relative;
     display: flex;
     flex-direction: column;
-    min-height: 100%; /* Для одинаковой высоты карточек */
+    height: 100%;
     border: var(--border-width) solid var(--color-border-grey); /* #eceef0 для контраста */
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-card);
     flex: 1;
 }
 
+.tariff-card .card-body > *:not(:last-child) {
+    margin-bottom: 1.25rem;
+}
+
 .tariff-card .card-footer {
     background-color: var(--color-white); /* Белый фон для футера карточки */
+}
+
+.tariff-divider {
+    border: 0;
+    border-top: 1px solid #e5e5e5;
+    margin: 0;
 }
 
 .tariff-name {
@@ -841,19 +846,21 @@ a {
 }
 
 .speed-value {
-    font-size: 1.5rem; /* Bootstrap fs-2 */
-    font-weight: 500; /* fw-medium */
+    font-size: 1.75rem; /* Bootstrap fs-2 */
+    font-weight: 400; /* fw-medium */
     line-height: 1; /* lh-1 */
 }
 
 .speed-unit {
-    font-size: 1.25rem; /* Bootstrap fs-4 */
+    font-size: 1rem; /* Bootstrap fs-4 */
     font-weight: 400; /* fw-normal */
+    line-height: 22px;
     margin-left: 0.25rem;
+    color: #9ea0a1;
 }
 
 .tariff-description p {
-    font-size: 1.25rem; /* Bootstrap fs-5 */
+    font-size: 1rem; /* Bootstrap fs-5 */
     font-weight: 400; /* fw-normal */
     line-height: 1.4; /* lh-base */
     margin: 0;
@@ -865,15 +872,17 @@ a {
 }
 
 .channel-count {
-    font-size: 1.5rem; /* Bootstrap fs-2 (или fs-1 для HD) */
-    font-weight: 500; /* fw-medium */
+    font-size: 1.75rem; /* Bootstrap fs-2 (или fs-1 для HD) */
+    font-weight: 400; /* fw-medium */
     line-height: 1; /* lh-1 */
 }
 
 .channel-label {
     font-size: 1rem; /* Bootstrap fs-4 */
     font-weight: 400; /* fw-normal */
+    line-height: 22px;
     margin-top: 0.5rem;
+    color: #9ea0a1;
 }
 
 .tariff-channels-btn {
@@ -896,9 +905,10 @@ a {
 }
 
 .price-unit {
-    font-size: 1.25rem; /* Bootstrap fs-3 */
+    font-size: 1rem; /* Bootstrap fs-3 */
     font-weight: 400; /* fw-normal */
     margin-left: 0.25rem;
+    color: #9ea0a1;
 }
 
 .tariff-connect-btn {
@@ -909,17 +919,16 @@ a {
 }
 
 .tariff-details a {
-    font-size: 14px;
-    font-weight: 400; /* fw-normal */
+    font-size: 0.875rem;
     color: #272727;
+    opacity: 0.8;
     text-decoration: none;
-    line-height: 16px;
-    transition: all 0.2s linear;
+    transition: color 0.2s ease;
 }
 
-.tariff-details a:hover,
-.tariff-details a:focus {
+.tariff-details a:hover {
     color: var(--color-ocean-blue);
+    opacity: 1;
 }
 
 /* Постоянная высота карточек */
