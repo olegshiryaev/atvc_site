@@ -846,14 +846,14 @@ a {
 }
 
 .speed-value {
-    font-size: 1.75rem; /* Bootstrap fs-2 */
-    font-weight: 400; /* fw-medium */
-    line-height: 1; /* lh-1 */
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1;
 }
 
 .speed-unit {
-    font-size: 1rem; /* Bootstrap fs-4 */
-    font-weight: 400; /* fw-normal */
+    font-size: 1rem;
+    font-weight: 400;
     line-height: 22px;
     margin-left: 0.25rem;
     color: #9ea0a1;
@@ -872,9 +872,9 @@ a {
 }
 
 .channel-count {
-    font-size: 1.75rem; /* Bootstrap fs-2 (или fs-1 для HD) */
-    font-weight: 400; /* fw-medium */
-    line-height: 1; /* lh-1 */
+    font-size: 2rem;
+    font-weight: 500;
+    line-height: 1;
 }
 
 .channel-label {
@@ -1845,9 +1845,7 @@ a {
 }
 .nav-pills .nav-link {
     color: #495057;
-    background-color: var(
-        --color-button-grey
-    );
+    background-color: var(--color-button-grey);
     transition: all 0.3s ease;
 }
 
@@ -1872,7 +1870,6 @@ a {
     flex-wrap: wrap; /* Разрешаем перенос строк при необходимости */
     gap: 10px; /* Расстояние между категориями */
 }
-
 
 .tab-nav-scroll {
     overflow-x: auto; /* Для горизонтальной прокрутки на мобильных */
