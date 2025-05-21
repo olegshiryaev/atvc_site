@@ -360,6 +360,7 @@ def services(request, service_slug, locality_slug):
         "service": service,
         "displayed_tariffs": tariffs,
         "locality": locality,
+        "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
     }
 
     return render(request, "core/services.html", context)
