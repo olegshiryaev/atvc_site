@@ -1,0 +1,66 @@
+{% if grouped_tariffs %}
+<section class="tariffs">
+    <div class="container">
+        <div class="tariffs__title-container">
+            <h2 class="fs-2 fw-bold mb-2 mb-sm-0">Тарифы в {{ locality.name_prepositional }}</h2>
+        </div>
+
+        <!-- Блок фильтров -->
+        {% if available_services|length > 1 %}
+        <!-- Навигация для десктопов -->
+        <ul class="nav nav-pills mb-4 gap-3 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
+            {% for service in available_services %}
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link filter-btn {% if service.slug == first_service_slug %}active{% endif %} d-flex align-items-center gap-2"
+                            data-filter="{{ service.slug }}"
+                            data-bs-toggle="tab"
+                            data-bs-target="#{{ service.slug }}"
+                            type="button"
+                            role="tab"
+                            aria-controls="{{ service.slug }}"
+                            aria-selected="{% if service.slug == first_service_slug %}true{% else %}false{% endif %}">
+                        {{ service.name }}
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+
+        <!-- Навигация для мобильных -->
+        <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
+            <ul class="nav nav-pills nav-justified flex-nowrap gap-3" id="tariffTabsMobile" role="tablist">
+                {% for service in available_services %}
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link filter-btn {% if service.slug == first_service_slug %}active{% endif %}"
+                                data-filter="{{ service.slug }}"
+                                data-bs-toggle="tab"
+                                data-bs-target="#{{ service.slug }}"
+                                type="button"
+                                role="tab"
+                                aria-controls="{{ service.slug }}"
+                                aria-selected="{% if service.slug == first_service_slug %}true{% else %}false{% endif %}">
+                            {{ service.name }}
+                        </button>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Контент табов с тарифами -->
+        <div class="tab-content" id="tariffTabsContent">
+            {% for service, tariffs in grouped_tariffs.items %}
+                <div class="tab-pane fade {% if service.slug == first_service_slug %}show active{% endif %}"
+                     id="{{ service.slug }}" role="tabpanel">
+                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
+                        {% include 'core/partials/tariffs_list.html' with displayed_tariffs=tariffs locality=locality %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% else %}
+<div class="container py-5 text-start">
+    <p>Тарифы в {{ locality.name_prepositional }} временно недоступны.</p>
+</div>
+{% endif %}

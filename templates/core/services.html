@@ -7,8 +7,12 @@
 <section class="container py-5">
     <h2 class="mb-4">{{ service.name }}</h2>
 
+    <!-- Блок тарифов -->
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% include "core/partials/tariffs_list.html" %}
     </div>
+
+    <!-- Модальное окно -->
+    {% include 'core/partials/order_modal.html' %}
 </section>
 {% endblock %}
