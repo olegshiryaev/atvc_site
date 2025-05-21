@@ -40,7 +40,7 @@ def index(request, locality_slug):
     tariffs = (
         Tariff.objects.filter(localities=locality, is_active=True)
         .select_related("service")
-        .prefetch_related("localities")
+        .prefetch_related("localities", "included_channels")
     )
 
     # Группируем тарифы по типу услуги
@@ -350,13 +350,15 @@ def services(request, service_slug, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug)
     service = get_object_or_404(Service, slug=service_slug)
 
-    tariffs = Tariff.objects.filter(
-        service=service, localities=locality, is_active=True
-    ).select_related("service")
+    tariffs = (
+        Tariff.objects.filter(service=service, localities=locality, is_active=True)
+        .select_related("service")
+        .prefetch_related("included_channels")
+    )
 
     context = {
         "service": service,
-        "tariffs": tariffs,
+        "displayed_tariffs": tariffs,
         "locality": locality,
     }
 

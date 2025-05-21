@@ -211,7 +211,7 @@ class Tariff(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({', '.join(loc.name for loc in self.localities.all())})"
+        return self.name
 
     class Meta:
         verbose_name = "Тариф"
