@@ -1278,13 +1278,15 @@ a {
 /* Заголовок модального окна */
 .modal-fixed-size .modal-header {
     flex-shrink: 0;
+    border-bottom: none;
+    padding-bottom: 0.5rem;
 }
 
 /* Прокручиваемая область с каналами */
 .modal-fixed-size .channel-scrollable {
-    max-height: 500px;
-    overflow-y: auto; /* Вертикальная прокрутка */
-    padding: 1rem; /* Bootstrap's p-4 */
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 0 1rem 1rem;
 }
 
 /* Опционально: улучшенный скролл */
@@ -1337,6 +1339,26 @@ a {
     line-height: 1.5; /* Для читаемости */
 }
 
+/* Кнопки категорий */
+.btn-category {
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 1rem;
+    color: #6c757d; /* Серый цвет по умолчанию */
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.btn-category.active {
+    color: var(--color-ocean-blue);
+}
+
+.z-index-sticky {
+    z-index: 1055;
+}
+
 /* Адаптивность */
 @media (max-width: 576px) {
     .modal-fixed-size {
@@ -1359,46 +1381,24 @@ a {
     }
 }
 
-/* Горизонтальная прокрутка для категорий */
-.category-filter-scroll {
-    display: flex;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch; /* Для плавности на мобильных */
-    padding-bottom: 0.5rem;
-}
-
-/* Кнопки категорий */
-.btn-category {
-    background: none;
-    border: none;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.95rem;
-    color: #6c757d; /* Серый цвет по умолчанию */
-    cursor: pointer;
-    transition: color 0.2s ease;
-}
-
-.btn-category.active,
-.btn-category:hover {
-    color: #0d6efd; /* Bootstrap primary blue */
-}
-
-.btn-category,
-.channel-category-item {
-    white-space: nowrap;
-}
-
-.category-count {
-    font-weight: 600;
-    color: #0d6efd;
+.btn-category-toggle {
+    box-shadow: none !important;
+    outline: none !important;
+    border: none !important;
 }
 
 /* Выпадающий список категорий ТВ-каналов */
 .channel-category-dropdown {
     min-width: max-content;
-    background-color: #fff !important;
-    border: 1px solid #ddd;
     z-index: 1050; /* чтобы был поверх модалки */
+}
+
+.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item:active {
+    background-color: transparent;
+    color: inherit;
+    outline: none;
+    box-shadow: none;
 }
 
 /* Элемент выпадающего списка */
@@ -1411,11 +1411,9 @@ a {
     color: #212529; /* Bootstrap default link color */
 }
 
-/* Количество каналов рядом с категорией */
-.channel-category-count {
-    font-weight: 600;
-    color: #0d6efd; /* Bootstrap primary blue */
-    margin-left: 0.5rem;
+.channel-category-item.active {
+    color: var(--color-ocean-blue);
+    background-color: transparent;
 }
 
 .hidden {
@@ -1884,6 +1882,7 @@ a {
     background-color: var(--color-ocean-blue);
 }
 .nav-pills .nav-link {
+    min-width: 120px;
     color: #495057;
     background-color: var(--color-button-grey);
     transition: all 0.3s ease;

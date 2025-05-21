@@ -11,7 +11,7 @@
         <ul class="nav nav-pills mb-4 gap-3 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
             {% for service in available_services %}
                 <li class="nav-item" role="presentation">
-                    <button class="nav-link filter-btn {% if service.slug == first_service_slug %}active{% endif %} d-flex align-items-center gap-2"
+                    <button class="nav-link filter-btn w-100 text-center {% if service.slug == first_service_slug %}active{% endif %}"
                             data-filter="{{ service.slug }}"
                             data-bs-toggle="tab"
                             data-bs-target="#{{ service.slug }}"
