@@ -1317,13 +1317,16 @@ a {
     border-radius: 8px;
 }
 
-.channel-card img,
+.channel-logo,
 .channel-logo-placeholder {
     width: 88px;
     height: 50px;
-    object-fit: contain;
-    margin-right: 16px;
     border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.channel-logo {
+    object-fit: contain;
 }
 
 .channel-logo-placeholder {
@@ -1331,6 +1334,11 @@ a {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.channel-logo-placeholder-icon {
+    font-size: 1.2rem;
+    color: #9ca3af;
 }
 
 .channel-card span {
