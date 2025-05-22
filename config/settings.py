@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "compressor",
     "django_htmx",
+    "import_export",
     "apps.cities",
     "apps.core",
     "apps.services",

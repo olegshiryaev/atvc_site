@@ -1,5 +1,11 @@
 from django.contrib import admin
+import os
+from django.conf import settings
+from django.core.files import File
 from django.utils.safestring import mark_safe
+from import_export.admin import ImportExportModelAdmin
+from import_export import resources, fields
+from import_export import widgets
 import csv
 from django.http import HttpResponse
 from django.utils.html import format_html
@@ -56,8 +62,85 @@ class ServiceAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
+class CategoryWidget(widgets.Widget):
+    mapping = {
+        "Эфирные": "broadcast",
+        "Познавательные": "education",
+        "Развлекательные": "entertainment",
+        "Детям": "kids",
+        "Кино": "movie",
+        "Музыка": "music",
+        "Бизнес, новости": "news",
+        "Спорт": "sport",
+    }
+
+    def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return ""
+        value = value.strip()
+        if value not in self.mapping:
+            raise ValueError(f"Неверная категория: {value}")
+        return self.mapping[value]
+
+    def render(self, value, obj=None, *args, **kwargs):
+        reverse_mapping = {v: k for k, v in self.mapping.items()}
+        return reverse_mapping.get(value, "")
+
+
+class TVChannelResource(resources.ModelResource):
+    name = fields.Field(column_name="Название канала", attribute="name")
+    description = fields.Field(column_name="Описание", attribute="description")
+    category = fields.Field(
+        column_name="Категория",
+        attribute="category",
+        widget=CategoryWidget(),
+    )
+    is_hd = fields.Field(
+        column_name="HD качество", attribute="is_hd", widget=widgets.BooleanWidget()
+    )
+    logo = fields.Field(column_name="Логотип", attribute="logo")
+
+    def dehydrate_category_display(self, obj):
+        return obj.get_category_display()
+
+    def dehydrate_logo(self, obj):
+        if obj.logo:
+            # Возвращаем только имя файла без пути
+            return os.path.basename(obj.logo.name)
+        return ""
+
+    class Meta:
+        model = TVChannel
+        fields = ("name", "description", "category", "is_hd", "logo")
+        export_order = ("name", "description", "category", "is_hd", "logo")
+        import_id_fields = ("name",)
+        skip_unchanged = True
+        report_skipped = True
+
+    def before_save_instance(self, instance, row, **kwargs):
+        logo_filename = getattr(instance, "logo", None)
+        if logo_filename:
+            logo_filename = str(logo_filename).strip()
+            # Если имя файла уже с префиксом 'channel_logos/', используем как есть,
+            # иначе добавляем префикс, чтобы проверить файл
+            if not logo_filename.startswith("channel_logos/"):
+                logo_filename = os.path.join("channel_logos", logo_filename)
+
+            logo_path = os.path.join(settings.MEDIA_ROOT, logo_filename)
+
+            if os.path.exists(logo_path):
+                with open(logo_path, "rb") as f:
+                    # сохраняем файл с оригинальным именем (без изменений)
+                    instance.logo.save(
+                        os.path.basename(logo_filename), File(f), save=False
+                    )
+
+        return super().before_save_instance(instance, row, **kwargs)
+
+
 @admin.register(TVChannel)
-class TVChannelAdmin(admin.ModelAdmin):
+class TVChannelAdmin(ImportExportModelAdmin):  # заменили базовый класс
+    resource_class = TVChannelResource
     list_display = ["name", "category", "is_hd", "logo_preview"]
     list_filter = ["category", "is_hd"]
     search_fields = ["name"]

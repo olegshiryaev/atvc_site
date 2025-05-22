@@ -124,7 +124,7 @@ class TVChannel(models.Model):
     ]
 
     name = models.CharField("Название канала", max_length=100)
-    description = models.TextField("Описание", blank=True)
+    description = models.TextField("Описание", null=True, blank=True)
     category = models.CharField(
         "Категория",
         max_length=20,
