@@ -100,15 +100,19 @@
                                                             onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
                                                         <label class="form-check-label" for="package-{{ package.id }}">
                                                             <h5 class="mb-1">{{ package.name }}</h5>
-                                                            <small class="text-muted me-2">
-                                                                {{ package.total_channels }} каналов
-                                                            </small>
-                                                            <a href="#"
-                                                               data-bs-toggle="modal"
-                                                               data-bs-target="#channelsModal-{{ package.id }}"
-                                                               style="font-size: 0.875rem; text-decoration: none; color: #0d6efd;">
-                                                                Список каналов
-                                                            </a>
+                                                            <!-- Блок с количеством каналов и ссылкой -->
+                                                            <div class="d-flex flex-column flex-xxl-row align-items-start align-items-xxl-center gap-1">
+                                                                <small class="text-muted me-xxl-2">
+                                                                    {{ package.total_channels }} каналов
+                                                                </small>
+                                                                <a href="#"
+                                                                   data-bs-toggle="modal"
+                                                                   data-bs-target="#channelsModal-{{ package.id }}"
+                                                                   class="text-primary"
+                                                                   style="font-size: 0.875rem; text-decoration: none;">
+                                                                    Список каналов
+                                                                </a>
+                                                            </div>
                                                         </label>
                                                     </div>
                                                 </div>
