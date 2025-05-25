@@ -3366,13 +3366,6 @@ button.swiper-pagination-bullet {
     opacity: 1;
 }
 
-/* Убрать отступ top для мобильной версии */
-@media (max-width: 991.98px) {
-    .btn-close {
-        top: 0;
-    }
-}
-
 /* Подсветка совпадений в поиске */
 .list-group-item strong {
     color: #007bff;
