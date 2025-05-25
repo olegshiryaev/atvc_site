@@ -56,9 +56,11 @@
                         <div class="col-12 col-md-6 col-xl-4 channel-item" data-category="{{ channel.category }}">
                             <div class="channel-card d-flex align-items-center p-2">
                                 {% if channel.logo %}
-                                    <img src="{{ channel.logo.url }}" alt="{{ channel.name }}" width="40" height="40" class="me-2">
+                                    <img src="{{ channel.logo.url }}" alt="{{ channel.name }}" class="channel-logo me-2">
                                 {% else %}
-                                    <i class="bi bi-tv me-2 text-primary" style="font-size: 1.2rem;"></i>
+                                    <div class="channel-logo-placeholder me-2">
+                                        <i class="bi bi-tv channel-logo-placeholder-icon"></i>
+                                    </div>
                                 {% endif %}
                                 <span>{{ channel.name }}</span>
                             </div>

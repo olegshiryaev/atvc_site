@@ -504,7 +504,7 @@ class TVChannelPackageAdmin(admin.ModelAdmin):
     def image_tag(self, obj):
         if obj.image:
             return format_html(
-                '<img src="{}" width="100" height="100" />'.format(obj.image.url)
+                '<img src="{}" width="132" height="72" />'.format(obj.image.url)
             )
         return "-"
 
