@@ -3369,6 +3369,7 @@ button.swiper-pagination-bullet {
 @media (max-width: 991.98px) {
     .btn-close {
         top: 11px;
+        right: 6px;
     }
 }
 
