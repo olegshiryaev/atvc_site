@@ -3385,4 +3385,26 @@ button.swiper-pagination-bullet {
     .navbar .navbar-toggler {
         margin-left: 1.5rem; /* Увеличен с 0.5rem до 1.5rem */
     }
+
+    .locality-list {
+        max-height: calc(
+            100% - 200px
+        ); /* Ограничиваем высоту с учетом поиска и популярных городов */
+        overflow-y: auto;
+    }
+
+    .city-item {
+        display: block;
+        padding: 0.75rem 1rem;
+        color: #212529;
+        text-decoration: none;
+        border-bottom: 1px solid #eee; /* Легкая разделительная линия */
+        transition: background 0.2s ease;
+    }
+
+    .city-item:hover,
+    .city-item.selected {
+        background: #f8f9fa;
+        color: #007bff;
+    }
 }

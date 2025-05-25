@@ -247,39 +247,20 @@
                     </template>
                 </div>
             
-                <!-- Две колонки -->
-                <div class="columns-layout">
-                    <!-- Колонка районов -->
-                    <div class="columns-layout__column">
-                        <h6 class="mb-2">Район</h6>
-                        <div class="region-list">
-                            <template x-for="district in districts()" :key="district">
-                                <a href="#" class="region-item"
-                                   :class="{ 'active': selectedDistrict === district }"
-                                   @click.prevent="selectedDistrict = district"
-                                   x-text="district"></a>
-                            </template>
-                        </div>
-                    </div>
-            
-                    <!-- Колонка городов -->
-                    <div class="columns-layout__column">
-                        <h6 class="mb-2">Населенный пункт</h6>
-                        <div class="locality-list">
-                            <template x-for="locality in localitiesInSelectedDistrict()" :key="locality.slug">
-                                <a :href="getNewPath(locality.slug)"
-                                   class="city-item"
-                                   :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                                   @click.prevent="
-                                       window.location.href = getNewPath(locality.slug);
-                                       saveSelection(locality.slug);
-                                       isMobileSelectorOpen = false;
-                                   "
-                                   x-text="locality.name">
-                                </a>
-                            </template>
-                        </div>
-                    </div>
+                <!-- Единый список населенных пунктов -->
+                <div class="locality-list">
+                    <template x-for="locality in filteredLocalities()" :key="locality.slug">
+                        <a :href="getNewPath(locality.slug)"
+                        class="city-item"
+                        :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                        @click.prevent="
+                            window.location.href = getNewPath(locality.slug);
+                            saveSelection(locality.slug);
+                            isMobileSelectorOpen = false;
+                        "
+                        x-text="locality.name">
+                        </a>
+                    </template>
                 </div>
             </div>
         </div>
