@@ -21,6 +21,7 @@ from .models import (
     Equipment,
     Office,
     Service,
+    StaticPage,
     TVChannel,
     Tariff,
     Feedback,
@@ -232,7 +233,7 @@ def about_company(request, locality_slug):
             {"title": "Главная", "url": "core:home"},
             {"title": "О компании", "url": None},
         ],
-        "form": form,  # Передаем форму в контекст
+        "form": form,
     }
 
     return render(request, "core/about/company.html", context)
@@ -364,3 +365,20 @@ def services(request, service_slug, locality_slug):
     }
 
     return render(request, "core/services.html", context)
+
+
+def static_page_view(request, slug, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug)
+    page = get_object_or_404(StaticPage, slug=slug)
+
+    context = {
+        "page": page,
+        "locality": locality,
+        "title": page.title,
+        "breadcrumbs": [
+            {"title": "Главная", "url": f"/{locality.slug}/"},
+            {"title": page.title, "url": request.path},
+        ],
+    }
+
+    return render(request, "core/static_page.html", context)

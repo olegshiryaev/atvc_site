@@ -9,6 +9,7 @@ from .views import (
     office_list,
     order_create,
     services,
+    static_page_view,
     submit_application,
     FeedbackCreateView,
 )
@@ -22,7 +23,8 @@ urlpatterns = [
     path("about/", about_company, name="about"),
     path("offices/", office_list, name="office_list"),
     path("rekvizity-i-dokumenty/", company_detail, name="company_detail"),
-    path("<str:service_slug>/", services, name="services"),
+    path("<slug:slug>/", static_page_view, name="static_page"),
+    path("/home/<slug:service_slug>/", services, name="services"),
     path(
         "application/submit/",
         submit_application,

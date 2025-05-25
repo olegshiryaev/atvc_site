@@ -50,10 +50,8 @@
         <div class="tab-content" id="tariffTabsContent">
             {% for service, tariffs in grouped_tariffs.items %}
                 <div class="tab-pane fade {% if service.slug == first_service_slug %}show active{% endif %}"
-                     id="{{ service.slug }}" role="tabpanel">
-                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4">
-                        {% include 'core/partials/tariffs_list.html' with displayed_tariffs=tariffs locality=locality %}
-                    </div>
+                    id="{{ service.slug }}" role="tabpanel">
+                    {% include 'core/partials/tariffs_list.html' with displayed_tariffs=tariffs locality=locality %}
                 </div>
             {% endfor %}
         </div>

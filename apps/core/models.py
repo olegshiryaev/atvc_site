@@ -695,3 +695,18 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Заявка от {self.full_name} на тариф {self.tariff.name}"
+
+
+class StaticPage(models.Model):
+    title = models.CharField("Заголовок", max_length=200)
+    slug = models.SlugField("URL-адрес", unique=True)
+    content = RichTextField("Содержимое")
+
+    class Meta:
+        verbose_name = "Статическая страница"
+        verbose_name_plural = "Статические страницы"
+
+    def __str__(self):
+        return self.title
+
+

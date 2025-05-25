@@ -214,7 +214,8 @@ CKEDITOR_CONFIGS = {
         "toolbar": "full",
         "height": 300,
         "width": "100%",
-        "extraPlugins": "",
+        "language": "ru",
+        "versionCheck": False,
         "toolbar_full": [
             [
                 "Styles",
@@ -235,14 +236,25 @@ CKEDITOR_CONFIGS = {
                 "Smiley",
                 "SpecialChar",
             ],
-            ["Source"],
+            ["RemoveFormat", "Source"],
         ],
-        "language": "ru",
-        "versionCheck": False,
         "contentsCss": [
-            "/static/fontawesome/css/all.min.css",  # Подключаем FontAwesome к CKEditor
+            "/static/fontawesome/css/all.min.css",
         ],
-    },
+        # 🚫 Удалить оборачивание в <p>
+        "autoParagraph": False,
+        # ↩ Enter вставляет <br>, Shift+Enter — <div>
+        "enterMode": 2,  # CKEDITOR.ENTER_BR
+        "shiftEnterMode": 2,
+        # ✔️ Разрешить кастомный HTML без фильтрации
+        "allowedContent": True,
+        # ⛔ Удалить &nbsp при вставке
+        "forcePasteAsPlainText": True,
+        # (опционально) отключить элемент пути внизу
+        "removePlugins": "elementspath",
+        # (опционально) запретить изменение размера редактора мышкой
+        "resize_enabled": False,
+    }
 }
 
 # Другие параметры

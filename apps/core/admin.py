@@ -23,6 +23,7 @@ from .models import (
     Office,
     Order,
     Service,
+    StaticPage,
     TVChannel,
     TVChannelPackage,
     Tariff,
@@ -514,3 +515,9 @@ class TVChannelPackageAdmin(admin.ModelAdmin):
         return ", ".join([t.name for t in obj.tariffs.all()])
 
     tariff_list.short_description = "Тарифы"
+
+
+@admin.register(StaticPage)
+class StaticPageAdmin(admin.ModelAdmin):
+    list_display = ("title", "slug")
+    prepopulated_fields = {"slug": ("title",)}
