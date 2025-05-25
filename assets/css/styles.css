@@ -3123,7 +3123,7 @@ button.swiper-pagination-bullet {
 
 .location-select-modal__content {
     background: #fff;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     padding: 1.5rem;
 }
@@ -3134,12 +3134,13 @@ button.swiper-pagination-bullet {
     justify-content: space-between;
     align-items: center;
     padding-bottom: 1rem;
-    border-bottom: 1px solid #dee2e6;
 }
 
 .location-select-modal__title {
-    font-size: 1.25rem;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+    letter-spacing: 0.3px;
 }
 
 /* Поле поиска */
@@ -3151,15 +3152,17 @@ button.swiper-pagination-bullet {
 .location-select-modal__search-input {
     width: 100%;
     padding: 0.75rem 1rem;
-    border: 1px solid #ced4da;
-    border-radius: 6px;
+    border: 1px solid var(--smoky-white-color);
+    background-color: var(--smoky-white-color);
+    border-radius: 8px;
     font-size: 1rem;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .location-select-modal__search-input:focus {
+    background-color: #fff;
     outline: none;
-    border-color: #007bff;
+    border-color: #86b7fe;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
@@ -3190,18 +3193,19 @@ button.swiper-pagination-bullet {
 }
 
 .locality-tag {
-    background: #e9ecef;
-    padding: 0.5rem 1rem;
-    border-radius: 16px;
-    text-decoration: none;
-    color: #212529;
-    font-size: 0.9rem;
-    transition: background 0.3s ease, color 0.3s ease;
+    display: inline-block;
+    margin: 0.25rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    background-color: #e9ecef;
+    color: #495057;
+    transition: all 0.2s ease;
 }
 
 .locality-tag:hover,
 .locality-tag.selected {
-    background: #007bff;
+    background-color: var(--color-ocean-blue);
     color: #fff;
 }
 
@@ -3237,8 +3241,8 @@ button.swiper-pagination-bullet {
 .region-item.active,
 .city-item:hover,
 .city-item.selected {
-    background: #f8f9fa;
-    color: #007bff;
+    background: #e7f1ff;
+    color: var(--color-navy-blue);
 }
 
 /* Мобильный offcanvas */
@@ -3259,6 +3263,13 @@ button.swiper-pagination-bullet {
     align-items: center;
     padding: 1rem 1.5rem;
     border-bottom: none;
+}
+
+.mobile-location-offcanvas__title {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 40px;
+    letter-spacing: 0.3px;
 }
 
 .mobile-location-offcanvas__body {
@@ -3339,15 +3350,27 @@ button.swiper-pagination-bullet {
 
 /* Стили для кнопки закрытия */
 .btn-close {
-    background: transparent;
     border: none;
     font-size: 1.25rem;
     cursor: pointer;
     opacity: 0.7;
+    z-index: 10;
+    position: absolute;
+    top: 18px;
+    right: 26px;
+    width: 40px;
+    height: 40px;
 }
 
 .btn-close:hover {
     opacity: 1;
+}
+
+/* Убрать отступ top для мобильной версии */
+@media (max-width: 991.98px) {
+    .btn-close {
+        top: 0;
+    }
 }
 
 /* Подсветка совпадений в поиске */
