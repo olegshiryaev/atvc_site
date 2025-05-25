@@ -231,22 +231,6 @@
                     </template>
                 </div>
             
-                <!-- Популярные города -->
-                <div class="tag-cloud mb-4">
-                    <template x-for="locality in localitiesWithoutDistrict()" :key="locality.slug">
-                        <a :href="getNewPath(locality.slug)"
-                           class="badge locality-tag"
-                           :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                           @click.prevent="() => {
-                               window.location.href = getNewPath(locality.slug);
-                               saveSelection(locality.slug);
-                               isMobileSelectorOpen = false;
-                           }"
-                           x-text="locality.name">
-                        </a>
-                    </template>
-                </div>
-            
                 <!-- Единый список населенных пунктов -->
                 <div class="locality-list">
                     <template x-for="locality in filteredLocalities()" :key="locality.slug">

@@ -3388,7 +3388,7 @@ button.swiper-pagination-bullet {
 
     .locality-list {
         max-height: calc(
-            100% - 200px
+            100% - 100px
         ); /* Ограничиваем высоту с учетом поиска и популярных городов */
         overflow-y: auto;
     }
