@@ -24,7 +24,7 @@ urlpatterns = [
     path("offices/", office_list, name="office_list"),
     path("rekvizity-i-dokumenty/", company_detail, name="company_detail"),
     path("<slug:slug>/", static_page_view, name="static_page"),
-    path("/home/<slug:service_slug>/", services, name="services"),
+    path("home/<slug:service_slug>/", services, name="services"),
     path(
         "application/submit/",
         submit_application,
