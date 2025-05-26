@@ -4,8 +4,12 @@
 <header id="navbar" x-data="{
     isModalOpen: false,
     isMobileSelectorOpen: false,
+    isPopoverOpen: false,
+    isMobileConfirmOpen: false,
     searchQuery: '',
     currentLocalitySlug: '{{ request.locality.slug|escapejs }}',
+    currentLocalityName: '{{ request.locality.name|escapejs }}',
+    currentLocalityNamePrepositional: '{{ request.locality.name_prepositional|escapejs }}',
     selectedDistrict: null,
     highlightedIndex: null,
     localities: [
@@ -14,7 +18,8 @@
             'name': '{{ locality.name|escapejs }}',
             'slug': '{{ locality.slug|escapejs }}',
             'district': '{{ locality.district.name|escapejs }}',
-            'district_id': {{ locality.district.id|default:'null' }}
+            'district_id': {{ locality.district.id|default:'null' }},
+            'name_prepositional': '{{ locality.name_prepositional|escapejs }}'
         }{% if not forloop.last %},{% endif %}
         {% endfor %}
     ],
@@ -35,11 +40,40 @@
         this.isMobileSelectorOpen = true;
         this.$nextTick(() => this.$refs.searchInput.focus());
     },
+    openMobileConfirm() {
+        this.isMobileConfirmOpen = true;
+    },
+    closePopover() {
+        this.isPopoverOpen = false;
+        this.isMobileConfirmOpen = false;
+        localStorage.setItem('localityConfirmed', 'true');
+    },
+    confirmLocality() {
+        this.closePopover();
+    },
+    autoClosePopover() {
+        setTimeout(() => {
+            if (this.isPopoverOpen || this.isMobileConfirmOpen) {
+                this.closePopover();
+            }
+        }, 30000); // 30 секунд
+    },
+    checkLocalityConfirmation() {
+        const isConfirmed = localStorage.getItem('localityConfirmed');
+        if (!isConfirmed) {
+            if (window.innerWidth < 992) { // lg breakpoint
+                this.isMobileConfirmOpen = true;
+            } else {
+                this.isPopoverOpen = true;
+            }
+            this.autoClosePopover();
+        }
+    },
     filteredLocalities() {
-        if (!this.searchQuery) return this.localities;
+        if (!this.searchQuery) return this.localities.sort((a, b) => a.name.localeCompare(b.name));
         return this.localities.filter(locality =>
             locality.name.toLowerCase().includes(this.searchQuery.toLowerCase())
-        );
+        ).sort((a, b) => a.name.localeCompare(b.name));
     },
     localitiesWithoutDistrict() {
         return this.filteredLocalities().filter(locality => !locality.district_id);
@@ -87,7 +121,7 @@
             this.isMobileSelectorOpen = false;
         }
     }
-}" x-init="initDistrict(); $watch('searchQuery', () => { updateDistrict(); })">
+}" x-init="initDistrict(); $watch('searchQuery', () => { updateDistrict(); }); checkLocalityConfirmation();">
     
     <!-- Скрипты для работы клавиатуры -->
     <script>
@@ -95,6 +129,7 @@
             if (e.key === 'Escape') {
                 const scope = document.getElementById('navbar').__x.getScope();
                 scope.closeModal();
+                scope.closePopover();
             }
         });
     </script>
@@ -136,28 +171,66 @@
             </ul>
             <!-- Действия (десктоп) -->
             <div class="d-none d-lg-flex align-items-center gap-3 ms-auto">
-                <button class="btn btn-link text-dark p-0 d-flex align-items-center text-decoration-none"
-                    @click="openModal()"
-                    aria-label="Выбрать населенный пункт">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span class="nav-link">{{ request.locality.name }}</span>
-                </button>
-                <a href="https://archangelsk.rt.ru/payment " class="btn btn-warning btn-sm">Оплатить</a>
-            </div>
-            <!-- Мобильное местоположение (добавлено) -->
-            <div class="ms-auto d-flex align-items-center gap-3 d-lg-none">
-                <button class="btn btn-link text-dark p-0 d-flex align-items-center text-decoration-none"
-                        @click="openMobileSelector()"
+                <div class="position-relative">
+                    <button class="btn btn-link text-dark p-0 d-flex align-items-center text-decoration-none"
+                        @click="openModal()"
                         aria-label="Выбрать населенный пункт">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
-                    <span class="nav-link">{{ request.locality.name }}</span>
-                </button>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="nav-link">{{ request.locality.name }}</span>
+                    </button>
+                    <!-- Popover подтверждения местоположения (десктоп) -->
+                    <div class="location-confirm-popover d-none d-lg-block"
+                         x-show="isPopoverOpen"
+                         x-transition:enter="popover-enter"
+                         x-transition:enter-start="popover-enter-start"
+                         x-transition:enter-end="popover-enter-end"
+                         x-transition:leave="popover-leave"
+                         x-transition:leave-start="popover-leave-start"
+                         x-transition:leave-end="popover-leave-end"
+                         style="display: none;">
+                        <div class="location-confirm-popover__content">
+                            <div class="location-confirm-popover__header">
+                                <button type="button" class="btn-close" @click="closePopover()">×</button>
+                            </div>
+                            <div class="location-confirm-popover__body text-center">
+                                <p class="mb-4">Хотите подключиться в <span x-text="currentLocalityNamePrepositional"></span>?</p>
+                                <div class="d-flex justify-content-center gap-3">
+                                    <button class="btn btn-outline-secondary"
+                                            @click="() => {
+                                                openModal();
+                                                closePopover();
+                                            }"
+                                            aria-label="Изменить местоположение">
+                                        Нет, изменить
+                                    </button>
+                                    <button class="btn btn-primary"
+                                            @click="confirmLocality()"
+                                            aria-label="Подтвердить местоположение">
+                                        Да, верно
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning btn-sm">Оплатить</a>
+            </div>
+            <!-- Мобильное местоположение -->
+            <div class="ms-auto d-flex align-items-center gap-3 d-lg-none">
+                <div class="position-relative">
+                    <button class="btn btn-link text-dark p-0 d-flex align-items-center text-decoration-none"
+                            @click="openMobileSelector()"
+                            aria-label="Выбрать населенный пункт">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="me-1" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        <span class="nav-link">{{ request.locality.name }}</span>
+                    </button>
+                </div>
             </div>
             <!-- Мобильный toggler -->
             <button class="navbar-toggler d-lg-none" type="button"
@@ -189,9 +262,7 @@
             </ul>
             <hr>
             <div class="d-flex flex-column gap-2">
-                <!-- Кнопка местоположения удалена -->
-                <a href="https://archangelsk.rt.ru/payment "
-                   class="btn btn-warning">Оплатить</a>
+                <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning">Оплатить</a>
             </div>
         </div>
     </div>
@@ -208,13 +279,13 @@
         <div class="mobile-location-offcanvas__backdrop" @click="isMobileSelectorOpen = false"></div>
         <div class="mobile-location-offcanvas__content" @click.stop>
             <div class="mobile-location-offcanvas__header">
-                <div class="mobile-location-offcanvas__title">Выберите местоположение</div>
+                <h5>Выберите местоположение</h5>
                 <button type="button" class="btn-close" @click="isMobileSelectorOpen = false">×</button>
             </div>
             <div class="mobile-location-offcanvas__body px-3 pb-3">
                 <!-- Поиск -->
                 <div class="search-container mb-3 position-relative">
-                    <input x-model="searchQuery" type="search" class="location-select-modal__search-input" placeholder="Найти" x-ref="searchInput">
+                    <input x-model="searchQuery" type="text" class="form-control" placeholder="Поиск" x-ref="searchInput">
                     <template x-if="searchQuery && filteredLocalities().length > 0">
                         <ul class="list-group position-absolute w-100 mt-1 shadow-sm border rounded overflow-hidden z-3">
                             <template x-for="(locality, index) in filteredLocalities().slice(0, 5)" :key="index">
@@ -230,21 +301,57 @@
                         </ul>
                     </template>
                 </div>
-            
+
                 <!-- Единый список населенных пунктов -->
                 <div class="locality-list">
                     <template x-for="locality in filteredLocalities()" :key="locality.slug">
                         <a :href="getNewPath(locality.slug)"
-                        class="city-item"
-                        :class="{ 'selected': locality.slug === currentLocalitySlug }"
-                        @click.prevent="
-                            window.location.href = getNewPath(locality.slug);
-                            saveSelection(locality.slug);
-                            isMobileSelectorOpen = false;
-                        "
-                        x-text="locality.name">
+                           class="city-item"
+                           :class="{ 'selected': locality.slug === currentLocalitySlug }"
+                           @click.prevent="
+                               window.location.href = getNewPath(locality.slug);
+                               saveSelection(locality.slug);
+                               isMobileSelectorOpen = false;
+                           "
+                           x-text="locality.name">
                         </a>
                     </template>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Offcanvas подтверждения местоположения (моб.) -->
+    <div class="mobile-confirm-offcanvas offcanvas offcanvas-bottom d-lg-none" 
+        x-show="isMobileConfirmOpen"
+        x-transition:enter="mobile-enter"
+        x-transition:enter-start="mobile-enter-start"
+        x-transition:enter-end="mobile-enter-end"
+        x-transition:leave="mobile-leave"
+        x-transition:leave-start="mobile-leave-start"
+        x-transition:leave-end="mobile-leave-end"
+        style="display: none;">
+        <div class="mobile-confirm-offcanvas__content" @click.stop>
+            <div class="mobile-confirm-offcanvas__header">
+                <h5>Подтверждение местоположения</h5>
+                <button type="button" class="btn-close" @click="closePopover()">×</button>
+            </div>
+            <div class="mobile-confirm-offcanvas__body px-3 pb-3 text-center">
+                <p class="mb-4">Хотите подключиться в <span x-text="currentLocalityNamePrepositional"></span>?</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <button class="btn btn-outline-secondary"
+                            @click="() => {
+                                openMobileSelector();
+                                closePopover();
+                            }"
+                            aria-label="Изменить местоположение">
+                        Нет, изменить
+                    </button>
+                    <button class="btn btn-primary"
+                            @click="confirmLocality()"
+                            aria-label="Подтвердить местоположение">
+                        Да, верно
+                    </button>
                 </div>
             </div>
         </div>
