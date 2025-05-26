@@ -3339,13 +3339,13 @@ button.swiper-pagination-bullet {
 }
 
 .location-confirm-popover__body .btn.btn-primary {
-    background-color: #e91e63; /* Цвет кнопки "Да, верно" */
+    background-color: var(--color-ocean-blue); /* Цвет кнопки "Да, верно" */
     color: #fff;
-    border-color: #e91e63;
+    border-color: var(--color-ocean-blue);
 }
 
 .location-confirm-popover__body .btn-primary:hover {
-    background: #c82333;
+    background: var(--color-navy-blue);
 }
 
 .location-confirm-popover__header .btn-close {
