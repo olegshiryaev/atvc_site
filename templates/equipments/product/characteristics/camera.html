@@ -1,0 +1,50 @@
+<!-- IP-камера -->
+<div class="characteristic-item">
+    <div class="characteristic-label">Цвет</div>
+    <div class="characteristic-value">{{ product.camera.get_color_display|default:"—" }}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Стандарт видеокамеры</div>
+    <div class="characteristic-value">{{ product.camera.get_camera_standard_display|default:"—" }}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Тип видеокамеры</div>
+    <div class="characteristic-value">{{ product.camera.get_camera_type_display|default:"—" }}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Количество мегапикселей</div>
+    <div class="characteristic-value">{{ product.camera.resolution_mp|default:"—" }} Мп</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Частота кадров</div>
+    <div class="characteristic-value">{{ product.camera.frame_rate|default:"—" }} кадров/с</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Рабочая температура</div>
+    <div class="characteristic-value">{{ product.camera.operating_temperature|default:"от -40°C до +60°C" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Фокусное расстояние</div>
+    <div class="characteristic-value">{{ product.camera.focal_length|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Угол обзора</div>
+    <div class="characteristic-value">{{ product.camera.viewing_angle|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Wi-Fi</div>
+    <div class="characteristic-value">{% if product.camera.wifi_standards %}{{ product.camera.wifi_standards }}{% else %}Нет{% endif %}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Размер (ШхДхВ)</div>
+    <div class="characteristic-value">{{ product.camera.dimensions|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Вес</div>
+    <div class="characteristic-value">{{ product.camera.weight|default:"—" }} г</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Тип оборудования</div>
+    <div class="characteristic-value">IP-камера</div>
+</div>
+<div class="characteristic-more-btn show-more-btn" role="button" aria-expanded="false">Показать больше</div>

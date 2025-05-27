@@ -40,6 +40,7 @@ urlpatterns = [
     path("<slug:locality_slug>/news/", include("apps.news.urls", namespace="news")),
     # Общие маршруты по <locality_slug>/
     path("<slug:locality_slug>/", include("apps.core.urls")),
+    path("<slug:locality_slug>/", include("apps.equipments.urls")),
 ]
 
 if settings.DEBUG:

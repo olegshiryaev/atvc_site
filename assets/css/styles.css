@@ -46,6 +46,9 @@
     --color-text-muted: #9ea0a1;
     --smoky-white-color: #f2f6f8;
     --main-color: #0091d5;
+    --secondary: #6c757d;
+    --light-bg: #f8f9fa;
+    --border-color: #dee2e6;
 
     /* Отступы */
     --spacing-xs: 0.25rem; /* 4px */
@@ -3628,4 +3631,143 @@ button.swiper-pagination-bullet {
         font-size: 0.8rem;
         padding: 0.4rem 1.2rem;
     }
+}
+
+/* === Каталог оборудования === */
+.product-gallery .main-image {
+    transition: transform 0.3s ease;
+}
+.product-gallery .main-image:hover {
+    transform: scale(1.02);
+}
+.thumbnail-gallery img {
+    cursor: pointer;
+    transition: opacity 0.3s ease, border-color 0.3s ease;
+    border: 2px solid transparent;
+}
+.thumbnail-gallery img:hover {
+    opacity: 0.8;
+    border-color: #007bff;
+}
+.characteristic-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+.characteristic-label {
+    font-weight: 500;
+    color: #495057;
+    flex: 1;
+}
+.characteristic-value {
+    flex: 1;
+    text-align: right;
+    color: #212529;
+}
+.show-more-btn {
+    cursor: pointer;
+    color: #007bff;
+    text-decoration: underline;
+    margin-top: 10px;
+    transition: color 0.3s ease;
+}
+.show-more-btn:hover {
+    color: #0056b3;
+}
+.tabs-one__item {
+    transition: background-color 0.3s ease;
+}
+.tabs-one__item.active {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #007bff;
+}
+.tabs-one__item-link {
+    color: #495057;
+    text-decoration: none;
+    padding: 10px 20px;
+    display: block;
+}
+.tabs-one__item-link:hover {
+    color: #007bff;
+}
+.product-card {
+    transition: box-shadow 0.3s ease;
+}
+.product-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+.product-card__img {
+    object-fit: cover;
+    height: 150px;
+}
+.product__tabs-content {
+    transition: opacity 0.3s ease;
+}
+
+.product-info {
+    background-color: #fff;
+    border: 1px solid #eee;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    font-size: 0.95rem;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #000;
+}
+
+.status {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+.status.available {
+    background-color: #e0f7e9;
+    color: #2e7d32;
+}
+
+.status.unavailable {
+    background-color: #fdecea;
+    color: #c62828;
+}
+
+.buy-btn {
+    background-color: var(--color-ocean-blue); /* Цвет кнопки "Да, верно" */
+    color: #fff;
+    border-color: var(--color-ocean-blue);
+}
+
+.buy-btn:hover {
+    background: var(--color-navy-blue);
+    color: #fff;
+}
+
+.favorite-btn {
+    background-color: #f1f1f1;
+    color: #555;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background 0.2s ease;
+}
+
+.favorite-btn:hover {
+    background-color: #e0e0e0;
+}
+
+.specs-table tr {
+    border-bottom: 1px solid var(--border-color);
+}
+
+.specs-table td {
+    padding: 10px 0;
+}
+
+.specs-table td:first-child {
+    color: var(--secondary);
+    width: 40%;
 }

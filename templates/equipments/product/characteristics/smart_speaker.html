@@ -1,0 +1,26 @@
+<!-- Умная колонка -->
+<div class="characteristic-item">
+    <div class="characteristic-label">Голосовой помощник</div>
+    <div class="characteristic-value">{{ product.smart_speaker.voice_assistant|default:"—" }}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Bluetooth</div>
+    <div class="characteristic-value">{% if product.smart_speaker.bluetooth %}Есть{% else %}Нет{% endif %}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">Время работы от батареи</div>
+    <div class="characteristic-value">{{ product.smart_speaker.battery_life|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Мощность динамика</div>
+    <div class="characteristic-value">{{ product.smart_speaker.speaker_wattage|default:"—" }} Вт</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Размер (ШхДхВ)</div>
+    <div class="characteristic-value">{{ product.smart_speaker.dimensions|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Вес</div>
+    <div class="characteristic-value">{{ product.smart_speaker.weight|default:"—" }} г</div>
+</div>
+<div class="characteristic-more-btn show-more-btn" role="button" aria-expanded="false">Показать больше</div>

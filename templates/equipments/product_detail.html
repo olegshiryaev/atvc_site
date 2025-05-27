@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load url_tools %}
+{% load currency_filters %}
+
+{% block title %}{{ product.name }} — {{ block.super }}{% endblock %}
+
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'partials/page_header.html' with title=title %}
+
+        <!-- Главная карточка товара -->
+        <div class="row g-5">
+            <!-- Изображения -->
+            <div class="col-md-6 text-center">
+                <!-- Основное изображение -->
+                <div class="product-gallery mb-3">
+                    {% with main_image=product.get_main_image %}
+                        {% if main_image %}
+                            <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm main-image" style="max-height: 400px;">
+                        {% else %}
+                            <img src="{% static 'images/no-image.png' %}" class="img-fluid rounded shadow-sm main-image" alt="Нет изображения" style="max-height: 400px;">
+                        {% endif %}
+                    {% endwith %}
+                </div>
+            
+                <!-- Миниатюры -->
+                <div class="thumbnail-gallery d-flex justify-content-center gap-2">
+                    {% for image in product.images.all %}
+                        <img 
+                            src="{{ image.image.url }}" 
+                            alt="Миниатюра {{ forloop.counter }}" 
+                            class="img-thumbnail product-thumb{% if forloop.first %} active{% endif %}" 
+                            data-full="{{ image.image.url }}"
+                            style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;">
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Информация о товаре -->
+            <div class="col-md-6">
+                <div class="product-info p-4 rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+
+                    <!-- Краткое описание -->
+                    <p class="text-muted small mb-2">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
+
+                    <!-- Статус и цена -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        {% if product.price %}
+                            <div class="price">{{ product.price|currency }}</div>
+                        {% else %}
+                            <div class="text-muted">Цена по запросу</div>
+                        {% endif %}
+
+                        {% if product.is_available %}
+                            <span class="status available">В наличии</span>
+                        {% else %}
+                            <span class="status unavailable">Нет в наличии</span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Кнопки -->
+                    <div class="d-flex gap-2 mb-4">
+                        <button class="btn buy-btn w-100">
+                            <i class="bi bi-cart me-1"></i> В корзину
+                        </button>
+                        <button class="btn favorite-btn w-100">
+                            <i class="bi bi-heart me-1"></i> В избранное
+                        </button>
+                    </div>
+
+                    <!-- Скачать инструкцию -->
+                    <div>
+                        <a href="#" class="btn btn-link p-0 text-decoration-none small">
+                            <i class="bi bi-download me-1"></i> Скачать инструкцию
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Табы: Описание / Характеристики -->
+        <div class="product__bottom-side mt-5">
+            <div class="woocommerce-tabs wc-tabs-wrapper product__tabs">
+                <ul class="tabs-one wc-tabs product__tabs-list" role="tablist">
+                    <li class="description_tab tabs-one__item active" id="tab-title-description" role="tab" aria-controls="tab-description" aria-selected="true">
+                        <a href="#tab-description" class="tabs-one__item-link">Полное описание</a>
+                    </li>
+                    <li class="additional_information_tab tabs-one__item" id="tab-title-additional_information" role="tab" aria-controls="tab-additional_information" aria-selected="false">
+                        <a href="#tab-additional_information" class="tabs-one__item-link">Технические характеристики</a>
+                    </li>
+                </ul>
+
+                <!-- Tab 1: Полное описание -->
+                <div class="product__tabs-content woocommerce-Tabs-panel woocommerce-Tabs-panel--description product__description panel entry-content wc-tab"
+                    id="tab-description" role="tabpanel" aria-labelledby="tab-title-description" style="display: block;">
+                    {% if product.description %}
+                        <p>{{ product.description }}</p>
+                    {% else %}
+                        <p class="text-muted">Описание отсутствует.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Технические характеристики -->
+                <div class="product__tabs-content woocommerce-Tabs-panel woocommerce-Tabs-panel--additional_information product__additional_information panel entry-content wc-tab"
+                    id="tab-additional_information" role="tabpanel" aria-labelledby="tab-title-additional_information" style="display: none;">
+
+                    <div class="product-characteristics" data-show-more>
+                        <h4 class="fw-bold mb-3">Технические характеристики</h4>
+
+                        {% if product.camera %}
+                            {% include "equipments/product/characteristics/camera.html" %}
+                        {% elif product.router %}
+                            {% include "equipments/product/characteristics/router.html" %}
+                        {% elif product.smart_speaker %}
+                            {% include "equipments/product/characteristics/smart_speaker.html" %}
+                        {% elif product.tvbox %}
+                            {% include "equipments/product/characteristics/tvbox.html" %}
+                        {% else %}
+                            <p class="text-muted">Характеристики недоступны для данного товара.</p>
+                        {% endif %}
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок "Вы недавно смотрели" -->
+        {% if recently_viewed %}
+        <div class="recently-viewed-block mt-5">
+            <h2 class="block__title">Вы недавно смотрели</h2>
+
+            <!-- Swiper -->
+            <div class="swiper recently-viewed-swiper">
+                <div class="swiper-wrapper">
+                    {% for item in recently_viewed %}
+                    <div class="swiper-slide product-card">
+                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper text-decoration-none text-dark">
+                            <div class="product-card__img-wrap">
+                                <img src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" alt="{{ item.name }}" class="product-card__img img-fluid lazyload">
+                            </div>
+                            <h6 class="product-card__title h6">{{ item.name }}</h6>
+                            <div class="product-card__desc">
+                                {{ item.short_description|truncatewords:10 }}
+                            </div>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price h5">
+                                    {{ item.price|currency }}
+                                </div>
+                                <div class="product-card__btn btn btn-outline-primary btn-sm" data-add-product-cart="">
+                                    В корзину
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Navigation arrows -->
+                <div class="slider-navs">
+                    <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Предыдущий слайд"></div>
+                    <div class="slider-navs__next" tabindex="0" role="button" aria-label="Следующий слайд"></div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="swiper-pagination"></div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript для вкладок и "Показать больше" -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Переключение табов
+        const tabLinks = document.querySelectorAll('.tabs-one__item-link');
+        const tabPanels = document.querySelectorAll('.product__tabs-content');
+    
+        tabLinks.forEach(function (link) {
+            link.addEventListener('click', function (event) {
+                event.preventDefault();
+    
+                // Убираем активные классы
+                tabLinks.forEach(l => l.closest('li').classList.remove('active'));
+                tabPanels.forEach(p => p.style.display = 'none');
+    
+                // Активируем текущий таб
+                const target = this.getAttribute('href');
+                document.querySelector(target).style.display = 'block';
+                this.closest('li').classList.add('active');
+            });
+        });
+    
+        // Кнопка "Показать больше"
+        const showMoreButtons = document.querySelectorAll('.show-more-btn');
+    
+        showMoreButtons.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                const moreInfoItems = btn.closest('.product-characteristics').querySelectorAll('.more-info');
+                const expanded = btn.getAttribute('aria-expanded') === 'true';
+    
+                moreInfoItems.forEach(item => {
+                    item.style.display = expanded ? 'none' : 'flex';
+                });
+    
+                btn.setAttribute('aria-expanded', String(!expanded));
+                btn.textContent = expanded ? 'Показать больше' : 'Скрыть';
+            });
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const mainImage = document.querySelector('.main-image');
+        const thumbnails = document.querySelectorAll('.product-thumb');
+    
+        thumbnails.forEach(function (thumb) {
+            thumb.addEventListener('click', function () {
+                const newSrc = this.dataset.full;
+                if (newSrc && mainImage) {
+                    mainImage.src = newSrc;
+    
+                    // Активная подсветка (если нужно)
+                    thumbnails.forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                }
+            });
+        });
+    });
+</script>    
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- ТВ-приставка -->
+<div class="characteristic-item">
+    <div class="characteristic-label">Операционная система</div>
+    <div class="characteristic-value">{{ product.tvbox.os|default:"—" }}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">HDMI</div>
+    <div class="characteristic-value">{% if product.tvbox.hdmi %}Есть{% else %}Нет{% endif %}</div>
+</div>
+<div class="characteristic-item">
+    <div class="characteristic-label">USB портов</div>
+    <div class="characteristic-value">{{ product.tvbox.usb_ports|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">ОЗУ</div>
+    <div class="characteristic-value">{{ product.tvbox.ram|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">ПЗУ</div>
+    <div class="characteristic-value">{{ product.tvbox.rom|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Размер (ШхДхВ)</div>
+    <div class="characteristic-value">{{ product.tvbox.dimensions|default:"—" }}</div>
+</div>
+<div class="characteristic-item more-info" style="display: none;">
+    <div class="characteristic-label">Вес</div>
+    <div class="characteristic-value">{{ product.tvbox.weight|default:"—" }} г</div>
+</div>
+<div class="characteristic-more-btn show-more-btn" role="button" aria-expanded="false">Показать больше</div>

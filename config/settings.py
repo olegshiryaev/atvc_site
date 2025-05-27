@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     "apps.core",
     "apps.services",
     "apps.news",
+    "apps.equipments",
 ]
 
 MIDDLEWARE = [
