@@ -5,19 +5,19 @@
         <table class="specs-table w-100">
             <tr>
                 <td>Модель</td>
-                <td>ASUS RT-AX55</td>
+                <td>{{ product.router.model|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Стандарт Wi-Fi</td>
-                <td>802.11a/b/g/n/ac/ax</td>
+                <td>{{ product.router.wifi_standard|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Диапазоны</td>
-                <td>2.4 ГГц + 5 ГГц</td>
+                <td>{{ product.router.frequency_ranges|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Скорость Wi-Fi</td>
-                <td>до 1800 Мбит/с</td>
+                <td>{{ product.router.wifi_speed|default:"—" }}</td>
             </tr>
         </table>
     </div>
@@ -27,15 +27,15 @@
         <table class="specs-table w-100">
             <tr>
                 <td>WAN порт</td>
-                <td>1 x Gigabit Ethernet</td>
+                <td>{{ product.router.wan_port|default:"—" }}</td>
             </tr>
             <tr>
                 <td>LAN порты</td>
-                <td>4 x Gigabit Ethernet</td>
+                <td>{{ product.router.lan_ports|default:"—" }}</td>
             </tr>
             <tr>
                 <td>USB</td>
-                <td>Нет</td>
+                <td>{{ product.router.usb_ports|default:"Нет" }}</td>
             </tr>
         </table>
     </div>
@@ -47,15 +47,15 @@
         <table class="specs-table w-100">
             <tr>
                 <td>Тип антенн</td>
-                <td>Внешние, несъемные</td>
+                <td>{{ product.router.antenna_type|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Количество</td>
-                <td>4</td>
+                <td>{{ product.router.antenna_count|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Усиление</td>
-                <td>5 dBi</td>
+                <td>{{ product.router.antenna_gain|default:"—" }}</td>
             </tr>
         </table>
     </div>
@@ -65,15 +65,15 @@
         <table class="specs-table w-100">
             <tr>
                 <td>Процессор</td>
-                <td>Broadcom 1.5 ГГц, 2 ядра</td>
+                <td>{{ product.router.cpu|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Память</td>
-                <td>256 МБ Flash, 512 МБ RAM</td>
+                <td>{{ product.router.memory|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Габариты</td>
-                <td>220 x 134 x 38 мм</td>
+                <td>{{ product.router.dimensions|default:"—" }}</td>
             </tr>
         </table>
     </div>

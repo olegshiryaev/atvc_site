@@ -3705,6 +3705,86 @@ button.swiper-pagination-bullet {
     transition: opacity 0.3s ease;
 }
 
+/* Контейнер вкладок */
+.product__tabs {
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+/* Список вкладок */
+.product__tabs-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-left: 0;
+    list-style: none;
+    border-bottom: 2px solid #ccc;
+}
+
+/* Одна вкладка */
+.product__tabs-list .tabs-one__item {
+    margin-bottom: -2px;
+}
+
+/* Ссылки вкладок */
+.product__tabs-list .tabs-one__item-link {
+    display: inline-block;
+    padding: 0.75rem 1.25rem;
+    border: 2px solid transparent;
+    border-bottom: none;
+    font-weight: 500;
+    color: #495057;
+    background-color: transparent;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+/* Активная вкладка */
+.product__tabs-list .tabs-one__item.active .tabs-one__item-link {
+    border-color: #0d6efd #0d6efd white;
+    color: #0d6efd;
+    background-color: white;
+    font-weight: 600;
+    border-radius: 0.25rem 0.25rem 0 0;
+}
+
+/* Контент вкладки */
+.product__tabs-content {
+    padding: 1.5rem;
+    border: 1px solid #dee2e6;
+    border-top: none;
+    background-color: white;
+    border-radius: 0 0 0.375rem 0.375rem;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Анимация появления */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 576px) {
+    .product__tabs-list {
+        flex-direction: column;
+    }
+
+    .product__tabs-list .tabs-one__item-link {
+        width: 100%;
+        text-align: left;
+        border-radius: 0.375rem;
+    }
+
+    .product__tabs-list .tabs-one__item.active .tabs-one__item-link {
+        border-radius: 0.375rem;
+    }
+}
+
 .product-info {
     background-color: #fff;
     border: 1px solid #eee;
