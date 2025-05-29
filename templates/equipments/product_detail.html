@@ -111,7 +111,7 @@
     {% if recently_viewed %}
     <section class="products-slider-block block " style="" data-block-slug="products-slider-block" data-block-appearance="">
         <div class="products-slider-block__header">
-            <h2 class="products-slider-block__title block__title">     Вы недавно смотрели    </h2>
+            <h2 class="products-slider-block__title block__title"> Вы недавно смотрели</h2>
         </div>
         <div class="products-slider-block__wrapper">
             <div class="swiper swiper-initialized swiper-horizontal">
@@ -124,7 +124,7 @@
                                 <img width="400" height="400" alt="Изображение" data-src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" class="product-card__img ls-is-cached lazyloaded" src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}"><noscript><img src="" width="400" height="400" alt="Изображение" class="product-card__img"></noscript>
                             </div>
                             <h6 class="product-card__title h6">{{ item.name }}</h6>
-                            <div class="product-card__desc">    {{ item.short_description|truncatewords:10 }}        </div>
+                            <div class="product-card__desc">{{ item.short_description|truncatewords:10 }}</div>
                             <div class="product-card__bottom">
                                 <div class="product-card__price h5">{{ item.price }} ₽</div>
                                 <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
-        slidesPerView: 1.2,
+        slidesPerView: 1, // Одна карточка на мобильных
         spaceBetween: 16,
         navigation: {
             nextEl: '.products-slider-block .slider-navs__next',
@@ -176,13 +176,13 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         breakpoints: {
             576: {
-                slidesPerView: 2,
+                slidesPerView: 2, // 2 карточки на экранах >= 576px
             },
             768: {
-                slidesPerView: 3,
+                slidesPerView: 3, // 3 карточки на экранах >= 768px
             },
             992: {
-                slidesPerView: 4,
+                slidesPerView: 4, // 4 карточки на экранах >= 992px
             },
         },
     });

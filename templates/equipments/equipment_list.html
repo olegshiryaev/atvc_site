@@ -36,31 +36,36 @@
             <div class="products-slider-block__header">
                 <h2 class="products-slider-block__title block__title">Популярные товары</h2>
             </div>
-            <div class="row g-4">
-                {% for product in popular_products %}
-                <div class="col-lg-3 col-md-4 col-sm-6">
-                    <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
-                        <!-- Изображение -->
-                        {% with product.images.first as image %}
-                            <div class="product-card__img-wrap">
-                                {% if image %}
-                                    <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
-                                {% else %}
-                                    <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
-                                {% endif %}
-                            </div>
-                        {% endwith %}
+            <!-- Swiper Container -->
+            <div class="swiper products-slider">
+                <div class="swiper-wrapper">
+                    {% for product in popular_products %}
+                    <div class="swiper-slide">
+                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                            <!-- Изображение -->
+                            {% with product.images.first as image %}
+                                <div class="product-card__img-wrap">
+                                    {% if image %}
+                                        <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
+                                    {% else %}
+                                        <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
+                                    {% endif %}
+                                </div>
+                            {% endwith %}
 
-                        <!-- Контент -->
-                        <h6 class="product-card__title h6">{{ product.name }}</h6>
-                        <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
-                        <div class="product-card__bottom d-flex justify-content-between">
-                            <div class="product-card__price h5">{{ product.price }} ₽</div>
-                            <i class="bi bi-cart fs-5 text-secondary"></i>
-                        </div>
-                    </a>
+                            <!-- Контент -->
+                            <h6 class="product-card__title h6">{{ product.name }}</h6>
+                            <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
+                            <div class="product-card__bottom d-flex justify-content-between">
+                                <div class="product-card__price h5">{{ product.price }} ₽</div>
+                                <i class="bi bi-cart fs-5 text-secondary"></i>
+                            </div>
+                        </a>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
+                <!-- Add Pagination -->
+                <div class="swiper-pagination"></div>
             </div>
         </section>
         {% endif %}
@@ -227,6 +232,38 @@
 
     </div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.products-slider', {
+        // Optional parameters
+        slidesPerView: 1, // Default for mobile
+        spaceBetween: 16,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        // Responsive breakpoints
+        breakpoints: {
+            576: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            768: {
+                slidesPerView: 3,
+                spaceBetween: 24,
+            },
+            992: {
+                slidesPerView: 4,
+                spaceBetween: 24,
+            },
+        },
+    });
+});
+</script>
 <script>
     // Автоотправка формы при изменении сортировки
     document.querySelectorAll('form[data-products-sortings] input[type=radio]').forEach(function(radio) {
