@@ -9,16 +9,7 @@
         {% endif %}
     </div>
     <div class="news-card__content">
-        <p class="news-card__date">{{ news.created_at|date:"d.m.Y" }}</p>
+        <p class="news-card__date">{{ news.created_at|date:"j E" }}</p>
         <h3 class="news-card__title">{{ news.title }}</h3>
-        {% if news.content %}
-            <p class="news-card__excerpt">
-                {% if is_preview %}
-                    {{ news.content|safe|striptags|truncatechars:140 }}
-                {% else %}
-                    {{ news.content|safe|striptags|truncatewords_html:20 }}
-                {% endif %}
-            </p>
-        {% endif %}
     </div>
 </a>

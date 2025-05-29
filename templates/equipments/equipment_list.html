@@ -5,109 +5,243 @@
 {% block title %}Оборудование — {{ block.super }}{% endblock %}
 
 {% block content %}
-<div class="container py-4">
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'partials/page_header.html' with title=title %}
 
-    <!-- Заголовок -->
-    <h1 class="mb-4">Оборудование</h1>
-
-    <!-- Категории -->
-    <div class="equipment-categories mb-4">
-        <ul class="nav nav-pills flex-wrap" style="gap: 0.5rem;">
-            <li class="nav-item me-2 mb-2">
-                <a class="nav-link {% if not selected_category %}active{% endif %}"
-                   href="{% url 'equipments:equipment_list' locality_slug=locality.slug %}">
-                    Все
-                </a>
-            </li>
-            {% for category in categories %}
+        <!-- Категории -->
+        <div class="equipment-categories mb-4">
+            <ul class="nav nav-pills flex-wrap" style="gap: 0.5rem;">
                 <li class="nav-item me-2 mb-2">
-                    <a class="nav-link {% if selected_category|slugify == category.id|slugify %}active{% endif %}"
-                       href="?{% url_replace 'category' category.id %}">
-                        {{ category.name }}
+                    <a class="nav-link {% if not selected_category %}active{% endif %}"
+                        href="{% url 'equipments:equipment_list' locality_slug=locality.slug %}">
+                        Все
                     </a>
                 </li>
-            {% endfor %}
-        </ul>
-    </div>
+                {% for category in categories %}
+                    <li class="nav-item me-2 mb-2">
+                        <a class="nav-link {% if selected_category|slugify == category.id|slugify %}active{% endif %}"
+                            href="?{% url_replace 'category' category.id %}">
+                            {{ category.name }}
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <!-- Популярные товары -->
-    {% if popular_products %}
-    <section class="popular-products mb-5">
-        <h2 class="mb-3">Популярные товары</h2>
-        <div class="row g-4">
-            {% for product in popular_products %}
-            <div class="col-md-3 col-sm-6">
-                <div class="card h-100 shadow-sm border-0 equipment-popular-card">
-                    <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                    <div class="card-body text-center">
-                        <h5 class="card-title">{{ product.name }}</h5>
-                        <p class="text-muted small">{{ product.short_description|truncatewords:10 }}</p>
-                        <p>Цена: <strong>{{ product.price }} ₽</strong></p>
-                        <p class="text-success"><i class="bi bi-eye"></i> {{ product.view_count }} просмотров</p>
-                        <div class="d-flex justify-content-between align-items-center mt-2">
-                            <button class="btn btn-success btn-sm me-2">
-                                <i class="bi bi-cart me-1"></i> В корзину
-                            </button>
-                            <a href="#" class="btn btn-outline-primary btn-sm">Подробнее</a>
+        <!-- Популярные товары -->
+        {% if popular_products %}
+        <section class="products-slider-block block dsfdsfd block_alignwide" style data-block-slug="products-slider-block" data-block-appearance>
+            <div class="products-slider-block__header">
+                <h2 class="products-slider-block__title block__title">Популярные товары</h2>
+            </div>
+            <div class="row g-4">
+                {% for product in popular_products %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                        <!-- Изображение -->
+                        {% with product.images.first as image %}
+                            <div class="product-card__img-wrap">
+                                {% if image %}
+                                    <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
+                                {% else %}
+                                    <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
+                                {% endif %}
+                            </div>
+                        {% endwith %}
+
+                        <!-- Контент -->
+                        <h6 class="product-card__title h6">{{ product.name }}</h6>
+                        <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
+                        <div class="product-card__bottom d-flex justify-content-between">
+                            <div class="product-card__price h5">{{ product.price }} ₽</div>
+                            <i class="bi bi-cart fs-5 text-secondary"></i>
                         </div>
-                    </div>
+                    </a>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Поиск и сортировка -->
+        <section class="products-list-block block  block_alignwide" style data-block-slug="products-list-block" data-block-appearance>
+            <div class="products-list-block__content" data-products-cat>
+                <div class="products-panel products-panel_top">
+                    <form name="search" method="GET" class="products-panel__search">
+                        <input type="search" name="q" placeholder="Поиск" value="{{ search_query }}"
+                            class="products-panel__search-input">
+
+                        {% if sort_by %}
+                            <input type="hidden" name="sort_by" value="{{ sort_by }}">
+                        {% endif %}
+                        {% if selected_category %}
+                            <input type="hidden" name="category" value="{{ selected_category }}">
+                        {% endif %}
+
+                        <button type="submit" class="products-panel__search-btn">
+                            <i class="bi bi-search me-1"></i>
+                        </button>
+                    </form>
+                </div>
+                <div class="products-panel products-panel_bottom">
+                    <form method="get" class="products-panel__sortings sortings" data-products-sortings>
+                        {% if search_query %}
+                            <input type="hidden" name="q" value="{{ search_query|default_if_none:'' }}">
+                        {% endif %}
+                        {% if selected_category %}
+                            <input type="hidden" name="category" value="{{ selected_category }}">
+                        {% endif %}
+                        <div class="sortings__title">Сортировать по:</div>
+                            <label class="sortings__item sortings__item_total_sales sortings__item_desc">
+                                <input class="sortings__item-value" type="radio" name="sort_by" value="popularity"
+                                    {% if sort_by == "popularity" or not sort_by %}checked{% endif %}>
+                                <div class="sortings__item-label">По популярности</div>
+                            </label>
+
+                            <label class="sortings__item sortings__item__price_asc sortings__item_asc">
+                                <input class="sortings__item-value" type="radio" name="sort_by" value="price_asc"
+                                    {% if sort_by == "price_asc" %}checked{% endif %}>
+                                <div class="sortings__item-label">Цене ↑</div>
+                            </label>
+
+                            <label class="sortings__item sortings__item__price sortings__item_desc">
+                                <input class="sortings__item-value" type="radio" name="sort_by" value="price_desc"
+                                    {% if sort_by == "price_desc" %}checked{% endif %}>
+                                <div class="sortings__item-label">Цене ↓</div>
+                            </label>
+
+                            <label class="sortings__item sortings__item_discount sortings__item_desc">
+                                <input class="sortings__item-value" type="radio" name="sort_by" value="discount"
+                                    {% if sort_by == "discount" %}checked{% endif %}>
+                                <div class="sortings__item-label">Со скидкой</div>
+                            </label>
+                    </form>
+                    <button class="products-panel__reset" data-products-full-reset="">Сбросить всё</button>
+                </div>
+
+                <!-- Карточки товаров -->
+                <div class="products-list-block__wrapper" data-products-wrapper>
+                    <ul class="products__list">
+                        {% for product in products %}
+                            <li class="product-card" data-product="{{ product.id }}" data-product-title="{{ product.name }}" data-product-price="{{ product.price }}" data-product-incatalog="1">
+                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                                    
+                                    <div class="product-card__cart" data-product-change-cart="{{ product.uuid|default:'' }}"></div>
+                                    
+                                    <div class="product-card__img-wrap">
+                                        <img src="{{ product.images.first.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
+                                    </div>
+
+                                    <h6 class="product-card__title h6">{{ product.name }}</h6>
+
+                                    <div class="product-card__desc">
+                                        {{ product.short_description|truncatewords:20 }}
+                                    </div>
+
+                                    <div class="product-card__bottom">
+                                        <div class="product-card__price h5">{{ product.price }} ₽</div>
+                                        <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                                    </div>
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="alert alert-info">Товаров не найдено.</li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
+        </section>
+
+        {% if products.paginator.num_pages > 1 %}
+        <nav aria-label="Навигация по страницам">
+        <ul class="pagination justify-content-center flex-wrap gap-1">
+
+            {# Кнопка "назад" #}
+            {% if products.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% url_replace 'page' products.previous_page_number %}" aria-label="Предыдущая">
+                <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&laquo;</span>
+            </li>
+            {% endif %}
+
+            {# Всегда показываем первую страницу #}
+            {% if products.number > 3 %}
+            <li class="page-item">
+                <a class="page-link" href="?{% url_replace 'page' 1 %}">1</a>
+            </li>
+            {% if products.number > 4 %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
+            {% endif %}
+            {% endif %}
+
+            {# Диапазон вокруг текущей страницы (2 слева и 2 справа) #}
+            {% for num in products.paginator.page_range %}
+            {% if num >= products.number|add:'-2' and num <= products.number|add:'2' %}
+                {% if num == products.number %}
+                <li class="page-item active" aria-current="page">
+                    <span class="page-link">{{ num }}</span>
+                </li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% url_replace 'page' num %}">{{ num }}</a>
+                </li>
+                {% endif %}
+            {% endif %}
             {% endfor %}
-        </div>
-    </section>
-    {% endif %}
 
-    <!-- Поиск и сортировка -->
-    <div class="equipment-filters mb-4">
-        <form method="GET" class="d-flex flex-wrap gap-2 mb-3">
-            <input type="text" name="q" placeholder="Поиск оборудования..." value="{{ search_query }}"
-                   class="form-control w-auto flex-grow-1">
-
-            {% if sort_by %}
-                <input type="hidden" name="sort_by" value="{{ sort_by }}">
+            {# Многоточие перед последней страницей #}
+            {% if products.number < products.paginator.num_pages|add:'-2' %}
+            {% if products.number < products.paginator.num_pages|add:'-3' %}
+                <li class="page-item disabled"><span class="page-link">…</span></li>
             {% endif %}
-            {% if selected_category %}
-                <input type="hidden" name="category" value="{{ selected_category }}">
+            <li class="page-item">
+                <a class="page-link" href="?{% url_replace 'page' products.paginator.num_pages %}">
+                {{ products.paginator.num_pages }}
+                </a>
+            </li>
             {% endif %}
 
-            <button type="submit" class="btn btn-primary d-flex align-items-center">
-                <i class="bi bi-search me-1"></i> Найти
-            </button>
-            <a href="{% url 'equipments:equipment_list' locality_slug=locality.slug %}" class="btn btn-outline-secondary">Сбросить всё</a>
-        </form>
+            {# Кнопка "вперёд" #}
+            {% if products.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% url_replace 'page' products.next_page_number %}" aria-label="Следующая">
+                <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled">
+                <span class="page-link" aria-hidden="true">&raquo;</span>
+            </li>
+            {% endif %}
 
-        <div class="equipment-sorting d-flex flex-wrap gap-2">
-            <span class="align-self-center me-2">Сортировать:</span>
-            <a href="?{% url_replace 'sort_by' 'popularity' %}" class="btn btn-sm btn-outline-secondary {% if sort_by == 'popularity' %}active{% endif %}">По популярности</a>
-            <a href="?{% url_replace 'sort_by' 'price_asc' %}" class="btn btn-sm btn-outline-secondary {% if sort_by == 'price_asc' %}active{% endif %}">Цене ↑</a>
-            <a href="?{% url_replace 'sort_by' 'price_desc' %}" class="btn btn-sm btn-outline-secondary {% if sort_by == 'price_desc' %}active{% endif %}">Цене ↓</a>
-            <a href="?{% url_replace 'sort_by' 'discount' %}" class="btn btn-sm btn-outline-secondary {% if sort_by == 'discount' %}active{% endif %}">Со скидкой</a>
-        </div>
+        </ul>
+        </nav>
+        {% endif %}
+
     </div>
-
-    <!-- Карточки товаров -->
-    <div class="product-grid row g-4">
-        {% for product in products %}
-        <div class="col-md-3 col-sm-6">
-            <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none text-dark">
-                <div class="card h-100 equipment-product-card">
-                    <img src="{{ product.images.first.image.url }}" class="card-img-top" alt="{{ product.name }}">
-                    <div class="card-body d-flex flex-column">
-                        <h5>{{ product.name }}</h5>
-                        <p class="text-muted small">{{ product.short_description|truncatewords:10 }}</p>
-                        <p class="mt-auto fw-bold fs-5">{{ product.price }} ₽</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        {% empty %}
-        <div class="alert alert-info">Товаров не найдено.</div>
-        {% endfor %}
-    </div>
-
-    <!-- Пагинация (если будете добавлять) -->
-    {# Пока отсутствует, но я могу показать как #}
-
 </div>
+<script>
+    // Автоотправка формы при изменении сортировки
+    document.querySelectorAll('form[data-products-sortings] input[type=radio]').forEach(function(radio) {
+        radio.addEventListener('change', function() {
+            this.form.submit();
+        });
+    });
+
+    // Обработка кнопки "Сбросить всё"
+    const resetButton = document.querySelector('[data-products-full-reset]');
+    if (resetButton) {
+        resetButton.addEventListener('click', function () {
+            // Перенаправление на чистый URL без параметров
+            window.location.href = "{{ request.path }}";
+        });
+    }
+</script>
 {% endblock %}

@@ -1,3 +1,4 @@
+from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import get_object_or_404, render
@@ -6,6 +7,7 @@ from django.db.models import Count, Q
 from apps.cities.models import Locality
 from apps.services.utils import get_client_ip
 from .models import Product, Category, ViewCount
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 def equipment_list(request, locality_slug):
@@ -15,7 +17,7 @@ def equipment_list(request, locality_slug):
     # Все категории
     categories = Category.objects.all()
 
-    # Получаем популярные товары по количеству просмотров за всё время
+    # Популярные товары (топ-4)
     popular_products = (
         Product.objects.filter(is_available=True)
         .annotate(view_count=Count("views"))
@@ -25,39 +27,55 @@ def equipment_list(request, locality_slug):
     # Все доступные товары
     products = Product.objects.filter(is_available=True)
 
-    # Логика фильтрации по категории
+    # Фильтрация по категории
     category_id = request.GET.get("category")
     if category_id:
         products = products.filter(category_id=category_id)
 
-    # Логика поиска
-    query = request.GET.get("q")
+    # Поиск
+    query = request.GET.get("q", "")
     if query:
         products = products.filter(
             Q(name__icontains=query) | Q(short_description__icontains=query)
         )
 
-    # Логика сортировки
+    # Сортировка
     sort_by = request.GET.get("sort_by")
-
-    # Аннотируем view_count для всех товаров
     products = products.annotate(view_count=Count("views"))
-
     if sort_by == "price_asc":
         products = products.order_by("price", "-view_count")
     elif sort_by == "price_desc":
         products = products.order_by("-price", "-view_count")
-    else:  # По умолчанию — по популярности
+    else:  # по популярности
         products = products.order_by("-view_count", "-price")
+
+    # Пагинация
+    paginator = Paginator(products, 12)
+    page_number = request.GET.get("page")
+
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    # Хлебные крошки
+    breadcrumbs = [
+        {"title": "Главная", "url": f"/{locality.slug}/"},
+        {"title": "Оборудование", "url": ""},
+    ]
 
     context = {
         "locality": locality,
         "categories": categories,
         "popular_products": popular_products,
-        "products": products,
+        "products": page_obj,
         "selected_category": category_id,
         "search_query": query,
         "sort_by": sort_by,
+        "breadcrumbs": breadcrumbs,
+        "title": "Оборудование",
     }
 
     return render(request, "equipments/equipment_list.html", context)

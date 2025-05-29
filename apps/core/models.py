@@ -32,7 +32,16 @@ class Office(models.Model):
     )
     address = models.CharField(max_length=200, verbose_name="Адрес")
     phone = models.CharField(
-        max_length=20, verbose_name="Телефон", blank=True, null=True
+        max_length=20, verbose_name="Основной телефон", blank=True, null=True
+    )
+    connection_phone = models.CharField(
+        max_length=20, verbose_name="Телефон для подключения", blank=True, null=True
+    )
+    tech_support_phone = models.CharField(
+        max_length=20, verbose_name="Телефон технической поддержки", blank=True, null=True
+    )
+    tech_support_email = models.EmailField(
+        verbose_name="Email технической поддержки", blank=True, null=True
     )
     latitude = models.CharField(
         max_length=50, verbose_name="Широта", blank=True, null=True

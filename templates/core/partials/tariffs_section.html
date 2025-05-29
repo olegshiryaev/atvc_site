@@ -1,36 +1,16 @@
 {% if grouped_tariffs %}
-<section class="tariffs">
-    <div class="container">
-        <div class="tariffs__title-container">
-            <h2 class="fs-2 fw-bold mb-2 mb-sm-0">Тарифы в {{ locality.name_prepositional }}</h2>
-        </div>
+<section id="tariff" class="tariffs block">
+    <div class="tariffs__content">
+        <h1 class="tariffs-block__title block__title h2">Тарифы в {{ locality.name_prepositional }}</h1>
 
         <!-- Блок фильтров -->
         {% if available_services|length > 1 %}
         <!-- Навигация для десктопов -->
-        <ul class="nav nav-pills mb-4 gap-3 d-none d-md-flex" id="tariffTabsDesktop" role="tablist">
-            {% for service in available_services %}
-                <li class="nav-item" role="presentation">
-                    <button class="nav-link filter-btn w-100 text-center {% if service.slug == first_service_slug %}active{% endif %}"
-                            data-filter="{{ service.slug }}"
-                            data-bs-toggle="tab"
-                            data-bs-target="#{{ service.slug }}"
-                            type="button"
-                            role="tab"
-                            aria-controls="{{ service.slug }}"
-                            aria-selected="{% if service.slug == first_service_slug %}true{% else %}false{% endif %}">
-                        {{ service.name }}
-                    </button>
-                </li>
-            {% endfor %}
-        </ul>
-
-        <!-- Навигация для мобильных -->
-        <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
-            <ul class="nav nav-pills nav-justified flex-nowrap gap-3" id="tariffTabsMobile" role="tablist">
+        <div class="tariffs-tabs-wrapper">
+            <ul class="nav nav-pills tariffs-tabs-nav" id="tariffTabs" role="tablist">
                 {% for service in available_services %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link filter-btn {% if service.slug == first_service_slug %}active{% endif %}"
+                        <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %}"
                                 data-filter="{{ service.slug }}"
                                 data-bs-toggle="tab"
                                 data-bs-target="#{{ service.slug }}"

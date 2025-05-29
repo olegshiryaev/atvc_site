@@ -2,160 +2,285 @@
 {% load static %}
 {% block title %}Главная страница{% endblock %}
 {% block content %}
-<div class="min-h-screen font-sans">
-    <!-- Карусель -->
-    {% if banners %}
-    <section class="hero-section">
-        <div class="container">
-            <div id="sliderMain" class="carousel slide carousel-fade mb-5" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" role="region" aria-label="Рекламная карусель">
-                <div class="carousel-inner">
-                    {% for banner in banners %}
-                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                        <div class="carousel-slide"
-                            {% if banner.background_image %}
-                            style="background-image: url('{{ banner.background_image.url }}');"
-                            {% endif %}>
-                            <div class="container py-3 py-md-5">
-                                <div class="row align-items-center">
-                                    <!-- Текстовая часть -->
-                                    <div class="col-12 col-md-8 carousel-text">
-                                        {% if banner.get_badge %}
-                                        <span class="badge-carousel bg-{{ banner.get_badge_color }} mb-2">
-                                            {{ banner.get_badge }}
-                                        </span>
-                                        {% endif %}
-                                        <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
-                                        <p class="lead mb-4">{{ banner.description }}</p>
-                                        {% if banner.link %}
-                                        <a href="{{ banner.link }}"
-                                        class="btn carousel-button">
-                                            {{ banner.button_text }}
-                                        </a>
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-                <!-- Пагинация -->
-                {% if banners|length > 1 %}
-                <div class="carousel-indicators">
-                    {% for banner in banners %}
-                    <button type="button"
-                            data-bs-target="#sliderMain"
-                            data-bs-slide-to="{{ forloop.counter0 }}"
-                            {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                            aria-label="Слайд {{ forloop.counter1 }}"
-                            aria-controls="sliderMain"></button>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-        </div>
-    </section>
-    {% endif %}
-    
-    <!-- Блок тарифов -->
-    {% include 'core/partials/tariffs_section.html' %}
-
-    <!-- Модальное окно -->
-    {% include 'core/partials/order_modal.html' %}
-
-    <!-- Секция проверки адреса -->
-    <section class="address-check-section">
-        <div class="container py-5 my-5">
-            <div class="row align-items-center">
-                <!-- Левая часть с изображением -->
-                <div class="col-lg-6 mb-4 mb-lg-0">
-                    <img src="{% static 'img/girl-with-laptop.png' %}" alt="..." class="address-check-image d-none d-lg-block img-fluid">
-                </div>
-                <!-- Правая часть с формой -->
-                <div class="col-lg-6 px-lg-4 py-lg-4">
-                    <div class="text-center mb-4">
-                        <h2 class="fs-1 fw-bold text-white mb-2">Проверьте доступность услуг</h2>
-                        <p class="fs-5 text-white mb-0 subtitle">Узнайте, какие услуги можно подключить по вашему адресу</p>
-                    </div>
-                    <form id="checkAddressForm" method="post" novalidate autocomplete="off">
-                        {% csrf_token %}
-                        <div class="row g-4">
-                            <!-- Улица -->
-                            <div class="col-md-6">
-                                <input type="text" name="street" id="street" class="form-control shadow-sm" placeholder="Укажите улицу">
-                                <div id="streetError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Номер дома -->
-                            <div class="col-md-6">
-                                <input type="text" name="house_number" id="house_number" class="form-control shadow-sm" placeholder="Укажите номер дома">
-                                <div id="house_numberError" class="invalid-feedback"></div>
-                            </div>
-                            <!-- Имя -->
-                            <div class="col-md-6">
-                                <input type="text" name="name" id="name" class="form-control shadow-sm" placeholder="Ваше имя" required>
-                                <div id="nameError" class="invalid-feedback">Пожалуйста, укажите имя</div>
-                            </div>
-                            <!-- Телефон -->
-                            <div class="col-md-6">
-                                <input type="tel" name="phone" id="phone" class="form-control shadow-sm" placeholder="+7 (___) ___-__-__" required>
-                                <div id="phoneError" class="invalid-feedback">Пожалуйста, укажите номер телефона</div>
-                            </div>
-                            <!-- Чекбокс и кнопка -->
-                            <div class="col-12">
-                                <div class="row align-items-center g-4">
-                                    <div class="col-md-6 mb-3 mb-md-0">
-                                        <div class="form-check">
-                                            <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
-                                            <label for="privacy" class="form-check-label text-white">
-                                                Я соглашаюсь, что ознакомлен с 
-                                                <a href="#" class="link-light text-decoration-underline">политикой конфиденциальности</a>
-                                            </label>
-                                            <div id="privacyError" class="invalid-feedback">Необходимо согласие</div>
+<div class="page__container container">
+    <div class="page__content">
+        <!-- Карусель -->
+        {% if banners %}
+        <section class="mainbanner-block block">
+            <div class="mainbanner-block__container">
+                <div id="sliderMain" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover" role="region" aria-label="Рекламная карусель">
+                    <div class="carousel-inner">
+                        {% for banner in banners %}
+                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                            <div class="carousel-slide"
+                                {% if banner.background_image %}
+                                style="background-image: url('{{ banner.background_image.url }}');"
+                                {% endif %}>
+                                <div class="container py-3 py-md-5">
+                                    <div class="row align-items-center">
+                                        <!-- Текстовая часть -->
+                                        <div class="col-12 col-md-8 carousel-text">
+                                            {% if banner.get_badge %}
+                                            <span class="badge-carousel bg-{{ banner.get_badge_color }} mb-2">
+                                                {{ banner.get_badge }}
+                                            </span>
+                                            {% endif %}
+                                            <h2 class="display-4 fw-bold mb-3">{{ banner.title }}</h2>
+                                            <p class="lead mb-4">{{ banner.description }}</p>
+                                            {% if banner.link %}
+                                            <a href="{{ banner.link }}"
+                                            class="btn carousel-button">
+                                                {{ banner.button_text }}
+                                            </a>
+                                            {% endif %}
                                         </div>
                                     </div>
-                                    <div class="col-md-6">
-                                        <button type="submit" class="btn btn-light text-primary w-100 py-2 py-md-3 fs-6 text-uppercase shadow-sm" id="submitAddressBtn" disabled>
-                                            Оставить заявку
-                                        </button>
-                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Последние новости -->
-    {% if latest_news %}
-    <section class="py-5 bg-light news-section">
-        <div class="container py-5">
-            <div class="news-widget__header mb-5 d-flex justify-content-between align-items-center">
-                <h2 class="news-widget__title">Последние новости</h2>
-                <a href="{% url 'news:news_list' locality.slug %}"
-                class="news-widget__link"
-                aria-label="Перейти ко всем новостям">
-                    Смотреть все
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </a>
-            </div>
-            <!-- Swiper Slider -->
-            <div class="swiper news-slider position-relative" style="padding-bottom: 3rem;">
-                <div class="swiper-wrapper">
-                    {% for news in latest_news %}
-                    <div class="swiper-slide">
-                        {% include 'news/partials/news_card.html' with news=news is_preview=True %}
+                        {% endfor %}
                     </div>
-                    {% endfor %}
+                    <!-- Пагинация -->
+                    {% if banners|length > 1 %}
+                    <div class="carousel-indicators">
+                        {% for banner in banners %}
+                        <button type="button"
+                                data-bs-target="#sliderMain"
+                                data-bs-slide-to="{{ forloop.counter0 }}"
+                                {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                                aria-label="Слайд {{ forloop.counter1 }}"
+                                aria-controls="sliderMain"></button>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                <div class="swiper-pagination"></div>
             </div>
-        </div>
-    </section>
-    {% endif %}
+        </section>
+        {% endif %}
+        
+        <!-- Блок тарифов -->
+        {% include 'core/partials/tariffs_section.html' %}
+
+        <!-- Модальное окно -->
+        {% include 'core/partials/order_modal.html' %}
+
+        <!-- Секция проверки адреса -->
+        <section class="address-check-section block">
+            <div class="container">
+                <div class="row align-items-center">
+                    <!-- Левая часть с изображением -->
+                    <div class="col-lg-6 mb-4 mb-lg-0">
+                        <img src="{% static 'img/girl-with-laptop.png' %}" alt="..." class="address-check-image d-none d-lg-block img-fluid">
+                    </div>
+                    <!-- Правая часть с формой -->
+                    <div class="col-lg-6 px-lg-4 py-lg-4">
+                        <div class="text-center mb-4">
+                            <h2 class="fs-1 fw-bold text-white mb-2">Проверьте доступность услуг</h2>
+                            <p class="fs-5 text-white mb-0 subtitle">Узнайте, какие услуги можно подключить по вашему адресу</p>
+                        </div>
+                        <form id="checkAddressForm" method="post" novalidate autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row g-4">
+                                <!-- Улица -->
+                                <div class="col-md-6">
+                                    <input type="text" name="street" id="street" class="form-control shadow-sm" placeholder="Укажите улицу">
+                                    <div id="streetError" class="invalid-feedback"></div>
+                                </div>
+                                <!-- Номер дома -->
+                                <div class="col-md-6">
+                                    <input type="text" name="house_number" id="house_number" class="form-control shadow-sm" placeholder="Укажите номер дома">
+                                    <div id="house_numberError" class="invalid-feedback"></div>
+                                </div>
+                                <!-- Имя -->
+                                <div class="col-md-6">
+                                    <input type="text" name="name" id="name" class="form-control shadow-sm" placeholder="Ваше имя" required>
+                                    <div id="nameError" class="invalid-feedback">Пожалуйста, укажите имя</div>
+                                </div>
+                                <!-- Телефон -->
+                                <div class="col-md-6">
+                                    <input type="tel" name="phone" id="phone" class="form-control shadow-sm" placeholder="+7 (___) ___-__-__" required>
+                                    <div id="phoneError" class="invalid-feedback">Пожалуйста, укажите номер телефона</div>
+                                </div>
+                                <!-- Чекбокс и кнопка -->
+                                <div class="col-12">
+                                    <div class="row align-items-center g-4">
+                                        <div class="col-md-6 mb-3 mb-md-0">
+                                            <div class="form-check">
+                                                <input type="checkbox" name="privacy" id="privacy" class="form-check-input" required>
+                                                <label for="privacy" class="form-check-label text-white">
+                                                    Я соглашаюсь, что ознакомлен с 
+                                                    <a href="#" class="link-light text-decoration-underline">политикой конфиденциальности</a>
+                                                </label>
+                                                <div id="privacyError" class="invalid-feedback">Необходимо согласие</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <button type="submit" class="btn btn-light text-primary w-100 py-2 py-md-3 fs-6 text-uppercase shadow-sm" id="submitAddressBtn" disabled>
+                                                Оставить заявку
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="shop" class="products-slider-block block block_alignwide" data-block-slug="products-slider-block" data-block-appearance="">
+            <div class="woocommerce-notices-wrapper" style="display: none;"></div>
+            <div class="products-slider-block__header">
+                <h2 class="products-slider-block__title block__title">Оборудование</h2>
+            </div>
+            <div class="products-slider-block__wrapper">
+                <div class="swiper swiper-initialized swiper-horizontal swiper-backface-hidden">
+                    <div class="swiper-wrapper">
+                        {% for product in popular_products %}
+                            <li class="product-card products-slider-block__item swiper-slide" 
+                                data-product-title="{{ product.name }}" 
+                                data-product-price="{{ product.price|default_if_none:'' }}">
+                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                                    <div class="product-card__cart" data-product-change-cart=""></div>
+                                    <div class="product-card__img-wrap">
+                                        {% with main_image=product.get_main_image %}
+                                            {% if main_image %}
+                                                <img data-lazy-src="{{ main_image.image.url }}" 
+                                                    width="400" height="400" 
+                                                    alt="{{ product.name }}" 
+                                                    class="product-card__img" 
+                                                    src="{{ main_image.image.url }}">
+                                            {% else %}
+                                                <img data-lazy-src="/static/placeholder/400x400.webp" 
+                                                    width="400" height="400" 
+                                                    alt="{{ product.name }}" 
+                                                    class="product-card__img" 
+                                                    src="/static/placeholder/400x400.webp">
+                                            {% endif %}
+                                        {% endwith %}
+                                    </div>
+                                    <h6 class="product-card__title h6">{{ product.name }}</h6>
+                                    <div class="product-card__desc">
+                                        <span>{{ product.short_description|default_if_none:'' }}</span>
+                                    </div>
+                                    <div class="product-card__bottom">
+                                        <div class="product-card__price h5">
+                                            {% if product.price %}
+                                                {{ product.price }} руб.
+                                            {% else %}
+                                                Цена по запросу
+                                            {% endif %}
+                                        </div>
+                                        <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                                    </div>
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li class="product-card products-slider-block__item swiper-slide">
+                                <div class="product-card__wrapper">
+                                    <p>Популярные товары отсутствуют.</p>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </div>
+                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                </div>
+                <div class="products-slider-block__navs slider-navs">
+                    <div class="slider-navs__prev" tabindex="-1" role="button" aria-label="Previous slide" aria-controls="swiper-wrapper-a68db2acb5cd7279"></div>
+                    <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
+                    <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-controls="swiper-wrapper-a68db2acb5cd7279"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Последние новости -->
+        {% if latest_news %}
+        <section class="news-section block block_alignwide">
+            <div class="tabs-posts2-block__wrap">
+                <div class="news-widget__header d-flex justify-content-between align-items-center">
+                    <h2 class="news-widget__title h2">Последние новости</h2>
+                    <a href="{% url 'news:news_list' locality.slug %}"
+                    class="news-widget__link"
+                    aria-label="Перейти ко всем новостям">
+                        Смотреть все
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </a>
+                </div>
+                <!-- Swiper Slider -->
+                <div class="swiper news-slider position-relative">
+                    <div class="swiper-wrapper">
+                        {% for news in latest_news %}
+                        <div class="swiper-slide">
+                            {% include 'news/partials/news_card.html' with news=news %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="slider-navs">
+                        <div class="slider-navs__prev"></div>
+                        <div class="slider-navs__next"></div>
+                        <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
+        <section id="main-form" class="form-main-block block  block_alignwide" style="" data-block-slug="form-main-block" data-block-appearance="">
+            <div class="form-main-block__wrapper">
+                <div class="form-main-block__header">
+                    <h2 class="form-main-block__title block__title">Подключиться просто!</h2>
+                    <div class="form-main-block__subtitle">Укажите свои данные и мы свяжемся с вами в течении часа для уточнения деталей! </div>
+                </div>
+                <div class="form-main-block__form form">
+                    <div class="wpcf7 js" id="wpcf7-f23489-o1" lang="ru-RU" dir="ltr">
+                        <div class="screen-reader-response"><p role="status" aria-live="polite" aria-atomic="true"></p> <ul></ul></div>
+                            <form action="/#wpcf7-f23489-o1" method="post" class="wpcf7-form init" aria-label="Контактная форма" novalidate="novalidate" data-status="init">
+                                <div style="display: none;">
+                                    <input type="hidden" name="_wpcf7" value="23489">
+                                    <input type="hidden" name="_wpcf7_version" value="5.7.5.1">
+                                    <input type="hidden" name="_wpcf7_locale" value="ru_RU">
+                                    <input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f23489-o1">
+                                    <input type="hidden" name="_wpcf7_container_post" value="0">
+                                    <input type="hidden" name="_wpcf7_posted_data_hash" value="">
+                                    <input type="hidden" name="_wpcf7_recaptcha_response" value="03AFcWeA7RKoaVq8KxOEAhKaKd-EorkwhShG6YWQPm8eR-WMPHDfbPO8fGbrxhin_0r000gHXFPvWlPA_6oBJe-sSVbG8DL65uKmTNmnL1oZPjYf6uoVT6AvU2KCCXLE-smIwvXH6uf4_i4NDlaBiq0VUTaNE9ihjCAne6neRdMX0Zylx2jgcBVFcU9hVLh8WRbAFcAkVUn55CvXZQc09WzKsGxHR7cGbXfKk7pA5v8QqHDmwjLE52MeyBtgt_LQ1hJrvwvuhRO37BcDLNCTbYi_ZNFuFmE47M5ijK_XutjTg-aOvPSwgGZFZnqSKM0SPFis6R0CeZXOfJWvqqoereouV0PFN9p9pKWsWnq3Rg5GX1p7EGoy5qZX3ShdG7wSdxnrgezQHlNAKtovj6s4CrNt-y9htp7VGAIDBjQ0K0IyAc-Bod_Jt43MF7tgeXfso2URqzWmrNyCO2Gd38Z-C0jm-_scPO6BgXMmCAnzqU56AqjqSyBz4QIxd6_PfrbIVPPeuHulpYfLTwZinOa8Xkg_AaKZGsZpmZ0BQ9H915WAPcl6C__JYnDAgg3YLDn5p9rMBEeg54VfqyK7T8v6fG3fr0lFf2mgwGxrauGZYtVrmVD8sbLWeUg-El3xbSnZAo3Ct-mLlunOwTRyhDJAfETJvPa3ubmPAmsikXP6-AZoCHKLeZE0V9pzkSoNxUneQ0E-0yzbPmW8hdAgPTCiIE9SY6D-DxT9-ea4yFX4R0Ood8HNyt5PYC1e816qFAQ3xTc5cTZCay1B7zBlKNBzlgu5YVbRss1e2nOjWLF8sYGBuzFew0RSg1hfPbnOuj0mLNGEzAydrsqhdkmW9mjHk2aMVeedmSxq_FDg">
+                                </div>
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="post-url" placeholder="" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="goal" placeholder="" value="FEEDBACK_FORM_SEND">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="main_form" placeholder="" value="1">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_name" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_price" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_discount" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_tv" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_ovn" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_telephony" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_equipment" value="">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="to_bargains" placeholder="" value="1">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="source_id" placeholder="" value="20">
+                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="subsource_id" placeholder="" value="72">
+                                    <input type="hidden" name="form-city" value="alapaevsk">
+                                <div class="form__wrapper">
+                                    <div class="form__item form__item_name">   
+                                    <label for="form-name" class="form__item-label">Имя</label>
+                                    <span class="wpcf7-form-control-wrap" data-name="form-name"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Имя" value="" type="text" name="form-name" autocomplete="name"></span>
+                                </div>
+                                    <div class="form__item form__item_phone">   
+                                    <label for="form-phone" class="form__item-label">Номер телефона</label>
+                                    <span class="wpcf7-form-control-wrap" data-name="form-phone"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-tel wpcf7-validates-as-required wpcf7-validates-as-tel" aria-required="true" aria-invalid="false" placeholder="+7(___) ___-__-__" value="" type="tel" name="form-phone" autocomplete="tel"></span>
+                                </div>
+                                <div class="form__policy policy-link-form">Нажимая кнопку «Отправить заявку», вы соглашаетесь с <a target="_blank" class="form__policy-link" href="">Условиями обработки персональных данных</a></div>
+                                    <input class="wpcf7-form-control has-spinner wpcf7-submit form__item form__item_btn btn btn_orange-gr" type="submit" value="Отправить заявку"><span class="wpcf7-spinner"></span>
+                                </div>
+                                <div class="wpcf7-response-output" aria-hidden="true"></div>
+                            </form>
+                        </div>
+                    </div>
+                    <div class="form-main-block__tariff" data-form-tariff="" data-change_link="#tariff" style="background-image:url();"></div>
+                </div>
+        </section>
+    </div>
 </div>
 
 <!-- Инициализация Swiper -->
@@ -163,7 +288,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         new Swiper('.news-slider', {
             slidesPerView: 1,
-            spaceBetween: 12,
+            spaceBetween: 16,
             centeredSlides: true,
             breakpoints: {
                 640: {
@@ -177,7 +302,7 @@
                     centeredSlides: false,
                 },
                 1280: {
-                    slidesPerView: 3,
+                    slidesPerView: 4,
                     spaceBetween: 20,
                     centeredSlides: false,
                 },
@@ -187,7 +312,7 @@
                 clickable: true,
                 dynamicBullets: true,
             },
-            loop: {% if latest_news.count > 3 %}true{% else %}false{% endif %},
+            loop: {% if latest_news.count > 4 %}true{% else %}false{% endif %},
             grabCursor: true,
             speed: 600,
             effect: 'slide',
@@ -382,6 +507,36 @@
             }
         });
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.products-slider-block .swiper', {
+        slidesPerView: 1, // Default for mobile
+        spaceBetween: 20, // Adjust spacing between cards
+        navigation: {
+            nextEl: '.slider-navs__next',
+            prevEl: '.slider-navs__prev',
+        },
+        pagination: {
+            el: '.slider-navs__pag',
+            clickable: true,
+        },
+        lazy: {
+            loadPrevNext: true, // Support for lazy loading
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2, // 2 cards for small screens (e.g., tablets)
+                spaceBetween: 20,
+            },
+            1024: {
+                slidesPerView: 4, // 4 cards for desktop
+                spaceBetween: 30, // Slightly larger spacing for desktop
+            },
+        },
+    });
+});
 </script>
 
 <!-- JavaScript для поиска каналов -->

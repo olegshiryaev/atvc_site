@@ -6,6 +6,9 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
+from django.db.models import Count
+
+from apps.equipments.models import Product
 
 from .forms import (
     ApplicationForm,
@@ -67,6 +70,15 @@ def index(request, locality_slug):
     )
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
+    # Получаем 10 самых популярных товаров на основе количества просмотров
+    popular_products = (
+        Product.objects.filter(is_available=True)
+        .annotate(view_count=Count("views"))
+        .select_related("category")
+        .prefetch_related("images")
+        .order_by("-view_count")[:10]
+    )
+
     context = {
         "grouped_tariffs": grouped_dict,
         "available_services": available_services,
@@ -75,6 +87,7 @@ def index(request, locality_slug):
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,
+        "popular_products": popular_products,
     }
 
     return render(request, "core/index.html", context)

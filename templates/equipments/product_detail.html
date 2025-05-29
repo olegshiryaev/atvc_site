@@ -1,79 +1,68 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load url_tools %}
-{% load currency_filters %}
-
 {% block title %}{{ product.name }} — {{ block.super }}{% endblock %}
-
 {% block content %}
-<div class="bg-white w-100">
-    <div class="container">
-        <!-- Хлебные крошки -->
-        {% include 'partials/page_header.html' with title=title %}
+<div class="container">
+    <!-- Хлебные крошки -->
+    {% include 'partials/page_header.html' with title=title %}
 
-        <!-- Главная карточка товара -->
-        <div class="row g-5">
-            <!-- Изображения -->
-            <div class="col-md-6 text-center">
-                <!-- Основное изображение -->
-                <div class="product-gallery mb-3">
-                    {% with main_image=product.get_main_image %}
-                        {% if main_image %}
-                            <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="img-fluid rounded shadow-sm main-image" style="max-height: 400px;">
-                        {% else %}
-                            <img src="{% static 'images/no-image.png' %}" class="img-fluid rounded shadow-sm main-image" alt="Нет изображения" style="max-height: 400px;">
-                        {% endif %}
-                    {% endwith %}
-                </div>
-            
-                <!-- Миниатюры -->
-                <div class="thumbnail-gallery d-flex justify-content-center gap-2">
-                    {% for image in product.images.all %}
-                        <img 
-                            src="{{ image.image.url }}" 
-                            alt="Миниатюра {{ forloop.counter }}" 
-                            class="img-thumbnail product-thumb{% if forloop.first %} active{% endif %}" 
-                            data-full="{{ image.image.url }}"
-                            style="width: 80px; height: 80px; object-fit: cover; cursor: pointer;">
-                    {% endfor %}
+    <!-- Основная карточка товара -->
+    <section class="product-detail-block">
+        <div class="row g-4">
+            <!-- Галерея изображений -->
+            <div class="col-md-6">
+                <div class="product__gallery gallery">
+
+                    <!-- Основной слайдер -->
+                    <div class="gallery__imgs swiper product-gallery-main">
+                        <div class="swiper-wrapper">
+                            {% if product.images.exists %}
+                                {% for image in product.images.all %}
+                                    <div class="swiper-slide gallery__item">
+                                        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="gallery__item-img lazyloaded">
+                                    </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="swiper-slide gallery__item">
+                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="product-card__img img-fluid rounded">
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Мини-превью -->
+                    {% if product.images.exists %}
+                        <div class="gallery__bottom slider-navs">
+                            <!-- Слайдер миниатюр -->
+                            <div class="gallery__thumbs swiper product-gallery-thumbs">
+                                <div class="swiper-wrapper">
+                                    {% for image in product.images.all %}
+                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;">
+                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
             <!-- Информация о товаре -->
             <div class="col-md-6">
-                <div class="product-info p-4 rounded-3 shadow-sm h-100 d-flex flex-column justify-content-between">
+                <div class="h-100 d-flex flex-column p-4">
+                    <h2 class="product-card__title h4">{{ product.name }}</h2>
+                    <p class="product-card__desc">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
 
-                    <!-- Краткое описание -->
-                    <p class="text-muted small mb-2">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
-
-                    <!-- Статус и цена -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        {% if product.price %}
-                            <div class="price">{{ product.price|currency }}</div>
-                        {% else %}
-                            <div class="text-muted">Цена по запросу</div>
-                        {% endif %}
-
-                        {% if product.is_available %}
-                            <span class="status available">В наличии</span>
-                        {% else %}
-                            <span class="status unavailable">Нет в наличии</span>
-                        {% endif %}
-                    </div>
-
-                    <!-- Кнопки -->
-                    <div class="d-flex gap-2 mb-4">
-                        <button class="btn buy-btn w-100">
-                            <i class="bi bi-cart me-1"></i> В корзину
+                    <div class="mt-auto">
+                        <div class="product-card__price mb-3">
+                            {{ product.price }} ₽
+                        </div>
+                        <button class="product-card__btn btn w-100" type="button">
+                            В корзину
                         </button>
-                        <button class="btn favorite-btn w-100">
-                            <i class="bi bi-heart me-1"></i> В избранное
-                        </button>
-                    </div>
-
-                    <!-- Скачать инструкцию -->
-                    <div>
-                        <a href="#" class="btn btn-link p-0 text-decoration-none small">
+                        <a href="#" class="text-decoration-none small mt-2 d-block text-center">
                             <i class="bi bi-download me-1"></i> Скачать инструкцию
                         </a>
                     </div>
@@ -82,153 +71,121 @@
         </div>
 
         <!-- Табы: Описание / Характеристики -->
-        <div class="product__bottom-side mt-5">
-            <div class="woocommerce-tabs wc-tabs-wrapper product__tabs">
-                <ul class="tabs-one wc-tabs product__tabs-list" role="tablist">
-                    <li class="description_tab tabs-one__item active" id="tab-title-description" role="tab" aria-controls="tab-description" aria-selected="true">
-                        <a href="#tab-description" class="tabs-one__item-link">Полное описание</a>
+        <div class="product-tabs mt-5">
+            <div class="product-tabs-wrapper mb-3">
+                <ul class="nav nav-pills product-tabs-nav" id="productTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="description-tab" data-bs-toggle="pill" data-bs-target="#description" type="button" role="tab">Полное описание</button>
                     </li>
-                    <li class="additional_information_tab tabs-one__item" id="tab-title-additional_information" role="tab" aria-controls="tab-additional_information" aria-selected="false">
-                        <a href="#tab-additional_information" class="tabs-one__item-link">Технические характеристики</a>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs" type="button" role="tab">Технические характеристики</button>
                     </li>
                 </ul>
-
-                <!-- Полное описание -->
-                <div class="product__tabs-content woocommerce-Tabs-panel woocommerce-Tabs-panel--description product__description panel entry-content wc-tab"
-                    id="tab-description" role="tabpanel" aria-labelledby="tab-title-description" style="display: block;">
+            </div>
+            <div class="tab-content" id="productTabsContent">
+                <div class="tab-pane fade show active" id="description" role="tabpanel">
                     {% if product.description %}
                         <p>{{ product.description }}</p>
                     {% else %}
                         <p class="text-muted">Описание отсутствует.</p>
                     {% endif %}
                 </div>
-
-                <!-- Технические характеристики -->
-                <div class="product__tabs-content woocommerce-Tabs-panel woocommerce-Tabs-panel--additional_information product__additional_information panel entry-content wc-tab"
-                    id="tab-additional_information" role="tabpanel" aria-labelledby="tab-title-additional_information" style="display: none;">
-
-                    <div class="product-characteristics" data-show-more>
-                        <h4 class="fw-bold mb-3">Технические характеристики</h4>
-
-                        {% if product.camera %}
-                            {% include "equipments/product/characteristics/camera.html" %}
-                        {% elif product.router %}
-                            {% include "equipments/product/characteristics/router.html" %}
-                        {% elif product.smart_speaker %}
-                            {% include "equipments/product/characteristics/smart_speaker.html" %}
-                        {% elif product.tvbox %}
-                            {% include "equipments/product/characteristics/tvbox.html" %}
-                        {% else %}
-                            <p class="text-muted">Характеристики недоступны для данного товара.</p>
-                        {% endif %}
-                        
-                    </div>
+                <div class="tab-pane fade" id="specs" role="tabpanel">
+                    {% if product.camera %}
+                        {% include "equipments/product/characteristics/camera.html" %}
+                    {% elif product.router %}
+                        {% include "equipments/product/characteristics/router.html" %}
+                    {% elif product.smart_speaker %}
+                        {% include "equipments/product/characteristics/smart_speaker.html" %}
+                    {% elif product.tvbox %}
+                        {% include "equipments/product/characteristics/tvbox.html" %}
+                    {% else %}
+                        <p class="text-muted">Характеристики недоступны для данного товара.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
+    </section>
 
-        <!-- Блок "Вы недавно смотрели" -->
-        {% if recently_viewed %}
-        <div class="recently-viewed-block mt-5">
-            <h2 class="block__title">Вы недавно смотрели</h2>
-
-            <!-- Swiper -->
-            <div class="swiper recently-viewed-swiper">
-                <div class="swiper-wrapper">
+    <!-- Вы недавно смотрели -->
+    {% if recently_viewed %}
+    <section class="products-slider-block block " style="" data-block-slug="products-slider-block" data-block-appearance="">
+        <div class="products-slider-block__header">
+            <h2 class="products-slider-block__title block__title">     Вы недавно смотрели    </h2>
+        </div>
+        <div class="products-slider-block__wrapper">
+            <div class="swiper swiper-initialized swiper-horizontal">
+                <div class="swiper-wrapper" style="transition-duration: 0ms; transform: translate3d(0px, 0px, 0px); transition-delay: 0ms;">
                     {% for item in recently_viewed %}
-                    <div class="swiper-slide product-card">
-                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper text-decoration-none text-dark">
+                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="25251" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
+                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
+                            <div class="product-card__cart" data-product-change-cart="e8f7da8e2d75253e4003cbc4c24286ac"></div>
                             <div class="product-card__img-wrap">
-                                <img src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" alt="{{ item.name }}" class="product-card__img img-fluid lazyload">
+                                <img width="400" height="400" alt="Изображение" data-src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" class="product-card__img ls-is-cached lazyloaded" src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}"><noscript><img src="" width="400" height="400" alt="Изображение" class="product-card__img"></noscript>
                             </div>
                             <h6 class="product-card__title h6">{{ item.name }}</h6>
-                            <div class="product-card__desc">
-                                {{ item.short_description|truncatewords:10 }}
-                            </div>
+                            <div class="product-card__desc">    {{ item.short_description|truncatewords:10 }}        </div>
                             <div class="product-card__bottom">
-                                <div class="product-card__price h5">
-                                    {{ item.price|currency }}
-                                </div>
-                                <div class="product-card__btn btn btn-outline-primary btn-sm" data-add-product-cart="">
-                                    В корзину
-                                </div>
+                                <div class="product-card__price h5">{{ item.price }} ₽</div>
+                                <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
                             </div>
                         </a>
-                    </div>
+                    </li>
                     {% endfor %}
                 </div>
-
-                <!-- Navigation arrows -->
-                <div class="slider-navs">
-                    <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Предыдущий слайд"></div>
-                    <div class="slider-navs__next" tabindex="0" role="button" aria-label="Следующий слайд"></div>
-                </div>
-
-                <!-- Pagination -->
-                <div class="swiper-pagination"></div>
+                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+            </div>
+            <div class="products-slider-block__navs slider-navs">
+                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-controls="swiper-wrapper-c72f6dd10351073241" aria-disabled="true"></div>
+                <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0" role="button" aria-label="Go to slide 1" aria-current="true"></span><span class="swiper-pagination-bullet" tabindex="0" role="button" aria-label="Go to slide 2"></span></div>
+                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-controls="swiper-wrapper-c72f6dd10351073241" aria-disabled="false"></div>
             </div>
         </div>
-        {% endif %}
-    </div>
+    </section>
+    {% endif %}
 </div>
-
-<!-- JavaScript для вкладок и "Показать больше" -->
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Переключение табов
-        const tabLinks = document.querySelectorAll('.tabs-one__item-link');
-        const tabPanels = document.querySelectorAll('.product__tabs-content');
-    
-        tabLinks.forEach(function (link) {
-            link.addEventListener('click', function (event) {
-                event.preventDefault();
-    
-                // Убираем активные классы
-                tabLinks.forEach(l => l.closest('li').classList.remove('active'));
-                tabPanels.forEach(p => p.style.display = 'none');
-    
-                // Активируем текущий таб
-                const target = this.getAttribute('href');
-                document.querySelector(target).style.display = 'block';
-                this.closest('li').classList.add('active');
-            });
-        });
-    
-        // Кнопка "Показать больше"
-        const showMoreButtons = document.querySelectorAll('.show-more-btn');
-    
-        showMoreButtons.forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                const moreInfoItems = btn.closest('.product-characteristics').querySelectorAll('.more-info');
-                const expanded = btn.getAttribute('aria-expanded') === 'true';
-    
-                moreInfoItems.forEach(item => {
-                    item.style.display = expanded ? 'none' : 'flex';
-                });
-    
-                btn.setAttribute('aria-expanded', String(!expanded));
-                btn.textContent = expanded ? 'Показать больше' : 'Скрыть';
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    const galleryThumbs = new Swiper('.product-gallery-thumbs', {
+        spaceBetween: 10,
+        slidesPerView: 'auto', // или 4
+        freeMode: true,
+        watchSlidesProgress: true,
     });
+
+    const galleryMain = new Swiper('.product-gallery-main', {
+        spaceBetween: 10,
+        thumbs: {
+            swiper: galleryThumbs
+        }
+    });
+});
 </script>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const mainImage = document.querySelector('.main-image');
-        const thumbnails = document.querySelectorAll('.product-thumb');
-    
-        thumbnails.forEach(function (thumb) {
-            thumb.addEventListener('click', function () {
-                const newSrc = this.dataset.full;
-                if (newSrc && mainImage) {
-                    mainImage.src = newSrc;
-    
-                    // Активная подсветка (если нужно)
-                    thumbnails.forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                }
-            });
-        });
+document.addEventListener('DOMContentLoaded', function () {
+    const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
+        slidesPerView: 1.2,
+        spaceBetween: 16,
+        navigation: {
+            nextEl: '.products-slider-block .slider-navs__next',
+            prevEl: '.products-slider-block .slider-navs__prev',
+        },
+        pagination: {
+            el: '.products-slider-block .slider-navs__pag',
+            clickable: true,
+        },
+        breakpoints: {
+            576: {
+                slidesPerView: 2,
+            },
+            768: {
+                slidesPerView: 3,
+            },
+            992: {
+                slidesPerView: 4,
+            },
+        },
     });
-</script>    
+});
+</script>
 {% endblock %}
