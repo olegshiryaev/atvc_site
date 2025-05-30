@@ -2858,8 +2858,9 @@ button.swiper-pagination-bullet {
     height: 160px;
 }
 
+.slider-navs__btn:hover,
 .slider-navs__btn:active {
-    color: #fff; /* Белая стрелка при наведении и нажатии */
+    color: #fff;
 }
 
 /* Добавляем overlay для hover-эффекта */
