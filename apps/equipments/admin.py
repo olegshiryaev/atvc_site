@@ -56,7 +56,7 @@ class TvBoxInline(admin.StackedInline):
 class ProductAdmin(admin.ModelAdmin):
     list_display = ["name", "price", "category", "is_available"]
     search_fields = ["name", "slug", "short_description"]
-    list_filter = ["category", "is_available"]
+    list_filter = ["category", "is_available", "services"]
     prepopulated_fields = {"slug": ("name",)}
     inlines = [
         ProductImageInline,
@@ -73,6 +73,7 @@ class ProductAdmin(admin.ModelAdmin):
         ),
         ("Цена и наличие", {"fields": ("price", "is_available")}),
         ("Категория", {"fields": ("category",)}),
+        ("Услуги", {"fields": ("services",)}),
     )
 
 

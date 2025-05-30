@@ -5,6 +5,8 @@ from pytils.translit import slugify
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
+from apps.core.models import Service
+
 
 class Category(models.Model):
     name = models.CharField("Название категории", max_length=100)
@@ -38,6 +40,9 @@ class Product(models.Model):
         related_name="products",
         blank=True,
         null=True,
+    )
+    services = models.ManyToManyField(
+        Service, related_name="products", verbose_name="Услуги", blank=True
     )
 
     def __str__(self):

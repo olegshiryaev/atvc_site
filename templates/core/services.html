@@ -4,11 +4,175 @@
 {% block title %}Интернет-тарифы{% endblock %}
 
 {% block content %}
-<section class="container py-5">
-    <h2 class="mb-4">Подключить {{ service.name|lower }} в {{ locality.name_prepositional }}</h2>
+<section class="container">
+    <!-- Хлебные крошки -->
+    {% include 'partials/page_header.html' with title=title %}
 
     <!-- Блок тарифов -->
-    {% include "core/partials/tariffs_list.html" %}
+    <section id="tarifs" class="tariffs-block block">
+        {% include "core/partials/tariffs_list.html" %}
+    </section>
+
+    <section class="advantages-block block">
+        <h2 class="advantages-block__title block__title">Преимущества интернета от АТК</h2>
+        <div class="advantages-block__wrapper">
+            <div class="advantages-block__advantage advantage" style="background-image:url({% static 'img/calls.webp' %})">
+                <div class="advantage__title">Стабильный интернет для важных созвнов</div>
+                <div class="advantage__desc"></div>
+            </div>
+            <div class="advantages-block__advantage advantage" style="background-image:url({% static 'img/setup.webp' %})">
+                <div class="advantage__title">Быстрое подключение без лишних забот</div>
+                <div class="advantage__desc"></div>
+            </div>
+            <div class="advantages-block__advantage advantage" style="background-image:url({% static 'img/support.webp' %})">
+                <div class="advantage__title">Круглосуточная помощь рядом с вами</div>
+                <div class="advantage__desc"></div>
+            </div>
+            <div class="advantages-block__advantage advantage" style="background-image:url({% static 'img/smart-home.webp' %})">
+                <div class="advantage__title">Безлимитный интернет для полного комфорта</div>
+                <div class="advantage__desc"></div>
+            </div>
+        </div>
+
+        <div class="advantages-block__wrapper_slider">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    <div class="advantages-block__advantage advantage advantage_slide swiper-slide" style="background-image: url({% static 'img/calls.webp' %});">
+                        <div class="advantage__title">Стабильный интернет для важных созвонов</div>
+                        <div class="advantage__desc"></div>
+                    </div>
+                    <div class="advantages-block__advantage advantage advantage_slide swiper-slide" style="background-image: url({% static 'img/setup.webp' %});">
+                        <div class="advantage__title">Быстрое подключение без лишних забот</div>
+                        <div class="advantage__desc"></div>
+                    </div>
+                    <div class="advantages-block__advantage advantage advantage_slide swiper-slide" style="background-image: url({% static 'img/support.webp' %});">
+                        <div class="advantage__title">Круглосуточная помощь рядом с вами</div>
+                        <div class="advantage__desc"></div>
+                    </div>
+                    <div class="advantages-block__advantage advantage advantage_slide swiper-slide" style="background-image: url({% static 'img/smart-home.webp' %});">
+                        <div class="advantage__title">Безлимитный интернет для полного комфорта</div>
+                        <div class="advantage__desc"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="advantages-block__navs slider-navs">
+                <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 19L8 12L15 5"></path>
+                    </svg>
+                </button>
+                <div class="slider-navs__pag"></div>
+                <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 19L8 12L15 5"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact-form" class="form2-block block  block_alignwide block_bgcolor" style="background-color:#f2f6f8" data-block-slug="form2-block" data-block-appearance="">
+        <div class="form2-block__wrapper">
+            <div class="form2-block__form form">
+                <h2 class="form2-block__title block__title">Подключиться просто!</h2>
+                <div class="form2-block__subtitle">Укажите свои данные, чтобы мы могли связаться с вами для уточнения деталей!</div>                
+                <div class="wpcf7 js" id="wpcf7-f25366-o1" lang="ru-RU" dir="ltr">
+                    <div class="screen-reader-response">
+                        <p role="status" aria-live="polite" aria-atomic="true"></p>
+                        <ul>
+                        </ul>
+                    </div>
+                    <form action="/home/#wpcf7-f25366-o1" method="post" class="wpcf7-form init" aria-label="Контактная форма" novalidate="novalidate" data-status="init">
+                        <div style="display: none;">
+                            <input type="hidden" name="_wpcf7" value="25366">
+                            <input type="hidden" name="_wpcf7_version" value="5.7.5.1">
+                            <input type="hidden" name="_wpcf7_locale" value="ru_RU">
+                            <input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f25366-o1">
+                            <input type="hidden" name="_wpcf7_container_post" value="0">
+                            <input type="hidden" name="_wpcf7_posted_data_hash" value="">
+                            <input type="hidden" name="_wpcf7_recaptcha_response" value="03AFcWeA6fozvwLyYuNJP732n-xqQE_uEBr4GFAEnJbmHB1TwAwQSZT4NrOThy1ubFBM1fTFkKF_YqGo2aeHwNqtFSeUqJsFekMOT0ZIwSUKmiVzEqemTBr9Ch3RpMKESA8fj8v00NGyXRpTtouTo0kOCa59429J9FYhYZVZlNlfqZpsZgS-PB-qeSEDuveJ7RUSY9YeCPVVoEx0EPTDqX2ACJrNLd-hZEiJ-KdQpeaV_Jnoa7KQsFWz0iCn62Zo74m-lYnQGm7a3aESYsAIV7Z-pFyDV1p2cxkYwnAfDnC1FWuOn3HG3fbEhMghGNhFXNHeKODgaIwlxaziGLiVLaBv9kgeInnkzUt4Fj8npK7ZL0TFs0GCcqBkU6JRlnbSQ0Q00kHcVimrziugo2o11B-3VhW3TdUFvEXa19xiC6NgXE_vMAzpipmPkgtJyziNsc2gdwiHQ1IOMAdXo0lpTRKzryEAP3tegl2lXw9hKgkmd1ju2Lsoq6TtJIkgeDmif5mxmXwXfmAjjdqjQJEREjWnHNDoyFbkS0v9CoR6FQY8okymSK3bZxbgDdAsMCxp-eQQVf9amlWfLuP8y4wzHyUeS21J7EpxWVjo3bmdb21Ua6bbhxw4ncLbehJlqxRKcfMvbOyAwN1Q42ubzg4pBLtpWVnuZLMnyPYP0fcZaPAWaDtbF8aIw9qpD3FDsQqnAs6h9uB1aGesWfK5zdQjQvOzz4lCQmTDONENmCSkS3cC1BtCCFaSEK686u-ihWqidKKJaqImIb9SECMFdOlA_TdrAL2ATVu6WDcmcWFont9NafP7j3Z7yVx50QV03-5Gbu3uEiQGd7iIvJMh3U3Hyo_KURjHeoLh5N5Q">
+                        </div>
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="post-url" placeholder="" value="https://alapaevsk.k-telecom.org/home/">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="goal" placeholder="" value="FEEDBACK_FORM_SEND">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="main_form" placeholder="" value="1">
+
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff" value="105383">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_name" value="Комфортный">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_price" value="">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_discount" value="">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_tv" value="">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_ovn" value="">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_telephony" value="">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_equipment" value="">
+
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="to_bargains" placeholder="" value="1">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="source_id" placeholder="" value="20">
+                            <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="subsource_id" placeholder="" value="69">
+                        <div class="form__wrapper">
+                            <div class="form__item form__item_name">   
+                                <label for="form-name" class="form__item-label">Имя</label>
+                                <span class="wpcf7-form-control-wrap" data-name="form-name">
+                                    <input size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Имя" value="" type="text" name="form-name" autocomplete="name">
+                                </span>
+                            </div>
+                            <div class="form__item form__item_phone">   
+                                <label for="form-phone" class="form__item-label">Номер телефона</label>
+                                <span class="wpcf7-form-control-wrap" data-name="form-phone">
+                                    <input size="40" class="wpcf7-form-control wpcf7-text wpcf7-tel wpcf7-validates-as-required wpcf7-validates-as-tel" aria-required="true" aria-invalid="false" placeholder="+7(___) ___-__-__" value="" type="tel" name="form-phone" autocomplete="tel">
+                                </span>
+                            </div>
+                            <input class="wpcf7-form-control has-spinner wpcf7-submit form__item form__item_btn btn btn_orange-gr" type="submit" value="Подключиться"><span class="wpcf7-spinner"></span>
+                            <div class="form__policy policy-link-form">Нажимая кнопку «Подключиться», вы соглашаетесь с 
+                                <a target="_blank" class="form__policy-link" href="">Условиями обработки персональных данных</a>
+                            </div>
+                        </div>
+                        <div class="wpcf7-response-output" aria-hidden="true"></div>
+                    </form>
+                </div>
+            </div>
+            <div class="form2-block__img-wrap">
+                <img src="{% static 'img/message.webp' %}" width="348" height="316" alt="" class="form2-block__img" src="">
+            </div>
+        </div> 
+    </section>
+
+    {% if products.exists %}
+    <section class="products-slider-block block block_alignwide" style="" data-block-slug="products-slider-block">
+        <div class="products-slider-block__header">
+            <h2 class="products-slider-block__title block__title">Роутеры для стабильной связи дома</h2>
+        </div>
+        <div class="products-slider-block__wrapper">
+            <div class="swiper">
+                <div class="swiper-wrapper">
+                    {% for product in products %}
+                        <li class="product-card products-slider-block__item swiper-slide">
+                            <a href="{{ product.get_absolute_url }}" class="product-card__wrapper">
+                                <div class="product-card__cart"></div>
+                                <div class="product-card__img-wrap">
+                                    <img src="{{ product.get_main_image.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
+                                </div>
+                                <h6 class="product-card__title h6">Роутер Keenetic Speedster</h6>
+                                <div class="product-card__desc">{{ product.description|truncatewords:10 }}</div>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
+                                    <div class="product-card__btn btn">В корзину</div>
+                                </div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </div>
+                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+            </div>
+            <div class="products-slider-block__navs slider-navs">
+                <div class="slider-navs__prev"></div>
+                <div class="slider-navs__pag"></div>
+                <div class="slider-navs__next"></div>
+            </div>
+        </div>
+    </section>
+    {% endif %}
 
     <!-- Модальное окно -->
     {% include 'core/partials/order_modal.html' %}
@@ -64,5 +228,83 @@
             }
         });
     }
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const swiper = new Swiper('.products-slider-block .swiper', {
+            slidesPerView: 4,     // ← Теперь по умолчанию 4 слайда на больших экранах
+            spaceBetween: 30,
+            loop: false,
+
+            pagination: {
+                el: '.slider-navs__pag',
+                clickable: true,
+            },
+
+            navigation: {
+                nextEl: '.slider-navs__next',
+                prevEl: '.slider-navs__prev',
+            },
+
+            breakpoints: {
+                // Mobile
+                320: {
+                    slidesPerView: 1,
+                    spaceBetween: 20
+                },
+                // Tablet portrait
+                768: {
+                    slidesPerView: 2,
+                    spaceBetween: 25
+                },
+                // Tablet landscape / small desktop
+                992: {
+                    slidesPerView: 3,
+                    spaceBetween: 30
+                },
+                // Full desktop
+                1200: {
+                    slidesPerView: 4,      // ← 4 карточки на больших экранах
+                    spaceBetween: 30
+                }
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const swiperContainer = document.querySelector('.advantages-block .swiper');
+        if (!swiperContainer) return;
+    
+        const swiper = new Swiper(swiperContainer, {
+            slidesPerView: 1,
+            spaceBetween: 30,
+            loop: false,
+            pagination: {
+                el: '.advantages-block .slider-navs__pag',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.advantages-block .slider-navs__next',
+                prevEl: '.advantages-block .slider-navs__prev',
+            },
+            breakpoints: {
+                768: {
+                    slidesPerView: 2.2,
+                },
+                1024: {
+                    slidesPerView: 3.2,
+                },
+                1200: {
+                    slidesPerView: 4,
+                }
+            },
+            a11y: {
+                prevSlideMessage: 'Предыдущий слайд',
+                nextSlideMessage: 'Следующий слайд',
+                paginationBulletMessage: 'Перейти к слайду {{index}}'
+            }
+        });
+    });
 </script>
 {% endblock %}

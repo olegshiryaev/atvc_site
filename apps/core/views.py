@@ -370,11 +370,29 @@ def services(request, service_slug, locality_slug):
         .prefetch_related("included_channels")
     )
 
+    products = Product.objects.filter(
+        is_available=True, services=service
+    ).prefetch_related("images", "services")
+
+    # Формируем breadcrumbs
+    breadcrumbs = [
+        {"title": "Главная", "url": f"/{locality.slug}/"},
+        {
+            "title": f"Подключить {service.name.lower()} в {locality.name_prepositional}",
+            "url": request.path,
+        },
+    ]
+
+    title = f"Подключить {service.name.lower()} в {locality.name_prepositional}"
+
     context = {
         "service": service,
         "displayed_tariffs": tariffs,
         "locality": locality,
         "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
+        "products": products,
+        "breadcrumbs": breadcrumbs,
+        "title": title,
     }
 
     return render(request, "core/services.html", context)

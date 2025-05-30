@@ -1,4 +1,4 @@
-<div class="position-relative tariff-swiper-wrapper">
+<div class="tariff-swiper-wrapper">
     <div class="swiper tariff-swiper">
         <div class="swiper-wrapper">
             {% for tariff in displayed_tariffs %}
@@ -82,8 +82,18 @@
     </div>
 
     <div class="slider-navs">
-        <div class="slider-navs__prev"></div>
-        <div class="slider-navs__next"></div>
+        <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 19L8 12L15 5"></path>
+            </svg>
+        </button>
+        <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" stroke-linejoin="round">
+                <path d="M15 19L8 12L15 5"></path>
+            </svg>
+        </button>
         <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
     </div>
 </div>
