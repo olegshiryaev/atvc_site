@@ -1070,6 +1070,334 @@ a[href]:hover:not(.btn) {
     }
 }
 
+.tariff-inform {
+    color: #2d2d2d;
+    font-family: Raleway, Arial, sans-serif;
+}
+
+.tariff-inform__wrapper {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 28px;
+    border-radius: 15px;
+    background: #fff;
+    height: 100%;
+    width: 100%;
+    transition: all 0.3s linear;
+}
+
+.tariff-inform__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    border-image: url()
+        2 stretch;
+    border-image-width: 0 0 3px 0;
+    gap: 10px;
+}
+
+.tariff-inform__title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 120%;
+    letter-spacing: -0.072px;
+}
+
+.tariff-inform__change {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0.28px;
+    color: var(--main-color);
+}
+
+.tariff-inform__change:hover {
+    color: var(--main-color-on-hover);
+}
+
+.tariff-inform__desc {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.052px;
+    margin-bottom: 20px;
+    border-image: url()
+        17 stretch;
+    border-image-width: 0 0 1px 0;
+    padding-bottom: 20px;
+}
+
+.tariff-inform__desc p {
+    margin: 0;
+}
+
+.tariff-inform__service:not(:last-child) {
+    margin-bottom: 20px;
+    padding-bottom: 17px;
+    border-image: url()
+        2 stretch;
+    border-image-width: 0 0 3px 0;
+}
+
+.tariff-inform .option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.tariff-inform .option:not(:last-child) {
+    margin-bottom: 32px;
+}
+
+.tariff-inform .option__wrap {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: 1fr min-content;
+    align-items: center;
+    grid-gap: 0 10px;
+}
+
+.tariff-inform .option__icon {
+    grid-row: span 2;
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.tariff-inform .option__icon_speed {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_tv_basic,
+.tariff-inform .option__icon_televidenie {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_tv_advanced {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_tv_movie,
+.tariff-inform .option__icon_tv_anime,
+.tariff-inform .option__icon_tv_match {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_equipment_count {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_archive_time {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_count_numbers {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_count_lines {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_minutes-limit {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_minutes-over-limit-price {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_minutes-price {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_abonent-line {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_quality,
+.tariff-inform .option__icon_is_fullhd {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_rec_sound {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_other_num {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_phone_detect {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_phone_redirect {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_routery {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_stb {
+    background-image: url();
+}
+
+.tariff-inform .option__icon_camera,
+.tariff-inform .option__icon_videonablyudenie {
+    background-image: url();
+}
+
+.tariff-inform .option__label {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.tariff-inform .option__desc {
+    color: #989898;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+}
+
+.tariff-inform .option__price {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.tariff-inform .option__price:not(:last-child) {
+    color: var(--main-color);
+}
+
+.tariff-inform .option__price-wrap {
+    text-align: right;
+}
+
+.tariff-inform .option__price-old {
+    margin-top: 4px;
+    font-size: 14px;
+    color: #989898;
+    text-decoration: line-through;
+}
+
+.tariff-inform .packs-options__desc,
+.tariff-inform .additional_options__desc {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 36px;
+}
+
+.tariff-inform .packs-options__desc:last-child,
+.tariff-inform .additional_options__desc:last-child {
+    margin-bottom: 0;
+}
+
+.tariff-inform .packs-options__desc-icon,
+.tariff-inform .additional_options__desc-icon {
+    width: 20px;
+    height: 20px;
+    min-width: 20px;
+    min-height: 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+.tariff-inform .packs-options__desc-text,
+.tariff-inform .additional_options__desc-text {
+    font-weight: 600;
+}
+
+.tariff-inform .packs-options__desc-price,
+.tariff-inform .additional_options__desc-price {
+    margin-left: auto;
+    font-weight: 700;
+}
+
+.tariff-inform .prices {
+    display: flex;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 26px;
+    align-items: center;
+    justify-content: space-between;
+    border-image: url()
+        2 stretch;
+    border-image-width: 3px 0 0 0;
+}
+
+.tariff-inform .prices__label {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.tariff-inform .prices__price {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 18px;
+    color: var(--main-color);
+}
+
+.tariff-inform .prices-wrap {
+    margin-left: auto;
+    text-align: right;
+}
+
+.tariff-inform .prices__price-old {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    text-decoration: line-through;
+    color: #989898;
+    margin-top: 6px;
+}
+
+.tariff-inform__under-text {
+    margin-top: 23px;
+    text-align: right;
+    font-size: 14px;
+}
+
+@media (max-width: 992px) {
+    .tariff-inform .prices__price {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 500px) {
+    .tariff-inform__title {
+        font-size: 20px;
+    }
+
+    .tariff-inform .prices {
+        margin-top: 17px;
+        flex-wrap: wrap;
+    }
+
+    .tariff-inform .option {
+        gap: 8px;
+    }
+
+    .tariff-inform .option:not(:last-child) {
+        margin-bottom: 26px;
+    }
+
+    .tariff-inform__under-text {
+        margin-top: 10px;
+    }
+}
+
 /* News Widget */
 .news-widget {
     background: #f4f6fb;

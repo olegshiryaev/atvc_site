@@ -59,10 +59,12 @@
         {% endif %}
         
         <!-- Блок тарифов -->
-        {% include 'core/partials/tariffs_section.html' %}
+        <section id="tarifs" class="tariffs-block block">
+            {% include 'core/partials/tariffs_section.html' %}
+        </section>
 
-        <!-- Модальное окно -->
-        {% include 'core/partials/order_modal.html' %}
+        {% comment %} <!-- Модальное окно -->
+        {% include 'core/partials/order_modal.html' %} {% endcomment %}
 
         <!-- Секция проверки адреса -->
         <section class="address-check-section block">
@@ -245,50 +247,94 @@
                 </div>
                 <div class="form-main-block__form form">
                     <div class="wpcf7 js" id="wpcf7-f23489-o1" lang="ru-RU" dir="ltr">
-                        <div class="screen-reader-response"><p role="status" aria-live="polite" aria-atomic="true"></p> <ul></ul></div>
-                            <form action="/#wpcf7-f23489-o1" method="post" class="wpcf7-form init" aria-label="Контактная форма" novalidate="novalidate" data-status="init">
-                                <div style="display: none;">
-                                    <input type="hidden" name="_wpcf7" value="23489">
-                                    <input type="hidden" name="_wpcf7_version" value="5.7.5.1">
-                                    <input type="hidden" name="_wpcf7_locale" value="ru_RU">
-                                    <input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f23489-o1">
-                                    <input type="hidden" name="_wpcf7_container_post" value="0">
-                                    <input type="hidden" name="_wpcf7_posted_data_hash" value="">
-                                    <input type="hidden" name="_wpcf7_recaptcha_response" value="03AFcWeA7RKoaVq8KxOEAhKaKd-EorkwhShG6YWQPm8eR-WMPHDfbPO8fGbrxhin_0r000gHXFPvWlPA_6oBJe-sSVbG8DL65uKmTNmnL1oZPjYf6uoVT6AvU2KCCXLE-smIwvXH6uf4_i4NDlaBiq0VUTaNE9ihjCAne6neRdMX0Zylx2jgcBVFcU9hVLh8WRbAFcAkVUn55CvXZQc09WzKsGxHR7cGbXfKk7pA5v8QqHDmwjLE52MeyBtgt_LQ1hJrvwvuhRO37BcDLNCTbYi_ZNFuFmE47M5ijK_XutjTg-aOvPSwgGZFZnqSKM0SPFis6R0CeZXOfJWvqqoereouV0PFN9p9pKWsWnq3Rg5GX1p7EGoy5qZX3ShdG7wSdxnrgezQHlNAKtovj6s4CrNt-y9htp7VGAIDBjQ0K0IyAc-Bod_Jt43MF7tgeXfso2URqzWmrNyCO2Gd38Z-C0jm-_scPO6BgXMmCAnzqU56AqjqSyBz4QIxd6_PfrbIVPPeuHulpYfLTwZinOa8Xkg_AaKZGsZpmZ0BQ9H915WAPcl6C__JYnDAgg3YLDn5p9rMBEeg54VfqyK7T8v6fG3fr0lFf2mgwGxrauGZYtVrmVD8sbLWeUg-El3xbSnZAo3Ct-mLlunOwTRyhDJAfETJvPa3ubmPAmsikXP6-AZoCHKLeZE0V9pzkSoNxUneQ0E-0yzbPmW8hdAgPTCiIE9SY6D-DxT9-ea4yFX4R0Ood8HNyt5PYC1e816qFAQ3xTc5cTZCay1B7zBlKNBzlgu5YVbRss1e2nOjWLF8sYGBuzFew0RSg1hfPbnOuj0mLNGEzAydrsqhdkmW9mjHk2aMVeedmSxq_FDg">
+                        <div class="screen-reader-response">
+                            <p role="status" aria-live="polite" aria-atomic="true"></p>
+                            <ul></ul>
+                        </div>
+                        <form action="/#wpcf7-f23489-o1" method="post" class="wpcf7-form init" aria-label="Контактная форма" novalidate="novalidate" data-status="init">
+                            <div style="display: none;">
+                                <input type="hidden" name="_wpcf7" value="23489">
+                                <input type="hidden" name="_wpcf7_version" value="5.7.5.1">
+                                <input type="hidden" name="_wpcf7_locale" value="ru_RU">
+                                <input type="hidden" name="_wpcf7_unit_tag" value="wpcf7-f23489-o1">
+                                <input type="hidden" name="_wpcf7_container_post" value="0">
+                                <input type="hidden" name="_wpcf7_posted_data_hash" value="">
+                                <input type="hidden" name="_wpcf7_recaptcha_response" value="03AFcWeA7RKoaVq8KxOEAhKaKd-EorkwhShG6YWQPm8eR-WMPHDfbPO8fGbrxhin_0r000gHXFPvWlPA_6oBJe-sSVbG8DL65uKmTNmnL1oZPjYf6uoVT6AvU2KCCXLE-smIwvXH6uf4_i4NDlaBiq0VUTaNE9ihjCAne6neRdMX0Zylx2jgcBVFcU9hVLh8WRbAFcAkVUn55CvXZQc09WzKsGxHR7cGbXfKk7pA5v8QqHDmwjLE52MeyBtgt_LQ1hJrvwvuhRO37BcDLNCTbYi_ZNFuFmE47M5ijK_XutjTg-aOvPSwgGZFZnqSKM0SPFis6R0CeZXOfJWvqqoereouV0PFN9p9pKWsWnq3Rg5GX1p7EGoy5qZX3ShdG7wSdxnrgezQHlNAKtovj6s4CrNt-y9htp7VGAIDBjQ0K0IyAc-Bod_Jt43MF7tgeXfso2URqzWmrNyCO2Gd38Z-C0jm-_scPO6BgXMmCAnzqU56AqjqSyBz4QIxd6_PfrbIVPPeuHulpYfLTwZinOa8Xkg_AaKZGsZpmZ0BQ9H915WAPcl6C__JYnDAgg3YLDn5p9rMBEeg54VfqyK7T8v6fG3fr0lFf2mgwGxrauGZYtVrmVD8sbLWeUg-El3xbSnZAo3Ct-mLlunOwTRyhDJAfETJvPa3ubmPAmsikXP6-AZoCHKLeZE0V9pzkSoNxUneQ0E-0yzbPmW8hdAgPTCiIE9SY6D-DxT9-ea4yFX4R0Ood8HNyt5PYC1e816qFAQ3xTc5cTZCay1B7zBlKNBzlgu5YVbRss1e2nOjWLF8sYGBuzFew0RSg1hfPbnOuj0mLNGEzAydrsqhdkmW9mjHk2aMVeedmSxq_FDg">
+                            </div>
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="post-url" placeholder="" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="goal" placeholder="" value="FEEDBACK_FORM_SEND">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="main_form" placeholder="" value="1">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_name" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_price" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_discount" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_tv" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_ovn" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_telephony" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_equipment" value="">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="to_bargains" placeholder="" value="1">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="source_id" placeholder="" value="20">
+                                <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="subsource_id" placeholder="" value="72">
+                                <input type="hidden" name="form-city" value="alapaevsk">
+                            <div class="form__wrapper">
+                                <div class="form__item form__item_name">   
+                                <label for="form-name" class="form__item-label">Имя</label>
+                                <span class="wpcf7-form-control-wrap" data-name="form-name"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Имя" value="" type="text" name="form-name" autocomplete="name"></span>
+                            </div>
+                            <div class="form__item form__item_phone">   
+                                <label for="form-phone" class="form__item-label">Номер телефона</label>
+                                <span class="wpcf7-form-control-wrap" data-name="form-phone"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-tel wpcf7-validates-as-required wpcf7-validates-as-tel" aria-required="true" aria-invalid="false" placeholder="+7(___) ___-__-__" value="" type="tel" name="form-phone" autocomplete="tel"></span>
+                            </div>
+                            <div class="form__policy policy-link-form">Нажимая кнопку «Отправить заявку», вы соглашаетесь с <a target="_blank" class="form__policy-link" href="">Условиями обработки персональных данных</a></div>
+                                <input class="wpcf7-form-control has-spinner wpcf7-submit form__item form__item_btn btn btn_orange-gr" type="submit" value="Отправить заявку"><span class="wpcf7-spinner"></span>
+                            </div>
+                            <div class="wpcf7-response-output" aria-hidden="true"></div>
+                        </form>
+                    </div>
+                </div>
+                <div class="form-main-block__tariff" data-form-tariff="" data-change_link="#tariff" style="background-image: url(); background-size: 0px;">
+                    <div class="tariff-inform  tariff-inform_type-ethernet tariff-inform_inet d-none" data-tariff-id="105383" data-tariff-name="Комфортный">
+                        <div class="tariff-inform__wrapper">
+                            <div class="tariff-inform__header">
+                                <div class="tariff-inform__title"></div>
+                                <a href="#tariff" class="tariff-inform__change link-to">Сменить</a>
+                            </div>
+                            <div class="tariff-inform__services">
+                                <div class="tariff-inform__service service-inet">
+                                    <div class="service-inet__option option option_speed">
+                                        <div class="option__wrap">
+                                            <div class="option__icon option__icon_speed"></div>
+                                            <div class="option__label"></div>
+                                            <div class="option__desc"></div>
+                                        </div>
+                                        <div class="option__price-wrap">
+                                            <div class="option__price"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="post-url" placeholder="" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="goal" placeholder="" value="FEEDBACK_FORM_SEND">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="main_form" placeholder="" value="1">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_name" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_price" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_discount" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_tv" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_ovn" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_telephony" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="form-tariff_equipment" value="">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="to_bargains" placeholder="" value="1">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="source_id" placeholder="" value="20">
-                                    <input type="hidden" class="wpcf7-form-control wpcf7-hidden" name="subsource_id" placeholder="" value="72">
-                                    <input type="hidden" name="form-city" value="alapaevsk">
-                                <div class="form__wrapper">
-                                    <div class="form__item form__item_name">   
-                                    <label for="form-name" class="form__item-label">Имя</label>
-                                    <span class="wpcf7-form-control-wrap" data-name="form-name"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-validates-as-required" aria-required="true" aria-invalid="false" placeholder="Имя" value="" type="text" name="form-name" autocomplete="name"></span>
+                                <div class="tariff-inform__service service-tv" style="display: none;">
+                                    <div class="service-tv__option option option_channels">
+                                        <div class="option__wrap">
+                                            <div class="option__icon option__icon_tv"></div>
+                                            <div class="option__label">—</div>
+                                            <div class="option__desc">Телевидение</div>
+                                        </div>
+                                        <div class="option__price-wrap">
+                                            <div class="option__price">—</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                    <div class="form__item form__item_phone">   
-                                    <label for="form-phone" class="form__item-label">Номер телефона</label>
-                                    <span class="wpcf7-form-control-wrap" data-name="form-phone"><input size="40" class="wpcf7-form-control wpcf7-text wpcf7-tel wpcf7-validates-as-required wpcf7-validates-as-tel" aria-required="true" aria-invalid="false" placeholder="+7(___) ___-__-__" value="" type="tel" name="form-phone" autocomplete="tel"></span>
+                            </div>
+                            <div class="tariff-inform__prices prices">
+                                <div class="prices__label">Итого:</div>
+                                <div class="prices-wrap">
+                                    <div class="prices__price"></div>
                                 </div>
-                                <div class="form__policy policy-link-form">Нажимая кнопку «Отправить заявку», вы соглашаетесь с <a target="_blank" class="form__policy-link" href="">Условиями обработки персональных данных</a></div>
-                                    <input class="wpcf7-form-control has-spinner wpcf7-submit form__item form__item_btn btn btn_orange-gr" type="submit" value="Отправить заявку"><span class="wpcf7-spinner"></span>
-                                </div>
-                                <div class="wpcf7-response-output" aria-hidden="true"></div>
-                            </form>
+                            </div>
                         </div>
                     </div>
-                    <div class="form-main-block__tariff" data-form-tariff="" data-change_link="#tariff" style="background-image:url();"></div>
                 </div>
+            </div>
         </section>
     </div>
 </div>
@@ -494,13 +540,6 @@
                     if (phoneMask) phoneMask.updateValue();
                     document.getElementById('submitAddressBtn').disabled = true;
 
-                    const modal = document.getElementById('orderModal');
-                    const bsModal = new bootstrap.Modal(modal);
-                    bsModal.show();
-
-                    setTimeout(() => {
-                        bsModal.hide();
-                    }, 5000);
                 } else if (data.errors) {
                     for (const [field, errors] of Object.entries(data.errors)) {
                         const errorDiv = addressForm.querySelector(`#${field}Error`);
@@ -578,6 +617,96 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         initChannelSearch();
         document.addEventListener('htmx:afterSwap', initChannelSearch);
+    });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const buttons = document.querySelectorAll('.tariff-connect-btn');
+        const tariffInfo = document.querySelector('.tariff-inform');
+    
+        // Функция обновления информации о тарифе
+        function updateTariffInfo(tariffData) {
+            tariffInfo.classList.remove('d-none');
+            tariffInfo.querySelector('.tariff-inform__title').textContent = tariffData.name;
+    
+            let speedHtml = `<div class="option__wrap">
+                                <div class="option__icon option__icon_speed"></div>
+                                <div class="option__label">${tariffData.speed || '—'} Мбит/с</div>
+                                <div class="option__desc">Интернет</div>
+                            </div>`;
+            tariffInfo.querySelector('.service-inet .option_speed').innerHTML = speedHtml;
+    
+            tariffInfo.querySelector('.prices__price').textContent = `${tariffData.price} ₽/мес`;
+    
+            const tvServiceBlock = tariffInfo.querySelector('.service-tv');
+            if (tvServiceBlock) {
+                if (tariffData.channels !== '—') {
+                    tvServiceBlock.style.display = 'block';
+                    tvServiceBlock.querySelector('.option__label').textContent = `${tariffData.channels} каналов`;
+                    tvServiceBlock.querySelector('.option__desc').textContent = tariffData.hdChannels !== '—'
+                        ? `+ ${tariffData.hdChannels} HD`
+                        : '';
+                } else {
+                    tvServiceBlock.style.display = 'none';
+                }
+            }
+    
+            document.querySelector('[name="form-tariff_name"]').value = tariffData.name;
+            document.querySelector('[name="form-tariff_price"]').value = tariffData.price;
+        }
+    
+        // Обработчик клика по кнопке "Подключить"
+        buttons.forEach(button => {
+            button.addEventListener('click', function () {
+                const tariffData = {
+                    name: this.dataset.tariffName,
+                    price: this.dataset.tariffPrice,
+                    speed: this.dataset.tariffSpeed || '—',
+                    channels: this.dataset.tariffChannels || '—',
+                    hdChannels: this.dataset.tariffHdChannels || '—',
+                    timestamp: Date.now()
+                };
+    
+                localStorage.setItem('selectedTariff', JSON.stringify(tariffData));
+                updateTariffInfo(tariffData);
+    
+                // Прокрутка к форме
+                const mainForm = document.getElementById('main-form');
+                if (mainForm) {
+                    mainForm.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+    
+        // Проверяем localStorage при загрузке страницы
+        const savedTariff = localStorage.getItem('selectedTariff');
+        if (savedTariff && tariffInfo) {
+            const tariffData = JSON.parse(savedTariff);
+            const TTL = 1 * 60 * 60 * 1000; // 1 час
+            const isExpired = Date.now() - tariffData.timestamp > TTL;
+    
+            if (!isExpired) {
+                updateTariffInfo(tariffData);
+            } else {
+                localStorage.removeItem('selectedTariff');
+            }
+        }
+    
+        // Опционально: при нажатии на "Сменить" — удаляем сохранённый тариф
+        const changeLink = document.querySelector('.tariff-inform__change');
+        if (changeLink) {
+            changeLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                localStorage.removeItem('selectedTariff');
+                tariffInfo.classList.add('d-none');
+    
+                // Прокрутка к блоку с тарифами
+                const tariffWrapper = document.querySelector('.tariffs-block');
+                if (tariffWrapper) {
+                    tariffWrapper.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
