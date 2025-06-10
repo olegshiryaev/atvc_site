@@ -535,6 +535,9 @@ document.addEventListener('DOMContentLoaded', function () {
             new Swiper('.available-services-block__wrapper_slider .swiper', {
                 slidesPerView: 1,
                 spaceBetween: 20,
+                grabCursor: true,
+                loop: true,
+                lazy: true,
                 navigation: {
                     nextEl: '.available-services-block__navs .slider-navs__next',
                     prevEl: '.available-services-block__navs .slider-navs__prev',
