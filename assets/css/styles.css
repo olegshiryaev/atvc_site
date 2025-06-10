@@ -5206,7 +5206,7 @@ select,
 }
 
 .available-services-block .service-card__btn {
-    font-size: 18px;
+    font-size: 1rem;
     font-weight: 500;
     align-self: flex-start;
     margin-top: auto;
