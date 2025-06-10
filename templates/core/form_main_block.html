@@ -1,3 +1,4 @@
+{% load widget_tweaks %}
 <section id="connect-form" class="connect-form block block_alignwide" data-block-slug="connect-form" data-block-appearance="">
     <div class="connect-form__wrapper">
         <div class="connect-form__header">
@@ -18,7 +19,7 @@
                     <!-- Телефон -->
                     <div class="connect-form__field connect-form__field_phone">
                         <label for="id_phone" class="connect-form__label">Номер телефона *</label>
-                        {{ form.phone }}
+                        {{ form.phone|add_class:"connect-form__input"|attr:"type:tel"|attr:"placeholder:+7 (___) ___-__-__" }}
                         <div class="connect-form__error" id="error_phone"></div>
                     </div>
                     <!-- Улица -->
@@ -106,6 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const phoneInput = document.getElementById('id_phone');
     let phoneMask;
     if (phoneInput) {
+        phoneInput.setAttribute('autocomplete', 'off');
         phoneMask = IMask(phoneInput, {
             mask: '+7(000)000-0000',
             lazy: false,

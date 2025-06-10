@@ -4520,6 +4520,7 @@ button.swiper-pagination-bullet {
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
+    line-height: 1.5;
 }
 
 .connect-form__input:focus {
