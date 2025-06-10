@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (window.innerWidth <= 600) {
             new Swiper('.available-services-block__wrapper_slider .swiper', {
                 slidesPerView: 1,
-                spaceBetween: 20,
+                spaceBetween: 30,
                 navigation: {
                     nextEl: '.available-services-block__navs .slider-navs__next',
                     prevEl: '.available-services-block__navs .slider-navs__prev',
@@ -542,12 +542,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 pagination: {
                     el: '.available-services-block__navs .slider-navs__pag',
                     clickable: true,
-                    bulletClass: 'swiper-pagination-bullet',
-                    bulletActiveClass: 'swiper-pagination-bullet-active',
-                },
-                autoplay: {
-                    delay: 5000,
-                    disableOnInteraction: false,
                 },
             });
         }
