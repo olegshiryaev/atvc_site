@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import resolve, reverse_lazy
+from django.urls import resolve, reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import JsonResponse
@@ -7,6 +7,7 @@ from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
 from django.db.models import Count
+from django.contrib import messages
 
 from apps.equipments.models import Product
 
@@ -79,6 +80,9 @@ def index(request, locality_slug):
         .order_by("-view_count")[:10]
     )
 
+    # Инициализируем форму
+    form = OrderForm()
+
     context = {
         "grouped_tariffs": grouped_dict,
         "available_services": available_services,
@@ -88,6 +92,7 @@ def index(request, locality_slug):
         "latest_news": latest_news,
         "banners": banners,
         "popular_products": popular_products,
+        "form": form,
     }
 
     return render(request, "core/index.html", context)
@@ -413,3 +418,61 @@ def static_page_view(request, slug, locality_slug):
     }
 
     return render(request, "core/static_page.html", context)
+
+
+def submit_order(request, locality_slug):
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    if request.method == "POST":
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            tariff_id = form.cleaned_data.get("tariff_id")
+            tariff = None
+            if tariff_id:
+                try:
+                    tariff = Tariff.objects.get(
+                        id=tariff_id, localities=locality, is_active=True
+                    )
+                except Tariff.DoesNotExist:
+                    return JsonResponse(
+                        {
+                            "success": False,
+                            "errors": {
+                                "tariff_id": [
+                                    "Выбранный тариф недоступен для вашего региона."
+                                ]
+                            },
+                        },
+                        status=400,
+                    )
+
+            order = form.save(commit=False)
+            order.locality = locality
+            order.tariff = tariff
+            order.save()
+            return JsonResponse(
+                {
+                    "success": True,
+                    "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
+                }
+            )
+        else:
+            errors = {
+                field: [str(e) for e in errors] for field, errors in form.errors.items()
+            }
+            non_field_errors = [str(e) for e in form.non_field_errors()]
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": errors,
+                    "non_field_errors": non_field_errors,
+                },
+                status=400,
+            )
+    else:
+        form = OrderForm()
+
+    context = {
+        "form": form,
+        "locality": locality,
+    }
+    return render(request, "core/form_main_block.html", context)

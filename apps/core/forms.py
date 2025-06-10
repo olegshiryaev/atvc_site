@@ -1,5 +1,5 @@
 from django import forms
-from .models import Application, Document, Feedback, Order
+from .models import Application, Document, Feedback, Order, Tariff
 from django.core.validators import RegexValidator
 
 
@@ -130,15 +130,79 @@ class FeedbackForm(forms.ModelForm):
         return phone
 
 
-
 class OrderForm(forms.ModelForm):
+    tariff_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Order
-        fields = ['full_name', 'phone', 'street', 'house', 'comment']
+        fields = ["full_name", "phone", "street", "house", "apartment"]
         widgets = {
-            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+7 (___) ___-__-__'}),
-            'street': forms.TextInput(attrs={'class': 'form-control'}),
-            'house': forms.TextInput(attrs={'class': 'form-control'}),
-            'comment': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+            "full_name": forms.TextInput(
+                attrs={
+                    "class": "connect-form__input",
+                    "placeholder": "Иванов Иван Иванович",
+                    "autocomplete": "name",
+                    "required": "required",
+                }
+            ),
+            "phone": forms.TextInput(
+                attrs={
+                    "class": "connect-form__input",
+                    "placeholder": "+7(___) ___-____",
+                    "autocomplete": "tel",
+                    "required": "required",
+                }
+            ),
+            "street": forms.TextInput(
+                attrs={
+                    "class": "connect-form__input",
+                    "placeholder": "ул. Ленина",
+                    "autocomplete": "address-line1",
+                }
+            ),
+            "house": forms.TextInput(
+                attrs={
+                    "class": "connect-form__input",
+                    "placeholder": "1",
+                    "autocomplete": "address-line2",
+                }
+            ),
+            "apartment": forms.TextInput(
+                attrs={
+                    "class": "connect-form__input",
+                    "placeholder": "1",
+                    "autocomplete": "address-line3",
+                }
+            ),
         }
+        labels = {
+            "full_name": "Имя",
+            "phone": "Номер телефона",
+            "street": "Улица",
+            "house": "Номер дома",
+            "apartment": "Квартира",
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["full_name"].required = True
+        self.fields["phone"].required = True
+        self.fields["street"].required = False
+        self.fields["house"].required = False
+        self.fields["apartment"].required = False
+        self.fields["phone"].validators.append(
+            RegexValidator(
+                regex=r"^\+7\d{10}$",
+                message="Телефон должен быть в формате +7XXXXXXXXXX",
+            )
+        )
+
+    def clean_tariff_id(self):
+        tariff_id = self.cleaned_data.get("tariff_id")
+        if tariff_id:
+            try:
+                tariff = Tariff.objects.get(id=tariff_id, is_active=True)
+            except Tariff.DoesNotExist:
+                raise forms.ValidationError("Выбранный тариф недействителен.")
+            return tariff_id
+        return None

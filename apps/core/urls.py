@@ -12,6 +12,7 @@ from .views import (
     static_page_view,
     submit_application,
     FeedbackCreateView,
+    submit_order,
 )
 
 app_name = "core"
@@ -19,6 +20,7 @@ app_name = "core"
 urlpatterns = [
     path("", index, name="home"),
     path("tariffs/<slug:slug>/", TariffDetailView.as_view(), name="tariff_detail"),
+    path('submit-order/', submit_order, name='submit_order'),
     path("order/<slug:slug>/", order_create, name="order_create"),
     path("about/", about_company, name="about"),
     path("offices/", office_list, name="office_list"),

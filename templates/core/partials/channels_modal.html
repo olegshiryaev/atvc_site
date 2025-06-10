@@ -13,16 +13,16 @@
                 <div class="d-block d-md-none sticky-top bg-white py-2 z-index-sticky">
                     <div class="category-filter-container d-flex flex-wrap gap-3">
                         <button type="button"
-                                class="btn btn-category-toggle dropdown-toggle d-block d-md-none"
+                                class="category-toggle dropdown-toggle d-block d-md-none"
                                 data-bs-toggle="dropdown"
                                 data-bs-autohide="false"
                                 aria-expanded="false">
-                            Категории
+                            Категории каналов
                         </button>
                         <ul class="dropdown-menu channel-category-dropdown">
                             <li>
                                 <a class="dropdown-item channel-category-item active" href="#" role="button" data-category="">
-                                    Все
+                                    Все каналы
                                     <span class="channel-category-count ms-3">0</span>
                                 </a>
                             </li>
@@ -41,9 +41,9 @@
                 <!-- Для десктопов -->
                 <div class="d-none d-md-block mb-3 sticky-top bg-white pt-3 z-index-sticky" style="top: 0;">
                     <div class="d-flex flex-wrap">
-                        <button class="btn btn-category active" data-category="">Все <span class="category-count ms-1">0</span></button>
+                        <button class="btn-category active" data-category="">Все каналы <span class="category-count ms-1">0</span></button>
                         {% for category in CATEGORY_CHOICES %}
-                            <button class="btn btn-category" data-category="{{ category.0 }}">
+                            <button class="btn-category" data-category="{{ category.0 }}">
                                 {{ category.1 }} <span class="category-count ms-1">0</span>
                             </button>
                         {% endfor %}

@@ -439,38 +439,63 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = (
         "full_name",
         "phone",
+        "street",
+        "house",
         "locality",
         "tariff",
-        "equipment_summary",
-        "total_services",
-        "total_cost",
+        "status",
         "created_at",
+        "total_cost",
     )
-    list_filter = ("status", "locality", "tariff")
-    search_fields = ("full_name", "phone", "street", "house")
-    readonly_fields = ("created_at",)
+    list_filter = ("status", "locality", "tariff", "created_at")
+    search_fields = ("full_name", "phone", "street", "house", "comment")
+    list_editable = ("status",)
+    list_per_page = 20
+    date_hierarchy = "created_at"
+    actions = ["mark_as_processed", "mark_as_completed"]
+    readonly_fields = ("created_at", "updated_at", "total_cost_display")
     fieldsets = (
-        ("Информация о клиенте", {"fields": ("full_name", "phone")}),
-        ("Адрес", {"fields": ("street", "house")}),
-        ("Тариф и оборудование", {"fields": ("tariff", "equipment")}),
-        ("Дополнительные услуги", {"fields": ("services",)}),
-        ("Комментарий и дата", {"fields": ("comment", "created_at")}),
+        (None, {"fields": ("full_name", "phone", "email", "status")}),
+        ("Адрес", {"fields": ("locality", "street", "house", "apartment")}),
+        (
+            "Тариф и услуги",
+            {
+                "fields": (
+                    "tariff",
+                    "equipment",
+                    "services",
+                    "tv_packages",
+                    "total_cost_display",
+                )
+            },
+        ),
+        ("Дополнительно", {"fields": ("comment", "created_at", "updated_at")}),
     )
 
-    def equipment_summary(self, obj):
-        return obj.equipment.name if obj.equipment else "-"
-
-    equipment_summary.short_description = "Оборудование"
-
-    def total_services(self, obj):
-        return ", ".join(service.name for service in obj.services.all()) or "-"
-
-    total_services.short_description = "Услуги"
-
-    def total_cost(self, obj):
+    def total_cost_display(self, obj):
         return f"{obj.total_cost()} ₽"
 
-    total_cost.short_description = "Сумма к оплате"
+    total_cost_display.short_description = "Общая стоимость"
+
+    def mark_as_processed(self, request, queryset):
+        queryset.update(status="processed")
+        self.message_user(request, "Выбранные заявки отмечены как 'В обработке'.")
+
+    mark_as_processed.short_description = "Отметить как в обработке"
+
+    def mark_as_completed(self, request, queryset):
+        queryset.update(status="completed")
+        self.message_user(request, "Выбранные заявки отмечены как 'Выполнена'.")
+
+    mark_as_completed.short_description = "Отметить как выполненные"
+
+    def get_queryset(self, request):
+        return (
+            super()
+            .get_queryset(request)
+            .select_related("locality", "tariff")
+            .prefetch_related("equipment", "services", "tv_packages")
+        )
 
 
 @admin.register(AdditionalService)

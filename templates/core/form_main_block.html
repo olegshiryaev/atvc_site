@@ -1,0 +1,307 @@
+<section id="connect-form" class="connect-form block block_alignwide" data-block-slug="connect-form" data-block-appearance="">
+    <div class="connect-form__wrapper">
+        <div class="connect-form__header">
+            <h2 class="connect-form__title block__title">Подключиться легко!</h2>
+            <div class="connect-form__subtitle">Укажите свои контактные данные, и мы свяжемся с вами в течение часа для уточнения деталей!</div>
+        </div>
+        <div class="connect-form__form">
+            <form id="connect-form-submit" action="{% url 'core:submit_order' locality_slug=locality.slug %}" method="post" class="form" aria-label="Контактная форма">
+                {% csrf_token %}
+                <input type="hidden" name="tariff_id" id="id_tariff_id">
+                <div class="connect-form__fields">
+                    <!-- Полное имя -->
+                    <div class="connect-form__field connect-form__field_name">
+                        <label for="id_full_name" class="connect-form__label">Имя *</label>
+                        {{ form.full_name }}
+                        <div class="connect-form__error" id="error_full_name"></div>
+                    </div>
+                    <!-- Телефон -->
+                    <div class="connect-form__field connect-form__field_phone">
+                        <label for="id_phone" class="connect-form__label">Номер телефона *</label>
+                        {{ form.phone }}
+                        <div class="connect-form__error" id="error_phone"></div>
+                    </div>
+                    <!-- Улица -->
+                    <div class="connect-form__field connect-form__field_street">
+                        <label for="id_street" class="connect-form__label">Улица</label>
+                        {{ form.street }}
+                        <div class="connect-form__error" id="error_street"></div>
+                    </div>
+                    <!-- Дом -->
+                    <div class="connect-form__field connect-form__field_house">
+                        <label for="id_house" class="connect-form__label">Номер дома</label>
+                        {{ form.house }}
+                        <div class="connect-form__error" id="error_house"></div>
+                    </div>
+                    <!-- Квартира -->
+                    <div class="connect-form__field connect-form__field_apartment">
+                        <label for="id_apartment" class="connect-form__label">Квартира</label>
+                        {{ form.apartment }}
+                        <div class="connect-form__error" id="error_apartment"></div>
+                    </div>
+                    <!-- Согласие с политикой -->
+                    <div class="connect-form__policy">
+                        Нажимая кнопку «Отправить заявку», вы соглашаетесь с 
+                        <a target="_blank" class="connect-form__policy-link" href="#">Условиями обработки персональных данных</a>
+                    </div>
+                    <!-- Кнопка отправки -->
+                    <button class="connect-form__submit btn btn-submit" type="submit">Отправить заявку</button>
+                </div>
+                <div class="connect-form__error" id="error_non_field"></div>
+            </form>
+        </div>
+        <div class="connect-form__tariff" data-tariff="" data-id="">
+            <div class="connect-form__tariff-info" id="tariff-info" style="display: none;">
+                <div class="connect-form__tariff-info-wrapper">
+                    <!-- Заголовок тарифа -->
+                    <div class="connect-form__tariff-header">
+                        <div class="connect-form__tariff-title" id="tariff-title">Тариф «...»</div>
+                        <a href="#tariff" class="connect-form__tariff-change link-to">Сменить</a>
+                    </div>
+                    <!-- Услуги -->
+                    <div class="connect-form__tariff-services">
+                        <!-- Интернет -->
+                        <div class="connect-form__tariff-service service-inet" id="service-inet" style="display: none;">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-wifi option__icon"></i>
+                                <span class="option__desc">Интернет</span>
+                            </div>
+                            <div class="option__label" id="internet-speed">—</div>
+                        </div>
+                        <!-- Телевидение -->
+                        <div class="connect-form__tariff-service service-tv" id="service-tv" style="display: none;">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-tv option__icon"></i>
+                                <span class="option__desc">Телевидение</span>
+                            </div>
+                            <div class="option__label" id="tv-channels">—</div>
+                        </div>
+                    </div>
+                    <hr>
+                    <!-- Итоговая цена -->
+                    <div class="connect-form__tariff-prices prices">
+                        <div class="prices__label">Итого:</div>
+                        <div class="prices-wrap">
+                            <div class="prices__price" id="tariff-price">—</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Модальное окно -->
+    <div class="connect-form__modal" id="connect-form-modal">
+        <div class="connect-form__modal-content">
+            <span class="connect-form__modal-close">×</span>
+            <h3 class="connect-form__modal-title">Заявка отправлена!</h3>
+            <p class="connect-form__modal-text">Мы свяжемся с вами в течение часа для уточнения деталей.</p>
+            <button class="connect-form__modal-btn btn btn-submit" id="connect-form-modal-close">Закрыть</button>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    // Маска для телефона
+    const phoneInput = document.getElementById('id_phone');
+    let phoneMask;
+    if (phoneInput) {
+        phoneMask = IMask(phoneInput, {
+            mask: '+7(000)000-0000',
+            lazy: false,
+            placeholderChar: '_'
+        });
+    }
+
+    // Тариф
+    const tariffIdInput = document.getElementById('id_tariff_id');
+    const tariffBlock = document.querySelector(".connect-form__tariff");
+    const tariffInfo = tariffBlock?.querySelector(".connect-form__tariff-info");
+    const tariffTitle = document.getElementById('tariff-title');
+    const serviceInet = document.getElementById('service-inet');
+    const serviceTv = document.getElementById('service-tv');
+    const internetSpeed = document.getElementById('internet-speed');
+    const tvChannels = document.getElementById('tv-channels');
+    const tariffPrice = document.getElementById('tariff-price');
+
+    if (!tariffBlock || !tariffInfo) {
+        console.error("Тарифный блок или информация о тарифе не найдены");
+        return;
+    }
+
+    function updateTariffDisplay(tariffData) {
+        console.log("Обновление тарифа:", tariffData);
+        tariffInfo.style.display = 'block';
+        tariffInfo.dataset.tariffId = tariffData.tariffId || "";
+        tariffInfo.dataset.tariffName = tariffData.tariffName || "";
+        tariffTitle.textContent = `Тариф «${tariffData.tariffName || "Не выбрано"}»`;
+
+        if (tariffData.tariffSpeed) {
+            serviceInet.style.display = 'block';
+            internetSpeed.textContent = `${tariffData.tariffSpeed} Мбит/с`;
+        } else {
+            serviceInet.style.display = 'none';
+        }
+
+        if (tariffData.tariffChannels) {
+            serviceTv.style.display = 'block';
+            let desc = `${tariffData.tariffChannels} каналов`;
+            if (tariffData.tariffHdChannels) {
+                desc += `, ${tariffData.tariffHdChannels} в HD`;
+            }
+            tvChannels.textContent = desc;
+        } else {
+            serviceTv.style.display = 'none';
+        }
+
+        tariffPrice.textContent = `${tariffData.tariffPrice || 0} ₽/мес`;
+        tariffIdInput.value = tariffData.tariffId || "";
+    }
+
+    // Загрузка сохранённого тарифа
+    const savedTariff = localStorage.getItem("selectedTariff");
+    if (savedTariff) {
+        try {
+            const tariffData = JSON.parse(savedTariff);
+            updateTariffDisplay(tariffData);
+        } catch (e) {
+            console.error("Ошибка парсинга savedTariff:", e);
+        }
+    }
+
+    // Делегирование событий для кнопок тарифов
+    document.addEventListener("click", function (e) {
+        const button = e.target.closest(".connect-btn");
+        if (button) {
+            e.preventDefault();
+            console.log("Клик по connect-btn:", button.dataset);
+            const tariffData = {
+                tariffId: button.dataset.tariffId,
+                tariffName: button.dataset.tariffName,
+                tariffPrice: parseInt(button.dataset.tariffPrice) || 0,
+                tariffSpeed: button.dataset.tariffSpeed || '',
+                tariffChannels: button.dataset.tariffChannels || '',
+                tariffHdChannels: button.dataset.tariffHdChannels || ''
+            };
+            try {
+                localStorage.setItem("selectedTariff", JSON.stringify(tariffData));
+                updateTariffDisplay(tariffData);
+                tariffBlock.scrollIntoView({ behavior: "smooth" });
+            } catch (e) {
+                console.error("Ошибка сохранения тарифа:", e);
+            }
+        }
+    });
+
+    // AJAX для формы
+    const form = document.getElementById('connect-form-submit');
+    const modal = document.getElementById('connect-form-modal');
+    const modalCloseBtn = document.getElementById('connect-form-modal-close');
+    const modalCloseSpan = document.querySelector('.connect-form__modal-close');
+
+    if (!form) {
+        console.error("Форма не найдена");
+        return;
+    }
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        console.log("Отправка формы");
+        const formData = new FormData(form);
+        if (phoneMask) {
+            formData.set('phone', phoneMask.unmaskedValue ? `+7${phoneMask.unmaskedValue}` : '');
+        }
+
+        // Очистка предыдущих ошибок
+        document.querySelectorAll('.connect-form__error').forEach(el => el.textContent = '');
+
+        const submitBtn = form.querySelector('.connect-form__submit');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Отправка...';
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value,
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP ошибка: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log("Ответ сервера:", data);
+            if (data.success) {
+                form.reset();
+                if (phoneMask) phoneMask.updateValue();
+                tariffInfo.style.display = 'none';
+                localStorage.removeItem('selectedTariff');
+                modal.classList.add('is-visible'); // Показ через класс
+            } else {
+                if (data.errors) {
+                    for (const [field, errors] of Object.entries(data.errors)) {
+                        const errorDiv = document.getElementById(`error_${field}`);
+                        if (errorDiv) {
+                            errorDiv.textContent = errors.join(', ');
+                        }
+                    }
+                }
+                if (data.non_field_errors) {
+                    document.getElementById('error_non_field').textContent = data.non_field_errors.join(', ');
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка AJAX:', error);
+            document.getElementById('error_non_field').textContent = 'Ошибка сервера. Попробуйте позже.';
+        })
+        .finally(() => {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Отправить заявку';
+        });
+    });
+
+    // Закрытие модального окна
+    if (modal) {
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => modal.classList.remove('is-visible'));
+        }
+        if (modalCloseSpan) {
+            modalCloseSpan.addEventListener('click', () => modal.classList.remove('is-visible'));
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('is-visible');
+            }
+        });
+    }
+
+    // Валидация в реальном времени
+    const inputs = form.querySelectorAll('.connect-form__input');
+    inputs.forEach(input => {
+        input.addEventListener('input', () => {
+            const errorDiv = document.getElementById(`error_${input.name}`);
+            if (errorDiv) errorDiv.textContent = '';
+        });
+    });
+});
+</script>
+
+<style>
+/* Дополнительный CSS для модального окна */
+.connect-form__modal {
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.3s, opacity 0.3s ease;
+}
+.connect-form__modal.is-visible {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s linear, opacity 0.3s ease;
+}
+</style>

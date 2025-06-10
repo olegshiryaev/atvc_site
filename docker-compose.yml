@@ -12,6 +12,7 @@ services:
         ports:
             - "8000:8000"
         container_name: django
+        restart: unless-stopped
         env_file:
             - docker/env/.env.prod
         volumes:
@@ -58,6 +59,7 @@ services:
     redis:
         image: redis:alpine
         container_name: redis
+        restart: always
         env_file:
             - docker/env/.env.prod
         expose:
@@ -81,6 +83,7 @@ services:
     celery-beat:
         build: .
         container_name: celery-beat
+        restart: unless-stopped
         env_file:
             - docker/env/.env.prod
         depends_on:
@@ -93,6 +96,7 @@ services:
     certbot:
         image: certbot/certbot
         container_name: certbot
+        restart: unless-stopped
         volumes:
             - ./docker/certbot/conf:/etc/letsencrypt:rw
             - ./docker/certbot/www:/var/www/certbot:rw

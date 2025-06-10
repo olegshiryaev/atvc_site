@@ -865,51 +865,30 @@ a[href]:hover:not(.btn) {
     transition: all 0.2s ease-in-out;
 }
 
-/* Общий класс для приглушенного текста */
-.tariff-label-muted {
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--color-text-muted);
-}
-
 /* Карточки тарифов */
 .tariff-card {
     background-color: var(--color-white);
     position: relative;
     display: flex;
     justify-content: space-between;
-    flex-flow: column nowrap;
+    flex-direction: column;
     height: 100%;
     min-height: 493px;
     width: 100%;
+    padding: 20px;
     border: 1px solid var(--smoky-white-color);
-    border-radius: var(--radius-sm);
+    border-radius: 15px;
     box-shadow: var(--shadow-card);
-    flex: 1 1 auto;
     overflow: hidden;
-    transition: all 0.3s linear;
 }
 
-.tariff-card .card-body > *:not(:last-child) {
-    margin-bottom: 1.25rem;
-}
-
-.tariff-card .card-footer {
-    background-color: var(--color-white); /* Белый фон для футера карточки */
-}
-
-.tariff-divider {
-    border: 0;
-    border-top: 1px solid #e5e5e5;
-    margin: 0;
-}
-
+/* === Заголовок и описание тарифа === */
 .tariff__title {
-    font-size: 23px;
+    font-size: 1.4rem;
     font-weight: 600;
     line-height: 32px;
     letter-spacing: -0.16px;
-    margin-bottom: 8px;
+    margin-bottom: 0.5rem;
 }
 
 .tariff-name-link {
@@ -918,102 +897,80 @@ a[href]:hover:not(.btn) {
 }
 
 .tariff-name-link:hover {
-    color: var(--color-navy-blue);
-}
-
-.tariff-speed {
-    display: flex;
-    align-items: baseline;
-}
-
-.speed-value {
-    font-size: 2rem;
-    font-weight: 500;
-    line-height: 1;
-}
-
-.speed-unit {
-    margin-left: 0.25rem;
-}
-.speed-unit.tariff-label-muted {
+    color: var(--main-color-on-hover);
 }
 
 /* Тариф — описание */
 .tariff__desc {
     color: #666;
-    font-size: 14px;
+    font-size: 0.9rem;
     font-weight: 400;
     line-height: 20px;
     letter-spacing: 0.052px;
-    min-height: 50px;
-    padding-bottom: 20px;
+    margin-bottom: 1rem;
 }
 
-.tariff-channels {
-    display: flex;
-    align-items: flex-start;
+/* === Атрибуты тарифа (например, "Интернет", "Телевидение") === */
+.tariff-card-plan-attr {
+    margin-bottom: 20px;
 }
 
-.channel-count {
-    font-size: 2rem;
-    font-weight: 500;
-    line-height: 1;
+.tariff-card-attr-name {
+    font-size: 0.875rem;
+    color: #989898;
+    display: block;
 }
 
-.channel-label {
-    margin-top: 0.2rem;
-}
-.channel-label.tariff-label-muted {
+.tariff-card-attr-value {
+    font-size: 1.25rem;
+    line-height: 1.2;
 }
 
-.tariff-channels-btn {
-    font-size: var(--font-size-xs);
-    font-weight: 500; /* fw-medium */
-    padding: var(--spacing-xs) var(--spacing-sm);
-    border-radius: var(--radius-sm);
-    transition: var(--transition-normal);
+/* === Футер карточки (цена, кнопка, ссылка) === */
+.tariff-card-footer {
+    border-top: 1px solid #eee; /* Разделитель сверху */
+    margin-top: auto;
+}
+
+.tariff-card-price {
+    display: flex; /* Цена и валюта рядом */
+    align-items: baseline; /* По базовой линии */
+    margin-bottom: 1rem; /* Отступ снизу */
 }
 
 .tariff-price {
-    display: flex;
-    align-items: baseline;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.6rem;
+    font-weight: 500;
 }
 
-.price-value {
-    font-size: 2rem; /* Bootstrap fs-1 */
-    font-weight: 500; /* fw-medium */
-    line-height: 1; /* lh-1 */
+.connect-btn {
+    display: inline-block;
+    white-space: nowrap;
+    text-align: center;
+    width: 100%; /* Ширина на весь блок */
+    padding: 0.75rem; /* Внутренний отступ */
+    font-size: 1rem; /* Размер текста */
+    font-weight: 500; /* Полужирный шрифт */
+    background-color: var(--main-color); /* Основной цвет кнопки */
+    color: var(--color-white); /* Белый текст */
+    border: none; /* Без границ */
+    border-radius: var(--radius-sm); /* Закруглённые углы */
+    cursor: pointer; /* Курсор указатель */
+    transition: background-color 0.3s ease; /* Плавный переход */
 }
 
-.price-unit {
-    margin-left: 0.25rem;
+.connect-btn:hover {
+    background-color: var(--main-color-on-hover);
 }
 
-.price-unit.tariff-label-muted {
-}
-
-.tariff-connect-btn {
-    font-size: 1.25rem; /* Bootstrap fs-4 */
-    font-weight: 400; /* fw-normal */
-    line-height: 1.55;
-    padding: 0.5rem;
-}
-
-.tariff-details a {
-    font-size: 1rem;
-    font-weight: 400;
-    color: #9ea0a1;
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.tariff-details a:hover {
-    color: var(--color-navy-blue);
-    opacity: 1;
-}
-
-.tariff-swiper-wrapper {
-    position: relative;
+.tariff-card-more-info-warp a {
+    display: block; /* Блочный элемент */
+    text-align: center; /* Центрирование */
+    font-size: 0.9rem; /* Меньший размер шрифта */
+    color: var(--color-text-muted);
+    text-decoration: none; /* Без подчеркивания */
+    margin-top: 1rem; /* Отступ сверху */
 }
 
 .channels-btn {
@@ -1042,359 +999,23 @@ a[href]:hover:not(.btn) {
     box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
 }
 
-/* Адаптивность для маленьких экранов */
-@media (max-width: 576px) {
-    .channels-btn {
-        padding: 6px 12px;
-        font-size: 12px;
-    }
+.tariff-empty {
+    display: flex; /* Центрируем содержимое */
+    justify-content: center; /* По центру по горизонтали */
+    align-items: center; /* По центру по вертикали */
+    height: 100%; /* На всю высоту */
+    font-size: 1.25rem; /* Размер текста */
+    color: var(--color-text-muted); /* Приглушенный цвет */
 }
 
-/* Постоянная высота карточек */
-.row-cols-1 > .col,
-.row-cols-sm-2 > .col,
-.row-cols-lg-3 > .col,
-.row-cols-xl-4 > .col {
-    display: flex; /* Для одинаковой высоты */
-}
-
-/* Убираем старую анимацию, чтобы не конфликтовала */
-.fade-in-up {
-    animation: none !important;
+.tariff-swiper-wrapper {
+    position: relative;
 }
 
 /* Адаптивность */
 @media (max-width: 575.98px) {
     .scrollable-buttons {
         justify-content: start; /* Слева на мобильных */
-    }
-}
-
-.tariff-inform {
-    color: #2d2d2d;
-    font-family: Raleway, Arial, sans-serif;
-}
-
-.tariff-inform__wrapper {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
-    padding: 28px;
-    border-radius: 15px;
-    background: #fff;
-    height: 100%;
-    width: 100%;
-    transition: all 0.3s linear;
-}
-
-.tariff-inform__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 28px;
-    padding-bottom: 20px;
-    border-image: url()
-        2 stretch;
-    border-image-width: 0 0 3px 0;
-    gap: 10px;
-}
-
-.tariff-inform__title {
-    font-size: 24px;
-    font-weight: 700;
-    line-height: 120%;
-    letter-spacing: -0.072px;
-}
-
-.tariff-inform__change {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 150%;
-    letter-spacing: 0.28px;
-    color: var(--main-color);
-}
-
-.tariff-inform__change:hover {
-    color: var(--main-color-on-hover);
-}
-
-.tariff-inform__desc {
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 20px;
-    letter-spacing: 0.052px;
-    margin-bottom: 20px;
-    border-image: url()
-        17 stretch;
-    border-image-width: 0 0 1px 0;
-    padding-bottom: 20px;
-}
-
-.tariff-inform__desc p {
-    margin: 0;
-}
-
-.tariff-inform__service:not(:last-child) {
-    margin-bottom: 20px;
-    padding-bottom: 17px;
-    border-image: url()
-        2 stretch;
-    border-image-width: 0 0 3px 0;
-}
-
-.tariff-inform .option {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.tariff-inform .option:not(:last-child) {
-    margin-bottom: 32px;
-}
-
-.tariff-inform .option__wrap {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: 1fr min-content;
-    align-items: center;
-    grid-gap: 0 10px;
-}
-
-.tariff-inform .option__icon {
-    grid-row: span 2;
-    width: 24px;
-    min-width: 24px;
-    height: 24px;
-    min-height: 24px;
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-}
-
-.tariff-inform .option__icon_speed {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_tv_basic,
-.tariff-inform .option__icon_televidenie {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_tv_advanced {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_tv_movie,
-.tariff-inform .option__icon_tv_anime,
-.tariff-inform .option__icon_tv_match {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_equipment_count {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_archive_time {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_count_numbers {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_count_lines {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_minutes-limit {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_minutes-over-limit-price {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_minutes-price {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_abonent-line {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_quality,
-.tariff-inform .option__icon_is_fullhd {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_rec_sound {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_other_num {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_phone_detect {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_phone_redirect {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_routery {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_stb {
-    background-image: url();
-}
-
-.tariff-inform .option__icon_camera,
-.tariff-inform .option__icon_videonablyudenie {
-    background-image: url();
-}
-
-.tariff-inform .option__label {
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 18px;
-}
-
-.tariff-inform .option__desc {
-    color: #989898;
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 18px;
-}
-
-.tariff-inform .option__price {
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.tariff-inform .option__price:not(:last-child) {
-    color: var(--main-color);
-}
-
-.tariff-inform .option__price-wrap {
-    text-align: right;
-}
-
-.tariff-inform .option__price-old {
-    margin-top: 4px;
-    font-size: 14px;
-    color: #989898;
-    text-decoration: line-through;
-}
-
-.tariff-inform .packs-options__desc,
-.tariff-inform .additional_options__desc {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 36px;
-}
-
-.tariff-inform .packs-options__desc:last-child,
-.tariff-inform .additional_options__desc:last-child {
-    margin-bottom: 0;
-}
-
-.tariff-inform .packs-options__desc-icon,
-.tariff-inform .additional_options__desc-icon {
-    width: 20px;
-    height: 20px;
-    min-width: 20px;
-    min-height: 20px;
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-}
-
-.tariff-inform .packs-options__desc-text,
-.tariff-inform .additional_options__desc-text {
-    font-weight: 600;
-}
-
-.tariff-inform .packs-options__desc-price,
-.tariff-inform .additional_options__desc-price {
-    margin-left: auto;
-    font-weight: 700;
-}
-
-.tariff-inform .prices {
-    display: flex;
-    gap: 10px;
-    margin-top: 26px;
-    padding-top: 26px;
-    align-items: center;
-    justify-content: space-between;
-    border-image: url()
-        2 stretch;
-    border-image-width: 3px 0 0 0;
-}
-
-.tariff-inform .prices__label {
-    font-size: 18px;
-    font-weight: 500;
-}
-
-.tariff-inform .prices__price {
-    font-size: 36px;
-    font-weight: 700;
-    line-height: 18px;
-    color: var(--main-color);
-}
-
-.tariff-inform .prices-wrap {
-    margin-left: auto;
-    text-align: right;
-}
-
-.tariff-inform .prices__price-old {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 18px;
-    text-decoration: line-through;
-    color: #989898;
-    margin-top: 6px;
-}
-
-.tariff-inform__under-text {
-    margin-top: 23px;
-    text-align: right;
-    font-size: 14px;
-}
-
-@media (max-width: 992px) {
-    .tariff-inform .prices__price {
-        font-size: 32px;
-    }
-}
-
-@media (max-width: 500px) {
-    .tariff-inform__title {
-        font-size: 20px;
-    }
-
-    .tariff-inform .prices {
-        margin-top: 17px;
-        flex-wrap: wrap;
-    }
-
-    .tariff-inform .option {
-        gap: 8px;
-    }
-
-    .tariff-inform .option:not(:last-child) {
-        margin-bottom: 26px;
-    }
-
-    .tariff-inform__under-text {
-        margin-top: 10px;
     }
 }
 
@@ -4851,7 +4472,8 @@ button.swiper-pagination-bullet {
     flex: 0 0 auto;
 }
 
-.form-main-block__wrapper {
+/* Контейнер формы подключения */
+.connect-form__wrapper {
     display: grid;
     grid-template-columns: 1.52fr 1fr;
     grid-template-rows: max-content 1fr;
@@ -4861,53 +4483,90 @@ button.swiper-pagination-bullet {
     padding: 70px 56px;
 }
 
-.form-main-block__title {
+.connect-form__title {
     margin-bottom: 9px;
 }
 
-.form-main-block__subtitle {
+.connect-form__subtitle {
     max-width: 550px;
     line-height: 150%;
     letter-spacing: 0.6px;
 }
 
-.form-main-block__form {
+.connect-form__form {
     position: relative;
 }
 
-.form-main-block .form__wrapper {
+.connect-form__fields {
     display: flex;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
     flex-wrap: wrap;
+    gap: 10px;
 }
 
-.form-main-block .form__item {
+.connect-form__field {
     width: 100%;
 }
 
-.form-main-block .form__item-label {
+.connect-form__label {
     font-size: 14px;
     font-weight: 400;
     display: block;
     margin-bottom: 10px;
 }
 
-.form-main-block .form__item_phone,
-.form-main-block .form__item_name {
+.connect-form__input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.connect-form__input:focus {
+    border-color: var(--main-color);
+    outline: none;
+}
+
+.connect-form__error {
+    color: #ff0000;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.connect-form__field_name,
+.connect-form__field_phone {
     width: calc(50% - 10px);
 }
 
-.form-main-block .form__item_btn {
-    width: 290px;
+.connect-form__field_street {
+    width: calc(50% - 10px);
 }
 
-.form-main-block .form__policy {
+.connect-form__field_house,
+.connect-form__field_apartment {
+    width: calc(25% - 10px);
+}
+
+.connect-form__submit {
+    width: 290px;
+    background: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.connect-form__submit:hover {
+    background: var(--main-color-on-hover);
+}
+
+.connect-form__policy {
     font-size: 14px;
     line-height: 200%;
 }
 
-.form-main-block__tariff {
+.connect-form__tariff {
     grid-row: 1/3;
     grid-column: 2/2;
     background-repeat: no-repeat;
@@ -4915,166 +4574,332 @@ button.swiper-pagination-bullet {
     background-size: contain;
 }
 
-.form-main-block_style-mesh .form-main-block__wrapper {
-    grid-template-columns: 1fr 510px;
-    gap: 140px;
-    align-items: center;
+/* Блок информации о тарифе */
+.connect-form__tariff-info {
+    color: #2d2d2d;
+    font-family: Raleway, Arial, sans-serif;
 }
 
-.form-main-block_style-mesh .form__wrapper {
-    row-gap: 15px;
-    align-items: center;
-}
-
-.form-main-block_style-mesh .form__item {
+.connect-form__tariff-info-wrapper {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    padding: 28px;
+    border-radius: 15px;
+    background: #fff;
+    height: 100%;
     width: 100%;
+    transition: all 0.3s linear;
 }
 
-.form-main-block_style-mesh .form__item_btn {
-    width: 215px;
+.connect-form__tariff-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    padding-bottom: 20px;
+    gap: 10px;
+}
+
+.connect-form__tariff-title {
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 120%;
+    letter-spacing: -0.072px;
+}
+
+.connect-form__tariff-change {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 150%;
+    letter-spacing: 0.28px;
+    color: var(--main-color);
+}
+
+.connect-form__tariff-change:hover {
+    color: var(--main-color-on-hover);
+}
+
+.connect-form__tariff-service:not(:last-child) {
+    padding-bottom: 17px;
+}
+
+.connect-form__tariff-service .d-flex {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.connect-form__tariff-service .mb-1 {
+    margin-bottom: 4px;
+}
+
+.connect-form__tariff-service .option__icon {
+    width: 24px;
+    min-width: 24px;
+    height: 24px;
+    min-height: 24px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.connect-form__tariff-service .option__desc {
+    color: #989898;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+}
+
+.connect-form__tariff-service .option__label {
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.connect-form__tariff-prices {
+    display: flex;
+    gap: 10px;
+    margin-top: 26px;
+    padding-top: 26px;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.connect-form__tariff-prices .prices__label {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.connect-form__tariff-prices .prices__price {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 18px;
+    color: var(--main-color);
+}
+
+.connect-form__tariff-prices .prices-wrap {
+    margin-left: auto;
+    text-align: right;
+}
+
+/* Модальное окно */
+.connect-form__modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.3s, opacity 0.3s ease;
+}
+
+.connect-form__modal.is-visible {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s linear, opacity 0.3s ease;
+}
+
+.connect-form__modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.connect-form__modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #2d2d2d;
+}
+
+.connect-form__modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+}
+
+.connect-form__modal-text {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+.connect-form__modal-btn {
+    width: 200px;
     background: var(--main-color);
-    height: max-content;
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-.form-main-block_style-mesh .form__item_btn:hover {
+.connect-form__modal-btn:hover {
     background: var(--main-color-on-hover);
 }
 
-.form-main-block_style-mesh .form__policy {
-    width: calc(100% - 240px);
-}
-
-@media (max-width: 1300px) {
-    .form-main-block_style-mesh .form__item_btn {
-        width: 100%;
-    }
-
-    .form-main-block_style-mesh .form__policy {
-        width: 100%;
-    }
-
-    .form-main-block_style-mesh .form-main-block__wrapper {
-        grid-template-columns: 1fr 434px;
-        gap: 50px;
-        padding: 56px 40px;
-    }
-}
-
+/* Медиа-запросы */
 @media (max-width: 1200px) {
-    .form-main-block__wrapper {
+    .connect-form__wrapper {
         padding: 70px 33px;
         grid-template-columns: 1fr 1.15fr;
         grid-column-gap: 30px;
     }
 
-    .form-main-block .form__wrapper {
+    .connect-form__fields {
         gap: 25px;
     }
 
-    .form-main-block .form__item_name,
-    .form-main-block .form__item_phone {
+    .connect-form__field_name,
+    .connect-form__field_phone,
+    .connect-form__field_street,
+    .connect-form__field_house,
+    .connect-form__field_apartment {
         width: 100%;
-    }
-
-    .form-main-block .form__policy {
-        line-height: 160%;
     }
 }
 
 @media (max-width: 992px) {
-    .form-main-block__wrapper {
+    .connect-form__wrapper {
         grid-template-columns: 1fr 1fr;
         grid-gap: 20px;
     }
 
-    .form-main-block .form__wrapper {
-        gap: 20px;
+    .connect-form__fields {
+        gap: 10px;
     }
 
-    .form-main-block_style-mesh .form__policy {
-        order: initial;
-    }
-
-    .form-main-block_style-mesh .form-main-block__wrapper {
-        padding: 56px 15px;
+    .connect-form__tariff-prices .prices__price {
+        font-size: 32px;
     }
 }
 
 @media (max-width: 900px) {
-    .form-main-block__subtitle {
+    .connect-form__subtitle {
         max-width: 100%;
     }
 
-    .form-main-block__wrapper {
+    .connect-form__wrapper {
         display: flex;
         flex-direction: column;
         align-items: center;
     }
 
-    .form-main-block__wrapper > * {
+    .connect-form__wrapper > * {
         max-width: 668px;
         width: 100%;
     }
 
-    .form-main-block .form__item_name,
-    .form-main-block .form__item_phone {
+    .connect-form__field_name,
+    .connect-form__field_phone {
         width: calc(50% - 10px);
     }
 
-    .form-main-block__form {
+    .connect-form__field_street {
+        width: calc(50% - 10px);
+    }
+
+    .connect-form__field_house,
+    .connect-form__field_apartment {
+        width: calc(25% - 10px);
+    }
+
+    .connect-form__form {
         order: 1;
     }
 
-    .form-main-block__tariff {
+    .connect-form__tariff {
         align-items: center;
-        background: 0 0;
+        background: none;
     }
 
-    .form-main-block__tariff.loading {
+    .connect-form__tariff.loading {
         padding: 60px 0;
     }
 }
 
 @media (max-width: 576px) {
-    .form-main-block__wrapper {
-        padding: 3px 30px;
+    .connect-form__wrapper {
+        padding: 33px 30px;
         gap: 33px;
     }
 
-    .form-main-block__form {
+    .connect-form__form {
         padding: 27px 0;
         margin-bottom: -5px;
     }
 
-    .form-main-block .form__wrapper {
+    .connect-form__fields {
         gap: 23px;
     }
 
-    .form-main-block .form__item_name,
-    .form-main-block .form__item_phone {
+    .connect-form__field_name,
+    .connect-form__field_phone,
+    .connect-form__field_street,
+    .connect-form__field_house,
+    .connect-form__field_apartment {
         width: 100%;
+    }
+
+    .connect-form__modal-content {
+        padding: 20px;
+    }
+
+    .connect-form__modal-title {
+        font-size: 20px;
+    }
+
+    .connect-form__modal-text {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 500px) {
+    .connect-form__tariff-title {
+        font-size: 20px;
+    }
+
+    .connect-form__tariff-prices {
+        margin-top: 17px;
+        flex-wrap: wrap;
     }
 }
 
 @media (max-width: 450px) {
-    .form-main-block {
+    .connect-form {
         width: 100vw;
         margin-left: -16px;
     }
 
-    .form-main-block__subtitle {
+    .connect-form__subtitle {
         font-size: 14px;
     }
 
-    .form-main-block__wrapper {
+    .connect-form__wrapper {
         padding: 40px 16px;
     }
 
-    .form-main-block__form {
+    .connect-form__form {
         padding: 0;
     }
 
-    .form-main-block .form__item {
+    .connect-form__field {
         width: 100%;
     }
 }

@@ -38,7 +38,10 @@ class Office(models.Model):
         max_length=20, verbose_name="Телефон для подключения", blank=True, null=True
     )
     tech_support_phone = models.CharField(
-        max_length=20, verbose_name="Телефон технической поддержки", blank=True, null=True
+        max_length=20,
+        verbose_name="Телефон технической поддержки",
+        blank=True,
+        null=True,
     )
     tech_support_email = models.EmailField(
         verbose_name="Email технической поддержки", blank=True, null=True
@@ -652,10 +655,13 @@ class Order(models.Model):
     locality = models.ForeignKey(
         Locality,
         on_delete=models.CASCADE,
-        verbose_name="Населенный пункт",
+        blank=True,
         null=True,
+        verbose_name="Населенный пункт",
     )
-    tariff = models.ForeignKey(Tariff, on_delete=models.CASCADE, verbose_name="Тариф")
+    tariff = models.ForeignKey(
+        Tariff, on_delete=models.SET_NULL, verbose_name="Тариф", null=True, blank=True
+    )
     equipment = models.ManyToManyField(
         "Equipment", blank=True, verbose_name="Оборудование"
     )
@@ -667,16 +673,22 @@ class Order(models.Model):
     )
     full_name = models.CharField("ФИО", max_length=255)
     phone = models.CharField("Телефон", max_length=20)
-    email = models.EmailField(blank=True, null=True)
-    street = models.CharField("Улица", max_length=255)
-    house = models.CharField("Дом", max_length=20)
+    email = models.EmailField("Email", blank=True, null=True)
+    street = models.CharField("Улица", max_length=255, blank=True, null=True)
+    house = models.CharField("Дом", max_length=20, blank=True, null=True)
     apartment = models.CharField("Квартира", max_length=10, blank=True, null=True)
     comment = models.TextField("Комментарий", blank=True, null=True)
     status = models.CharField(
         "Статус", max_length=20, choices=STATUS_CHOICES, default="new"
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name="Дата создания",
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Дата обновления",
+    )
 
     def total_equipment_cost(self):
         return sum(eq.price for eq in self.equipment.all())
@@ -703,7 +715,8 @@ class Order(models.Model):
         verbose_name_plural = "Заявки"
 
     def __str__(self):
-        return f"Заявка от {self.full_name} на тариф {self.tariff.name}"
+        tariff_name = self.tariff.name if self.tariff else "без тарифа"
+        return f"Заявка от {self.full_name} на тариф {tariff_name}"
 
 
 class StaticPage(models.Model):
@@ -717,5 +730,3 @@ class StaticPage(models.Model):
 
     def __str__(self):
         return self.title
-
-
