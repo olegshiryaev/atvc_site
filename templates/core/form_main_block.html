@@ -188,7 +188,16 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 localStorage.setItem("selectedTariff", JSON.stringify(tariffData));
                 updateTariffDisplay(tariffData);
-                tariffBlock.scrollIntoView({ behavior: "smooth" });
+                // Прокрутка к началу секции connect-form с отступом
+                const connectForm = document.querySelector("#connect-form");
+                if (connectForm) {
+                    const offset = 100;
+                    const elementPosition = connectForm.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({
+                        top: elementPosition - offset,
+                        behavior: "smooth"
+                    });
+                }
             } catch (e) {
                 console.error("Ошибка сохранения тарифа:", e);
             }
