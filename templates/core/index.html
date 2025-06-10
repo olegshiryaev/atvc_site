@@ -59,30 +59,7 @@
         {% endif %}
 
         <!-- Блок услуг -->
-        <section id="available-services" class="available-services-block block">
-            <h2 class="available-services-block__title block__title">
-                Услуги АТК, которые можно подключить в {{ locality.name_prepositional }}
-            </h2>
-            <div class="available-services-block__wrapper">
-                {% for service in available_services %}
-                    <div class="service-card__item item"
-                        {% if service.background_image %}
-                            style="background-image: url('{{ service.background_image.url|default_if_none:'' }}');"
-                        {% endif %}>
-                        <div class="service-card__content">
-                            <h3 class="service-card__title">{{ service.name }}</h3>
-                            <p class="service-card__subtitle">{{ service.description|default:""|truncatewords:20 }}</p>
-                            <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}"
-                                class="service-card__btn btn"
-                                role="button"
-                                aria-label="Подробнее об услуге {{ service.name }}">
-                                Подробнее
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </section>
+        {% include 'core/available_services.html' %}
         
         <!-- Блок тарифов -->
         <section id="tarifs" class="tariffs-block block">
@@ -550,5 +527,34 @@ document.addEventListener('DOMContentLoaded', function () {
         initChannelSearch();
         document.addEventListener('htmx:afterSwap', initChannelSearch);
     });
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    function initSwiper() {
+        if (window.innerWidth <= 600) {
+            new Swiper('.available-services-block__wrapper_slider .swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.available-services-block__navs .slider-navs__next',
+                    prevEl: '.available-services-block__navs .slider-navs__prev',
+                },
+                pagination: {
+                    el: '.available-services-block__navs .slider-navs__pag',
+                    clickable: true,
+                    bulletClass: 'swiper-pagination-bullet',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
+                },
+                autoplay: {
+                    delay: 5000,
+                    disableOnInteraction: false,
+                },
+            });
+        }
+    }
+
+    initSwiper();
+    window.addEventListener('resize', initSwiper);
+});
 </script>
 {% endblock %}
