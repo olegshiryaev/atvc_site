@@ -100,7 +100,9 @@ class Service(models.Model):
     localities = models.ManyToManyField(
         Locality, related_name="services", verbose_name="Населённые пункты", blank=True
     )
-    background_image = models.ImageField("Изображение", upload_to='services/', blank=True, null=True)
+    background_image = models.ImageField(
+        "Изображение", upload_to="services/", blank=True, null=True
+    )
     is_active = models.BooleanField("Активна", default=True)
 
     class Meta:
@@ -716,7 +718,7 @@ class Order(models.Model):
         verbose_name_plural = "Заявки"
 
     def __str__(self):
-        tariff_name = self.tariff.name if self.tariff else "без тарифа"
+        tariff_name = self.tariff.name if self.tariff else "не указан"
         return f"Заявка от {self.full_name} на тариф {tariff_name}"
 
 

@@ -8,7 +8,9 @@ from django.template.loader import render_to_string
 from collections import defaultdict
 from django.db.models import Count
 from django.contrib import messages
+import logging
 
+from apps.core.tasks import send_order_notification
 from apps.equipments.models import Product
 
 from .forms import (
@@ -35,6 +37,9 @@ from ..news.models import News
 from ..services.utils import get_client_ip
 from ..services.email import send_contact_email_message
 from django.core.mail import send_mail
+
+# Определение логгера
+logger = logging.getLogger(__name__)
 
 
 def index(request, locality_slug):
@@ -411,59 +416,52 @@ def static_page_view(request, slug, locality_slug):
     return render(request, "core/static_page.html", context)
 
 
+@require_POST
 def submit_order(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    if request.method == "POST":
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            tariff_id = form.cleaned_data.get("tariff_id")
-            tariff = None
-            if tariff_id:
-                try:
-                    tariff = Tariff.objects.get(
-                        id=tariff_id, localities=locality, is_active=True
-                    )
-                except Tariff.DoesNotExist:
-                    return JsonResponse(
-                        {
-                            "success": False,
-                            "errors": {
-                                "tariff_id": [
-                                    "Выбранный тариф недоступен для вашего региона."
-                                ]
-                            },
-                        },
-                        status=400,
-                    )
+    form = OrderForm(request.POST, locality=locality)
+    if form.is_valid():
+        order = form.save(commit=False)
+        order.locality = locality
+        tariff_id = form.cleaned_data.get("tariff_id")
+        if tariff_id:
+            order.tariff = Tariff.objects.get(id=tariff_id, is_active=True)
+        order.save()
+        logger.info(
+            f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'без тарифа'}"
+        )
 
-            order = form.save(commit=False)
-            order.locality = locality
-            order.tariff = tariff
-            order.save()
-            return JsonResponse(
-                {
-                    "success": True,
-                    "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
-                }
+        # Асинхронная отправка уведомления
+        try:
+            admin_url = request.build_absolute_uri(
+                f"/admin/core/order/{order.id}/change/"
             )
-        else:
-            errors = {
-                field: [str(e) for e in errors] for field, errors in form.errors.items()
+            send_order_notification.delay(order.id, admin_url)
+            logger.info(
+                f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь"
+            )
+        except Exception as e:
+            logger.error(
+                f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}"
+            )
+
+        return JsonResponse(
+            {
+                "success": True,
+                "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
             }
-            non_field_errors = [str(e) for e in form.non_field_errors()]
-            return JsonResponse(
-                {
-                    "success": False,
-                    "errors": errors,
-                    "non_field_errors": non_field_errors,
-                },
-                status=400,
-            )
+        )
     else:
-        form = OrderForm()
-
-    context = {
-        "form": form,
-        "locality": locality,
-    }
-    return render(request, "core/form_main_block.html", context)
+        errors = {
+            field: [str(e) for e in errors] for field, errors in form.errors.items()
+        }
+        non_field_errors = [str(e) for error in form.non_field_errors()]
+        logger.warning(f"Ошибка валидации формы: {form.errors}")
+        return JsonResponse(
+            {
+                "success": False,
+                "errors": errors,
+                "non_field_errors": non_field_errors,
+            },
+            status=400,
+        )

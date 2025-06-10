@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; }
+        h2 { color: #005555; }
+        .field { margin: 10px 0; }
+        .label { font-weight: bold; }
+        .link { color: #005555; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Новая заявка #{{ order.id }}</h2>
+        <div class="field">
+            <span class="label">Дата создания:</span> {{ order.created_at|date:"d.m.Y H:i" }}
+        </div>
+        <div class="field">
+            <span class="label">ФИО:</span> {{ order.full_name }}
+        </div>
+        <div class="field">
+            <span class="label">Телефон:</span> {{ order.phone }}
+        </div>
+        <div class="field">
+            <span class="label">Тариф:</span> {{ order.tariff.name|default:"Без тарифа" }}
+        </div>
+        <div class="field">
+            <span class="label">Адрес:</span> 
+            {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
+        </div>
+        <div class="field">
+            <span class="label">Населенный пункт:</span> {{ order.locality.name }}
+        </div>
+        <div class="field">
+            <span class="label">Статус:</span> {{ order.get_status_display }}
+        </div>
+        <div class="field">
+            <a class="link" href="{{ admin_url }}">Посмотреть в админ-панели</a>
+        </div>
+    </div>
+</body>
+</html>

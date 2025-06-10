@@ -87,3 +87,16 @@ services:
         volumes:
             - media:/app/media
             - ./:/app
+
+    flower:
+        build: .
+        container_name: flower
+        env_file:
+            - docker/env/.env.dev
+        depends_on:
+            - redis
+        command: celery -A config flower --port=5555 --loglevel=info --logfile=./docker/logs/flower.log
+        volumes:
+            - ./:/app
+        ports:
+            - "5555:5555"

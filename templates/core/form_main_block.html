@@ -14,31 +14,31 @@
                     <div class="connect-form__field connect-form__field_name">
                         <label for="id_full_name" class="connect-form__label">Имя *</label>
                         {{ form.full_name }}
-                        <div class="connect-form__error" id="error_full_name"></div>
+                        <div class="connect-form__error" id="error_full_name" role="alert"></div>
                     </div>
                     <!-- Телефон -->
                     <div class="connect-form__field connect-form__field_phone">
                         <label for="id_phone" class="connect-form__label">Номер телефона *</label>
                         {{ form.phone|add_class:"connect-form__input"|attr:"type:tel"|attr:"placeholder:+7 (___) ___-__-__" }}
-                        <div class="connect-form__error" id="error_phone"></div>
+                        <div class="connect-form__error" id="error_phone" role="alert"></div>
                     </div>
                     <!-- Улица -->
                     <div class="connect-form__field connect-form__field_street">
                         <label for="id_street" class="connect-form__label">Улица</label>
                         {{ form.street }}
-                        <div class="connect-form__error" id="error_street"></div>
+                        <div class="connect-form__error" id="error_street" role="alert"></div>
                     </div>
                     <!-- Дом -->
                     <div class="connect-form__field connect-form__field_house">
                         <label for="id_house" class="connect-form__label">Номер дома</label>
                         {{ form.house }}
-                        <div class="connect-form__error" id="error_house"></div>
+                        <div class="connect-form__error" id="error_house" role="alert"></div>
                     </div>
                     <!-- Квартира -->
                     <div class="connect-form__field connect-form__field_apartment">
                         <label for="id_apartment" class="connect-form__label">Квартира</label>
                         {{ form.apartment }}
-                        <div class="connect-form__error" id="error_apartment"></div>
+                        <div class="connect-form__error" id="error_apartment" role="alert"></div>
                     </div>
                     <!-- Согласие с политикой -->
                     <div class="connect-form__policy">
@@ -48,7 +48,7 @@
                     <!-- Кнопка отправки -->
                     <button class="connect-form__submit btn btn-submit" type="submit">Отправить заявку</button>
                 </div>
-                <div class="connect-form__error" id="error_non_field"></div>
+                <div class="connect-form__error" id="error_non_field" role="alert"></div>
             </form>
         </div>
         <div class="connect-form__tariff" data-tariff="" data-id="">
@@ -91,10 +91,10 @@
         </div>
     </div>
     <!-- Модальное окно -->
-    <div class="connect-form__modal" id="connect-form-modal">
+    <div class="connect-form__modal" id="connect-form-modal" role="dialog" aria-modal="true" aria-labelledby="connect-form-modal-title">
         <div class="connect-form__modal-content">
-            <span class="connect-form__modal-close">×</span>
-            <h3 class="connect-form__modal-title">Заявка отправлена!</h3>
+            <span class="connect-form__modal-close" role="button" aria-label="Закрыть модальное окно">×</span>
+            <h3 class="connect-form__modal-title" id="connect-form-modal-title">Заявка отправлена!</h3>
             <p class="connect-form__modal-text">Мы свяжемся с вами в течение часа для уточнения деталей.</p>
             <button class="connect-form__modal-btn btn btn-submit" id="connect-form-modal-close">Закрыть</button>
         </div>
@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const tariffTitle = document.getElementById('tariff-title');
     const serviceInet = document.getElementById('service-inet');
     const serviceTv = document.getElementById('service-tv');
-    const internetSpeed = document.getElementById('internet-speed');
+    const telInternetSpeed = document.getElementById('internet-speed');
     const tvChannels = document.getElementById('tv-channels');
     const tariffPrice = document.getElementById('tariff-price');
 
@@ -132,7 +132,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function updateTariffDisplay(tariffData) {
-        console.log("Обновление тарифа:", tariffData);
         tariffInfo.style.display = 'block';
         tariffInfo.dataset.tariffId = tariffData.tariffId || "";
         tariffInfo.dataset.tariffName = tariffData.tariffName || "";
@@ -140,7 +139,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (tariffData.tariffSpeed) {
             serviceInet.style.display = 'block';
-            internetSpeed.textContent = `${tariffData.tariffSpeed} Мбит/с`;
+            telInternetSpeed.textContent = `${tariffData.tariffSpeed} Мбит/с`;
         } else {
             serviceInet.style.display = 'none';
         }
@@ -176,7 +175,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const button = e.target.closest(".connect-btn");
         if (button) {
             e.preventDefault();
-            console.log("Клик по connect-btn:", button.dataset);
             const tariffData = {
                 tariffId: button.dataset.tariffId,
                 tariffName: button.dataset.tariffName,
@@ -188,7 +186,6 @@ document.addEventListener("DOMContentLoaded", function () {
             try {
                 localStorage.setItem("selectedTariff", JSON.stringify(tariffData));
                 updateTariffDisplay(tariffData);
-                // Прокрутка к началу секции connect-form с отступом
                 const connectForm = document.querySelector("#connect-form");
                 if (connectForm) {
                     const offset = 100;
@@ -215,16 +212,38 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
+    // Валидация перед отправкой
     form.addEventListener('submit', function (e) {
         e.preventDefault();
-        console.log("Отправка формы");
+        // Очистка предыдущих ошибок
+        document.querySelectorAll('.connect-form__error').forEach(el => {
+            el.textContent = '';
+            el.classList.remove('is-visible');
+        });
+
+        // Клиентская валидация
+        let hasErrors = false;
+        if (!form.full_name.value.trim()) {
+            document.getElementById('error_full_name').textContent = 'Введите ваше имя';
+            document.getElementById('error_full_name').classList.add('is-visible');
+            hasErrors = true;
+        }
+        if (!phoneMask || phoneMask.unmaskedValue.length !== 10) {
+            document.getElementById('error_phone').textContent = 'Введите полный номер телефона';
+            document.getElementById('error_phone').classList.add('is-visible');
+            hasErrors = true;
+        }
+
+        if (hasErrors) {
+            const firstErrorField = form.querySelector('.connect-form__error.is-visible').parentElement.querySelector('input');
+            if (firstErrorField) firstErrorField.focus();
+            return;
+        }
+
         const formData = new FormData(form);
         if (phoneMask) {
             formData.set('phone', phoneMask.unmaskedValue ? `+7${phoneMask.unmaskedValue}` : '');
         }
-
-        // Очистка предыдущих ошибок
-        document.querySelectorAll('.connect-form__error').forEach(el => el.textContent = '');
 
         const submitBtn = form.querySelector('.connect-form__submit');
         submitBtn.disabled = true;
@@ -241,35 +260,39 @@ document.addEventListener("DOMContentLoaded", function () {
         })
         .then(response => {
             if (!response.ok) {
-                throw new Error(`HTTP ошибка: ${response.status}`);
+                throw new Error(`Ошибка сервера: ${response.status}`);
             }
             return response.json();
         })
         .then(data => {
-            console.log("Ответ сервера:", data);
             if (data.success) {
                 form.reset();
                 if (phoneMask) phoneMask.updateValue();
                 tariffInfo.style.display = 'none';
                 localStorage.removeItem('selectedTariff');
-                modal.classList.add('is-visible'); // Показ через класс
+                modal.classList.add('is-visible');
             } else {
                 if (data.errors) {
                     for (const [field, errors] of Object.entries(data.errors)) {
                         const errorDiv = document.getElementById(`error_${field}`);
                         if (errorDiv) {
                             errorDiv.textContent = errors.join(', ');
+                            errorDiv.classList.add('is-visible');
                         }
                     }
                 }
                 if (data.non_field_errors) {
                     document.getElementById('error_non_field').textContent = data.non_field_errors.join(', ');
+                    document.getElementById('error_non_field').classList.add('is-visible');
                 }
+                const firstErrorField = form.querySelector('.connect-form__error.is-visible').parentElement.querySelector('input');
+                if (firstErrorField) firstErrorField.focus();
             }
         })
         .catch(error => {
             console.error('Ошибка AJAX:', error);
-            document.getElementById('error_non_field').textContent = 'Ошибка сервера. Попробуйте позже.';
+            document.getElementById('error_non_field').textContent = `Не удалось отправить заявку: ${error.message}. Попробуйте позже.`;
+            document.getElementById('error_non_field').classList.add('is-visible');
         })
         .finally(() => {
             submitBtn.disabled = false;
@@ -277,34 +300,85 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // Закрытие модального окна
-    if (modal) {
-        if (modalCloseBtn) {
-            modalCloseBtn.addEventListener('click', () => modal.classList.remove('is-visible'));
-        }
-        if (modalCloseSpan) {
-            modalCloseSpan.addEventListener('click', () => modal.classList.remove('is-visible'));
-        }
-        window.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.classList.remove('is-visible');
-            }
-        });
-    }
-
     // Валидация в реальном времени
     const inputs = form.querySelectorAll('.connect-form__input');
     inputs.forEach(input => {
         input.addEventListener('input', () => {
             const errorDiv = document.getElementById(`error_${input.name}`);
-            if (errorDiv) errorDiv.textContent = '';
+            if (errorDiv) {
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('is-visible');
+            }
+            // Проверка имени
+            if (input.name === 'full_name' && input.value.trim() && !/^[А-Яа-яA-Za-z\s]+$/.test(input.value)) {
+                errorDiv.textContent = 'Имя должно содержать только буквы и пробелы';
+                errorDiv.classList.add('is-visible');
+            }
+            // Проверка телефона
+            if (input.name === 'phone' && phoneMask && phoneMask.unmaskedValue.length === 10) {
+                errorDiv.textContent = '';
+                errorDiv.classList.remove('is-visible');
+            }
         });
     });
+
+    // Закрытие модального окна
+    if (modal) {
+        if (modalCloseBtn) {
+            modalCloseBtn.addEventListener('click', () => {
+                modal.classList.remove('is-visible');
+                form.reset();
+                if (phoneMask) phoneMask.updateValue();
+            });
+        }
+        if (modalCloseSpan) {
+            modalCloseSpan.addEventListener('click', () => {
+                modal.classList.remove('is-visible');
+                form.reset();
+                if (phoneMask) phoneMask.updateValue();
+            });
+        }
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('is-visible');
+                form.reset();
+                if (phoneMask) phoneMask.updateValue();
+            }
+        });
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modal.classList.contains('is-visible')) {
+                modal.classList.remove('is-visible');
+                form.reset();
+                if (phoneMask) phoneMask.updateValue();
+            }
+        });
+    }
 });
 </script>
 
 <style>
-/* Дополнительный CSS для модального окна */
+/* Стили для ошибок */
+.connect-form__error {
+    color: #d32f2f;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    opacity: 0;
+    height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, height 0.3s ease;
+}
+.connect-form__error.is-visible {
+    opacity: 1;
+    height: auto;
+    padding: 0.25rem 0;
+}
+
+/* Стили для полей с ошибками */
+.connect-form__field:has(.connect-form__error.is-visible) .connect-form__input {
+    border-color: #d32f2f;
+}
+
+/* Модальное окно */
 .connect-form__modal {
     visibility: hidden;
     opacity: 0;

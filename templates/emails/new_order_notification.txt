@@ -1,0 +1,5 @@
+Новая заявка #{{ order.id }}
+
+Дата создания: {{ order.created_at|date:"d.m.Y H:i" }} ФИО: {{ order.full_name }} Телефон: {{ order.phone }} Тариф: {{ order.tariff.name|default:"Без тарифа" }} Адрес: {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %} Населенный пункт: {{ order.locality.name }} Статус: {{ order.get_status_display }}
+
+Подробности в админ-панели: {{ admin_url }}
