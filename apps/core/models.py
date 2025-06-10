@@ -100,6 +100,7 @@ class Service(models.Model):
     localities = models.ManyToManyField(
         Locality, related_name="services", verbose_name="Населённые пункты", blank=True
     )
+    background_image = models.ImageField("Изображение", upload_to='services/', blank=True, null=True)
     is_active = models.BooleanField("Активна", default=True)
 
     class Meta:

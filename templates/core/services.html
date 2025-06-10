@@ -76,7 +76,7 @@
     <section id="contact-form" class="form2-block block  block_alignwide block_bgcolor" style="background-color:#f2f6f8" data-block-slug="form2-block" data-block-appearance="">
         <div class="form2-block__wrapper">
             <div class="form2-block__form form">
-                <h2 class="form2-block__title block__title">Подключиться просто!</h2>
+                <h2 class="form2-block__title block__title">Подключиться легко!</h2>
                 <div class="form2-block__subtitle">Укажите свои данные, чтобы мы могли связаться с вами для уточнения деталей!</div>                
                 <div class="wpcf7 js" id="wpcf7-f25366-o1" lang="ru-RU" dir="ltr">
                     <div class="screen-reader-response">
@@ -141,7 +141,7 @@
     {% if products.exists %}
     <section class="products-slider-block block block_alignwide" style="" data-block-slug="products-slider-block">
         <div class="products-slider-block__header">
-            <h2 class="products-slider-block__title block__title">Роутеры для стабильной связи дома</h2>
+            <h2 class="products-slider-block__title block__title">Оборудование для стабильного интернета</h2>
         </div>
         <div class="products-slider-block__wrapper">
             <div class="swiper">
@@ -153,7 +153,7 @@
                                 <div class="product-card__img-wrap">
                                     <img src="{{ product.get_main_image.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
                                 </div>
-                                <h6 class="product-card__title h6">Роутер Keenetic Speedster</h6>
+                                <h6 class="product-card__title h6">{{ product.name }}</h6>
                                 <div class="product-card__desc">{{ product.description|truncatewords:10 }}</div>
                                 <div class="product-card__bottom">
                                     <div class="product-card__price h5">{{ product.price }} ₽</div>

@@ -53,18 +53,10 @@ def index(request, locality_slug):
     for tariff in tariffs:
         grouped_tariffs[tariff.service].append(tariff)
 
-    # Список доступных услуг (сортированный)
-    available_services = (
-        Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
-        .distinct()
-        .order_by("name")
-    )
-
-    # Преобразуем defaultdict в обычный dict
-    grouped_dict = dict(grouped_tariffs)
-
-    # Определяем первую услугу для установки активного таба
-    first_service_slug = available_services[0].slug if available_services else ""
+    first_service_slug = ""
+    if grouped_tariffs:
+        # Берём первый service из grouped_tariffs для активного таба
+        first_service_slug = next(iter(grouped_tariffs)).slug
 
     latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
         "-created_at"
@@ -84,8 +76,7 @@ def index(request, locality_slug):
     form = OrderForm()
 
     context = {
-        "grouped_tariffs": grouped_dict,
-        "available_services": available_services,
+        "grouped_tariffs": dict(grouped_tariffs),
         "first_service_slug": first_service_slug,
         "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
         "locality": locality,

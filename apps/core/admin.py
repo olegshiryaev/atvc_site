@@ -61,6 +61,7 @@ class ServiceAdmin(admin.ModelAdmin):
     list_display = ("name", "slug", "is_active")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
+    list_filter = ['is_active']
 
 
 class CategoryWidget(widgets.Widget):
