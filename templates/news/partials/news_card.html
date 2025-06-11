@@ -1,5 +1,5 @@
-<a href="{{ news.get_absolute_url }}" class="news-card" aria-label="Читать новость: {{ news.title }}">
-    <div class="news-card__image">
+<a href="{{ news.get_absolute_url }}" class="news-card__item" aria-label="Читать новость: {{ news.title }}">
+    <div class="news-card__img">
         {% if news.image %}
             <img src="{{ news.image.url }}" alt="{{ news.title }}" loading="lazy">
         {% else %}
@@ -9,7 +9,7 @@
         {% endif %}
     </div>
     <div class="news-card__content">
-        <p class="news-card__date">{{ news.created_at|date:"j E" }}</p>
-        <h3 class="news-card__title">{{ news.title }}</h3>
+        <div class="news-card__date">{{ news.created_at|date:"d.m.y" }}</div>
+        <div class="news-card__title">{{ news.title }}</div>
     </div>
 </a>

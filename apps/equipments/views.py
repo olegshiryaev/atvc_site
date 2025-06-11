@@ -62,7 +62,7 @@ def equipment_list(request, locality_slug):
 
     # Хлебные крошки
     breadcrumbs = [
-        {"title": "Главная", "url": f"/{locality.slug}/"},
+        {"title": "Главная", "url": "core:home"},
         {"title": "Оборудование", "url": ""},
     ]
 

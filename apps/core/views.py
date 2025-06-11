@@ -377,7 +377,7 @@ def services(request, service_slug, locality_slug):
 
     # Формируем breadcrumbs
     breadcrumbs = [
-        {"title": "Главная", "url": f"/{locality.slug}/"},
+        {"title": "Главная", "url": "core:home"},
         {
             "title": f"Подключить {service.name.lower()} в {locality.name_prepositional}",
             "url": request.path,
@@ -428,7 +428,7 @@ def submit_order(request, locality_slug):
             order.tariff = Tariff.objects.get(id=tariff_id, is_active=True)
         order.save()
         logger.info(
-            f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'без тарифа'}"
+            f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'не указан'}"
         )
 
         # Асинхронная отправка уведомления

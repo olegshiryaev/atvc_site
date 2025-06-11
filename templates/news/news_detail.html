@@ -2,63 +2,52 @@
 {% load static %}
 
 {% block content %}
-<div class="bg-white w-100">
-    <div class="container">
-        {% include 'partials/page_header.html' with title=title %}
+<section class="news-detail-section">
+    <div class="bg-white w-100">
+        <div class="container">
+            {% include 'partials/page_header.html' with title=title %}
 
-        <!-- Контент новости -->
-        <article class="news-detail animate-fade-in">
-            <header class="mb-4">
-                <div class="d-flex align-items-center gap-2 text-muted fs-6 fw-medium mb-0">
-                    <span>{{ news.created_at|date:"d.m.Y" }}</span>
+            <!-- Контент новости -->
+            <article class="news-detail">
+                <div class="news-detail__row">
+                    <!-- Изображение -->
+                    <div class="news-detail__image">
+                        {% if news.image %}
+                            <img src="{{ news.image.url }}" alt="{{ news.title }}" loading="lazy">
+                        {% else %}
+                            <div class="news-detail__placeholder">Изображение отсутствует</div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Контент -->
+                    <div class="news-detail__content">
+                        <header class="news-detail__header">
+                            <time class="news-detail__date">{{ news.created_at|date:"d.m.Y" }}</time>
+                        </header>
+
+                        <div class="news-detail__body">
+                            {{ news.content|safe }}
+                        </div>
+
+                        <!-- Блок поделиться -->
+                        <div class="news-detail__share">
+                            <p class="news-detail__share-title">Поделиться:</p>
+                            <ul class="news-detail__share-list">
+                                <li class="news-detail__share-item">
+                                    <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ news.title }}" target="_blank">Telegram</a>
+                                </li>
+                                <li class="news-detail__share-item">
+                                    <a href="https://wa.me/?text={{ news.title }}%20{{ request.build_absolute_uri }}" target="_blank">WhatsApp</a>
+                                </li>
+                                <li class="news-detail__share-item">
+                                    <a href="https://vk.com/share.php?url={{ request.build_absolute_uri }}&title={{ news.title }}" target="_blank">VK</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
-            </header>
-
-            <div class="news-card__image">
-                {% if news.image %}
-                <img src="{{ news.image.url }}" 
-                    alt="{{ news.title }}" 
-                    loading="lazy">
-                {% else %}
-                <div class="news-card__placeholder">
-                    Изображение отсутствует
-                </div>
-                {% endif %}
-            </div>
-
-            <div class="news-content fs-base text-gray-800 lh-lg mb-5">
-                {{ news.content|safe }}
-            </div>
-
-            <!-- Кнопки "Поделиться" -->
-            <div class="share-buttons d-flex align-items-center gap-3 mb-5 animate-fade-in">
-                <span class="text-gray-700 fs-6 fw-medium">Поделиться:</span>
-                
-                <!-- Telegram -->
-                <a href="https://t.me/share/url?url= {{ request.build_absolute_uri|urlencode }}&text={{ news.title|urlencode }}" 
-                   target="_blank" 
-                   class="share-icon text-gray-500 hover-text-primary"
-                   aria-label="Поделиться в Telegram">
-                    <svg>...</svg>
-                </a>
-            
-                <!-- WhatsApp -->
-                <a href="https://api.whatsapp.com/send?text= {{ news.title|urlencode }}%20{{ request.build_absolute_uri|urlencode }}" 
-                   target="_blank" 
-                   class="share-icon text-gray-500 hover-text-primary"
-                   aria-label="Поделиться в WhatsApp">
-                    <svg>...</svg>
-                </a>
-            
-                <!-- VK -->
-                <a href="https://vk.com/share.php?url= {{ request.build_absolute_uri|urlencode }}&title={{ news.title|urlencode }}" 
-                   target="_blank" 
-                   class="share-icon text-gray-500 hover-text-primary"
-                   aria-label="Поделиться в VK">
-                    <svg>...</svg>
-                </a>
-            </div>
-        </article>
+            </article>
+        </div>
     </div>
-</div>
+</section>
 {% endblock %}

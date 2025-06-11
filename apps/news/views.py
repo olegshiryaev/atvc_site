@@ -39,7 +39,9 @@ def load_more_news(request, locality_slug):
     page = int(request.GET.get("page", 2))
     news_per_page = 3
 
-    news_list = News.objects.filter(localities=locality, is_published=True).order_by("-created_at")
+    news_list = News.objects.filter(localities=locality, is_published=True).order_by(
+        "-created_at"
+    )
 
     paginator = Paginator(news_list, news_per_page)
 
@@ -51,15 +53,11 @@ def load_more_news(request, locality_slug):
     # Рендерим список карточек новостей
     html = render_to_string(
         "news/partials/news_card_list.html",
-        {"news_list": page_obj,
-        "locality": locality},
-        request=request
+        {"news_list": page_obj, "locality": locality},
+        request=request,
     )
 
-    return JsonResponse({
-        "html": html,
-        "has_more_news": page_obj.has_next()
-    })
+    return JsonResponse({"html": html, "has_more_news": page_obj.has_next()})
 
 
 def news_detail(request, locality_slug, news_slug):

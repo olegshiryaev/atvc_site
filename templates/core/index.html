@@ -210,33 +210,43 @@
 
         <!-- Последние новости -->
         {% if latest_news %}
-        <section class="news-section block block_alignwide">
-            <div class="tabs-posts2-block__wrap">
-                <div class="news-widget__header d-flex justify-content-between align-items-center">
-                    <h2 class="news-widget__title h2">Последние новости</h2>
-                    <a href="{% url 'news:news_list' locality.slug %}"
-                    class="news-widget__link"
-                    aria-label="Перейти ко всем новостям">
-                        Смотреть все
+        <section class="main_news-block block">
+            <div class="main_news-block__header">
+                <h2 class="main_news-block__title block__title">Последние новости</h2>
+                <div class="main_news-block__more-wrap">
+                    <a href="{% url 'news:news_list' locality.slug %}" class="more-link" aria-label="Перейти ко всем новостям">
+                        Показать все
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                         </svg>
                     </a>
                 </div>
-                <!-- Swiper Slider -->
-                <div class="swiper news-slider position-relative">
+            </div>
+
+            <div class="main_news-block__wrapper_slider">
+                <div class="swiper">
                     <div class="swiper-wrapper">
                         {% for news in latest_news %}
-                        <div class="swiper-slide">
-                            {% include 'news/partials/news_card.html' with news=news %}
-                        </div>
+                            <div class="main_news-block__news news news_slide swiper-slide">
+                                {% include 'news/partials/news_card.html' with news=news %}
+                            </div>
                         {% endfor %}
                     </div>
-                    <div class="slider-navs">
-                        <div class="slider-navs__prev"></div>
-                        <div class="slider-navs__next"></div>
-                        <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
-                    </div>
+                </div>
+                <div class="main_news-block_navs slider-navs">
+                    <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
+                    <div class="slider-navs__pag"></div>
+                    <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </section>
@@ -251,44 +261,34 @@
 <!-- Инициализация Swiper -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        new Swiper('.news-slider', {
+        new Swiper('.main_news-block .swiper', {
             slidesPerView: 1,
-            spaceBetween: 16,
-            centeredSlides: true,
+            spaceBetween: 20,
+            loop: false,
+            pagination: {
+                el: '.main_news-block .slider-navs__pag',
+                clickable: true,
+            },
+            navigation: {
+                nextEl: '.main_news-block .slider-navs__next',
+                prevEl: '.main_news-block .slider-navs__prev',
+            },
             breakpoints: {
-                640: {
-                    slidesPerView: 2,
-                    spaceBetween: 16,
-                    centeredSlides: false,
+                768: {
+                    slidesPerView: 2.2,
                 },
                 1024: {
                     slidesPerView: 3,
-                    spaceBetween: 20,
-                    centeredSlides: false,
                 },
-                1280: {
-                    slidesPerView: 4,
-                    spaceBetween: 20,
-                    centeredSlides: false,
-                },
+                1200: {
+                    slidesPerView: 3,
+                }
             },
-            pagination: {
-                el: '.swiper-pagination',
-                clickable: true,
-                dynamicBullets: true,
-            },
-            loop: {% if latest_news.count > 4 %}true{% else %}false{% endif %},
-            grabCursor: true,
-            speed: 600,
-            effect: 'slide',
-            watchSlidesProgress: true,
-        });
-
-        // Анимация карточек новостей
-        const cards = document.querySelectorAll('.animate-slide-up');
-        cards.forEach((card, index) => {
-            const delay = (index / 3).toFixed(2);
-            card.style.animationDelay = `${delay}s`;
+            a11y: {
+                prevSlideMessage: 'Предыдущий слайд',
+                nextSlideMessage: 'Следующий слайд',
+                paginationBulletMessage: 'Перейти к слайду {{index}}'
+            }
         });
     });
 </script>
