@@ -4128,6 +4128,10 @@ button.swiper-pagination-bullet {
     position: relative;
 }
 
+.products-slider-block .slider-navs {
+    margin-top: 28px;
+}
+
 .products-slider-block__header {
     display: flex;
     align-items: center;
@@ -4137,13 +4141,13 @@ button.swiper-pagination-bullet {
     margin-bottom: 30px;
 }
 
+.products-slider-block__wrapper {
+    position: relative;
+}
+
 .products-slider-block__link {
     padding: 12px 15px;
     font-size: 15px;
-}
-
-.products-slider-block__wrapper {
-    position: relative;
 }
 
 .products-list-block .products__list {
@@ -5062,10 +5066,6 @@ select,
 
 .advantages-block__title {
     margin-bottom: 30px;
-}
-
-.advantages-block__wrapper {
-    display: none;
 }
 
 .advantages-block__wrapper_slider {
