@@ -2209,30 +2209,6 @@ button.swiper-pagination-bullet {
     }
 }
 
-.address-check-section {
-    position: relative;
-    overflow: hidden;
-    border-radius: 1rem;
-}
-
-.address-check-section .container {
-    background: linear-gradient(135deg, #0284c7 0%, #075985 100%);
-    box-shadow: var(--shadow-card);
-    border-radius: 1rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.address-check-image {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    max-height: 100%;
-    max-width: 50%;
-    object-fit: contain;
-    pointer-events: none;
-}
-
 /* Фиксированные размеры модального окна */
 .modal-fixed-size {
     max-width: 800px;

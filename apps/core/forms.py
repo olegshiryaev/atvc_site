@@ -1,3 +1,4 @@
+import re
 from django import forms
 from .models import Application, Document, Feedback, Order, Tariff
 from django.core.validators import RegexValidator
@@ -219,9 +220,17 @@ class OrderForm(forms.ModelForm):
     def clean_phone(self):
         phone = self.cleaned_data.get("phone") or ""
         phone = phone.strip()
-        if not phone:
-            raise forms.ValidationError("Введите номер телефона")
-        return phone
+
+        # Удаляем все нецифровые символы
+        cleaned_phone = re.sub(r"[^\d]", "", phone)
+
+        # Проверяем длину и начало номера
+        if len(cleaned_phone) != 11 or not cleaned_phone.startswith("7"):
+            raise forms.ValidationError(
+                "Введите номер телефона в формате +7 (XXX) XXX-XX-XX"
+            )
+
+        return f"+7{cleaned_phone[1:]}"  # Возвращаем в формате +7XXXXXXXXXX
 
     def clean_street(self):
         street = self.cleaned_data.get("street") or ""

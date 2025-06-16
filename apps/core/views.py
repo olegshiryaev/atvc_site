@@ -53,15 +53,23 @@ def index(request, locality_slug):
         .prefetch_related("localities", "included_channels")
     )
 
-    # Группируем тарифы по типу услуги
+    # Группируем тарифы по типу услугиMore actions
     grouped_tariffs = defaultdict(list)
     for tariff in tariffs:
         grouped_tariffs[tariff.service].append(tariff)
 
-    first_service_slug = ""
-    if grouped_tariffs:
-        # Берём первый service из grouped_tariffs для активного таба
-        first_service_slug = next(iter(grouped_tariffs)).slug
+    # Список доступных услуг (сортированный)
+    available_services = (
+        Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
+        .distinct()
+        .order_by("name")
+    )
+
+    # Преобразуем defaultdict в обычный dict
+    grouped_dict = dict(grouped_tariffs)
+
+    # Определяем первую услугу для установки активного таба
+    first_service_slug = available_services[0].slug if available_services else ""
 
     latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
         "-created_at"
@@ -455,7 +463,7 @@ def submit_order(request, locality_slug):
         errors = {
             field: [str(e) for e in errors] for field, errors in form.errors.items()
         }
-        non_field_errors = [str(e) for error in form.non_field_errors()]
+        non_field_errors = [str(error) for error in form.non_field_errors()]
         logger.warning(f"Ошибка валидации формы: {form.errors}")
         return JsonResponse(
             {

@@ -1,0 +1,646 @@
+{% load static %}
+<!-- Секция проверки адреса -->
+<section id="address-check-form" class="address-check block">
+    <div class="address-check__wrapper">
+        <div class="address-check__layout">
+            <!-- Блок с иллюстрацией -->
+            <div class="address-check__illustration">
+                <img src="{% static 'img/girl-with-laptop.png' %}" alt="Проверка подключения" class="address-check__image">
+            </div>
+            
+            <!-- Блок с формой -->
+            <div class="address-check__form-block">
+                <div class="address-check__header">
+                    <h2 class="address-check__heading block__title">Проверьте возможность подключения</h2>
+                    <p class="address-check__description">Узнайте, какие услуги доступны по вашему адресу</p>
+                </div>
+                
+                <form id="connectionCheckForm" class="address-check__form" method="post" action="{% url 'core:submit_order' locality_slug=locality.slug %}" novalidate>
+                    {% csrf_token %}
+                    <input type="hidden" name="tariff_id" id="tariff_id" value="">
+                    
+                    <!-- Поле ФИО -->
+                    <div class="address-check__field-group">
+                        <input type="text" name="full_name" id="full_name" class="address-check__input" 
+                               placeholder="Иванов Иван Иванович" required>
+                        <div id="error_full_name" class="address-check__validation-message"></div>
+                    </div>
+                    
+                    <!-- Поле телефона -->
+                    <div class="address-check__field-group">
+                        <input type="tel" name="phone" id="phone" class="address-check__input" 
+                               placeholder="+7 (___) ___-__-__" required>
+                        <div id="error_phone" class="address-check__validation-message"></div>
+                    </div>
+                    
+                    <!-- Группа полей адреса -->
+                    <div class="address-check__address-fields">
+                        <!-- Улица (обязательное поле) -->
+                        <div class="address-check__field-group address-check__field-group--street">
+                            <input type="text" name="street" id="street" class="address-check__input" 
+                                   placeholder="ул. Ленина" required>
+                            <div id="error_street" class="address-check__validation-message"></div>
+                        </div>
+                        
+                        <!-- Дом (обязательное поле) -->
+                        <div class="address-check__field-group address-check__field-group--house">
+                            <input type="text" name="house" id="house" class="address-check__input" 
+                                   placeholder="Дом" required>
+                            <div id="error_house" class="address-check__validation-message"></div>
+                        </div>
+                        
+                        <!-- Квартира (необязательное поле) -->
+                        <div class="address-check__field-group address-check__field-group--apartment">
+                            <input type="text" name="apartment" id="apartment" class="address-check__input" 
+                                   placeholder="Кв.">
+                            <div id="error_apartment" class="address-check__validation-message"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Футер формы -->
+                    <div class="address-check__form-footer">
+                        <p class="address-check__agreement-text">
+                            Нажимая кнопку "Проверить адрес", вы соглашаетесь с 
+                            <a href="#" class="address-check__policy-link">Условиями обработки персональных данных</a>
+                        </p>
+                        <button type="submit" class="address-check__submit-btn" id="submitConnectionBtn">
+                            Проверить адрес
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Модальное окно успешной отправки -->
+<div class="address-check__modal" id="address-check-modal" role="dialog" aria-modal="true" aria-labelledby="address-check-modal-title">
+    <div class="address-check__modal-content">
+        <span class="address-check__modal-close" role="button" aria-label="Закрыть модальное окне">×</span>
+        <h3 class="address-check__modal-title" id="address-check-modal-title">Заявка отправлена!</h3>
+        <p class="address-check__modal-text">Мы свяжемся с вами в течение часа для уточнения деталей.</p>
+        <button class="address-check__modal-btn" id="address-check-modal-close">Закрыть</button>
+    </div>
+</div>
+
+<style>
+/* Базовые стили компонента проверки адреса */
+.address-check {
+    --primary-color: #fff;
+    --primary-hover: #e0f2fe;
+    --error-color: #fecaca;
+    --text-color: #fff;
+    --muted-text: #e0f2fe;
+    --border-color: rgba(255, 255, 255, 0.2);
+    --background-color: linear-gradient(135deg, rgb(2, 132, 199) 0%, rgb(7, 89, 133) 100%);
+    
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+    border-radius: 20px;
+}
+
+/* MOBILE FIRST STYLES (0-767px) */
+.address-check__wrapper {
+    width: 100%;
+    margin: 0;
+    padding: 1.5rem 0;
+}
+
+.address-check__layout {
+    display: flex;
+    flex-direction: column;
+}
+
+.address-check__illustration {
+    display: none;
+}
+
+.address-check__header {
+    text-align: left;
+    margin-bottom: 1.5rem;
+    padding: 0 1rem;
+}
+
+.address-check__heading {
+    margin: 0 0 0.5rem;
+    color: var(--text-color);
+}
+
+.address-check__description {
+    font-size: 1rem;
+    color: var(--muted-text);
+    margin: 0;
+}
+
+.address-check__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    padding: 0 1rem;
+}
+
+.address-check__field-group {
+    position: relative;
+}
+
+.address-check__input {
+    width: 100%;
+    padding: 0.875rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    font-size: 0.9375rem;
+    transition: all 0.2s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.address-check__input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+}
+
+.address-check__input--invalid {
+    border-color: var(--error-color);
+}
+
+.address-check__address-fields {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+
+.address-check__validation-message {
+    font-size: 0.8125rem;
+    color: var(--error-color);
+    margin-top: 0.375rem;
+    display: none;
+}
+
+.address-check__validation-message--visible {
+    display: block;
+}
+
+.address-check__form-footer {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 0 1rem;
+}
+
+.address-check__agreement-text {
+    font-size: 0.75rem;
+    color: var(--muted-text);
+    line-height: 1.4;
+    margin: 0;
+    text-align: center;
+}
+
+.address-check__policy-link {
+    color: var(--primary-color);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    white-space: nowrap;
+}
+
+.address-check__policy-link:hover {
+    color: var(--primary-hover) !important;
+}
+
+.address-check__submit-btn {
+    background-color: var(--primary-color);
+    color: #0369a1;
+    padding: 0.875rem 1rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 0.9375rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-align: center;
+    width: 100%;
+}
+
+.address-check__submit-btn:hover {
+    background-color: var(--primary-hover);
+}
+
+.address-check__submit-btn:disabled {
+    background-color: var(--color-button-grey);
+    cursor: not-allowed;
+}
+
+.address-check__submit-btn--loading {
+    position: relative;
+    color: transparent;
+}
+
+.address-check__submit-btn--loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: address-check-spin 0.8s linear infinite;
+}
+
+@keyframes address-check-spin {
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* ===== SUCCESS MODAL ===== */
+.address-check__modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.3s, opacity 0.3s ease;
+}
+
+.address-check__modal.is-visible {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s linear, opacity 0.3s ease;
+}
+
+.address-check__modal-content {
+    background: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+    text-align: center;
+    box-sizing: border-box;
+}
+
+.address-check__modal-close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #2d2d2d;
+}
+
+.address-check__modal-title {
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 15px;
+    color: var(--text-color);
+}
+
+.address-check__modal-text {
+    font-size: 16px;
+    margin-bottom: 20px;
+    color: var(--muted-text);
+}
+
+.address-check__modal-btn {
+    width: 200px;
+    background: var(--main-color);
+    color: #fff;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s ease;
+}
+
+.address-check__modal-btn:hover {
+    background: var(--main-color-on-hover);
+}
+
+/* ===== TABLET STYLES (768px-991px) ===== */
+@media (min-width: 768px) {
+    .address-check {
+        width: auto;
+        position: static;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .address-check__wrapper {
+        padding: 2rem 1.5rem;
+    }
+    
+    .address-check__input {
+        border: 1px solid var(--border-color);
+        border-radius: 0.375rem;
+    }
+    
+    .address-check__address-fields {
+        grid-template-columns: 2fr 1fr 1fr;
+    }
+    
+    .address-check__form-footer {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0;
+        gap: 1.5rem;
+    }
+    
+    .address-check__agreement-text {
+        text-align: left;
+        font-size: 0.8125rem;
+        flex: 1;
+    }
+    
+    .address-check__submit-btn {
+        min-width: 180px;
+        width: auto;
+        border-radius: 0.375rem;
+    }
+    
+    .address-check__form {
+        padding: 0;
+    }
+}
+
+/* ===== DESKTOP STYLES (992px+) ===== */
+@media (min-width: 992px) {
+    .address-check__wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 1rem 1.25rem 0;
+        min-height: 450px;
+        display: flex;
+        align-items: flex-end;
+        box-sizing: border-box;
+    }
+    
+    .address-check__layout {
+        display: grid;
+        grid-template-columns: 40% 60%;
+        align-items: end;
+        width: 100%;
+        gap: 1.5rem;
+    }
+    
+    .address-check__illustration {
+        display: flex;
+        height: 100%;
+        align-items: flex-end;
+        justify-content: flex-start;
+        position: relative;
+        padding-left: 0;
+    }
+    
+    .address-check__image {
+        height: 100%;
+        width: auto;
+        max-width: 90%;
+        object-fit: contain;
+        object-position: bottom left;
+        margin-left: -10%;
+        filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    .address-check__form-block {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 0.5rem 0 1.5rem 1rem;
+    }
+    
+    .address-check__header {
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+    
+    .address-check__heading {
+        margin-bottom: 0.25rem;
+    }
+    
+    .address-check__description {
+        font-size: 1rem;
+    }
+    
+    .address-check__header {
+        padding: 0;
+        margin-bottom: 1rem;
+    }
+
+    .address-check__form {
+        gap: 1.5rem;
+    }
+}
+
+/* ===== iOS SPECIFIC FIXES ===== */
+@supports (-webkit-touch-callout: none) {
+    .address-check__input,
+    .address-check__submit-btn,
+    .address-check__modal-btn {
+        font-size: 16px;
+    }
+}
+
+/* ===== ACCESSIBILITY IMPROVEMENTS ===== */
+.address-check__input:focus-visible,
+.address-check__submit-btn:focus-visible,
+.address-check__modal-btn:focus-visible,
+.address-check__modal-close:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+.address-check__modal-close:focus-visible {
+    outline-offset: 4px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const connectionForm = document.getElementById('connectionCheckForm');
+    const successModal = document.getElementById('address-check-modal');
+    const modalCloseBtn = document.getElementById('address-check-modal-close');
+    
+    if (!connectionForm) return;
+
+    // Инициализация маски для телефона
+    const phoneInput = connectionForm.querySelector('[name="phone"]');
+    const phoneMask = IMask(phoneInput, {
+        mask: '+{7}(000)000-00-00',
+        lazy: false,
+        placeholderChar: '_'
+    });
+
+    // Функция для подготовки номера телефона к отправке
+    function preparePhoneNumber(phoneValue) {
+        const digits = phoneValue.replace(/\D/g, '');
+        if (digits.length === 11 && digits.startsWith('7')) {
+            return '+7' + digits.substring(1);
+        }
+        return null;
+    }
+
+    // Валидация формы
+    function validateConnectionForm() {
+        const fullNameValid = connectionForm.querySelector('[name="full_name"]').value.trim().length >= 3;
+        const phoneValid = preparePhoneNumber(phoneMask.unmaskedValue) !== null;
+        const streetValid = connectionForm.querySelector('[name="street"]').value.trim().length > 0;
+        const houseValid = connectionForm.querySelector('[name="house"]').value.trim().length > 0;
+        
+        connectionForm.querySelector('#submitConnectionBtn').disabled = !(fullNameValid && phoneValid && streetValid && houseValid);
+    }
+
+    // Обработчики событий
+    connectionForm.querySelectorAll('[name="full_name"], [name="phone"], [name="street"], [name="house"]').forEach(input => {
+        input.addEventListener('input', validateConnectionForm);
+    });
+
+    // Управление модальным окном
+    function showSuccessModal() {
+        successModal.classList.add('is-visible');
+    }
+    
+    function hideSuccessModal() {
+        successModal.classList.remove('is-visible');
+    }
+    
+    modalCloseBtn.addEventListener('click', hideSuccessModal);
+    successModal.querySelector('.address-check__modal-close').addEventListener('click', hideSuccessModal);
+    
+    successModal.addEventListener('click', function(e) {
+        if (e.target === successModal) {
+            hideSuccessModal();
+        }
+    });
+
+    // Отправка формы
+    connectionForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Сброс ошибок
+        connectionForm.querySelectorAll('.address-check__input').forEach(el => el.classList.remove('address-check__input--invalid'));
+        connectionForm.querySelectorAll('.address-check__validation-message').forEach(el => {
+            el.classList.remove('address-check__validation-message--visible');
+        });
+
+        // Валидация
+        let isFormValid = true;
+        const preparedPhone = preparePhoneNumber(phoneMask.unmaskedValue);
+        
+        // Валидация ФИО
+        const fullNameField = connectionForm.querySelector('[name="full_name"]');
+        if (fullNameField.value.trim().length < 3) {
+            fullNameField.classList.add('address-check__input--invalid');
+            const errorElement = connectionForm.querySelector('#error_full_name');
+            errorElement.textContent = 'Введите полное имя (минимум 3 символа)';
+            errorElement.classList.add('address-check__validation-message--visible');
+            isFormValid = false;
+        }
+        
+        // Валидация телефона
+        const phoneField = connectionForm.querySelector('[name="phone"]');
+        if (!preparedPhone) {
+            phoneField.classList.add('address-check__input--invalid');
+            const errorElement = connectionForm.querySelector('#error_phone');
+            errorElement.textContent = 'Введите номер телефона в формате +7 (XXX) XXX-XX-XX';
+            errorElement.classList.add('address-check__validation-message--visible');
+            isFormValid = false;
+        }
+        
+        // Валидация улицы
+        const streetField = connectionForm.querySelector('[name="street"]');
+        if (!streetField.value.trim()) {
+            streetField.classList.add('address-check__input--invalid');
+            const errorElement = connectionForm.querySelector('#error_street');
+            errorElement.textContent = 'Введите название улицы';
+            errorElement.classList.add('address-check__validation-message--visible');
+            isFormValid = false;
+        }
+        
+        // Валидация дома
+        const houseField = connectionForm.querySelector('[name="house"]');
+        if (!houseField.value.trim()) {
+            houseField.classList.add('address-check__input--invalid');
+            const errorElement = connectionForm.querySelector('#error_house');
+            errorElement.textContent = 'Введите номер дома';
+            errorElement.classList.add('address-check__validation-message--visible');
+            isFormValid = false;
+        }
+        
+        if (!isFormValid) return;
+
+        // Отправка данных
+        try {
+            const submitBtn = connectionForm.querySelector('#submitConnectionBtn');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('address-check__submit-btn--loading');
+            
+            const formData = new FormData(connectionForm);
+            formData.set('phone', preparedPhone);
+            
+            const response = await fetch(connectionForm.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                connectionForm.reset();
+                phoneMask.updateValue();
+                showSuccessModal();
+            } else if (data.errors) {
+                for (const [field, errors] of Object.entries(data.errors)) {
+                    const errorElement = connectionForm.querySelector(`#error_${field}`);
+                    if (errorElement) {
+                        errorElement.textContent = errors.join(' ');
+                        errorElement.classList.add('address-check__validation-message--visible');
+                        const inputField = connectionForm.querySelector(`[name="${field}"]`);
+                        if (inputField) inputField.classList.add('address-check__input--invalid');
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при проверке адреса:', error);
+            alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.');
+        } finally {
+            const submitBtn = connectionForm.querySelector('#submitConnectionBtn');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('address-check__submit-btn--loading');
+        }
+    });
+
+    // Инициализация формы
+    validateConnectionForm();
+    
+    // Если есть выбранный тариф
+    if (window.selectedConnectionTariff) {
+        connectionForm.querySelector('[name="tariff_id"]').value = window.selectedConnectionTariff;
+        validateConnectionForm();
+    }
+});
+</script>
