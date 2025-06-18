@@ -141,7 +141,7 @@ class TVChannelResource(resources.ModelResource):
 
 
 @admin.register(TVChannel)
-class TVChannelAdmin(ImportExportModelAdmin):  # заменили базовый класс
+class TVChannelAdmin(ImportExportModelAdmin):
     resource_class = TVChannelResource
     list_display = ["name", "category", "is_hd", "logo_preview"]
     list_filter = ["category", "is_hd"]

@@ -42,7 +42,7 @@ class Locality(models.Model):
     name_prepositional = models.CharField(
         max_length=100, verbose_name="Название в предложном падеже"
     )
-    slug = models.SlugField(unique=True, verbose_name="URL")
+    slug = models.SlugField(unique=True, verbose_name="URL-адрес")
     locality_type = models.CharField(
         max_length=20, choices=LOCALITY_TYPES, verbose_name="Тип"
     )
