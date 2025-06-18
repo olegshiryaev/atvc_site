@@ -115,7 +115,7 @@ def product_detail(request, slug, locality_slug=None):
     breadcrumbs = [
         {
             "title": "Оборудование",
-            "url": f"/{locality_slug or 'arhangelsk'}/oborudovanie/",
+            "url": "equipments:equipment_list",  # 👈 имя маршрута, не путь
         }
     ]
 
@@ -123,11 +123,12 @@ def product_detail(request, slug, locality_slug=None):
         breadcrumbs.append(
             {
                 "title": product.category.name,
-                "url": f"{breadcrumbs[0]['url']}?category={product.category.id}",
+                "url": "equipments:equipment_list",  # тот же маршрут
+                "query": f"?category={product.category.id}",  # 👈 передадим query отдельно
             }
         )
 
-    breadcrumbs.append({"title": product.name, "url": ""})
+    breadcrumbs.append({"title": product.name, "url": None})
 
     # Получаем список просмотренных товаров
     viewed_products = []
