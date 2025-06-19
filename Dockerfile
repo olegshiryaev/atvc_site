@@ -1,39 +1,39 @@
 FROM python:3.10-alpine
 
-ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
+# Переменные окружения
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    POETRY_NO_INTERACTION=1
 
-# Установка зависимостей и библиотек
+# Установка системных зависимостей
 RUN apk update && apk add --no-cache \
+    build-base \
     libpq \
-    poppler-utils \
-    cairo-dev \
-    pango-dev \
-    gdk-pixbuf-dev \
+    postgresql-dev \
     jpeg-dev \
     zlib-dev \
     libffi-dev \
-    postgresql-dev \
-    gcc \
-    musl-dev \
+    cairo-dev \
+    pango-dev \
+    gdk-pixbuf-dev \
+    poppler-utils \
     curl \
-    && python3 -m ensurepip && pip3 install --no-cache --upgrade pip setuptools wheel poetry
+    git \
+    && python3 -m ensurepip \
+    && pip3 install --upgrade pip setuptools wheel poetry
 
-# Отключаем venv внутри Poetry
-ENV POETRY_VIRTUALENVS_CREATE=false \
-    POETRY_NO_INTERACTION=1
-
-# Устанавливаем рабочую директорию
+# Установка рабочей директории
 WORKDIR /app
 
-# Копируем pyproject.toml и poetry.lock до кода
+# Копируем зависимости до основного кода (для кеширования слоя)
 COPY pyproject.toml poetry.lock ./
 
-# Устанавливаем зависимости
+# Устанавливаем зависимости проекта
 RUN poetry install --no-root
 
-# Копируем проект
+# Копируем всё содержимое проекта
 COPY . .
 
-# Открываем доступ на запись (если нужно)
+# Настройка прав доступа (по необходимости)
 RUN chmod -R 777 /app
