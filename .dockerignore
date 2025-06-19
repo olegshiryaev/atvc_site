@@ -38,3 +38,6 @@ Thumbs.db
 .env
 .env.*
 *.log
+
+# Certbot
+docker/certbot/conf
