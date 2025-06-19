@@ -107,12 +107,16 @@ services:
             - "5555:5555"
 
     certbot:
-        image: certbot/certbot
-        container_name: certbot
-        restart: unless-stopped
-        volumes:
-            - ./docker/certbot/conf:/etc/letsencrypt:rw
-            - ./docker/certbot/www:/var/www/certbot:rw
-        # command: certonly --webroot --webroot-path=/var/www/certbot/ --email oashiryaev@yandex.ru --agree-tos --no-eff-email -d arhinternet.ru -d www.arhinternet.ru
-        depends_on:
-            - nginx
+      image: certbot/certbot
+      container_name: certbot
+      restart: unless-stopped
+      volumes:
+        - ./docker/certbot/conf:/etc/letsencrypt:rw
+        - ./docker/certbot/www:/var/www/certbot:rw
+      command: >
+        sh -c "trap exit TERM; while :; do
+          certbot renew --webroot --webroot-path=/var/www/certbot/ --quiet --deploy-hook 'nginx -s reload';
+          sleep 12h;
+        done"
+      depends_on:
+        - nginx
