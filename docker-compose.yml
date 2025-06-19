@@ -114,6 +114,6 @@ services:
         - ./docker/certbot/conf:/etc/letsencrypt:rw
         - ./docker/certbot/www:/var/www/certbot:rw
         - ./docker/certbot/renew.sh:/renew.sh:ro
-      command: /renew.sh
+      entrypoint: ["/bin/sh", "/renew.sh"]
       depends_on:
         - nginx
