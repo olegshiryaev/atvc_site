@@ -10,6 +10,7 @@ from apps.core.tasks import generate_thumbnail_async
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
 from pdf2image import convert_from_bytes
+from django.core.validators import MinValueValidator, MaxValueValidator
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -204,7 +205,14 @@ class Tariff(models.Model):
     connection_price = models.PositiveIntegerField(
         "Стоимость подключения (₽)", default=200
     )
-    description = RichTextField("Описание", blank=True, null=True)
+    is_featured = models.BooleanField("Хит", default=False)
+    is_promo = models.BooleanField("Акция", default=False)
+    promo_price = models.PositiveIntegerField("Промо-цена (₽)", null=True, blank=True)
+    promo_months = models.PositiveSmallIntegerField(
+        "Месяцев по акции", null=True, blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(24)]
+    )
+    description = RichTextField("Описание", blank=True)
     localities = models.ManyToManyField(
         Locality,
         blank=True,
@@ -224,6 +232,12 @@ class Tariff(models.Model):
                 self.slug = f"{base_slug}-{counter}"
                 counter += 1
         super().save(*args, **kwargs)
+
+    def get_actual_price(self):
+        """Текущая цена с учётом акции"""
+        if self.is_promo and self.promo_price and self.promo_months:
+            return self.promo_price
+        return self.price
 
     def __str__(self):
         return self.name
