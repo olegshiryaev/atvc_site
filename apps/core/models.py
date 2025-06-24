@@ -238,6 +238,11 @@ class Tariff(models.Model):
         if self.is_promo and self.promo_price and self.promo_months:
             return self.promo_price
         return self.price
+    
+    def get_discount_percent(self):
+        if self.is_promo and self.promo_price and self.price > 0:
+            return ((self.price - self.promo_price) / self.price) * 100
+        return 0
 
     def __str__(self):
         return self.name
