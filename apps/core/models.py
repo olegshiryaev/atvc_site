@@ -212,7 +212,7 @@ class Tariff(models.Model):
         "Месяцев по акции", null=True, blank=True,
         validators=[MinValueValidator(1), MaxValueValidator(24)]
     )
-    description = RichTextField("Описание", blank=True)
+    description = RichTextField("Описание", null=True, blank=True)
     localities = models.ManyToManyField(
         Locality,
         blank=True,
