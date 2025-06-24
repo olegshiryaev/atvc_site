@@ -74,13 +74,17 @@
                                 <div class="tarif-card-promo">Скидка на {{ tariff.promo_months }} {{ tariff.promo_months|ru_plural:"месяц,месяца,месяцев" }}</div>
                             {% endif %}
                             <div class="tariff-card-price-container">
-                                <div class="tariff-price-promo">{{ tariff.promo_price }} <span class="tariff-price-currency">₽/мес</span></div>
-                                <div class="tariff-price-next-container">
-                                    <div class="tariff-price-next">{{ tariff.price }} <span class="tariff-price-currency"> ₽/мес</span></div>
-                                    {% if tariff.promo_price and tariff.price %}
-                                        <span class="discount-percent">-{{ tariff.get_discount_percent|floatformat:"0" }}%</span>
-                                    {% endif %}
-                                </div>
+                                {% if tariff.promo_price %}
+                                    <div class="tariff-price-promo">{{ tariff.promo_price }} <span class="tariff-price-currency">₽/мес</span></div>
+                                    <div class="tariff-price-next-container">
+                                        <div class="tariff-price-next crossed-out">{{ tariff.price }} <span class="tariff-price-currency"> ₽/мес</span></div>
+                                        {% if tariff.price %}
+                                            <span class="discount-percent">-{{ tariff.get_discount_percent|floatformat:"0" }}%</span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="tariff-price-promo">{{ tariff.price }} <span class="tariff-price-currency">₽/мес</span></div>
+                                {% endif %}
                             </div>
                             <div class="tariff-card-action-btn">
                                 <button class="connect-btn"
