@@ -11,6 +11,7 @@ from django.http import HttpResponse
 from django.utils.html import format_html
 
 from apps.cities.models import Locality
+from pytils.translit import slugify as pytils_slugify
 from apps.core.forms import DocumentForm
 from .models import (
     AdditionalService,
@@ -158,46 +159,101 @@ class TVChannelAdmin(ImportExportModelAdmin):
 
 @admin.register(Tariff)
 class TariffAdmin(admin.ModelAdmin):
+    # Отображение в списке
     list_display = (
-        "name",
-        "service",
-        "technology",
-        "speed",
-        "price",
-        "is_active",
-        "slug",
-        "get_localities",
+        'name', 
+        'service', 
+        'display_price', 
+        'is_active', 
+        'is_featured', 
+        'is_promo',
+        'technology_display',
+        'localities_count'
     )
-    list_editable = ("price", "is_active")
-    list_filter = (LocalityFilter, "service")
-    filter_horizontal = ["localities", "included_channels"]
-    search_fields = ["name", "slug", "description"]
-    readonly_fields = ("slug",)
-    actions = ["export_as_csv"]
+    list_filter = (
+        'is_active', 
+        'is_featured', 
+        'is_promo',
+        'service',
+        'technology'
+    )
+    search_fields = ('name', 'description')
+    filter_horizontal = ('included_channels', 'localities')
+    readonly_fields = ('slug',)
+    list_per_page = 30
 
+    # Группировка полей в форме редактирования
     fieldsets = (
-        ("Основное", {"fields": ("name", "slug", "service", "price", "is_active")}),
-        (
-            "Характеристики",
-            {
-                "fields": (
-                    "technology",
-                    "speed",
-                    "channels",
-                    "hd_channels",
-                    "description",
-                ),
-                "classes": ("collapse",),
-            },
-        ),
-        ("Привязка к городам", {"fields": ("localities",)}),
-        ("ТВ каналы", {"fields": ("included_channels",)}),
+        ('Основная информация', {
+            'fields': (
+                'name', 
+                'slug',
+                'service',
+                'description',
+                'is_active'
+            )
+        }),
+        ('Цены', {
+            'fields': (
+                'price',
+                'connection_price',
+                'is_promo',
+                'promo_price',
+                'promo_months',
+                'is_featured'
+            )
+        }),
+        ('Характеристики', {
+            'fields': (
+                'technology',
+                'speed',
+                'channels',
+                'hd_channels',
+            )
+        }),
+        ('Связи', {
+            'fields': (
+                'included_channels',
+                'localities',
+            )
+        }),
     )
 
-    def get_localities(self, obj):
-        return ", ".join(obj.localities.values_list("name", flat=True))
+    # Кастомные методы для отображения
+    def display_price(self, obj):
+        if obj.is_promo and obj.promo_price:
+            return format_html(
+                '<span style="color: red; text-decoration: line-through;">{}₽</span> → <span style="color: green;">{}₽</span>',
+                obj.price,
+                obj.promo_price
+            )
+        return f"{obj.price}₽"
+    display_price.short_description = 'Цена'
 
-    get_localities.short_description = "Города"
+    def technology_display(self, obj):
+        return obj.get_technology_display()
+    technology_display.short_description = 'Технология'
+
+    def localities_count(self, obj):
+        return obj.localities.count()
+    localities_count.short_description = 'Локации'
+
+    # Действия в админке
+    actions = ['activate_tariffs', 'deactivate_tariffs']
+
+    def activate_tariffs(self, request, queryset):
+        queryset.update(is_active=True)
+    activate_tariffs.short_description = "Активировать выбранные тарифы"
+
+    def deactivate_tariffs(self, request, queryset):
+        queryset.update(is_active=False)
+    deactivate_tariffs.short_description = "Деактивировать выбранные тарифы"
+
+    # Сохранение модели
+    def save_model(self, request, obj, form, change):
+        if not obj.slug:
+            obj.slug = pytils_slugify(obj.name)
+        super().save_model(request, obj, form, change)
 
     def export_as_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")

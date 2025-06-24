@@ -1,4 +1,5 @@
 {% load channel_extras %}
+{% load ru_plural %}
 <div class="tariff-swiper-wrapper">
     <!-- Swiper -->
     <div class="swiper tariff-swiper">
@@ -9,7 +10,8 @@
                 <!-- Отображение одного тарифа -->
                 <div class="swiper-slide">
                     <!-- Карточка тарифа -->
-                    <div class="tariff-card">
+                    <div class="tariff-card {% if tariff.is_featured %}tariff-card--featured{% endif %}">
+
                         <div class="tariff-card-head">
                             <!-- Название тарифа -->
                             <h3 class="tariff__title">
@@ -19,6 +21,16 @@
                                     {{ tariff.name }}
                                 </a>
                             </h3>
+
+                            <!-- Бейджи -->
+                            <div class="tariff-badges">
+                                {% if tariff.is_featured %}
+                                    <span class="badge badge--hit">Хит</span>
+                                {% endif %}
+                                {% if tariff.is_promo %}
+                                    <span class="badge badge--promo">Акция</span>
+                                {% endif %}
+                            </div>
 
                             <!-- Описание тарифа -->
                             {% if tariff.description %}
@@ -58,9 +70,16 @@
 
                         <!-- Блок с ценой и кнопкой подключения -->
                         <div class="tariff-card-footer">
-                            <div class="tariff-card-price">
-                                <div class="tariff-price">{{ tariff.price }}
-                                    <span class="tariff-price-currency">₽/мес</span>
+                            {% if tariff.promo_months %}
+                                <div class="tarif-card-promo">Скидка на {{ tariff.promo_months }} {{ tariff.promo_months|ru_plural:"месяц,месяца,месяцев" }}</div>
+                            {% endif %}
+                            <div class="tariff-card-price-container">
+                                <div class="tariff-price-promo">{{ tariff.promo_price }} <span class="tariff-price-currency">₽/мес</span></div>
+                                <div class="tariff-price-next-container">
+                                    <div class="tariff-price-next">{{ tariff.price }} <span class="tariff-price-currency"> ₽/мес</span></div>
+                                    {% if tariff.promo_price and tariff.price %}
+                                        <span class="discount-percent">-{{ tariff.get_discount_percent|floatformat:"0" }}%</span>
+                                    {% endif %}
                                 </div>
                             </div>
                             <div class="tariff-card-action-btn">
