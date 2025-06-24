@@ -13,7 +13,7 @@
                     <div class="tariff-card {% if tariff.is_featured %}tariff-card--featured{% endif %}">
 
                         <div class="tariff-card-head">
-                            <div class="tariff-title-wrapper">
+                            <div class="tariff-header-container">
                                 <!-- Название тарифа -->
                                 <h3 class="tariff__title">
                                     <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}"

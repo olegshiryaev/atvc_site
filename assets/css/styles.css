@@ -1825,7 +1825,7 @@ button.swiper-pagination-bullet {
 .tariff-badges {
     display: flex;
     gap: 8px;
-    flex-shrink: 0;
+    align-items: center;
 }
 
 .badge {
@@ -1833,9 +1833,11 @@ button.swiper-pagination-bullet {
     border-radius: 4px;
     font-size: 12px;
     font-weight: 600;
+    line-height: 1;
     text-transform: uppercase;
     color: white;
     display: inline-block;
+    vertical-align: middle;
 }
 
 .badge--hit {
@@ -1846,12 +1848,11 @@ button.swiper-pagination-bullet {
     background-color: #4caf50;
 }
 
-.tariff-title-wrapper {
+.tariff-header-container {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
-    margin-bottom: 0.5rem;
+    align-items: center;  /* Выравнивание по вертикали */
+    gap: 12px;           /* Расстояние между элементами */
+    margin-bottom: 12px;
 }
 
 .tariff-card {
@@ -1876,7 +1877,8 @@ button.swiper-pagination-bullet {
     font-weight: 600;
     line-height: 32px;
     letter-spacing: -0.16px;
-    flex-grow: 1;
+    margin: 0;
+    flex: 1;
 }
 
 .tariff-name-link {
