@@ -1825,7 +1825,7 @@ button.swiper-pagination-bullet {
 .tariff-badges {
     display: flex;
     gap: 8px;
-    margin-bottom: 12px;
+    flex-shrink: 0;
 }
 
 .badge {
@@ -1844,6 +1844,14 @@ button.swiper-pagination-bullet {
 
 .badge--promo {
     background-color: #4caf50;
+}
+
+.tariff-title-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 0.5rem;
 }
 
 .tariff-card {
@@ -1868,7 +1876,7 @@ button.swiper-pagination-bullet {
     font-weight: 600;
     line-height: 32px;
     letter-spacing: -0.16px;
-    margin-bottom: 0.5rem;
+    flex-grow: 1;
 }
 
 .tariff-name-link {

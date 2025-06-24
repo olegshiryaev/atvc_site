@@ -13,23 +13,25 @@
                     <div class="tariff-card {% if tariff.is_featured %}tariff-card--featured{% endif %}">
 
                         <div class="tariff-card-head">
-                            <!-- Название тарифа -->
-                            <h3 class="tariff__title">
-                                <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}"
-                                   class="tariff-name-link"
-                                   title="{{ tariff.name }}">
-                                    {{ tariff.name }}
-                                </a>
-                            </h3>
+                            <div class="tariff-title-wrapper">
+                                <!-- Название тарифа -->
+                                <h3 class="tariff__title">
+                                    <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}"
+                                    class="tariff-name-link"
+                                    title="{{ tariff.name }}">
+                                        {{ tariff.name }}
+                                    </a>
+                                </h3>
 
-                            <!-- Бейджи -->
-                            <div class="tariff-badges">
-                                {% if tariff.is_featured %}
-                                    <span class="badge badge--hit">Хит</span>
-                                {% endif %}
-                                {% if tariff.is_promo %}
-                                    <span class="badge badge--promo">Акция</span>
-                                {% endif %}
+                                <!-- Бейджи -->
+                                <div class="tariff-badges">
+                                    {% if tariff.is_featured %}
+                                        <span class="badge badge--hit">Хит</span>
+                                    {% endif %}
+                                    {% if tariff.is_promo %}
+                                        <span class="badge badge--promo">Акция</span>
+                                    {% endif %}
+                                </div>
                             </div>
 
                             <!-- Описание тарифа -->
