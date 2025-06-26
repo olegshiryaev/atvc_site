@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='news',
             name='cities',
-            field=models.ManyToManyField(related_name='news', to='cities.city'),
+            field=models.ManyToManyField(related_name='news', to='cities.locality'),
         ),
     ]
