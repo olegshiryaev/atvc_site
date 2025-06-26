@@ -14,6 +14,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='banner',
             name='cities',
-            field=models.ManyToManyField(related_name='banners', to='cities.city', verbose_name='Города'),
+            field=models.ManyToManyField(related_name='banners', to='cities.locality', verbose_name='Населенные пункты'),
         ),
     ]
