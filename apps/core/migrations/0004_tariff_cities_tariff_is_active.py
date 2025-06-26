@@ -14,7 +14,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='tariff',
             name='cities',
-            field=models.ManyToManyField(related_name='tariffs', to='cities.city', verbose_name='Города'),
+            field=models.ManyToManyField(related_name='tariffs', to='cities.locality', verbose_name='Города'),
         ),
         migrations.AddField(
             model_name='tariff',
