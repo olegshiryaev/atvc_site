@@ -21,6 +21,7 @@ class LocalityTypeWidget(widgets.Widget):
         "Посёлок": "town",
         "Село": "selo",
         "Посёлок городского типа": "urban-type",
+        "Рабочий посёлок": "work-town",
     }
 
     def clean(self, value, row=None, *args, **kwargs):
