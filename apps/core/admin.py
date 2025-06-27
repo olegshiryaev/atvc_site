@@ -9,6 +9,7 @@ from import_export import widgets
 import csv
 from django.http import HttpResponse
 from django.utils.html import format_html
+from import_export.widgets import BooleanWidget
 
 from apps.cities.models import Locality
 from pytils.translit import slugify as pytils_slugify
@@ -30,6 +31,10 @@ from .models import (
     Tariff,
     WorkSchedule,
 )
+
+class CustomBooleanWidget(BooleanWidget):
+    TRUE_VALUES = ("1", "true", "yes", "on", "Истина")
+    FALSE_VALUES = ("0", "false", "no", "off", "Ложь")
 
 
 class WorkScheduleInline(admin.TabularInline):
@@ -99,7 +104,9 @@ class TVChannelResource(resources.ModelResource):
         widget=CategoryWidget(),
     )
     is_hd = fields.Field(
-        column_name="HD качество", attribute="is_hd", widget=widgets.BooleanWidget()
+        column_name="HD качество",
+        attribute="is_hd",
+        widget=CustomBooleanWidget(),
     )
     logo = fields.Field(column_name="Логотип", attribute="logo")
 
