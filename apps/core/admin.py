@@ -188,16 +188,6 @@ class TariffResource(resources.ModelResource):
         attribute="speed"
     )
     
-    channels = fields.Field(
-        column_name="Количество каналов",
-        attribute="channels"
-    )
-    
-    hd_channels = fields.Field(
-        column_name="Количество HD каналов",
-        attribute="hd_channels"
-    )
-    
     included_channels = fields.Field(
         column_name="Включённые ТВ каналы",
         attribute="included_channels",
@@ -256,8 +246,6 @@ class TariffResource(resources.ModelResource):
             'service',
             'technology',
             'speed',
-            'channels',
-            'hd_channels',
             'included_channels',
             'price',
             'connection_price',
@@ -274,8 +262,6 @@ class TariffResource(resources.ModelResource):
             'service',
             'technology',
             'speed',
-            'channels',
-            'hd_channels',
             'included_channels',
             'price',
             'connection_price',
