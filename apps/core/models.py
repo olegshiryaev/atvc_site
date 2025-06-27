@@ -95,7 +95,6 @@ class WorkSchedule(models.Model):
 
 
 class Service(models.Model):
-    slug = models.SlugField("Код", unique=True)
     name = models.CharField("Название услуги", max_length=100)
     description = models.TextField("Описание", blank=True, null=True)
     localities = models.ManyToManyField(
@@ -104,6 +103,7 @@ class Service(models.Model):
     background_image = models.ImageField(
         "Изображение", upload_to="services/", blank=True, null=True
     )
+    slug = models.SlugField("URL-адрес", unique=True)
     is_active = models.BooleanField("Активна", default=True)
 
     class Meta:
