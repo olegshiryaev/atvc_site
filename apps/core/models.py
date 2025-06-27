@@ -182,6 +182,7 @@ class Tariff(models.Model):
         max_length=20,
         choices=TECHNOLOGY_CHOICES,
         blank=True,
+        null=True
     )
     speed = models.IntegerField(
         "Скорость (Мбит/с)", null=True, blank=True, validators=[MinValueValidator(0)]
