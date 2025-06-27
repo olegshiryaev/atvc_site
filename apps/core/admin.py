@@ -279,9 +279,46 @@ class TariffResource(resources.ModelResource):
             'description',
             'is_active'
         )
-        import_id_fields = ('name',)
+        import_id_fields = ('name', 'price')
         skip_unchanged = True
         report_skipped = True
+
+    def get_instance(self, instance_loader, row):
+        """Кастомный поиск тарифа по названию и цене"""
+        try:
+            name = row.get('Название', '').strip()
+            price_str = row.get('Цена (руб/мес)', '').strip()
+            
+            if not name or not price_str:
+                return None
+                
+            try:
+                price = int(price_str)
+            except (ValueError, TypeError):
+                return None
+                
+            # Ищем тариф с указанным именем и ценой
+            return Tariff.objects.get(name=name, price=price)
+            
+        except Tariff.DoesNotExist:
+            return None
+        except Tariff.MultipleObjectsReturned:
+            # Если всё ещё есть дубликаты, берём первый
+            return Tariff.objects.filter(name=name, price=price).first()
+
+    def before_import_row(self, row, **kwargs):
+        """Дополнительная обработка перед импортом"""
+        # Нормализация цены (удаление пробелов, символа ₽ и т.д.)
+        if 'Цена (руб/мес)' in row:
+            price = str(row['Цена (руб/мес)']).replace(' ', '').replace('₽', '')
+            try:
+                row['Цена (руб/мес)'] = int(float(price))
+            except (ValueError, TypeError):
+                row['Цена (руб/мес)'] = None
+
+        # Нормализация названия
+        if 'Название' in row:
+            row['Название'] = row['Название'].strip()
 
 
 @admin.register(Tariff)
