@@ -291,9 +291,18 @@ class TariffResource(resources.ModelResource):
         report_skipped = True
 
     def before_import_row(self, row, **kwargs):
-        """Генерируем slug если его нет"""
-        if 'Название' in row and 'slug' not in row:
-            row['slug'] = pytils_slugify(row['Название'])
+        """Генерируем уникальный slug перед импортом"""
+        if 'Название' in row:
+            name = row['Название'].strip()
+            if name:
+                base_slug = pytils_slugify(name)
+                row['slug'] = base_slug
+                
+                # Проверяем уникальность
+                counter = 1
+                while Tariff.objects.filter(slug=row['slug']).exists():
+                    row['slug'] = f"{base_slug}-{counter}"
+                    counter += 1
 
 
 @admin.register(Tariff)

@@ -224,13 +224,22 @@ class Tariff(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = pytils_slugify(self.name)
-            # Ensure slug is unique
+            base_slug = pytils_slugify(self.name)
+            self.slug = base_slug
+            
+            # Проверяем уникальность и добавляем суффикс если нужно
+            counter = 1
+            while Tariff.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{counter}"
+                counter += 1
+        else:
+            # Если slug задан вручную, тоже проверяем уникальность
             base_slug = self.slug
             counter = 1
             while Tariff.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{base_slug}-{counter}"
                 counter += 1
+                
         super().save(*args, **kwargs)
 
     def get_actual_price(self):
