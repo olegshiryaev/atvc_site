@@ -54,14 +54,6 @@ def index(request, locality_slug):
             Prefetch('included_channels', queryset=TVChannel.objects.all()),
             'localities'
         )
-        .annotate(
-            channels_count=Count('included_channels', distinct=True),
-            hd_channels_count=Count(
-                'included_channels',
-                filter=Q(included_channels__is_hd=True),
-                distinct=True
-            )
-        )
     )
 
     # Группируем тарифы по типу услугиMore actions

@@ -246,12 +246,12 @@ class Tariff(models.Model):
         return 0
     
     @property
-    def channels_count(self):
+    def total_channels(self):
         """Общее количество каналов"""
         return self.included_channels.count()
 
     @property
-    def hd_channels_count(self):
+    def total_hd_channels(self):
         """Количество HD-каналов"""
         return self.included_channels.filter(is_hd=True).count()
 

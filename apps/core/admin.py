@@ -14,6 +14,7 @@ from import_export.widgets import BooleanWidget
 
 from apps.cities.models import Locality
 from pytils.translit import slugify as pytils_slugify
+from django.db.models import Count, Q
 from apps.core.forms import DocumentForm
 from .models import (
     AdditionalService,
@@ -371,6 +372,14 @@ class TariffAdmin(ImportExportModelAdmin):
         }),
     )
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        qs = qs.annotate(
+            _channels_count=Count('included_channels'),
+            _hd_channels_count=Count('included_channels', filter=Q(included_channels__is_hd=True))
+        )
+        return qs.prefetch_related('included_channels', 'localities')
+
     # Кастомные методы для отображения
     def display_price(self, obj):
         if obj.is_promo and obj.promo_price:
@@ -393,11 +402,12 @@ class TariffAdmin(ImportExportModelAdmin):
     def get_channels_count(self, obj):
         return obj.included_channels.count()
     get_channels_count.short_description = 'Всего каналов'
-    get_channels_count.admin_order_field = 'included_channels__count'
+    get_channels_count.admin_order_field = '_channels_count'
 
     def get_hd_channels_count(self, obj):
         return obj.included_channels.filter(is_hd=True).count()
     get_hd_channels_count.short_description = 'HD каналов'
+    get_hd_channels_count.admin_order_field = '_hd_channels_count'
 
     # Действия в админке
     actions = ['activate_tariffs', 'deactivate_tariffs']
@@ -421,7 +431,7 @@ class TariffAdmin(ImportExportModelAdmin):
         response["Content-Disposition"] = 'attachment; filename="tariffs.csv"'
 
         writer = csv.writer(response)
-        writer.writerow(["Название", "Слаг", "Тип", "Цена", "Скорость", "Города"])
+        writer.writerow(["Название", "URL-адрес", "Тип", "Цена", "Скорость", "Города"])
 
         for tariff in queryset:
             localities = ", ".join(

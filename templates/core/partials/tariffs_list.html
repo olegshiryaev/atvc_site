@@ -52,20 +52,18 @@
                             {% endif %}
 
                             <!-- Количество каналов -->
-                            {% with channels_count=tariff.included_channels.count hd_count=tariff.included_channels.filter(is_hd=True).count %}
-                            {% if channels_count %}
+                            {% if tariff.total_channels %}
                             <div class="tariff-card-plan-attr">
                                 <div class="tariff-card-attr-name">Телевидение</div>
                                 <div class="tariff-card-attr-value">
-                                    {{ channels_count }}
-                                    <span class="tariff-card-attr-unit">{{ channels_count|decline_channel }}</span>
-                                    {% if hd_count %}
-                                        <span class="tariff-card-attr-unit">({{ hd_count }} HD)</span>
+                                    {{ tariff.total_channels }}
+                                    <span class="tariff-card-attr-unit">{{ tariff.total_channels|decline_channel }}</span>
+                                    {% if tariff.total_hd_channels %}
+                                        <span class="tariff-card-attr-unit">({{ tariff.total_hd_channels }} HD)</span>
                                     {% endif %}
                                 </div>
                             </div>
                             {% endif %}
-                            {% endwith %}
 
                             <!-- Кнопка "Список каналов" -->
                             {% if channels %}
