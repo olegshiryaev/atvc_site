@@ -91,14 +91,14 @@
                             </div>
                             <div class="tariff-card-action-btn">
                                 <button class="connect-btn"
-                                        data-tariff-id="{{ tariff.id }}"
-                                        data-tariff-name="{{ tariff.name }}"
-                                        data-tariff-price="{% if tariff.promo_price %}{{ tariff.promo_price }}{% else %}{{ tariff.price }}{% endif %}"
-                                        data-tariff-speed="{{ tariff.speed|default:'' }}"
-                                        data-tariff-channels="{{ tariff.included_channels.count }}"
-                                        data-tariff-hd-channels="{{ tariff.included_channels.filter(is_hd=True).count }}">
-                                    Подключить
-                                </button>
+                                    data-tariff-id="{{ tariff.id }}"
+                                    data-tariff-name="{{ tariff.name }}"
+                                    data-tariff-price="{% if tariff.promo_price %}{{ tariff.promo_price }}{% else %}{{ tariff.price }}{% endif %}"
+                                    data-tariff-speed="{{ tariff.speed|default:'' }}"
+                                    data-tariff-channels="{{ tariff.total_channels }}"
+                                    data-tariff-hd-channels="{{ tariff.total_hd_channels }}">
+                                Подключить
+                            </button>
                             </div>
                             <div class="tariff-card-more-info-warp">
                                 <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}">
