@@ -93,10 +93,10 @@
                                 <button class="connect-btn"
                                         data-tariff-id="{{ tariff.id }}"
                                         data-tariff-name="{{ tariff.name }}"
-                                        data-tariff-price="{{ tariff.price }}"
+                                        data-tariff-price="{% if tariff.promo_price %}{{ tariff.promo_price }}{% else %}{{ tariff.price }}{% endif %}"
                                         data-tariff-speed="{{ tariff.speed|default:'' }}"
-                                        data-tariff-channels="{{ tariff.channels|default:'' }}"
-                                        data-tariff-hd-channels="{{ tariff.hd_channels|default:'' }}">
+                                        data-tariff-channels="{{ tariff.included_channels.count }}"
+                                        data-tariff-hd-channels="{{ tariff.included_channels.filter(is_hd=True).count }}">
                                     Подключить
                                 </button>
                             </div>

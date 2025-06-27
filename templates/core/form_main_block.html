@@ -75,7 +75,11 @@
                                 <i class="bi bi-tv option__icon"></i>
                                 <span class="option__desc">Телевидение</span>
                             </div>
-                            <div class="option__label" id="tv-channels">—</div>
+                            <div class="option__label">
+                                <span id="tv-channels-count">0</span> 
+                                <span id="tv-channels-word">каналов</span>
+                                <span id="tv-hd-channels" style="display: none;"> (<span id="tv-hd-channels-count">0</span> HD)</span>
+                            </div>
                         </div>
                     </div>
                     <hr>
@@ -123,12 +127,26 @@ document.addEventListener("DOMContentLoaded", function () {
     const serviceInet = document.getElementById('service-inet');
     const serviceTv = document.getElementById('service-tv');
     const telInternetSpeed = document.getElementById('internet-speed');
-    const tvChannels = document.getElementById('tv-channels');
+    const tvChannelsCount = document.getElementById('tv-channels-count');
+    const tvChannelsWord = document.getElementById('tv-channels-word');
+    const tvHdChannels = document.getElementById('tv-hd-channels');
+    const tvHdChannelsCount = document.getElementById('tv-hd-channels-count');
     const tariffPrice = document.getElementById('tariff-price');
 
     if (!tariffBlock || !tariffInfo) {
         console.error("Тарифный блок или информация о тарифе не найдены");
         return;
+    }
+
+    // Функция для склонения слова "канал"
+    function getChannelWord(count) {
+        count = parseInt(count);
+        if (count % 10 === 1 && count % 100 !== 11) {
+            return 'канал';
+        } else if ([2, 3, 4].includes(count % 10) && ![12, 13, 14].includes(count % 100)) {
+            return 'канала';
+        }
+        return 'каналов';
     }
 
     function updateTariffDisplay(tariffData) {
@@ -137,6 +155,7 @@ document.addEventListener("DOMContentLoaded", function () {
         tariffInfo.dataset.tariffName = tariffData.tariffName || "";
         tariffTitle.textContent = `Тариф «${tariffData.tariffName || "Не выбрано"}»`;
 
+        // Интернет
         if (tariffData.tariffSpeed) {
             serviceInet.style.display = 'block';
             telInternetSpeed.textContent = `${tariffData.tariffSpeed} Мбит/с`;
@@ -144,17 +163,23 @@ document.addEventListener("DOMContentLoaded", function () {
             serviceInet.style.display = 'none';
         }
 
-        if (tariffData.tariffChannels) {
+        // Телевидение
+        if (tariffData.tariffChannels && parseInt(tariffData.tariffChannels) > 0) {
             serviceTv.style.display = 'block';
-            let desc = `${tariffData.tariffChannels} каналов`;
-            if (tariffData.tariffHdChannels) {
-                desc += `, ${tariffData.tariffHdChannels} в HD`;
+            tvChannelsCount.textContent = tariffData.tariffChannels;
+            tvChannelsWord.textContent = getChannelWord(tariffData.tariffChannels);
+            
+            if (tariffData.tariffHdChannels && parseInt(tariffData.tariffHdChannels) > 0) {
+                tvHdChannels.style.display = 'inline';
+                tvHdChannelsCount.textContent = tariffData.tariffHdChannels;
+            } else {
+                tvHdChannels.style.display = 'none';
             }
-            tvChannels.textContent = desc;
         } else {
             serviceTv.style.display = 'none';
         }
 
+        // Цена
         tariffPrice.textContent = `${tariffData.tariffPrice || 0} ₽/мес`;
         tariffIdInput.value = tariffData.tariffId || "";
     }
