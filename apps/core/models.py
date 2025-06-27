@@ -187,15 +187,6 @@ class Tariff(models.Model):
     speed = models.IntegerField(
         "Скорость (Мбит/с)", null=True, blank=True, validators=[MinValueValidator(0)]
     )
-    channels = models.IntegerField(
-        "Количество каналов", null=True, blank=True, validators=[MinValueValidator(0)]
-    )
-    hd_channels = models.IntegerField(
-        "Количество HD каналов",
-        null=True,
-        blank=True,
-        validators=[MinValueValidator(0)],
-    )
     included_channels = models.ManyToManyField(
         TVChannel,
         verbose_name="Включённые ТВ каналы",
@@ -253,6 +244,16 @@ class Tariff(models.Model):
         if self.is_promo and self.promo_price and self.price > 0:
             return ((self.price - self.promo_price) / self.price) * 100
         return 0
+    
+    @property
+    def channels_count(self):
+        """Общее количество каналов"""
+        return self.included_channels.count()
+
+    @property
+    def hd_channels_count(self):
+        """Количество HD-каналов"""
+        return self.included_channels.filter(is_hd=True).count()
 
     def __str__(self):
         return self.name

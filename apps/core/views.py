@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
-from django.db.models import Count
+from django.db.models import Count, Q, Prefetch
 from django.contrib import messages
 import logging
 
@@ -50,7 +50,18 @@ def index(request, locality_slug):
     tariffs = (
         Tariff.objects.filter(localities=locality, is_active=True)
         .select_related("service")
-        .prefetch_related("localities", "included_channels")
+        .prefetch_related(
+            Prefetch('included_channels', queryset=TVChannel.objects.all()),
+            'localities'
+        )
+        .annotate(
+            channels_count=Count('included_channels', distinct=True),
+            hd_channels_count=Count(
+                'included_channels',
+                filter=Q(included_channels__is_hd=True),
+                distinct=True
+            )
+        )
     )
 
     # Группируем тарифы по типу услугиMore actions

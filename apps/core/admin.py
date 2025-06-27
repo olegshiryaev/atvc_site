@@ -316,6 +316,8 @@ class TariffAdmin(ImportExportModelAdmin):
         'is_active', 
         'is_featured', 
         'is_promo',
+        'get_channels_count',
+        'get_hd_channels_count',
         'technology_display',
         'localities_count',
         'slug'
@@ -329,7 +331,7 @@ class TariffAdmin(ImportExportModelAdmin):
     )
     search_fields = ('name', 'description')
     filter_horizontal = ('included_channels', 'localities')
-    readonly_fields = ('slug',)
+    readonly_fields = ('slug', 'get_channels_count', 'get_hd_channels_count')
     list_per_page = 30
 
     # Группировка полей в форме редактирования
@@ -357,8 +359,8 @@ class TariffAdmin(ImportExportModelAdmin):
             'fields': (
                 'technology',
                 'speed',
-                'channels',
-                'hd_channels',
+                'get_channels_count',
+                'get_hd_channels_count',
             )
         }),
         ('Связи', {
@@ -387,6 +389,15 @@ class TariffAdmin(ImportExportModelAdmin):
     def localities_count(self, obj):
         return obj.localities.count()
     localities_count.short_description = 'Локации'
+
+    def get_channels_count(self, obj):
+        return obj.included_channels.count()
+    get_channels_count.short_description = 'Всего каналов'
+    get_channels_count.admin_order_field = 'included_channels__count'
+
+    def get_hd_channels_count(self, obj):
+        return obj.included_channels.filter(is_hd=True).count()
+    get_hd_channels_count.short_description = 'HD каналов'
 
     # Действия в админке
     actions = ['activate_tariffs', 'deactivate_tariffs']
@@ -423,6 +434,8 @@ class TariffAdmin(ImportExportModelAdmin):
                     tariff.get_service_display(),
                     tariff.price,
                     tariff.speed or "-",
+                    tariff.included_channels.count(),
+                    tariff.included_channels.filter(is_hd=True).count(),
                     localities,
                 ]
             )
