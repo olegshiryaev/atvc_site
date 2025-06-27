@@ -166,31 +166,119 @@ class TVChannelAdmin(ImportExportModelAdmin):
 
 
 class TariffResource(resources.ModelResource):
+    name = fields.Field(
+        column_name="Название",  # Используем перевод из модели
+        attribute="name"
+    )
+    
     service = fields.Field(
-        column_name='Тип услуги',
-        attribute='service',
+        column_name="Тип услуги",
+        attribute="service",
         widget=ForeignKeyWidget(Service, 'name')
     )
     
-    included_channels = fields.Field(
-        column_name="Включенные каналы",
-        attribute="included_channels",
-        widget=ManyToManyWidget(TVChannel, field="name", separator="|")  # Можно изменить разделитель
+    technology = fields.Field(
+        column_name="Технология подключения",
+        attribute="technology"
     )
     
+    speed = fields.Field(
+        column_name="Скорость (Мбит/с)",
+        attribute="speed"
+    )
+    
+    channels = fields.Field(
+        column_name="Количество каналов",
+        attribute="channels"
+    )
+    
+    hd_channels = fields.Field(
+        column_name="Количество HD каналов",
+        attribute="hd_channels"
+    )
+    
+    included_channels = fields.Field(
+        column_name="Включённые ТВ каналы",
+        attribute="included_channels",
+        widget=ManyToManyWidget(TVChannel, field='name', separator=',')
+    )
+    
+    price = fields.Field(
+        column_name="Цена (руб/мес)",
+        attribute="price"
+    )
+    
+    connection_price = fields.Field(
+        column_name="Стоимость подключения (₽)",
+        attribute="connection_price"
+    )
+    
+    is_featured = fields.Field(
+        column_name="Хит",
+        attribute="is_featured"
+    )
+    
+    is_promo = fields.Field(
+        column_name="Акция",
+        attribute="is_promo"
+    )
+    
+    promo_price = fields.Field(
+        column_name="Промо-цена (₽)",
+        attribute="promo_price"
+    )
+    
+    promo_months = fields.Field(
+        column_name="Месяцев по акции",
+        attribute="promo_months"
+    )
+    
+    description = fields.Field(
+        column_name="Описание",
+        attribute="description"
+    )
+    
+    is_active = fields.Field(
+        column_name="Активен",
+        attribute="is_active"
+    )
+
     class Meta:
         model = Tariff
         fields = (
-            'name', 
-            'service', 
-            'price', 
-            'speed', 
-            'channels', 
-            'hd_channels', 
+            'name',
+            'service',
+            'technology',
+            'speed',
+            'channels',
+            'hd_channels',
             'included_channels',
+            'price',
+            'connection_price',
+            'is_featured',
+            'is_promo',
+            'promo_price',
+            'promo_months',
+            'description',
             'is_active'
         )
-        export_order = fields  # Для сохранения порядка при экспорте
+        export_order = (
+            'name',
+            'service',
+            'technology',
+            'speed',
+            'channels',
+            'hd_channels',
+            'included_channels',
+            'price',
+            'connection_price',
+            'is_featured',
+            'is_promo',
+            'promo_price',
+            'promo_months',
+            'description',
+            'is_active'
+        )
         import_id_fields = ('name',)
         skip_unchanged = True
         report_skipped = True
