@@ -219,7 +219,7 @@ class Tariff(models.Model):
         verbose_name="Населённые пункты",
         related_name="tariffs",
     )
-    slug = models.SlugField("Слаг", max_length=120, blank=True)
+    slug = models.SlugField("URL-адрес", max_length=120, blank=True)
     is_active = models.BooleanField("Активен", default=True)
 
     def save(self, *args, **kwargs):
@@ -605,7 +605,7 @@ class AdditionalService(models.Model):
     name = models.CharField("Название услуги", max_length=200)
     price = models.PositiveIntegerField("Цена в месяц (₽)")
     description = RichTextField(verbose_name="Описание", blank=True, null=True)
-    slug = models.SlugField("Слаг", blank=True, null=True)
+    slug = models.SlugField("URL-адрес", blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.slug:

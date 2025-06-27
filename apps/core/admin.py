@@ -242,6 +242,11 @@ class TariffResource(resources.ModelResource):
         column_name="Активен",
         attribute="is_active"
     )
+    slug = fields.Field(
+        column_name="Слаг",
+        attribute="slug",
+        readonly=True
+    )
 
     class Meta:
         model = Tariff
@@ -260,6 +265,7 @@ class TariffResource(resources.ModelResource):
             'promo_price',
             'promo_months',
             'description',
+            'slug',
             'is_active'
         )
         export_order = (
@@ -279,9 +285,15 @@ class TariffResource(resources.ModelResource):
             'description',
             'is_active'
         )
-        import_id_fields = ('name', 'price')
+        import_id_fields = ('slug',)
+        export_order = fields
         skip_unchanged = True
         report_skipped = True
+
+    def before_import_row(self, row, **kwargs):
+        """Генерируем slug если его нет"""
+        if 'Название' in row and 'slug' not in row:
+            row['slug'] = pytils_slugify(row['Название'])
 
 
 @admin.register(Tariff)
@@ -296,7 +308,8 @@ class TariffAdmin(ImportExportModelAdmin):
         'is_featured', 
         'is_promo',
         'technology_display',
-        'localities_count'
+        'localities_count',
+        'slug'
     )
     list_filter = (
         'is_active', 
