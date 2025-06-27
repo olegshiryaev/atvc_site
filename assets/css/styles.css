@@ -1977,7 +1977,7 @@ button.swiper-pagination-bullet {
     font-weight: bold;
     position: relative;
     z-index: 1;
-    margin-bottom: 1px;
+    margin-bottom: 4px;
 }
 
 .connect-btn {
