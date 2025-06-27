@@ -6,6 +6,7 @@ from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
 from import_export import widgets
+from import_export.widgets import ManyToManyWidget, ForeignKeyWidget
 import csv
 from django.http import HttpResponse
 from django.utils.html import format_html
@@ -164,8 +165,40 @@ class TVChannelAdmin(ImportExportModelAdmin):
     logo_preview.short_description = "Логотип"
 
 
+class TariffResource(resources.ModelResource):
+    service = fields.Field(
+        column_name='Тип услуги',
+        attribute='service',
+        widget=ForeignKeyWidget(Service, 'name')
+    )
+    
+    included_channels = fields.Field(
+        column_name="Включенные каналы",
+        attribute="included_channels",
+        widget=ManyToManyWidget(TVChannel, field="name", separator="|")  # Можно изменить разделитель
+    )
+    
+    class Meta:
+        model = Tariff
+        fields = (
+            'name', 
+            'service', 
+            'price', 
+            'speed', 
+            'channels', 
+            'hd_channels', 
+            'included_channels',
+            'is_active'
+        )
+        export_order = fields  # Для сохранения порядка при экспорте
+        import_id_fields = ('name',)
+        skip_unchanged = True
+        report_skipped = True
+
+
 @admin.register(Tariff)
-class TariffAdmin(admin.ModelAdmin):
+class TariffAdmin(ImportExportModelAdmin):
+    resource_class = TariffResource
     # Отображение в списке
     list_display = (
         'name', 
