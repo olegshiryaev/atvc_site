@@ -35,7 +35,7 @@ class Locality(models.Model):
         ("village", "Деревня"),
         ("town", "Посёлок"),
         ("selo", "Село"),
-        ("urban-type", "Посёлок городского типа"),
+        ("work-town", "Рабочий посёлок"),
     ]
 
     name = models.CharField(max_length=100, verbose_name="Населённый пункт")
@@ -52,7 +52,7 @@ class Locality(models.Model):
         related_name="localities",
         verbose_name="Регион",
         null=True,
-        blank=True,  # временно делаем поле необязательным
+        blank=True,
     )
     district = models.ForeignKey(
         District,
