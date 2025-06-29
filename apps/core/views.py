@@ -2,12 +2,14 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import resolve, reverse_lazy, reverse
 from django.views.decorators.http import require_POST
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import JsonResponse
+from django.http import JsonResponse, FileResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
-from django.db.models import Count, Q, Prefetch
+from django.db.models import Count, Q, Prefetch, F
 from django.contrib import messages
+import os
+from urllib.parse import quote
 import logging
 
 from apps.core.tasks import send_order_notification
@@ -24,6 +26,7 @@ from .models import (
     AdditionalService,
     Banner,
     Company,
+    Document,
     Equipment,
     Office,
     Service,
