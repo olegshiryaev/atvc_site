@@ -1916,6 +1916,19 @@ button.swiper-pagination-bullet {
     line-height: 1.2;
 }
 
+.technology-badge {
+    display: inline-block;
+    vertical-align: middle;
+    font-size: 0.6em;
+    padding: 0 4px;
+    line-height: 140%;
+    border: 1px solid #000;
+    border-radius: 4px;
+    margin-left: 4px;
+    font-weight: 400;
+    margin-bottom: 5px;
+}
+
 /* === Футер карточки (цена, кнопка, ссылка) === */
 .tariff-card-footer {
     margin-top: auto;
@@ -1972,7 +1985,7 @@ button.swiper-pagination-bullet {
     background-color: var(--orange-color);
     color: white;
     padding: 2px 6px;
-    border-radius: 10px;
+    border-radius: 4px;
     font-size: 0.8rem;
     font-weight: bold;
     position: relative;
@@ -5194,7 +5207,7 @@ select,
     transition: all 0.3s linear;
     border-radius: 20px;
     min-height: 319px;
-    padding: 50px;
+    padding: 30px;
     position: relative;
     overflow: hidden;
     color: #fff;

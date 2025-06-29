@@ -47,6 +47,11 @@
                                 <div class="tariff-card-attr-name">Интернет</div>
                                 <div class="tariff-card-attr-value">{{ tariff.speed }}
                                     <span class="tariff-unit">Мбит/с</span>
+                                    {% if tariff.technology %}
+                                        <span class="technology-badge" data-technology="{{ tariff.technology }}" title="{{ tariff.get_technology_display }}">
+                                            {{ tariff.get_technology_display }}
+                                        </span>
+                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}
