@@ -149,55 +149,71 @@ class SmartSpeaker(models.Model):
     max_power = models.CharField(
         "Максимальная мощность",
         max_length=20,
-        default="30 Вт",
+        blank=True,
+        null=True,
         help_text="Например: 30 Вт"
     )
     
     voice_assistant = models.CharField(
         "Голосовой помощник",
         max_length=100,
-        default="Маруся",
+        blank=True,
+        null=True,
         help_text="Например: Маруся, Алиса, Google Assistant"
     )
     
     wireless_connection = models.CharField(
         "Беспроводное соединение",
         max_length=100,
-        default="Bluetooth, Wi-Fi",
+        blank=True,
+        null=True,
         help_text="Например: Bluetooth, Wi-Fi"
     )
     
     power_source = models.CharField(
         "Питание",
         max_length=100,
-        default="от сети",
+        blank=True,
+        null=True,
         help_text="Например: от сети, от батареи"
     )
     
     frequency_range = models.CharField(
         "Диапазон частот",
         max_length=100,
-        default="50 - 20000 Гц",
+        blank=True,
+        null=True,
         help_text="Например: 50 - 20000 Гц"
     )
     
     wifi_standard = models.CharField(
         "Стандарт Wi-Fi",
         max_length=100,
-        default="802.11 a/b/g/n/ac",
+        blank=True,
+        null=True,
         help_text="Например: 802.11 a/b/g/n/ac"
     )
     
     signal_noise_ratio = models.CharField(
         "Соотношение сигнал/шум",
         max_length=20,
-        default="80 дБ",
+        blank=True,
+        null=True,
         help_text="Например: 80 дБ"
     )
+    
     dimensions = models.CharField(
-        "Размер (ШхДхВ)", max_length=50, blank=True, null=True
+        "Размер (ШхДхВ)", 
+        max_length=50, 
+        blank=True, 
+        null=True
     )
-    weight = models.PositiveIntegerField("Вес (г)", blank=True, null=True)
+    
+    weight = models.PositiveIntegerField(
+        "Вес (г)", 
+        blank=True, 
+        null=True
+    )
 
     def __str__(self):
         return f"Умная колонка: {self.product.name}"
