@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
-{% load url_tools %}
+{% load static url_tools color_tags %}
 {% block title %}{{ product.name }} — {{ block.super }}{% endblock %}
 {% block content %}
 <div class="container">
@@ -13,32 +12,27 @@
             <!-- Галерея изображений -->
             <div class="col-md-6">
                 <div class="product__gallery gallery">
-
-                    <!-- Основной слайдер -->
                     <div class="gallery__imgs swiper product-gallery-main">
                         <div class="swiper-wrapper">
                             {% if product.images.exists %}
                                 {% for image in product.images.all %}
-                                    <div class="swiper-slide gallery__item">
-                                        <img src="{{ image.image.url }}" alt="{{ product.name }}" class="gallery__item-img lazyloaded">
+                                    <div class="swiper-slide gallery__item" data-color="{{ image.color|default:'all' }}">
+                                        <img src="{{ image.image.url }}" alt="{{ product.name }} - {{ image.get_color_display|default:'Изображение' }}" class="gallery__item-img lazyloaded">
                                     </div>
                                 {% endfor %}
                             {% else %}
-                                <div class="swiper-slide gallery__item">
+                                <div class="swiper-slide gallery__item" data-color="all">
                                     <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="product-card__img img-fluid rounded">
                                 </div>
                             {% endif %}
                         </div>
                     </div>
-
-                    <!-- Мини-превью -->
                     {% if product.images.exists %}
                         <div class="gallery__bottom slider-navs">
-                            <!-- Слайдер миниатюр -->
                             <div class="gallery__thumbs swiper product-gallery-thumbs">
                                 <div class="swiper-wrapper">
                                     {% for image in product.images.all %}
-                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;">
+                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;" data-color="{{ image.color|default:'all' }}">
                                             <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img">
                                         </div>
                                     {% endfor %}
@@ -55,13 +49,43 @@
                     <h2 class="product-card__title h4">{{ product.name }}</h2>
                     <p class="product-card__desc">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
 
+                    <!-- Выбор цвета в виде кружков -->
+                    {% if product.variants.exists %}
+                        <div class="product-card__colors mb-3">
+                            <h6>Выберите цвет:</h6>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% for variant in product.variants.all %}
+                                    <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}" title="{{ variant.get_color_display }}">
+                                        <input type="radio" name="variant_id" value="{{ variant.id }}"
+                                               data-price="{{ variant.price|default:product.price }}"
+                                               data-color="{{ variant.color }}"
+                                               {% if forloop.first %}checked{% endif %}
+                                               {% if variant.stock <= 0 %}disabled{% endif %}
+                                               aria-label="Выбрать цвет {{ variant.get_color_display }}">
+                                        <span class="circle" style="background-color: {{ variant.color|color_to_hex }};"></span>
+                                    </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+
                     <div class="mt-auto">
                         <div class="product-card__price mb-3">
-                            {{ product.price }} ₽
+                            <span class="current-price">
+                                {% if product.variants.exists %}
+                                    {{ product.variants.first.price|default:product.price }} ₽
+                                {% else %}
+                                    {{ product.price }} ₽
+                                {% endif %}
+                            </span>
                         </div>
-                        <button class="product-card__btn btn w-100" type="button">
-                            В корзину
-                        </button>
+                        <form method="post" action="#">
+                            {% csrf_token %}
+                            <input type="hidden" name="variant_id" id="selected_variant_id" value="{% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}">
+                            <button class="product-card__btn btn w-100" type="submit" {% if product.variants.exists and not product.variants.all|length or product.variants.all|length == 0 %}disabled{% endif %}>
+                                В корзину
+                            </button>
+                        </form>
                         <a href="#" class="text-decoration-none small mt-2 d-block text-center">
                             <i class="bi bi-download me-1"></i> Скачать инструкцию
                         </a>
@@ -109,15 +133,15 @@
 
     <!-- Вы недавно смотрели -->
     {% if recently_viewed %}
-    <section class="products-slider-block block " style="" data-block-slug="products-slider-block" data-block-appearance="">
+    <section class="products-slider-block block" data-block-slug="products-slider-block" data-block-appearance="">
         <div class="products-slider-block__header">
-            <h2 class="products-slider-block__title block__title"> Вы недавно смотрели</h2>
+            <h2 class="products-slider-block__title block__title">Вы недавно смотрели</h2>
         </div>
         <div class="products-slider-block__wrapper">
             <div class="swiper swiper-initialized swiper-horizontal">
-                <div class="swiper-wrapper" style="transition-duration: 0ms; transform: translate3d(0px, 0px, 0px); transition-delay: 0ms;">
+                <div class="swiper-wrapper">
                     {% for item in recently_viewed %}
-                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="25251" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
+                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
                         <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
                             <div class="product-card__cart" data-product-change-cart="e8f7da8e2d75253e4003cbc4c24286ac"></div>
                             <div class="product-card__img-wrap">
@@ -136,19 +160,65 @@
                 <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
             </div>
             <div class="products-slider-block__navs slider-navs">
-                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-controls="swiper-wrapper-c72f6dd10351073241" aria-disabled="true"></div>
+                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-disabled="true"></div>
                 <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0" role="button" aria-label="Go to slide 1" aria-current="true"></span><span class="swiper-pagination-bullet" tabindex="0" role="button" aria-label="Go to slide 2"></span></div>
-                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-controls="swiper-wrapper-c72f6dd10351073241" aria-disabled="false"></div>
+                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-disabled="false"></div>
             </div>
         </div>
     </section>
     {% endif %}
 </div>
+
+<!-- Стили для выбора цвета в виде кружков -->
+<style>
+.color-circle {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+.color-circle input {
+    display: none;
+}
+.color-circle .circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid #ccc;
+    display: inline-block;
+    transition: border-color 0.2s;
+}
+.color-circle input:checked + .circle {
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px #007bff;
+}
+.color-circle.disabled .circle {
+    opacity: 0.5;
+    cursor: not-allowed;
+    position: relative;
+}
+.color-circle.disabled .circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 2px;
+    background: #999;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+.color-circle:hover:not(.disabled) .circle {
+    border-color: #0056b3;
+}
+</style>
+
+<!-- JavaScript для галереи и выбора цвета -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
+    // Инициализация Swiper для галереи
     const galleryThumbs = new Swiper('.product-gallery-thumbs', {
         spaceBetween: 10,
-        slidesPerView: 'auto', // или 4
+        slidesPerView: 'auto',
         freeMode: true,
         watchSlidesProgress: true,
     });
@@ -159,12 +229,53 @@ document.addEventListener('DOMContentLoaded', function () {
             swiper: galleryThumbs
         }
     });
-});
-</script>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
+
+    // Навигация к изображению, соответствующему выбранному цвету
+    function navigateToColorImage(color) {
+        const slides = document.querySelectorAll('.gallery__item');
+        let targetIndex = 0; // По умолчанию первый слайд
+        slides.forEach((slide, index) => {
+            const slideColor = slide.getAttribute('data-color');
+            if (slideColor === color) {
+                targetIndex = index; // Находим первый слайд с соответствующим цветом
+            }
+        });
+        galleryMain.slideTo(targetIndex); // Переключаемся на нужный слайд
+    }
+
+    // Обновление цены и variant_id при выборе цвета
+    const colorInputs = document.querySelectorAll('input[name="variant_id"]');
+    const priceElement = document.querySelector('.current-price');
+    const variantIdInput = document.getElementById('selected_variant_id');
+    const addToCartButton = document.querySelector('.product-card__btn');
+
+    colorInputs.forEach(input => {
+        input.addEventListener('change', function () {
+            const variantId = this.value;
+            variantIdInput.value = variantId;
+
+            // Обновление цены
+            const variantPrice = this.getAttribute('data-price');
+            priceElement.textContent = variantPrice ? `${variantPrice} ₽` : '{{ product.price }} ₽';
+
+            // Навигация к изображению выбранного цвета
+            const selectedColor = this.getAttribute('data-color');
+            navigateToColorImage(selectedColor);
+
+            // Обновление кнопки "В корзину"
+            addToCartButton.disabled = this.disabled;
+        });
+    });
+
+    // Инициализация первого выбранного цвета
+    const firstChecked = document.querySelector('input[name="variant_id"]:checked');
+    if (firstChecked) {
+        navigateToColorImage(firstChecked.getAttribute('data-color'));
+    }
+
+    // Инициализация Swiper для недавно просмотренных
     const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
-        slidesPerView: 1, // Одна карточка на мобильных
+        slidesPerView: 1,
         spaceBetween: 16,
         navigation: {
             nextEl: '.products-slider-block .slider-navs__next',
@@ -175,15 +286,9 @@ document.addEventListener('DOMContentLoaded', function () {
             clickable: true,
         },
         breakpoints: {
-            576: {
-                slidesPerView: 2, // 2 карточки на экранах >= 576px
-            },
-            768: {
-                slidesPerView: 3, // 3 карточки на экранах >= 768px
-            },
-            992: {
-                slidesPerView: 4, // 4 карточки на экранах >= 992px
-            },
+            576: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            992: { slidesPerView: 4 },
         },
     });
 });

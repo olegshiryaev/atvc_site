@@ -16,7 +16,7 @@
                             <div class="tariff-header-container">
                                 <!-- Название тарифа -->
                                 <h3 class="tariff__title">
-                                    <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}"
+                                    <a href="{% url 'orders:order_create' locality_slug=locality.slug slug=tariff.slug %}"
                                     class="tariff-name-link"
                                     title="{{ tariff.name }}">
                                         {{ tariff.name }}
@@ -106,7 +106,7 @@
                             </button>
                             </div>
                             <div class="tariff-card-more-info-warp">
-                                <a href="{% url 'core:order_create' locality_slug=locality.slug slug=tariff.slug %}">
+                                <a href="{% url 'orders:order_create' locality_slug=locality.slug slug=tariff.slug %}">
                                     Подробнее о тарифе
                                 </a>
                             </div>

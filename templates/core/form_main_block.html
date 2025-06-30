@@ -6,7 +6,7 @@
             <div class="connect-form__subtitle">Укажите свои контактные данные, и мы свяжемся с вами в течение часа для уточнения деталей!</div>
         </div>
         <div class="connect-form__form">
-            <form id="connect-form-submit" action="{% url 'core:submit_order' locality_slug=locality.slug %}" method="post" class="form" aria-label="Контактная форма">
+            <form id="connect-form-submit" action="{% url 'orders:submit_order' locality_slug=locality.slug %}" method="post" class="form" aria-label="Контактная форма">
                 {% csrf_token %}
                 <input type="hidden" name="tariff_id" id="id_tariff_id">
                 <div class="connect-form__fields">

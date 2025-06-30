@@ -25,7 +25,6 @@ from .models import (
     Document,
     Feedback,
     Office,
-    Order,
     Service,
     StaticPage,
     TVChannel,
@@ -648,70 +647,6 @@ class DocumentAdmin(admin.ModelAdmin):
             return "-"
 
     thumbnail_preview.short_description = "Миниатюра"
-
-
-@admin.register(Order)
-class OrderAdmin(admin.ModelAdmin):
-    list_display = (
-        "full_name",
-        "phone",
-        "street",
-        "house",
-        "locality",
-        "tariff",
-        "status",
-        "created_at",
-        "total_cost",
-    )
-    list_filter = ("status", "locality", "tariff", "created_at")
-    search_fields = ("full_name", "phone", "street", "house", "comment")
-    list_editable = ("status",)
-    list_per_page = 20
-    date_hierarchy = "created_at"
-    actions = ["mark_as_processed", "mark_as_completed"]
-    readonly_fields = ("created_at", "updated_at", "total_cost_display")
-    fieldsets = (
-        (None, {"fields": ("full_name", "phone", "email", "status")}),
-        ("Адрес", {"fields": ("locality", "street", "house", "apartment")}),
-        (
-            "Тариф и услуги",
-            {
-                "fields": (
-                    "tariff",
-                    "equipment",
-                    "services",
-                    "tv_packages",
-                    "total_cost_display",
-                )
-            },
-        ),
-        ("Дополнительно", {"fields": ("comment", "created_at", "updated_at")}),
-    )
-
-    def total_cost_display(self, obj):
-        return f"{obj.total_cost()} ₽"
-
-    total_cost_display.short_description = "Общая стоимость"
-
-    def mark_as_processed(self, request, queryset):
-        queryset.update(status="processed")
-        self.message_user(request, "Выбранные заявки отмечены как 'В обработке'.")
-
-    mark_as_processed.short_description = "Отметить как в обработке"
-
-    def mark_as_completed(self, request, queryset):
-        queryset.update(status="completed")
-        self.message_user(request, "Выбранные заявки отмечены как 'Выполнена'.")
-
-    mark_as_completed.short_description = "Отметить как выполненные"
-
-    def get_queryset(self, request):
-        return (
-            super()
-            .get_queryset(request)
-            .select_related("locality", "tariff")
-            .prefetch_related("equipment", "services", "tv_packages")
-        )
 
 
 @admin.register(AdditionalService)

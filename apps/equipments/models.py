@@ -8,6 +8,13 @@ from django.contrib.contenttypes.models import ContentType
 from apps.core.models import Service
 
 
+COLOR_CHOICES = [
+    ("white", "Белый"),
+    ("black", "Чёрный"),
+    ("gray", "Серый"),
+    ("other", "Другой"),
+]
+
 class Category(models.Model):
     name = models.CharField("Название категории", max_length=100)
     slug = models.SlugField("URL", unique=True, blank=True)
@@ -17,7 +24,13 @@ class Category(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            while self.__class__.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     class Meta:
@@ -50,7 +63,13 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            while self.__class__.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def get_main_image(self):
@@ -67,15 +86,56 @@ class ProductImage(models.Model):
     )
     image = models.ImageField("Изображение", upload_to="product_images/")
     is_main = models.BooleanField("Основное изображение", default=False)
+    color = models.CharField(
+        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
+    )
     order = models.PositiveIntegerField("Порядок", default=0)
 
     def __str__(self):
         return f"Изображение для {self.product.name}"
+    
+    def save(self, *args, **kwargs):
+        if self.is_main:
+            self.product.images.filter(is_main=True).update(is_main=False)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["order"]
         verbose_name = "Изображение товара"
         verbose_name_plural = "Изображения товаров"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product"],
+                condition=models.Q(is_main=True),
+                name="unique_main_image_per_product"
+            )
+        ]
+
+
+class ProductVariant(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="variants", verbose_name="Товар"
+    )
+    color = models.CharField("Цвет", max_length=10, choices=COLOR_CHOICES)
+    sku = models.CharField("Артикул", max_length=50, blank=True, null=True)
+    stock = models.PositiveIntegerField("Остаток на складе", default=0)
+    price = models.PositiveIntegerField(
+        "Цена", blank=True, null=True,
+        help_text="Если не указано, используется цена из Product"
+    )
+
+    def __str__(self):
+        return f"{self.product.name} ({self.get_color_display()})"
+
+    class Meta:
+        verbose_name = "Вариант товара"
+        verbose_name_plural = "Варианты товаров"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product", "color"],
+                name="unique_product_color"
+            )
+        ]
 
 
 class SmartSpeaker(models.Model):
@@ -85,14 +145,59 @@ class SmartSpeaker(models.Model):
         primary_key=True,
         related_name="smart_speaker",
     )
-    voice_assistant = models.CharField("Голосовой помощник", max_length=50)
-    bluetooth = models.BooleanField("Bluetooth", default=True)
-    battery_life = models.CharField(
-        "Время работы от батареи", max_length=50, blank=True
+    
+    max_power = models.CharField(
+        "Максимальная мощность",
+        max_length=20,
+        default="30 Вт",
+        help_text="Например: 30 Вт"
     )
-    speaker_wattage = models.IntegerField(
-        "Мощность динамика (Вт)", blank=True, null=True
+    
+    voice_assistant = models.CharField(
+        "Голосовой помощник",
+        max_length=100,
+        default="Маруся",
+        help_text="Например: Маруся, Алиса, Google Assistant"
     )
+    
+    wireless_connection = models.CharField(
+        "Беспроводное соединение",
+        max_length=100,
+        default="Bluetooth, Wi-Fi",
+        help_text="Например: Bluetooth, Wi-Fi"
+    )
+    
+    power_source = models.CharField(
+        "Питание",
+        max_length=100,
+        default="от сети",
+        help_text="Например: от сети, от батареи"
+    )
+    
+    frequency_range = models.CharField(
+        "Диапазон частот",
+        max_length=100,
+        default="50 - 20000 Гц",
+        help_text="Например: 50 - 20000 Гц"
+    )
+    
+    wifi_standard = models.CharField(
+        "Стандарт Wi-Fi",
+        max_length=100,
+        default="802.11 a/b/g/n/ac",
+        help_text="Например: 802.11 a/b/g/n/ac"
+    )
+    
+    signal_noise_ratio = models.CharField(
+        "Соотношение сигнал/шум",
+        max_length=20,
+        default="80 дБ",
+        help_text="Например: 80 дБ"
+    )
+    dimensions = models.CharField(
+        "Размер (ШхДхВ)", max_length=50, blank=True, null=True
+    )
+    weight = models.PositiveIntegerField("Вес (г)", blank=True, null=True)
 
     def __str__(self):
         return f"Умная колонка: {self.product.name}"
@@ -108,12 +213,6 @@ class Camera(models.Model):
     )
 
     # ==== Характеристики камеры ====
-    COLOR_CHOICES = [
-        ("white", "Белый"),
-        ("black", "Чёрный"),
-        ("gray", "Серый"),
-        ("other", "Другой"),
-    ]
     color = models.CharField(
         "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
     )
@@ -206,12 +305,6 @@ class Router(models.Model):
         "Частоты", max_length=10, choices=FREQUENCY_CHOICES, blank=True, null=True
     )
 
-    COLOR_CHOICES = [
-        ("white", "Белый"),
-        ("black", "Чёрный"),
-        ("gray", "Серый"),
-        ("other", "Другой"),
-    ]
     color = models.CharField(
         "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
     )
@@ -267,12 +360,6 @@ class TvBox(models.Model):
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox"
     )
-    COLOR_CHOICES = [
-        ("black", "Чёрный"),
-        ("white", "Белый"),
-        ("gray", "Серый"),
-        ("other", "Другой"),
-    ]
     color = models.CharField(
         "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
     )

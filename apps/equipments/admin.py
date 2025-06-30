@@ -1,7 +1,9 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from .models import (
     Category,
     Product,
+    ProductVariant,
     SmartSpeaker,
     Camera,
     Router,
@@ -16,16 +18,44 @@ from .models import (
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
-    fields = ("image", "is_main", "order")
+    fields = ("image", "color", "is_main", "order")
     verbose_name = "Изображение"
     verbose_name_plural = "Изображения"
 
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" width="100" height="100" />')
+        return "Нет изображения"
+    image_preview.short_description = "Превью"
+
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    fields = ("color", "sku", "stock", "price")
+    verbose_name = "Вариант товара"
+    verbose_name_plural = "Варианты товаров"
+    
 
 class SmartSpeakerInline(admin.StackedInline):
     model = SmartSpeaker
     can_delete = False
     verbose_name = "Характеристики умной колонки"
     verbose_name_plural = "Характеристики умной колонки"
+    fieldsets = (
+        ('Основные', {
+            'fields': ('voice_assistant', 'power_source')
+        }),
+        ('Беспроводное соединение', {
+            'fields': ('wireless_connection', 'wifi_standard')
+        }),
+        ('Аудио', {
+            'fields': ('max_power', 'frequency_range', 'signal_noise_ratio')
+        }),
+        ('Физические характеристики', {
+            'fields': ('dimensions', 'weight')
+        }),
+    )
 
 
 class CameraInline(admin.StackedInline):
@@ -54,12 +84,13 @@ class TvBoxInline(admin.StackedInline):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "category", "is_available"]
+    list_display = ["name", "price", "category", "is_available", "variant_count"]
     search_fields = ["name", "slug", "short_description"]
     list_filter = ["category", "is_available", "services"]
     prepopulated_fields = {"slug": ("name",)}
     inlines = [
         ProductImageInline,
+        ProductVariantInline,
         SmartSpeakerInline,
         CameraInline,
         RouterInline,
@@ -75,6 +106,25 @@ class ProductAdmin(admin.ModelAdmin):
         ("Категория", {"fields": ("category",)}),
         ("Услуги", {"fields": ("services",)}),
     )
+
+    def variant_count(self, obj):
+        """Отображает количество вариантов товара."""
+        return obj.variants.count()
+    variant_count.short_description = "Варианты"
+
+    def get_inline_instances(self, request, obj=None):
+        """Показывать только релевантные инлайны в зависимости от типа товара."""
+        inlines = [ProductImageInline, ProductVariantInline]
+        if obj:
+            if hasattr(obj, 'smart_speaker'):
+                inlines.append(SmartSpeakerInline)
+            elif hasattr(obj, 'camera'):
+                inlines.append(CameraInline)
+            elif hasattr(obj, 'router'):
+                inlines.append(RouterInline)
+            elif hasattr(obj, 'tvbox'):
+                inlines.append(TvBoxInline)
+        return [inline(self.model, self.admin_site) for inline in inlines]
 
 
 # === Админка: Category ===
@@ -96,13 +146,39 @@ class ProductImageAdmin(admin.ModelAdmin):
     search_fields = ["product__name"]
 
 
+# === Админка: ProductVariant ===
+
+@admin.register(ProductVariant)
+class ProductVariantAdmin(admin.ModelAdmin):
+    list_display = ["product", "color", "sku", "stock", "price"]
+    list_filter = ["color"]
+    search_fields = ["product__name", "sku"]
+    list_editable = ["stock", "price"]
+
+
 # === Админка: SmartSpeaker ===
 
 
 @admin.register(SmartSpeaker)
 class SmartSpeakerAdmin(admin.ModelAdmin):
-    list_display = ["product", "voice_assistant", "bluetooth", "battery_life"]
-    search_fields = ["product__name"]
+    list_display = ('product', 'voice_assistant', 'power_source', 'wireless_connection', 'max_power')
+    list_filter = ('voice_assistant', 'power_source', 'wireless_connection')
+    search_fields = ('product__name', 'voice_assistant')
+    fieldsets = (
+        ('Основные', {
+            'fields': ('product', 'voice_assistant', 'power_source')
+        }),
+        ('Беспроводное соединение', {
+            'fields': ('wireless_connection', 'wifi_standard')
+        }),
+        ('Аудио', {
+            'fields': ('max_power', 'frequency_range', 'signal_noise_ratio')
+        }),
+        ('Физические характеристики', {
+            'fields': ('dimensions', 'weight')
+        }),
+    )
+    readonly_fields = ('product',)
 
 
 # === Админка: Camera ===

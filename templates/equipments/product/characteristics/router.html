@@ -5,19 +5,19 @@
         <table class="specs-table w-100">
             <tr>
                 <td>Модель</td>
-                <td>{{ product.router.model|default:"—" }}</td>
+                <td>{{ product.name|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Стандарт Wi-Fi</td>
-                <td>{{ product.router.wifi_standard|default:"—" }}</td>
+                <td>{{ product.router.wifi_standards|default:"—" }}</td>
             </tr>
             <tr>
                 <td>Диапазоны</td>
-                <td>{{ product.router.frequency_ranges|default:"—" }}</td>
+                <td>{{ product.router.get_frequency_display|default:"—" }}</td>
             </tr>
             <tr>
-                <td>Скорость Wi-Fi</td>
-                <td>{{ product.router.wifi_speed|default:"—" }}</td>
+                <td>Максимальная скорость (Мбит/с)</td>
+                <td>{{ product.router.max_speed|default:"—" }}</td>
             </tr>
         </table>
     </div>

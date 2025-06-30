@@ -47,7 +47,7 @@
                     </li>
                     {% endif %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" role="tab">
+                        <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="products-tab" data-bs-toggle="pill" data-bs-target="#products" role="tab">
                             <i class="bi bi-router me-1"></i>Оборудование
                         </button>
                     </li>
@@ -68,7 +68,7 @@
                         </li>
                         {% endif %}
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="equipment-tab" data-bs-toggle="pill" data-bs-target="#equipment" role="tab">
+                            <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="products-tab" data-bs-toggle="pill" data-bs-target="#products" role="tab">
                                 <i class="bi bi-router me-1"></i>Оборудование
                             </button>
                         </li>
@@ -136,35 +136,35 @@
                     </div>
                     {% endif %}
                     <!-- Оборудование -->
-                    <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="equipment" role="tabpanel">
+                    <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="products" role="tabpanel">
                         <h3 class="mb-4">Выберите оборудование</h3>
                         <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
                         <div class="row g-4">
-                            {% for equipment in equipments %}
+                            {% for product in products %}
                             <div class="col-md-6">
-                                <div class="card equipment-item h-100" data-id="{{ equipment.id }}" onclick="selectEquipment(this, {{ equipment.price }})">
+                                <div class="card equipment-item h-100" data-id="{{ product.id }}" onclick="selectEquipment(this, {{ product.price }})">
                                     <div class="card-body">
                                         <div class="d-flex align-items-center mb-3">
                                             <div class="bg-light p-3 rounded me-3">
-                                                {% if equipment.image %}
-                                                    <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" width="50" height="50">
+                                                {% if product.get_main_image %}
+                                                    <img src="{{ product.get_main_image.image.url }}" alt="{{ product.name }}" width="50" height="50">
                                                 {% else %}
                                                     <i class="bi bi-router text-primary" style="font-size: 2rem;"></i>
                                                 {% endif %}
                                             </div>
                                             <div>
-                                                <h5 class="mb-0">{{ equipment.name }}</h5>
-                                                <span class="text-muted">{{ equipment.model }}</span>
+                                                <h5 class="mb-0">{{ product.name }}</h5>
+                                                <span class="text-muted">{{ product.short_description }}</span>
                                             </div>
                                         </div>
                                         <div class="equipment-description mb-3">
                                             {{ equipment.description|safe }}
                                         </div>
                                         <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <div class="h5 mb-0">{{ equipment.price }} ₽</div>
-                                            {% if equipment.rating %}
+                                            <div class="h5 mb-0">{{ product.price }} ₽</div>
+                                            {% if product.category %}
                                             <div class="badge bg-light text-dark">
-                                                <i class="bi bi-star-fill text-warning"></i> {{ equipment.rating }}
+                                                {{ product.category.name }}
                                             </div>
                                             {% endif %}
                                         </div>

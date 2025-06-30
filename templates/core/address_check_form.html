@@ -15,9 +15,10 @@
                     <p class="address-check__description">Узнайте, какие услуги доступны по вашему адресу</p>
                 </div>
                 
-                <form id="connectionCheckForm" class="address-check__form" method="post" action="{% url 'core:submit_order' locality_slug=locality.slug %}" novalidate>
+                <form id="connectionCheckForm" class="address-check__form" method="post" action="{% url 'orders:submit_order' locality_slug=locality.slug %}" novalidate>
                     {% csrf_token %}
                     <input type="hidden" name="tariff_id" id="tariff_id" value="">
+                    <input type="hidden" name="comment" id="comment" value="Требуется подбор тарифа">
                     
                     <!-- Поле ФИО -->
                     <div class="address-check__field-group">

@@ -15,6 +15,9 @@
     <div class="container">
         <h2>Новая заявка #{{ order.id }}</h2>
         <div class="field">
+            <span class="label">Статус:</span> {{ order.get_status_display }}
+        </div>
+        <div class="field">
             <span class="label">Дата создания:</span> {{ order.created_at|date:"d.m.Y H:i" }}
         </div>
         <div class="field">
@@ -27,14 +30,14 @@
             <span class="label">Тариф:</span> {{ order.tariff.name|default:"Не указан" }}
         </div>
         <div class="field">
+            <span class="label">Населенный пункт:</span> {{ order.locality.name }}
+        </div>
+        <div class="field">
             <span class="label">Адрес:</span> 
             {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
         </div>
         <div class="field">
-            <span class="label">Населенный пункт:</span> {{ order.locality.name }}
-        </div>
-        <div class="field">
-            <span class="label">Статус:</span> {{ order.get_status_display }}
+            <span class="label">Комментарий:</span> {{ order.comment|default_if_none:"" }}
         </div>
         <div class="field">
             <a class="link" href="{{ admin_url }}">Посмотреть в админ-панели</a>

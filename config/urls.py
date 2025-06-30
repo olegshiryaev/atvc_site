@@ -41,6 +41,7 @@ urlpatterns = [
     # Общие маршруты по <locality_slug>/
     path("<slug:locality_slug>/", include("apps.core.urls")),
     path("<slug:locality_slug>/", include("apps.equipments.urls")),
+    path("<slug:locality_slug>/", include("apps.orders.urls")),
 ]
 
 if settings.DEBUG:
