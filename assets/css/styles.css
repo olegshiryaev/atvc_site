@@ -5507,50 +5507,110 @@ select,
     }
 }
 
-.tv-package-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    overflow: hidden;
-    text-align: center;
+.tv-packages-block {
+    position: relative;
 }
+
+.tv-packages-block .swiper {
+    padding: 30px 18px;
+    width: calc(100% + 25px);
+    margin-left: -18px;
+}
+
+.tv-packages-block__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.tv-package-card {
+    border: 1px solid var(--smoky-white-color);
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 400px; /* Фиксированная высота для всех карточек */
+    padding: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.tv-package-card__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
 .tv-package-card__img-wrap {
     width: 100%;
     height: 200px;
     overflow: hidden;
+    position: relative;
+    margin-bottom: 20px;
+    border-radius: 16px;
 }
+
 .tv-package-card__img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
+
 .tv-package-card__title {
-    font-size: 1.25rem;
-    margin: 0.5rem 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    line-height: 32px;
+    letter-spacing: -0.16px;
+    margin: 0 0 10px 0;
 }
+
 .tv-package-card__desc {
-    font-size: 0.9rem;
     color: #666;
-    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 20px;
+    letter-spacing: 0.052px;
+    margin-bottom: 10px;
+    flex-grow: 1; /* Описание растягивается, чтобы заполнить пространство */
+    overflow: hidden;
 }
+
 .tv-package-card__stats {
     font-size: 0.85rem;
     color: #333;
-    margin-bottom: 0.5rem;
+    margin-bottom: 10px;
 }
+
 .tv-package-card__bottom {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.5rem;
+    margin-top: auto;
 }
+
 .tv-package-card__price {
-    font-size: 1.2rem;
-    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+    font-size: 1.6rem;
+    font-weight: 500;
 }
+
 .tv-package-card__btn {
-    padding: 0.5rem 1rem;
-    background-color: #007bff;
+    padding: 0.5rem;
+    background-color: var(--main-color);
     color: white;
     border-radius: 4px;
-    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+}
+
+.tv-package-card__btn svg {
+    width: 24px;
+    height: 24px;
 }

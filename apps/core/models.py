@@ -675,7 +675,7 @@ class TVChannelPackage(models.Model):
         return self.channels.count()
 
     def price_display(self):
-        return f"{self.price} ₽/мес."
+        return f"{self.price} ₽/мес"
 
 
 class StaticPage(models.Model):
