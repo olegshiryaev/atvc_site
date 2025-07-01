@@ -55,16 +55,21 @@ def index(request, locality_slug):
         .select_related("service")
         .prefetch_related(
             Prefetch('included_channels', queryset=TVChannel.objects.all()),
-            'localities'
+            'localities',
+            'tv_packages',
         )
     )
 
-    # Группируем тарифы по типу услугиMore actions
+    # Собираем уникальные ТВ-пакеты, связанные с тарифами
+    tv_package_ids = tariffs.values_list('tv_packages', flat=True).distinct()
+    tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids).prefetch_related('channels')
+
+    # Группируем тарифы по типу услуги
     grouped_tariffs = defaultdict(list)
     for tariff in tariffs:
         grouped_tariffs[tariff.service].append(tariff)
 
-    # Список доступных услуг (сортированный)
+    # Список доступных услуг
     available_services = (
         Service.objects.filter(id__in=tariffs.values_list("service_id", flat=True))
         .distinct()
@@ -74,15 +79,16 @@ def index(request, locality_slug):
     # Преобразуем defaultdict в обычный dict
     grouped_dict = dict(grouped_tariffs)
 
-    # Определяем первую услугу для установки активного таба
+    # Первая услуга для активного таба
     first_service_slug = available_services[0].slug if available_services else ""
 
+    # Новости и баннеры
     latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
         "-created_at"
     )
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
-    # Получаем 10 самых популярных товаров на основе количества просмотров
+    # Популярные продукты
     popular_products = (
         Product.objects.filter(is_available=True)
         .annotate(view_count=Count("views"))
@@ -98,7 +104,7 @@ def index(request, locality_slug):
         "grouped_tariffs": dict(grouped_tariffs),
         "first_service_slug": first_service_slug,
         "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
-        'tv_packages': TVChannelPackage.objects.all(),
+        "tv_packages": tv_packages,
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,
