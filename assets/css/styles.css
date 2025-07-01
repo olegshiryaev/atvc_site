@@ -4342,6 +4342,45 @@ button.swiper-pagination-bullet {
     width: 100%;
 }
 
+/* Стили для выбора цвета в виде кружков */
+.color-circle {
+    display: inline-flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+}
+.color-circle input {
+    display: none;
+}
+.color-circle .circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--color-text-muted);
+    display: inline-block;
+    transition: border-color 0.2s, outline 0.2s;
+}
+.color-circle input:checked + .circle {
+    outline: 2px solid var(--main-color);
+    outline-offset: 2px;
+}
+
+.color-circle.disabled .circle {
+    opacity: 0.5;
+    cursor: not-allowed;
+    position: relative;
+}
+.color-circle.disabled .circle::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70%;
+    height: 2px;
+    background: #999;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+
 /* Популярные товары */
 .popular-card-img {
     max-height: 180px;
@@ -5466,4 +5505,52 @@ select,
         width: 100%;
         padding: 30px;
     }
+}
+
+.tv-package-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    text-align: center;
+}
+.tv-package-card__img-wrap {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+.tv-package-card__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.tv-package-card__title {
+    font-size: 1.25rem;
+    margin: 0.5rem 0;
+}
+.tv-package-card__desc {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+.tv-package-card__stats {
+    font-size: 0.85rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+.tv-package-card__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+}
+.tv-package-card__price {
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+.tv-package-card__btn {
+    padding: 0.5rem 1rem;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
 }

@@ -31,6 +31,7 @@ from .models import (
     Service,
     StaticPage,
     TVChannel,
+    TVChannelPackage,
     Tariff,
     Feedback,
 )
@@ -97,6 +98,7 @@ def index(request, locality_slug):
         "grouped_tariffs": dict(grouped_tariffs),
         "first_service_slug": first_service_slug,
         "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
+        'tv_packages': TVChannelPackage.objects.all(),
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,

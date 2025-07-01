@@ -1,7 +1,8 @@
+from django.http import FileResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.utils import timezone
 from datetime import timedelta
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.db.models import Count, Q
 
 from apps.cities.models import Locality
@@ -165,3 +166,12 @@ def product_detail(request, slug, locality_slug=None):
         "equipments/product_detail.html",
         context,
     )
+
+
+def download_instruction(request, locality_slug, slug):
+    locality = get_object_or_404(Locality, slug=locality_slug)
+    product = get_object_or_404(Product, slug=slug)
+    # Предполагается, что у продукта есть поле, например, `instruction`, с файлом инструкции
+    if hasattr(product, 'instruction') and product.instruction:
+        return FileResponse(product.instruction.open('rb'), as_attachment=True, filename=f"{product.name}_instruction.pdf")
+    return HttpResponseRedirect('equipments:product_detail', locality_slug=locality.slug, slug=product.slug)

@@ -64,6 +64,78 @@
         <!-- Блок тарифов -->
         {% include 'core/partials/tariffs_section.html' %}
 
+        {% if tv_packages %}
+        <section class="tv-packages-block block block_alignwide" data-block-slug="tv-packages-block" data-block-appearance="">
+            <div class="tv-packages-block__header">
+                <h2 class="tv-packages-block__title block__title">Телеканалы на любой вкус</h2>
+            </div>
+            <div class="tv-packages-block__wrapper">
+                <div class="swiper swiper-initialized swiper-horizontal swiper-backface-hidden">
+                    <div class="swiper-wrapper">
+                        {% for package in tv_packages %}
+                            <div class="tv-package-card tv-packages-block__item swiper-slide" 
+                                data-package-title="{{ package.name }}" 
+                                data-package-price="{{ package.price|default_if_none:'' }}">
+                                <a href="#" class="tv-package-card__wrapper">
+                                    <div class="tv-package-card__img-wrap">
+                                        {% if package.image %}
+                                            <img data-lazy-src="{{ package.image.url }}" 
+                                                width="400" height="400" 
+                                                alt="{{ package.name }}" 
+                                                class="tv-package-card__img" 
+                                                src="{{ package.image.url }}">
+                                        {% else %}
+                                            <img data-lazy-src="/static/placeholder/400x400.webp" 
+                                                width="400" height="400" 
+                                                alt="{{ package.name }}" 
+                                                class="tv-package-card__img" 
+                                                src="/static/placeholder/400x400.webp">
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="tv-package-card__title h6">{{ package.name }}</h6>
+                                    <div class="tv-package-card__desc">
+                                        <span>{{ package.description|default_if_none:''|truncatewords:20 }}</span>
+                                    </div>
+                                    <div class="tv-package-card__stats">
+                                        <span>{{ package.channel_count_display }}</span>
+                                    </div>
+                                    <div class="tv-package-card__bottom">
+                                        <div class="tv-package-card__price h5">
+                                            {{ package.price_display }}
+                                        </div>
+                                        <div class="tv-package-card__btn btn" data-add-package-cart="">Подключить</div>
+                                    </div>
+                                </a>
+                            </div>
+                        {% empty %}
+                            <div class="tv-package-card tv-packages-block__item swiper-slide">
+                                <div class="tv-package-card__wrapper">
+                                    <p>Пакеты ТВ-каналов отсутствуют.</p>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+                </div>
+                <div class="tv-packages-block__navs slider-navs">
+                    <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
+                    <div class="slider-navs__pag"></div>
+                    <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+
         {% comment %} <!-- Модальное окно -->
         {% include 'core/partials/order_modal.html' %} {% endcomment %}
 
@@ -367,6 +439,41 @@ document.addEventListener('DOMContentLoaded', function () {
 
     initSwiper();
     window.addEventListener('resize', initSwiper);
+});
+</script>
+<!-- Инициализация Swiper для блока ТВ-пакетов -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.tv-packages-block .swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.tv-packages-block .slider-navs__next',
+            prevEl: '.tv-packages-block .slider-navs__prev',
+        },
+        pagination: {
+            el: '.tv-packages-block .slider-navs__pag',
+            clickable: true,
+        },
+        lazy: {
+            loadPrevNext: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            1024: {
+                slidesPerView: 4,
+                spaceBetween: 30,
+            },
+        },
+        a11y: {
+            prevSlideMessage: 'Предыдущий слайд',
+            nextSlideMessage: 'Следующий слайд',
+            paginationBulletMessage: 'Перейти к слайду {{index}}'
+        }
+    });
 });
 </script>
 {% endblock %}

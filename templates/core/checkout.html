@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block title %}Оформление заказа{% endblock %}
+{% block content %}
+<div class="container">
+    {% include 'partials/page_header.html' with title="Оформление заказа" %}
+    <section class="checkout-block">
+        <form method="post" action="{% url 'orders:checkout' locality_slug=locality_slug %}">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="full_name" class="form-label">ФИО</label>
+                <input type="text" name="full_name" id="full_name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="phone" class="form-label">Телефон</label>
+                <input type="tel" name="phone" id="phone" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email (необязательно)</label>
+                <input type="email" name="email" id="email" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="street" class="form-label">Улица</label>
+                <input type="text" name="street" id="street" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="house" class="form-label">Дом</label>
+                <input type="text" name="house" id="house" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="apartment" class="form-label">Квартира</label>
+                <input type="text" name="apartment" id="apartment" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label for="comment" class="form-label">Комментарий</label>
+                <textarea name="comment" id="comment" class="form-control" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary w-100">Подтвердить заказ</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

@@ -1,224 +1,232 @@
 from django.contrib import admin
-from django.utils.safestring import mark_safe
-from .models import (
-    Category,
-    Product,
-    ProductVariant,
-    SmartSpeaker,
-    Camera,
-    Router,
-    TvBox,
-    ProductImage,
-)
+from .models import Category, Product, ProductImage, ProductVariant, SmartSpeaker, Camera, Router, TvBox, ViewCount
 
 
-# === Вспомогательные классы для инлайнов ===
-
-
+# Inline классы для связанных моделей
 class ProductImageInline(admin.TabularInline):
     model = ProductImage
     extra = 1
-    fields = ("image", "color", "is_main", "order")
-    verbose_name = "Изображение"
-    verbose_name_plural = "Изображения"
-
-    def image_preview(self, obj):
-        if obj.image:
-            return mark_safe(f'<img src="{obj.image.url}" width="100" height="100" />')
-        return "Нет изображения"
-    image_preview.short_description = "Превью"
+    fields = ('image', 'color', 'is_main', 'order')
+    ordering = ('order',)
 
 
 class ProductVariantInline(admin.TabularInline):
     model = ProductVariant
     extra = 1
-    fields = ("color", "sku", "stock", "price")
-    verbose_name = "Вариант товара"
-    verbose_name_plural = "Варианты товаров"
-    
+    fields = ('color', 'sku', 'stock', 'price')
+
 
 class SmartSpeakerInline(admin.StackedInline):
     model = SmartSpeaker
-    can_delete = False
-    verbose_name = "Характеристики умной колонки"
-    verbose_name_plural = "Характеристики умной колонки"
-    fieldsets = (
-        ('Основные', {
-            'fields': ('voice_assistant', 'power_source')
-        }),
-        ('Беспроводное соединение', {
-            'fields': ('wireless_connection', 'wifi_standard')
-        }),
-        ('Аудио', {
-            'fields': ('max_power', 'frequency_range', 'signal_noise_ratio')
-        }),
-        ('Физические характеристики', {
-            'fields': ('dimensions', 'weight')
-        }),
+    extra = 0
+    max_num = 1
+    fields = (
+        'max_power', 'voice_assistant', 'wireless_connection',
+        'power_source', 'frequency_range', 'wifi_standard',
+        'signal_noise_ratio', 'dimensions', 'weight'
     )
 
 
 class CameraInline(admin.StackedInline):
     model = Camera
-    can_delete = False
-    verbose_name = "Характеристики камеры"
-    verbose_name_plural = "Характеристики камеры"
+    extra = 0
+    max_num = 1
+    fields = (
+        'color', 'camera_standard', 'camera_type', 'resolution_mp',
+        'frame_rate', 'operating_temperature', 'dimensions', 'weight',
+        'focal_length', 'resolution', 'matrix_type', 'viewing_angle'
+    )
 
 
 class RouterInline(admin.StackedInline):
     model = Router
-    can_delete = False
-    verbose_name = "Характеристики роутера"
-    verbose_name_plural = "Характеристики роутера"
+    extra = 0
+    max_num = 1
+    fields = (
+        'max_speed', 'supports_devices', 'coverage_area', 'bands',
+        'frequency', 'color', 'dimensions', 'weight', 'antennas_count',
+        'lan_ports', 'ram', 'supports_ipv6', 'encryption', 'management',
+        'vpn_support', 'port_speed'
+    )
 
 
 class TvBoxInline(admin.StackedInline):
     model = TvBox
-    can_delete = False
-    verbose_name = "Характеристики ТВ-приставки"
-    verbose_name_plural = "Характеристики ТВ-приставки"
-
-
-# === Админка: Product ===
-
-
-@admin.register(Product)
-class ProductAdmin(admin.ModelAdmin):
-    list_display = ["name", "price", "category", "is_available", "variant_count"]
-    search_fields = ["name", "slug", "short_description"]
-    list_filter = ["category", "is_available", "services"]
-    prepopulated_fields = {"slug": ("name",)}
-    inlines = [
-        ProductImageInline,
-        ProductVariantInline,
-        SmartSpeakerInline,
-        CameraInline,
-        RouterInline,
-        TvBoxInline,
-    ]
-
-    fieldsets = (
-        (
-            "Основная информация",
-            {"fields": ("name", "slug", "short_description", "description")},
-        ),
-        ("Цена и наличие", {"fields": ("price", "is_available")}),
-        ("Категория", {"fields": ("category",)}),
-        ("Услуги", {"fields": ("services",)}),
+    extra = 0
+    max_num = 1
+    fields = (
+        'color', 'ethernet', 'usb_count', 'os', 'hdmi', 'usb_ports',
+        'hdmi_version', 'av_output', 'sd_card', 'ram', 'rom', 'wifi',
+        'protocols'
     )
-
-    def variant_count(self, obj):
-        """Отображает количество вариантов товара."""
-        return obj.variants.count()
-    variant_count.short_description = "Варианты"
-
-    def get_inline_instances(self, request, obj=None):
-        """Показывать только релевантные инлайны в зависимости от типа товара."""
-        inlines = [ProductImageInline, ProductVariantInline]
-        if obj:
-            if hasattr(obj, 'smart_speaker'):
-                inlines.append(SmartSpeakerInline)
-            elif hasattr(obj, 'camera'):
-                inlines.append(CameraInline)
-            elif hasattr(obj, 'router'):
-                inlines.append(RouterInline)
-            elif hasattr(obj, 'tvbox'):
-                inlines.append(TvBoxInline)
-        return [inline(self.model, self.admin_site) for inline in inlines]
-
-
-# === Админка: Category ===
 
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ["name", "slug"]
-    prepopulated_fields = {"slug": ("name",)}
+    list_display = ('name', 'slug')
+    search_fields = ('name',)
+    prepopulated_fields = {'slug': ('name',)}
+    list_filter = ('name',)
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug')
+        }),
+    )
 
 
-# === Админка: ProductImage ===
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+    list_display = ('name', 'slug', 'price', 'is_available', 'category', 'get_services')
+    search_fields = ('name', 'description', 'short_description')
+    list_filter = ('is_available', 'category', 'services')
+    prepopulated_fields = {'slug': ('name',)}
+    list_editable = ('price', 'is_available')
+    inlines = [ProductImageInline, ProductVariantInline, SmartSpeakerInline, CameraInline, RouterInline, TvBoxInline]
+    
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'slug', 'category', 'price', 'is_available')
+        }),
+        ('Descriptions', {
+            'fields': ('short_description', 'description')
+        }),
+        ('Services', {
+            'fields': ('services',)
+        }),
+    )
+
+    def get_services(self, obj):
+        return ", ".join([service.name for service in obj.services.all()])
+    get_services.short_description = 'Услуги'
 
 
 @admin.register(ProductImage)
 class ProductImageAdmin(admin.ModelAdmin):
-    list_display = ["product", "is_main", "order"]
-    list_filter = ["product"]
-    search_fields = ["product__name"]
+    list_display = ('product', 'image', 'color', 'is_main', 'order')
+    list_filter = ('product', 'color', 'is_main')
+    search_fields = ('product__name',)
+    list_editable = ('is_main', 'order', 'color')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'image', 'color', 'is_main', 'order')
+        }),
+    )
 
-
-# === Админка: ProductVariant ===
 
 @admin.register(ProductVariant)
 class ProductVariantAdmin(admin.ModelAdmin):
-    list_display = ["product", "color", "sku", "stock", "price"]
-    list_filter = ["color"]
-    search_fields = ["product__name", "sku"]
-    list_editable = ["stock", "price"]
-
-
-# === Админка: SmartSpeaker ===
+    list_display = ('product', 'color', 'sku', 'stock', 'price')
+    list_filter = ('color', 'product')
+    search_fields = ('product__name', 'sku')
+    list_editable = ('stock', 'price', 'color')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'color', 'sku', 'stock', 'price')
+        }),
+    )
 
 
 @admin.register(SmartSpeaker)
 class SmartSpeakerAdmin(admin.ModelAdmin):
-    list_display = ('product', 'voice_assistant', 'power_source', 'wireless_connection', 'max_power')
-    list_filter = ('voice_assistant', 'power_source', 'wireless_connection')
-    search_fields = ('product__name', 'voice_assistant')
+    list_display = ('product', 'voice_assistant', 'max_power', 'wireless_connection')
+    search_fields = ('product__name', 'voice_assistant', 'wireless_connection')
+    list_filter = ('voice_assistant', 'wireless_connection')
+    
     fieldsets = (
-        ('Основные', {
-            'fields': ('product', 'voice_assistant', 'power_source')
+        (None, {
+            'fields': ('product',)
         }),
-        ('Беспроводное соединение', {
-            'fields': ('wireless_connection', 'wifi_standard')
-        }),
-        ('Аудио', {
-            'fields': ('max_power', 'frequency_range', 'signal_noise_ratio')
-        }),
-        ('Физические характеристики', {
-            'fields': ('dimensions', 'weight')
+        ('Technical Specifications', {
+            'fields': (
+                'max_power', 'voice_assistant', 'wireless_connection', 
+                'power_source', 'frequency_range', 'wifi_standard', 
+                'signal_noise_ratio', 'dimensions', 'weight'
+            )
         }),
     )
-    readonly_fields = ('product',)
-
-
-# === Админка: Camera ===
 
 
 @admin.register(Camera)
 class CameraAdmin(admin.ModelAdmin):
-    list_display = [
-        "product",
-        "color",
-        "camera_standard",
-        "camera_type",
-        "resolution_mp",
-        "frame_rate",
-    ]
-    search_fields = ["product__name"]
-    list_filter = ["color", "camera_standard", "camera_type"]
-
-
-# === Админка: Router ===
+    list_display = ('product', 'camera_type', 'resolution', 'color')
+    search_fields = ('product__name', 'camera_type', 'resolution', 'matrix_type')
+    list_filter = ('camera_type', 'camera_standard', 'color')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'color')
+        }),
+        ('Technical Specifications', {
+            'fields': (
+                'camera_standard', 'camera_type', 'resolution_mp', 'frame_rate',
+                'operating_temperature', 'dimensions', 'weight', 'focal_length',
+                'resolution', 'matrix_type', 'viewing_angle'
+            )
+        }),
+    )
 
 
 @admin.register(Router)
 class RouterAdmin(admin.ModelAdmin):
-    list_display = [
-        "product",
-        "max_speed",
-        "supports_devices",
-        "coverage_area",
-        "bands",
-        "wifi_standards",
-    ]
-    search_fields = ["product__name"]
-    list_filter = ["bands", "supports_ipv6"]
-
-
-# === Админка: TvBox ===
+    list_display = ('product', 'max_speed', 'bands', 'frequency', 'color')
+    search_fields = ('product__name', 'wifi_standards', 'management')
+    list_filter = ('bands', 'frequency', 'color', 'supports_ipv6')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'color')
+        }),
+        ('Network Specifications', {
+            'fields': (
+                'max_speed', 'supports_devices', 'coverage_area', 
+                'bands', 'frequency', 'wifi_standards', 'supports_ipv6', 
+                'encryption', 'management', 'vpn_support'
+            )
+        }),
+        ('Hardware', {
+            'fields': ('antennas_count', 'lan_ports', 'port_speed', 'ram', 'dimensions', 'weight')
+        }),
+    )
 
 
 @admin.register(TvBox)
 class TvBoxAdmin(admin.ModelAdmin):
-    list_display = ["product", "os", "hdmi", "usb_ports"]
-    search_fields = ["product__name"]
+    list_display = ('product', 'os', 'color', 'hdmi')
+    search_fields = ('product__name', 'os', 'wifi')
+    list_filter = ('color', 'os', 'hdmi', 'av_output', 'sd_card')
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'color')
+        }),
+        ('Technical Specifications', {
+            'fields': (
+                'ethernet', 'usb_count', 'os', 'hdmi', 'usb_ports', 
+                'hdmi_version', 'av_output', 'sd_card', 'ram', 'rom', 
+                'wifi', 'protocols'
+            )
+        }),
+    )
+
+
+@admin.register(ViewCount)
+class ViewCountAdmin(admin.ModelAdmin):
+    list_display = ('product', 'user', 'ip_address', 'viewed_on')
+    search_fields = ('product__name', 'ip_address', 'user__username')
+    list_filter = ('viewed_on', 'product')
+    date_hierarchy = 'viewed_on'
+    
+    fieldsets = (
+        (None, {
+            'fields': ('product', 'user', 'session_key', 'ip_address', 'viewed_on')
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        return False  # Views are typically recorded automatically, not added manually
+    
+    def has_change_permission(self, request, obj=None):
+        return False  # Views shouldn't be editable

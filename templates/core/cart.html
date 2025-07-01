@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% block title %}Корзина{% endblock %}
+{% block content %}
+<div class="container">
+    {% include 'partials/page_header.html' with title="Корзина" %}
+    <section class="cart-block">
+        {% if cart_items.products or cart_items.tariff or cart_items.services or cart_items.tv_packages %}
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Элемент</th>
+                            <th>Описание</th>
+                            <th>Цена</th>
+                            <th>Количество</th>
+                            <th>Итого</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in cart_items.products %}
+                            <tr>
+                                <td>Товар</td>
+                                <td>{{ item.product.name }} ({{ item.variant.get_color_display }})</td>
+                                <td>{{ item.price }} ₽</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.total }} ₽</td>
+                                <td>
+                                    <form method="post" action="{% url 'orders:remove_from_cart' locality_slug=locality_slug %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="item_type" value="product">
+                                        <input type="hidden" name="item_id" value="variant_{{ item.variant.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% if cart_items.tariff %}
+                            <tr>
+                                <td>Тариф</td>
+                                <td>{{ cart_items.tariff.name }}</td>
+                                <td>{{ cart_items.tariff.price }} ₽</td>
+                                <td>1</td>
+                                <td>{{ cart_items.tariff.price }} ₽</td>
+                                <td>
+                                    <form method="post" action="{% url 'orders:remove_from_cart' locality_slug=locality_slug %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="item_type" value="tariff">
+                                        <input type="hidden" name="item_id" value="{{ cart_items.tariff.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endif %}
+                        {% for service in cart_items.services %}
+                            <tr>
+                                <td>Услуга</td>
+                                <td>{{ service.name }}</td>
+                                <td>{{ service.price }} ₽</td>
+                                <td>1</td>
+                                <td>{{ service.price }} ₽</td>
+                                <td>
+                                    <form method="post" action="{% url 'orders:remove_from_cart' locality_slug=locality_slug %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="item_type" value="service">
+                                        <input type="hidden" name="item_id" value="{{ service.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        {% for tv_package in cart_items.tv_packages %}
+                            <tr>
+                                <td>ТВ-пакет</td>
+                                <td>{{ tv_package.name }}</td>
+                                <td>{{ tv_package.price }} ₽</td>
+                                <td>1</td>
+                                <td>{{ tv_package.price }} ₽</td>
+                                <td>
+                                    <form method="post" action="{% url 'orders:remove_from_cart' locality_slug=locality_slug %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="item_type" value="tv_package">
+                                        <input type="hidden" name="item_id" value="{{ tv_package.id }}">
+                                        <button type="submit" class="btn btn-danger btn-sm">Удалить</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="text-end mt-4">
+                <h4>Итого: {{ total_price }} ₽</h4>
+                <a href="{% url 'orders:checkout' locality_slug=locality_slug %}" class="btn btn-primary">Оформить заказ</a>
+            </div>
+        {% else %}
+            <p class="text-muted">Ваша корзина пуста.</p>
+            <a href="{% url 'equipments:equipment_list' locality_slug=locality_slug %}" class="btn btn-primary">К каталогу</a>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

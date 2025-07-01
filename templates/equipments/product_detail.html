@@ -48,8 +48,6 @@
                 <div class="h-100 d-flex flex-column p-4">
                     <h2 class="product-card__title h4">{{ product.name }}</h2>
                     <p class="product-card__desc">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
-
-                    <!-- Выбор цвета в виде кружков -->
                     {% if product.variants.exists %}
                         <div class="product-card__colors mb-3">
                             <h6>Выберите цвет:</h6>
@@ -57,36 +55,36 @@
                                 {% for variant in product.variants.all %}
                                     <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}" title="{{ variant.get_color_display }}">
                                         <input type="radio" name="variant_id" value="{{ variant.id }}"
-                                               data-price="{{ variant.price|default:product.price }}"
-                                               data-color="{{ variant.color }}"
-                                               {% if forloop.first %}checked{% endif %}
-                                               {% if variant.stock <= 0 %}disabled{% endif %}
-                                               aria-label="Выбрать цвет {{ variant.get_color_display }}">
+                                                data-price="{{ variant.price|default:product.price }}"
+                                                data-color="{{ variant.color }}"
+                                                {% if forloop.first %}checked{% endif %}
+                                                {% if variant.stock <= 0 %}disabled{% endif %}
+                                                aria-label="Выбрать цвет {{ variant.get_color_display }}{% if variant.stock <= 0 %}, нет в наличии{% endif %}">
                                         <span class="circle" style="background-color: {{ variant.color|color_to_hex }};"></span>
                                     </label>
                                 {% endfor %}
                             </div>
                         </div>
                     {% endif %}
-
                     <div class="mt-auto">
                         <div class="product-card__price mb-3">
                             <span class="current-price">
-                                {% if product.variants.exists %}
-                                    {{ product.variants.first.price|default:product.price }} ₽
-                                {% else %}
-                                    {{ product.price }} ₽
-                                {% endif %}
+                                {{ product.variants.first.price|default:product.price|default:'N/A' }} ₽
                             </span>
                         </div>
-                        <form method="post" action="#">
+                        <form method="post" action="{% url 'orders:add_to_cart' locality_slug=locality.slug %}" id="add-to-cart-form">
                             {% csrf_token %}
+                            <input type="hidden" name="item_type" value="product">
                             <input type="hidden" name="variant_id" id="selected_variant_id" value="{% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}">
-                            <button class="product-card__btn btn w-100" type="submit" {% if product.variants.exists and not product.variants.all|length or product.variants.all|length == 0 %}disabled{% endif %}>
-                                В корзину
+                            <div class="mb-3">
+                                <label for="quantity" class="form-label">Количество:</label>
+                                <input type="number" name="quantity" id="quantity" class="form-control w-25" min="1" max="{% if product.variants.exists %}{{ product.variants.first.stock }}{% else %}10{% endif %}" value="1">
+                            </div>
+                            <button class="product-card__btn btn w-100" type="submit" {% if product.variants.exists and not product.variants.all|length %}disabled{% endif %}>
+                                Добавить в корзину
                             </button>
                         </form>
-                        <a href="#" class="text-decoration-none small mt-2 d-block text-center">
+                        <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
                             <i class="bi bi-download me-1"></i> Скачать инструкцию
                         </a>
                     </div>
@@ -168,49 +166,6 @@
     </section>
     {% endif %}
 </div>
-
-<!-- Стили для выбора цвета в виде кружков -->
-<style>
-.color-circle {
-    display: inline-flex;
-    align-items: center;
-    position: relative;
-    cursor: pointer;
-}
-.color-circle input {
-    display: none;
-}
-.color-circle .circle {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid #ccc;
-    display: inline-block;
-    transition: border-color 0.2s;
-}
-.color-circle input:checked + .circle {
-    border-color: #007bff;
-    box-shadow: 0 0 0 2px #007bff;
-}
-.color-circle.disabled .circle {
-    opacity: 0.5;
-    cursor: not-allowed;
-    position: relative;
-}
-.color-circle.disabled .circle::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 70%;
-    height: 2px;
-    background: #999;
-    transform: translate(-50%, -50%) rotate(45deg);
-}
-.color-circle:hover:not(.disabled) .circle {
-    border-color: #0056b3;
-}
-</style>
 
 <!-- JavaScript для галереи и выбора цвета -->
 <script>

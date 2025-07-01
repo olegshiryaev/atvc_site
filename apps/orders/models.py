@@ -1,21 +1,33 @@
 from django.db import models
 from django.conf import settings
-from apps.equipments.models import Product
+from apps.equipments.models import Product, ProductVariant
 from apps.core.models import Locality, Tariff, TVChannelPackage, AdditionalService
 
 class OrderProduct(models.Model):
     """Промежуточная модель для товаров в заказе"""
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_products')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
-    price = models.PositiveIntegerField(verbose_name="Цена на момент заказа")
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_products', verbose_name="Заказ")
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
+    variant = models.ForeignKey(
+        ProductVariant, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        verbose_name="Вариант товара"
+    )
+    quantity = models.PositiveIntegerField("Количество", default=1)
+    price = models.PositiveIntegerField("Цена за единицу")
     
     class Meta:
         verbose_name = "Товар в заказе"
         verbose_name_plural = "Товары в заказе"
     
     def __str__(self):
-        return f"{self.product.name} x{self.quantity} в заказе #{self.order.id}"
+        variant_str = f" ({self.variant.get_color_display()})" if self.variant else ""
+        return f"{self.product.name}{variant_str} x{self.quantity} в заказе #{self.order.id}"
+
+    def get_price(self):
+        """Возвращает цену из ProductVariant или Product"""
+        return self.price  # Цена уже сохранена при создании OrderProduct
 
 
 class Order(models.Model):
@@ -87,14 +99,16 @@ class Order(models.Model):
     )
 
     def get_products_with_details(self):
-        """Возвращает продукты с их специализированными характеристиками"""
+        """Возвращает продукты с их вариантами и специализированными характеристиками"""
         products = []
         for order_product in self.order_products.all():
             product = order_product.product
+            variant = order_product.variant
             details = {
                 'quantity': order_product.quantity,
                 'price': order_product.price,
                 'product': product,
+                'variant': variant,
                 'type': None,
                 'specifics': None
             }
