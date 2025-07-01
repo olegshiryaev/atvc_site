@@ -65,78 +65,84 @@
         {% include 'core/partials/tariffs_section.html' %}
 
         {% if tv_packages %}
-            <section class="tv-packages-block block" data-block-slug="tv-packages-block" data-block-appearance="">
-                <div class="tv-packages-block__header">
-                    <h2 class="tv-packages-block__title block__title">Телеканалы на любой вкус</h2>
-                </div>
-                <div class="tv-packages-block__wrapper">
-                    <div class="swiper">
-                        <div class="swiper-wrapper">
-                            {% for package in tv_packages %}
-                                <div class="tv-package-card tv-packages-block__item swiper-slide" 
-                                    data-package-title="{{ package.name }}" 
-                                    data-package-price="{{ package.price|default_if_none:'' }}">
-                                    <div class="tv-package-card__wrapper">
-                                        <div class="tv-package-card__img-wrap">
-                                            {% if package.image %}
-                                                <img data-lazy-src="{{ package.image.url }}" 
-                                                    width="400" height="400" 
-                                                    alt="{{ package.name }}" 
-                                                    class="tv-package-card__img" 
-                                                    src="{{ package.image.url }}">
-                                            {% else %}
-                                                <img data-lazy-src="/static/placeholder/400x400.webp" 
-                                                    width="400" height="400" 
-                                                    alt="{{ package.name }}" 
-                                                    class="tv-package-card__img" 
-                                                    src="/static/placeholder/400x400.webp">
-                                            {% endif %}
-                                        </div>
-                                        <h6 class="tv-package-card__title">{{ package.name }}</h6>
-                                        <div class="tv-package-card__desc">
-                                            <span>{{ package.description|default_if_none:''|truncatewords:20 }}</span>
-                                        </div>
-                                        <div class="tv-package-card__stats">
-                                            <span>{{ package.channel_count_display }}</span>
-                                        </div>
-                                        <div class="tv-package-card__bottom">
-                                            <div class="tv-package-card__price">
-                                                {{ package.price_display }}
+        <section class="tv-packages-block block" data-block-slug="tv-packages-block" data-block-appearance="">
+            <div class="tv-packages-block__header">
+                <h2 class="tv-packages-block__title block__title">Телеканалы на любой вкус</h2>
+            </div>
+            <div class="tv-packages-block__wrapper">
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        {% for package in tv_packages %}
+                            <div class="tv-package-card tv-packages-block__item swiper-slide" 
+                                data-package-title="{{ package.name }}" 
+                                data-package-price="{{ package.price|default_if_none:'' }}">
+                                <div class="tv-package-card__wrapper">
+                                    <div class="tv-package-card__img-wrap">
+                                        {% if package.image %}
+                                            <img data-lazy-src="{{ package.image.url }}" 
+                                                width="400" height="400" 
+                                                alt="{{ package.name }}" 
+                                                class="tv-package-card__img" 
+                                                src="{{ package.image.url }}">
+                                        {% else %}
+                                            <div class="tv-package-card__img-placeholder">
+                                                <span>Нет изображения</span>
                                             </div>
-                                            <button class="tv-package-card__btn btn" data-add-package-cart="" aria-label="Добавить пакет">
-                                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
-                                                    <path d="M12 5v14M5 12h14"></path>
-                                                </svg>
-                                            </button>
+                                        {% endif %}
+                                    </div>
+                                    <h6 class="tv-package-card__title">{{ package.name }}</h6>
+                                    <div class="tv-package-card__desc">
+                                        <span>{{ package.description|default_if_none:''|truncatewords:20 }}</span>
+                                    </div>
+                                    <div class="tv-package-card__stats">
+                                        <span>{{ package.channel_count_display }}</span>
+                                        <a href="#channelsModal-{{ package.id }}"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#channelsModal-{{ package.id }}"
+                                        class="tv-package-card__channels-link">Список каналов</a>
+                                    </div>
+                                    <div class="tv-package-card__bottom">
+                                        <div class="tv-package-card__price">
+                                            {{ package.price_display }}
                                         </div>
+                                        <button class="tv-package-card__btn btn" data-add-package-cart="" aria-label="Добавить пакет">
+                                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24">
+                                                <path d="M12 5v14M5 12h14"></path>
+                                            </svg>
+                                        </button>
                                     </div>
                                 </div>
-                            {% empty %}
-                                <div class="tv-package-card tv-packages-block__item swiper-slide">
-                                    <div class="tv-package-card__wrapper">
-                                        <p>Пакеты ТВ-каналов отсутствуют.</p>
-                                    </div>
+                            </div>
+                        {% empty %}
+                            <div class="tv-package-card tv-packages-block__item swiper-slide">
+                                <div class="tv-package-card__wrapper">
+                                    <p>Пакеты ТВ-каналов отсутствуют.</p>
                                 </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                    <div class="tv-packages-block__navs slider-navs">
-                        <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 19L8 12L15 5"></path>
-                            </svg>
-                        </button>
-                        <div class="slider-navs__pag"></div>
-                        <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 19L8 12L15 5"></path>
-                            </svg>
-                        </button>
+                            </div>
+                        {% endfor %}
                     </div>
                 </div>
-            </section>
+                <div class="tv-packages-block__navs slider-navs">
+                    <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
+                    <div class="slider-navs__pag"></div>
+                    <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                            stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M15 19L8 12L15 5"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Модалы вынесены за пределы Swiper -->
+            {% for package in tv_packages %}
+                {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all %}
+            {% endfor %}
+        </section>
         {% endif %}
 
         {% comment %} <!-- Модальное окно -->

@@ -5558,6 +5558,19 @@ select,
     object-fit: cover;
 }
 
+.tv-package-card__img-placeholder {
+    width: 100%;
+    height: 100%;
+    background-color: #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1rem;
+    font-weight: 400;
+    text-align: center;
+}
+
 .tv-package-card__title {
     font-size: 1.4rem;
     font-weight: 600;
@@ -5581,6 +5594,20 @@ select,
     font-size: 0.85rem;
     color: #333;
     margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tv-package-card__channels-link {
+    color: var(--main-color);
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.tv-package-card__channels-link:hover {
+    text-decoration: underline;
 }
 
 .tv-package-card__bottom {

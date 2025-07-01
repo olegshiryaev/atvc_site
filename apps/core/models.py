@@ -661,9 +661,19 @@ class TVChannelPackage(models.Model):
 
     def channel_count_display(self):
         stats = self.get_channel_stats()
-        if stats["hd"] > 0:
-            return f"{stats['sd']} SD + {stats['hd']} HD"
-        return f"{stats['sd']} каналов"
+        total = stats['sd'] + stats['hd']
+        
+        # Логика склонения слова "канал"
+        if total % 10 == 1 and total % 100 != 11:
+            channel_word = "канал"
+        elif total % 10 in [2, 3, 4] and total % 100 not in [12, 13, 14]:
+            channel_word = "канала"
+        else:
+            channel_word = "каналов"
+        
+        if stats['hd'] > 0:
+            return f"{total} {channel_word} ({stats['hd']} HD)"
+        return f"{total} {channel_word}"
 
     def has_hd_channels(self):
         return self.channels.filter(is_hd=True).exists()
