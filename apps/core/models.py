@@ -165,6 +165,7 @@ class TVChannel(models.Model):
 
 
 class Tariff(models.Model):
+    """Модель для хранения информации о тарифах"""
     TECHNOLOGY_CHOICES = [
         ("fttx", "FTTx"),
         ("pon", "PON"),
@@ -211,7 +212,7 @@ class Tariff(models.Model):
         verbose_name="Населённые пункты",
         related_name="tariffs",
     )
-    slug = models.SlugField("URL-адрес", max_length=120, blank=True)
+    slug = models.SlugField("URL-адрес", max_length=120, blank=True, unique=True)
     is_active = models.BooleanField("Активен", default=True)
 
     def save(self, *args, **kwargs):
@@ -645,13 +646,31 @@ class TVChannelPackage(models.Model):
     tariffs = models.ManyToManyField(
         "Tariff", verbose_name="Тарифы", related_name="tv_packages", blank=True
     )
+    slug = models.SlugField("URL-адрес", max_length=120, blank=True)
 
     def __str__(self):
         return self.name
-
-    class Meta:
-        verbose_name = "Пакет ТВ-каналов"
-        verbose_name_plural = "Пакеты ТВ-каналов"
+    
+    def save(self, *args, **kwargs):
+        """Автоматически генерирует уникальный slug на основе имени пакета."""
+        if not self.slug:
+            base_slug = pytils_slugify(self.name)
+            self.slug = base_slug
+            
+            # Проверяем уникальность и добавляем суффикс, если нужно
+            counter = 1
+            while TVChannelPackage.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{counter}"
+                counter += 1
+        else:
+            # Если slug задан вручную, тоже проверяем уникальность
+            base_slug = self.slug
+            counter = 1
+            while TVChannelPackage.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+                self.slug = f"{base_slug}-{counter}"
+                counter += 1
+                
+        super().save(*args, **kwargs)
 
     def get_channel_stats(self):
         channels = self.channels.all()
@@ -686,6 +705,10 @@ class TVChannelPackage(models.Model):
 
     def price_display(self):
         return f"{self.price} ₽/мес"
+    
+    class Meta:
+        verbose_name = "Пакет ТВ-каналов"
+        verbose_name_plural = "Пакеты ТВ-каналов"
 
 
 class StaticPage(models.Model):

@@ -668,16 +668,17 @@ class AdditionalServiceAdmin(admin.ModelAdmin):
 
 @admin.register(TVChannelPackage)
 class TVChannelPackageAdmin(admin.ModelAdmin):
-    list_display = ("name", "price", "tariff_list", "image_tag")
-    search_fields = ("name",)
+    list_display = ("name", "price", "tariff_list", "image_tag", "slug")
+    search_fields = ("name", "slug")
     filter_horizontal = ("channels", "tariffs")
     readonly_fields = ("image_tag",)
     fieldsets = (
-        (None, {"fields": ("name", "price", "description", "image", "image_tag")}),
+        (None, {"fields": ("name", "price", "description", "image", "image_tag", "slug")}),
         ("Связь", {"fields": ("channels", "tariffs")}),
     )
 
     def image_tag(self, obj):
+        """Отображает миниатюру изображения пакета."""
         if obj.image:
             return format_html(
                 '<img src="{}" width="132" height="72" />'.format(obj.image.url)
@@ -688,6 +689,7 @@ class TVChannelPackageAdmin(admin.ModelAdmin):
     image_tag.allow_tags = True
 
     def tariff_list(self, obj):
+        """Возвращает список связанных тарифов."""
         return ", ".join([t.name for t in obj.tariffs.all()])
 
     tariff_list.short_description = "Тарифы"
