@@ -52,12 +52,14 @@ INSTALLED_APPS = [
     "compressor",
     "django_htmx",
     "import_export",
+    "channels",
     "apps.cities",
     "apps.core",
-    "apps.services",
+    "apps.services.apps.ServicesConfig",
     "apps.news",
     "apps.equipments",
     "apps.orders",
+    "apps.chat",
 ]
 
 MIDDLEWARE = [
@@ -93,6 +95,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+
+ASGI_APPLICATION = "config.asgi.application"
 
 
 # Database
@@ -175,6 +179,14 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 # Cache and Celery settings
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [env('REDIS_LOCATION', default='redis://redis:6379/2').replace('/1', '/2')],  # Используем базу /2
+        },
+    },
+}
 
 CACHES = {
     "default": {
@@ -267,6 +279,9 @@ RECAPTCHA_PUBLIC_KEY = env("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
 
 LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
+    "/chat/",
+    "/chat/api/",
+    "/ws/",
     "/a9f8s7d6/",
     "/static/",
     "/media/",

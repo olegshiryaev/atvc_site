@@ -1,0 +1,57 @@
+<h1>Панель поддержки</h1>
+
+<ul id="sessions-list">
+  {% for session in sessions %}
+    <li>
+      <a href="#" data-session-id="{{ session.id }}" class="session-link">
+        {{ session.name }} — {{ session.contact }} — {{ session.created_at }}
+      </a>
+    </li>
+  {% empty %}
+    <li>Нет активных сессий</li>
+  {% endfor %}
+</ul>
+
+<div id="chat-window" style="display:none;">
+  <h2>Чат с <span id="chat-client-name"></span></h2>
+  <div id="chat-messages" style="border:1px solid #ccc; height:300px; overflow-y:scroll;"></div>
+  <input type="text" id="chat-input" placeholder="Введите сообщение..." />
+</div>
+
+<script>
+  let socket = null;
+  let currentSessionId = null;
+
+  document.querySelectorAll('.session-link').forEach(link => {
+    link.onclick = e => {
+      e.preventDefault();
+      const sessionId = e.target.dataset.sessionId;
+      currentSessionId = sessionId;
+      document.getElementById('chat-client-name').innerText = e.target.innerText;
+      document.getElementById('chat-window').style.display = 'block';
+      document.getElementById('chat-messages').innerHTML = '';
+
+      if (socket) {
+        socket.close();
+      }
+
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      socket = new WebSocket(`${protocol}://${window.location.host}/ws/chat/${sessionId}/`);
+
+      socket.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const msg = document.createElement('div');
+        msg.innerHTML = `<strong>${data.is_support ? 'Специалист' : 'Клиент'}:</strong> ${data.message}`;
+        document.getElementById('chat-messages').appendChild(msg);
+        document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+      };
+
+      document.getElementById('chat-input').onkeydown = function(e) {
+        if (e.key === 'Enter' && this.value.trim() !== '') {
+          socket.send(JSON.stringify({message: this.value, is_support: true}));
+          this.value = '';
+        }
+      };
+    };
+  });
+</script>

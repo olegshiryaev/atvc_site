@@ -42,6 +42,7 @@ urlpatterns = [
     path("<slug:locality_slug>/", include("apps.core.urls")),
     path("<slug:locality_slug>/", include("apps.equipments.urls")),
     path("<slug:locality_slug>/", include("apps.orders.urls")),
+    path("chat/", include("apps.chat.urls")),
 ]
 
 if settings.DEBUG:
