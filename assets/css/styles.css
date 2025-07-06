@@ -2061,6 +2061,112 @@ button.swiper-pagination-bullet {
     position: relative;
 }
 
+.info-slide {
+    height: 100%;
+    min-height: 493px;
+    width: 100%;
+    padding: 20px;
+    border-radius: 15px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    color: white;
+    background: #0091d5;
+    background: linear-gradient(135deg, #0091d5 0%, #0077b5 100%);
+    box-shadow: var(--shadow-card);
+    overflow: hidden;
+}
+
+.info-slide__content {
+    max-width: 300px;
+    margin: 0 auto;
+}
+
+.info-slide__title {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: white;
+}
+
+.info-slide__text {
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.info-slide__contacts {
+    margin-bottom: 20px;
+}
+
+.contact-phone {
+    margin-bottom: 15px;
+}
+
+.phone-link {
+    display: block;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+    margin-bottom: 5px;
+}
+
+.contact-phone span {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.info-slide__feedback-btn {
+    background: white;
+    color: #0091d5;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-bottom: 20px;
+    width: 100%;
+    transition: all 0.3s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.info-slide__feedback-btn:hover {
+    background: #f0f0f0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.info-slide__social {
+    margin-top: 20px;
+}
+
+.info-slide__social p {
+    margin-bottom: 10px;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.social-link {
+    color: white;
+    font-size: 24px;
+    transition: all 0.3s;
+    opacity: 0.8;
+}
+
+.social-link:hover {
+    color: white;
+    opacity: 1;
+}
+
+/* Иконки (можно заменить на свои) */
+.icon-vk:before { content: "VK"; font-family: Arial; font-weight: bold; }
+.icon-telegram:before { content: "TG"; font-family: Arial; font-weight: bold; }
+.icon-whatsapp:before { content: "WA"; font-family: Arial; font-weight: bold; }
+
 /* Адаптивность */
 @media (max-width: 575.98px) {
     .scrollable-buttons {
