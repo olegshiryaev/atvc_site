@@ -1,5 +1,15 @@
-<div class="callback-modal-body text-center p-4">
-    <h4 class="text-success">Спасибо!</h4>
-    <p>Заявка принята!<br>Наши специалисты свяжутся с Вами в ближайшее время.</p>
-    <button type="button" class="btn btn-success mt-3" data-bs-dismiss="modal">Закрыть</button>
-</div>
+<button class="callback-modal-close" onclick="closeModal()">&times;</button>
+
+<h3 class="callback-modal-title">Спасибо!</h3>
+<p class="callback-modal-subtitle">
+    Заявка принята!<br>
+    Наши специалисты свяжутся с Вами в ближайшее время.
+</p>
+
+<button onclick="closeModal()" class="callback-btn mt-3">Закрыть</button>
+
+<script>
+    setTimeout(() => {
+        closeModal();
+    }, 5000);
+</script>
