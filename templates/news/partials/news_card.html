@@ -8,6 +8,9 @@
             </div>
         {% endif %}
     </div>
+    <div class="news-card__category{% if news.category == 'news' %} news-card__category--news{% elif news.category == 'promotions' %} news-card__category--promotion{% endif %}">
+        {{ news.get_category_display }}
+    </div>
     <div class="news-card__content">
         <div class="news-card__title">{{ news.title }}</div>
         <div class="news-card__excerpt">
@@ -15,8 +18,8 @@
         </div>
         <div class="news-card__footer">
             <span class="news-card__date">{{ news.created_at|date:"d.m.Y" }}</span>
-            <span class="news-card__views" title="Количество просмотров">
-                👁 {{ news.views_count }}
+            <span class="news-card__views" aria-label="Просмотров: {{ news.views_count }}">
+                👁 <span aria-hidden="true">{{ news.views_count }}</span>
             </span>
         </div>
     </div>

@@ -2,7 +2,7 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 import html
-import re
+from django.utils.html import strip_tags
 from django.utils.text import Truncator
 from ckeditor.fields import RichTextField
 from django.core.validators import FileExtensionValidator
@@ -12,8 +12,8 @@ from ..cities.models import Locality
 
 class News(models.Model):
     CATEGORY_CHOICES = (
-        ("news", "Новость"),
-        ("promotion", "Акция"),
+        ("news", "Новости"),
+        ("promotions", "Акции"),
     )
     
     title = models.CharField(max_length=200, verbose_name="Заголовок")
@@ -65,13 +65,7 @@ class News(models.Model):
         
     @property
     def preview_text(self):
-        # Декодируем HTML-сущности
-        text = html.unescape(self.content)
-
-        # Удаляем HTML-теги
-        text = re.sub(r"<[^>]*>", "", text)
-
-        # Обрезаем по словам (20 слов)
+        text = html.unescape(strip_tags(self.content))
         return Truncator(text).words(20, truncate='...')
 
     def get_absolute_url(self):

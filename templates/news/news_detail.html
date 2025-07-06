@@ -34,19 +34,33 @@
                             <p class="news-detail__share-title">Поделиться:</p>
                             <ul class="news-detail__share-list">
                                 <li class="news-detail__share-item">
-                                    <a href="https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ news.title }}" target="_blank">Telegram</a>
+                                    <a href=" https://t.me/share/url?url={{ request.build_absolute_uri }}&text={{ news.title }}" target="_blank" aria-label="Поделиться в Telegram">
+                                        <img src="{% static 'icons/telegram.svg' %}" alt="Telegram">
+                                    </a>
                                 </li>
                                 <li class="news-detail__share-item">
-                                    <a href="https://wa.me/?text={{ news.title }}%20{{ request.build_absolute_uri }}" target="_blank">WhatsApp</a>
-                                </li>
-                                <li class="news-detail__share-item">
-                                    <a href="https://vk.com/share.php?url={{ request.build_absolute_uri }}&title={{ news.title }}" target="_blank">VK</a>
+                                    <a href=" https://vk.com/share.php?url={{ request.build_absolute_uri }}&title={{ news.title }}" target="_blank" aria-label="Поделиться во ВКонтакте">
+                                        <img src="{% static 'icons/vk.svg' %}" alt="VK">
+                                    </a>
                                 </li>
                             </ul>
                         </div>
                     </div>
                 </div>
             </article>
+            <!-- Другие новости -->
+            {% if other_news %}
+            <section class="related-news">
+                <h2 class="related-news__title">Другие новости</h2>
+                <div class="related-news__grid">
+                    {% for item in other_news %}
+                        <div class="related-news__card">
+                            {% include 'news/partials/news_card.html' with news=item is_preview=True %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </section>
+            {% endif %}
         </div>
     </div>
 </section>

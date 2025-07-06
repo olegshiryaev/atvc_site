@@ -70,12 +70,21 @@ def news_detail(request, locality_slug, news_slug):
     # Увеличиваем счётчик просмотров
     News.objects.filter(pk=news_item.pk).update(views_count=F("views_count") + 1)
 
+    # Получаем другие новости из той же локальности
+    other_news = News.objects.filter(
+        localities=locality,
+        is_published=True
+    ).exclude(
+        id=news_item.id
+    ).order_by('-created_at')[:3]
+
     return render(
         request,
         "news/news_detail.html",
         {
             "locality": locality,
             "news": news_item,
+            "other_news": other_news,
             "title": news_item.title,
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},

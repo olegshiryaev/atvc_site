@@ -2176,6 +2176,28 @@ button.swiper-pagination-bullet {
     flex-grow: 1;
 }
 
+.news-card__category {
+    padding: 4px 12px;
+    margin: 0 20px;
+    margin-top: -8px;
+    align-self: flex-start;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: #6c757d;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.news-card__category--news {
+    background-color: #007bff; /* синий */
+}
+
+.news-card__category--promotion {
+    background-color: #28a745; /* зелёный */
+}
+
 .news-card__title {
     font-weight: 600;
     font-size: 18px;
@@ -2329,6 +2351,23 @@ button.swiper-pagination-bullet {
     .news-detail__content {
         flex: 1 1 100%;
     }
+}
+
+/* === Читайте также === */
+.related-news {
+    margin-top: 40px;
+    padding-top: 30px;
+}
+
+.related-news__title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+}
+
+.related-news__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
 }
 
 /* Фиксированные размеры модального окна */
