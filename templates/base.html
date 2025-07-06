@@ -57,12 +57,20 @@
     </main>
 
     <!-- Кнопка открытия чата -->
-    <button id="chat-toggle" class="chat-toggle-btn" title="Открыть чат">💬 Чат</button>
+    <button id="chat-toggle" class="chat-toggle-btn" title="Открыть чат" aria-expanded="false">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2z"/>
+        </svg>
+        <span id="unread-count" class="chat-unread-count" style="display: none;">0</span>
+    </button>
 
     <!-- Модальное окно чата -->
     <div id="chat-modal" class="chat-modal" role="dialog" aria-modal="true" aria-labelledby="chat-header-title" aria-hidden="true" tabindex="-1">
         <div class="chat-header">
-            <strong id="chat-header-title">Онлайн-чат</strong>
+            <div>
+                <strong id="chat-header-title">Онлайн-чат</strong>
+                <span id="chat-status" class="chat-status">Ожидание специалиста...</span>
+            </div>
             <button id="chat-close" class="chat-close-btn" aria-label="Закрыть чат">×</button>
         </div>
 
@@ -220,6 +228,7 @@ document.getElementById('chat-toggle').onclick = () => {
     document.getElementById('chat-modal').style.display = 'flex';
     isChatOpen = true;
     clearChatNotification();
+    document.getElementById('chat-name').focus();
 };
 
 document.getElementById('chat-close').onclick = () => {

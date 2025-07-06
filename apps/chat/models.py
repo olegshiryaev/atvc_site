@@ -14,6 +14,8 @@ class ChatMessage(models.Model):
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
     message = models.TextField()
     is_support = models.BooleanField(default=False)
+    is_read = models.BooleanField(default=False)
+    attachment = models.FileField(upload_to='chat_attachments/', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
     class Meta:

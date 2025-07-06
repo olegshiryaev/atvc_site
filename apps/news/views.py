@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.template.loader import render_to_string
 from django.http import HttpResponse, JsonResponse
 from django.core.paginator import Paginator, EmptyPage
+from django.db.models import F
 from ..cities.models import Locality
 from .models import News
 import re
@@ -66,13 +67,16 @@ def news_detail(request, locality_slug, news_slug):
         News, slug=news_slug, localities=locality, is_published=True
     )
 
+    # Увеличиваем счётчик просмотров
+    News.objects.filter(pk=news_item.pk).update(views_count=F("views_count") + 1)
+
     return render(
         request,
         "news/news_detail.html",
         {
             "locality": locality,
             "news": news_item,
-            "title": news_item.title,  # Передаём название новости в title
+            "title": news_item.title,
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},
                 {"title": "Новости", "url": "news:news_list"},
