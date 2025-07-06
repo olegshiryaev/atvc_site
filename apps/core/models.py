@@ -355,13 +355,6 @@ class Feedback(models.Model):
     ip_address = models.GenericIPAddressField(
         verbose_name="IP отправителя", blank=True, null=True
     )
-    user = models.ForeignKey(
-        User,
-        verbose_name="Пользователь",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-    )
 
     class Meta:
         verbose_name = "Обратная связь"

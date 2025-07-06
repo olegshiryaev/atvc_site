@@ -55,17 +55,12 @@ class FeedbackCreateForm(forms.ModelForm):
 
     class Meta:
         model = Feedback
-        fields = ("name", "phone", "content")
-
-    def __init__(self, *args, **kwargs):
-        """
-        Обновление стилей формы
-        """
-        super().__init__(*args, **kwargs)
-        for field in self.fields:
-            self.fields[field].widget.attrs.update(
-                {"class": "form-control", "autocomplete": "off"}
-            )
+        fields = ['name', 'phone', 'content']
+        widgets = {
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ваше имя'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Телефон'}),
+            'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Сообщение'}),
+        }
 
 
 class DocumentForm(forms.ModelForm):

@@ -10,7 +10,6 @@ from .views import (
     services,
     static_page_view,
     submit_application,
-    FeedbackCreateView,
 )
 
 app_name = "core"

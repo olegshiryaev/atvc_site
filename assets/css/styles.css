@@ -2167,6 +2167,119 @@ button.swiper-pagination-bullet {
 .icon-telegram:before { content: "TG"; font-family: Arial; font-weight: bold; }
 .icon-whatsapp:before { content: "WA"; font-family: Arial; font-weight: bold; }
 
+/* Уникальные стили для callback формы */
+.callback-modal {
+    z-index: 1060; /* Выше стандартного модального окна */
+}
+
+.callback-modal-dialog {
+    max-width: 400px;
+}
+
+.callback-modal-content {
+    border-radius: 12px;
+    overflow: hidden;
+    border: none;
+    box-shadow: 0 5px 30px rgba(0, 0, 0, 0.15);
+}
+
+.callback-modal-header {
+    background-color: #0091d5;
+    color: white;
+    padding: 20px;
+    border-bottom: none;
+    position: relative;
+}
+
+.callback-modal-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.callback-modal-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 2rem;
+    line-height: 1;
+    color: white;
+    opacity: 0.8;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+.callback-modal-close:hover {
+    opacity: 1;
+}
+
+.callback-modal-body {
+    padding: 25px;
+}
+
+.callback-form-group {
+    margin-bottom: 20px;
+}
+
+.callback-form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #333;
+}
+
+.callback-form-control {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.3s;
+}
+
+.callback-form-control:focus {
+    border-color: #0091d5;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0, 145, 213, 0.2);
+}
+
+.callback-modal-footer {
+    padding: 0 25px 25px;
+    text-align: center;
+    border-top: none;
+}
+
+.callback-btn {
+    display: inline-block;
+    padding: 12px 30px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: none;
+}
+
+.callback-btn-primary {
+    background-color: #0091d5;
+    color: white;
+    width: 100%;
+}
+
+.callback-btn-primary:hover {
+    background-color: #0077b5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Маска для телефона (если будете подключать библиотеку) */
+.callback-phone-mask {
+    letter-spacing: 1px;
+}
+
 /* Адаптивность */
 @media (max-width: 575.98px) {
     .scrollable-buttons {

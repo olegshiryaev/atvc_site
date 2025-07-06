@@ -168,30 +168,6 @@ def contact(request):
     return render(request, "core/contact.html", {"title": "Контакты"})
 
 
-class FeedbackCreateView(SuccessMessageMixin, CreateView):
-    model = Feedback
-    form_class = FeedbackCreateForm
-    success_message = "Ваше письмо успешно отправлено администрации сайта"
-    template_name = "system/feedback.html"
-    extra_context = {"title": "Контактная форма"}
-    success_url = reverse_lazy("home")
-
-    def form_valid(self, form):
-        if form.is_valid():
-            feedback = form.save(commit=False)
-            feedback.ip_address = get_client_ip(self.request)
-            if self.request.user.is_authenticated:
-                feedback.user = self.request.user
-            send_contact_email_message(
-                feedback.subject,
-                feedback.email,
-                feedback.content,
-                feedback.ip_address,
-                feedback.user_id,
-            )
-        return super().form_valid(form)
-
-
 # def internet_tariffs(request, locality_slug):
 #     locality = get_object_or_404(Locality, slug=locality_slug)
 #     service = get_object_or_404(Service, slug="internet")
@@ -303,26 +279,24 @@ def b2b_internet_view(request, locality_slug):
     )
 
 
+@require_POST
 def feedback_form(request, locality_slug):
-    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    name = request.POST.get("name")
+    phone = request.POST.get("phone")
+    content = request.POST.get("content", "Обратная связь")
 
-    if request.method == "POST":
-        form = FeedbackForm(request.POST)
-        if form.is_valid():
-            feedback = form.save(commit=False)
-            feedback.ip_address = request.META.get("REMOTE_ADDR")
-            feedback.save()
-            return render(
-                request, "includes/feedback_thanks.html", {"locality": locality}
-            )
-        return render(
-            request, "includes/feedback_form.html", {"form": form, "locality": locality}
+    if phone:  # можно добавить валидацию, если нужно
+        Feedback.objects.create(
+            name=name,
+            phone=phone,
+            content=content,
+            ip_address=request.META.get("REMOTE_ADDR"),
         )
+        if request.htmx:
+            return render(request, "core/callback_success.html")
+        return redirect("core:index")  # если без HTMX
     else:
-        form = FeedbackForm()
-        return render(
-            request, "includes/feedback_form.html", {"form": form, "locality": locality}
-        )
+        return render(request, "core/callback_form.html", {"error": "Телефон обязателен"})
 
 
 def services(request, service_slug, locality_slug):
