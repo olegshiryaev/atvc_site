@@ -6213,11 +6213,10 @@ button.swiper-pagination-bullet {
 @media (max-width: 500px) {
     .chat-modal {
         width: 100vw;
-        height: 100vh;
+        height: 100dvh;
         bottom: 0;
         right: 0;
         border-radius: 0;
-        max-height: 100dvh;
     }
     .chat-header {
         border-top-left-radius: 0;

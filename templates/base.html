@@ -350,6 +350,7 @@
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
             isChatOpen = true;
+            document.body.style.overflow = 'hidden';
             clearChatNotification();
             document.getElementById('chat-name').focus();
             if (sessionId) updateUnreadCountFromServer();
@@ -360,6 +361,7 @@
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
             isChatOpen = false;
+            document.body.style.overflow = '';
             sendTypingEvent(false);
             clearChatNotification();
         };
