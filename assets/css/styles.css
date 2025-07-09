@@ -5465,6 +5465,10 @@ button.swiper-pagination-bullet {
     .connect-form__field {
         width: 100%;
     }
+
+    .connect-form__submit {
+        width: 100%;
+    }
 }
 
 .form2-block {
