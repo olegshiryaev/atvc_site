@@ -355,24 +355,10 @@
             if (sessionId) updateUnreadCountFromServer();
         };
 
-        document.getElementById('chat-close').onclick = async () => {
-            if (socket?.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'close_session' }));
-            }
+        document.getElementById('chat-close').onclick = () => {
             const modal = document.getElementById('chat-modal');
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
-            if (socket) socket.close();
-            document.getElementById('chat-messages').innerHTML = '';
-            loadedMessageIds.clear();
-            lastDateHeader = null;
-            document.getElementById('chat-input').value = '';
-            document.getElementById('chat-user-form').style.display = 'block';
-            document.getElementById('chat-input-wrapper').style.display = 'none';
-            document.getElementById('chat-error').style.display = 'none';
-            localStorage.removeItem('chatSessionId');
-            localStorage.removeItem('chatName');
-            localStorage.removeItem('chatContact');
             isChatOpen = false;
             sendTypingEvent(false);
             clearChatNotification();

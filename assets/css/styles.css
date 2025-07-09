@@ -6217,6 +6217,7 @@ button.swiper-pagination-bullet {
         bottom: 0;
         right: 0;
         border-radius: 0;
+        max-height: 100dvh;
     }
     .chat-header {
         border-top-left-radius: 0;
