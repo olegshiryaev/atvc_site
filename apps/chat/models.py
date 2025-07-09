@@ -11,9 +11,16 @@ class ChatSession(models.Model):
     contact = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     is_closed = models.BooleanField(default=False)
+    is_online = models.BooleanField(default=False)  # Для статуса онлайн/офлайн
+    token = models.CharField(max_length=32, unique=True, blank=True)  # Для аутентификации WebSocket
 
     def __str__(self):
         return f"{self.name} ({self.contact})"
+
+    def save(self, *args, **kwargs):
+        if not self.token:
+            self.token = uuid.uuid4().hex  # Генерируем токен, если не задан
+        super().save(*args, **kwargs)
 
 class ChatMessage(models.Model):
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')

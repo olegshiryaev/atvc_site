@@ -77,12 +77,14 @@
         <div id="chat-error" class="chat-error" role="alert" aria-live="assertive"></div>
 
         <!-- User form -->
-        <div id="chat-user-form" class="chat-user-form">
-            <input type="text" id="chat-name" class="chat-input" placeholder="Ваше имя" aria-label="Ваше имя" aria-describedby="name-hint" autocomplete="name" required />
-            <span id="name-hint" class="sr-only">Введите ваше имя</span>
-            <input type="text" id="chat-contact" class="chat-input" placeholder="Телефон или email" aria-label="Телефон или email" aria-describedby="contact-hint" autocomplete="email tel" required pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|^\+?\d{10,15})$" />
-            <span id="contact-hint" class="sr-only">Введите email или номер телефона</span>
-            <button id="chat-start" class="chat-start-btn">Начать чат</button>
+        <div id="chat-user-form-container" class="chat-form-container">
+            <div id="chat-user-form" class="chat-user-form">
+                <input type="text" id="chat-name" class="chat-input" placeholder="Ваше имя" aria-label="Ваше имя" aria-describedby="name-hint" autocomplete="name" required />
+                <span id="name-hint" class="sr-only">Введите ваше имя</span>
+                <input type="text" id="chat-contact" class="chat-input" placeholder="Телефон или email" aria-label="Телефон или email" aria-describedby="contact-hint" autocomplete="email tel" required pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|^\+?\d{10,15})$" />
+                <span id="contact-hint" class="sr-only">Введите email или номер телефона</span>
+                <button id="chat-start" class="chat-start-btn">Начать чат</button>
+            </div>
         </div>
 
         <!-- Chat messages -->

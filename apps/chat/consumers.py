@@ -1,3 +1,4 @@
+# apps/chat/consumers.py
 import json
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
@@ -47,13 +48,13 @@ class ChatConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         logger.info(f"Успешное подключение: session_id={self.session_id}, channel={self.channel_name}")
         
-        # Помечаем сообщения как прочитанные и отправляем обновление
+        # Помечаем сообщения как прочитанные
         if self.is_support:
             await self.mark_client_messages_as_read()
         else:
             await self.mark_support_messages_as_read()
         
-        # Отправляем обновлённый unread_count после пометки
+        # Отправляем обновлённый unread_count
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -75,6 +76,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'sender': msg['sender'],
                     'attachment': msg['attachment'],
                     'history': True,
+                    'is_read': msg['is_read']
                 }))
 
     async def disconnect(self, close_code):
@@ -117,6 +119,20 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.close()
             return
 
+        if data.get('type') == 'mark_read':
+            if self.is_support:
+                await self.mark_client_messages_as_read()
+            else:
+                await self.mark_support_messages_as_read()
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'read_status',
+                    'unread_count': await self.get_unread_count()
+                }
+            )
+            return
+
         message = data.get('message', '')
         is_support = data.get('is_support', False)
         attachment_url = data.get('attachment')
@@ -153,9 +169,10 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'timestamp': timestamp.isoformat(),
                 'sender': sender,
                 'attachment': attachment_url,
+                'is_read': False
             }
         )
-        # Обновляем статус прочтения при отправке сообщения специалистом
+        # Обновляем статус прочтения для сообщений специалиста
         if is_support:
             await self.channel_layer.group_send(
                 self.room_group_name,
@@ -174,6 +191,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp'],
             'sender': event['sender'],
             'attachment': event.get('attachment'),
+            'is_read': event['is_read']
         }))
 
     async def typing_message(self, event):
@@ -255,7 +273,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             ChatMessage.objects
             .filter(session=self.session)
             .order_by('-timestamp')
-            .values('message_id', 'message', 'is_support', 'timestamp', 'attachment', 'sender')[offset:offset+limit]
+            .values('message_id', 'message', 'is_support', 'timestamp', 'attachment', 'sender', 'is_read')[offset:offset+limit]
         )
 
     @database_sync_to_async
