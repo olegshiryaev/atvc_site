@@ -17,7 +17,7 @@ class ChatSession(models.Model):
 
 class ChatMessage(models.Model):
     session = models.ForeignKey(ChatSession, on_delete=models.CASCADE, related_name='messages')
-    message_id = models.UUIDField(default=uuid.uuid4, blank=True, null=True)
+    message_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     message = models.TextField(max_length=2000)
     is_support = models.BooleanField(default=False)
     is_read = models.BooleanField(default=False)
