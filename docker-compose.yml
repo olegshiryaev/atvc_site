@@ -1,107 +1,134 @@
 version: "3.8"
 
 volumes:
-    pgdata:
-    static:
-    media:
+  pgdata:
+  static:
+  media:
+  logs:
 
 services:
-    django:
-        build:
-            context: .
-        ports:
-            - "8000:8000"
-        container_name: django
-        restart: unless-stopped
-        env_file:
-            - docker/env/.env.prod
-        volumes:
-            - ./:/app
-            - static:/app/static
-            - media:/app/media
-        depends_on:
-            - postgres
-            - redis
-        command: >
-            sh -c "python manage.py collectstatic --no-input &&
-                  python manage.py makemigrations &&
-                  python manage.py migrate &&
-                  gunicorn --workers=4 --reload --max-requests=1000 config.wsgi -b 0.0.0.0:8000"
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: django
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    volumes:
+      - ./:/app
+      - static:/app/static
+      - media:/app/media
+      - logs:/app/docker/logs
+    depends_on:
+      - postgres
+      - redis
+    command: >
+      sh -c "python manage.py collectstatic --no-input &&
+             python manage.py makemigrations &&
+             python manage.py migrate &&
+             poetry run daphne -b 0.0.0.0 -p 8000 config.asgi:application"
 
-    nginx:
-        container_name: nginx
-        working_dir: /app
-        image: nginx:stable-alpine
-        restart: always
-        ports:
-            - "80:80"
-            - "443:443"
-        volumes:
-            - static:/app/static
-            - media:/app/media
-            - ./docker/nginx/prod/:/etc/nginx/conf.d:ro
-            - ./docker/certbot/conf:/etc/letsencrypt:ro
-            - ./docker/certbot/www:/var/www/certbot:ro
-        links:
-            - django
-        depends_on:
-            - django
+  nginx:
+    container_name: nginx
+    image: nginx:stable-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static:/app/static
+      - media:/app/media
+      - ./docker/nginx/prod/:/etc/nginx/conf.d:ro
+      - ./docker/certbot/conf:/etc/letsencrypt:rw
+      - ./docker/certbot/www:/var/www/certbot:rw
+    depends_on:
+      - django
 
-    postgres:
-        image: postgres:alpine
-        container_name: postgres
-        restart: always
-        env_file:
-            - docker/env/.env.prod
-        volumes:
-            - pgdata:/var/lib/postgresql/data/
+  postgres:
+    image: postgres:alpine
+    container_name: postgres
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    expose:
+      - "5432"
 
-    redis:
-        image: redis:alpine
-        container_name: redis
-        restart: always
-        env_file:
-            - docker/env/.env.prod
-        expose:
-            - 6379
-        volumes:
-            - ./docker/redis/data:/data
+  redis:
+    image: redis:alpine
+    container_name: redis
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    expose:
+      - "6379"
+    volumes:
+      - ./docker/redis/data:/data
 
-    celery-worker:
-        build: .
-        container_name: celery-worker
-        restart: always
-        env_file:
-            - docker/env/.env.prod
-        volumes:
-            - ./:/app
-            - media:/app/media
-        command: celery -A config worker --loglevel=info --logfile=./docker/logs/celery-worker.log
-        depends_on:
-            - redis
+  celery-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-worker
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    volumes:
+      - ./:/app
+      - media:/app/media
+      - logs:/app/docker/logs
+    command: >
+      sh -c "poetry run celery -A config worker --loglevel=info --concurrency=2 --logfile=/app/docker/logs/celery-worker.log"
+    depends_on:
+      - redis
+      - postgres
 
-    celery-beat:
-        build: .
-        container_name: celery-beat
-        restart: unless-stopped
-        env_file:
-            - docker/env/.env.prod
-        depends_on:
-            - redis
-        command: celery -A config beat --loglevel=info --logfile=./docker/logs/celery-beat.log
-        volumes:
-            - media:/app/media
-            - ./:/app
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: celery-beat
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    volumes:
+      - ./:/app
+      - media:/app/media
+      - logs:/app/docker/logs
+    command: >
+      sh -c "poetry run celery -A config beat --loglevel=info --logfile=/app/docker/logs/celery-beat.log"
+    depends_on:
+      - redis
+      - postgres
 
-    flower:
-        build: .
-        container_name: flower
-        env_file:
-            - docker/env/.env.dev
-        depends_on:
-            - redis
-        command: celery -A config flower --port=5555 --loglevel=info --logfile=./docker/logs/flower.log
-        volumes:
-            - ./:/app
-        ports:
-            - "5555:5555"
+  flower:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flower
+    restart: unless-stopped
+    env_file:
+      - docker/env/.env.prod
+    volumes:
+      - ./:/app
+      - logs:/app/docker/logs
+    command: >
+      sh -c "poetry run celery -A config flower --port=5555 --loglevel=info --logfile=/app/docker/logs/flower.log"
+    ports:
+      - "5555:5555"
+    depends_on:
+      - redis
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    restart: unless-stopped
+    volumes:
+      - ./docker/certbot/conf:/etc/letsencrypt:rw
+      - ./docker/certbot/www:/var/www/certbot:rw
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew; sleep 12h; done"
+    depends_on:
+      - nginx
