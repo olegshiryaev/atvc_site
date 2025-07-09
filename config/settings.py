@@ -281,6 +281,7 @@ RECAPTCHA_PRIVATE_KEY = env("RECAPTCHA_PRIVATE_KEY")
 LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
     "/chat/",
     "/chat/api/",
+    "/chat/support/",
     "/ws/",
     "/a9f8s7d6/",
     "/static/",

@@ -78,17 +78,19 @@
 
         <!-- User form -->
         <div id="chat-user-form" class="chat-user-form">
-            <input type="text" id="chat-name" class="chat-input" placeholder="Ваше имя" aria-label="Ваше имя" autocomplete="name" required />
-            <input type="text" id="chat-contact" class="chat-input" placeholder="Телефон или email" aria-label="Телефон или email" autocomplete="email tel" required />
+            <input type="text" id="chat-name" class="chat-input" placeholder="Ваше имя" aria-label="Ваше имя" aria-describedby="name-hint" autocomplete="name" required />
+            <span id="name-hint" class="sr-only">Введите ваше имя</span>
+            <input type="text" id="chat-contact" class="chat-input" placeholder="Телефон или email" aria-label="Телефон или email" aria-describedby="contact-hint" autocomplete="email tel" required pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|^\+?\d{10,15})$" />
+            <span id="contact-hint" class="sr-only">Введите email или номер телефона</span>
             <button id="chat-start" class="chat-start-btn">Начать чат</button>
         </div>
 
         <!-- Chat messages -->
-        <div id="chat-messages" class="chat-messages" aria-live="polite" aria-relevant="additions"></div>
+        <div id="chat-messages" class="chat-messages" aria-live="polite" aria-relevant="additions" style="display: none;"></div>
 
         <!-- Typing indicator -->
         <div id="chat-typing-indicator" class="chat-typing-indicator" aria-live="polite" aria-atomic="true" style="display:none;">
-            <span class="typing-text"><span id="typing-name"></span> печатает<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span></span>
+            <span class="typing-text"><span id="typing-name"></span> печатает<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>
         </div>
 
         <!-- Message input -->
@@ -126,300 +128,452 @@
             console.log('HTMX afterSwap');
         });
     </script>
-<script>
-    let sessionId = null;
-    let socket = null;
-    let isChatOpen = false;
-    let unreadCount = 0;
-    let lastDateHeader = null;
-    const notificationSound = new Audio('/static/sounds/notification.mp3');
+    <script>
+        let sessionId = null;
+        let socket = null;
+        let isChatOpen = false;
+        let unreadCount = 0;
+        let lastDateHeader = null;
+        let reconnectAttempts = 0;
+        const maxReconnectAttempts = 3;
+        const notificationSound = new Audio('/static/sounds/notification.mp3');
+        const loadedMessageIds = new Set();
 
-    function escapeHTML(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
-    }
-
-    function updateUnreadCount(count) {
-        const unreadBadge = document.getElementById('unread-count');
-        unreadBadge.textContent = count;
-        unreadBadge.style.display = count > 0 ? 'block' : 'none';
-    }
-
-    function showChatNotification() {
-        document.getElementById('chat-toggle').classList.add('chat-notification');
-        updateUnreadCount(unreadCount);
-    }
-
-    function clearChatNotification() {
-        document.getElementById('chat-toggle').classList.remove('chat-notification');
-        unreadCount = 0;
-        updateUnreadCount(unreadCount);
-    }
-
-    function sendTypingEvent(isTyping) {
-        if (socket?.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({
-                type: 'typing',
-                is_typing: isTyping,
-                sender: localStorage.getItem('chatName') || 'Пользователь'
-            }));
-        }
-    }
-
-    function scrollChatToBottom() {
-        const messagesBox = document.getElementById('chat-messages');
-        messagesBox.scrollTop = messagesBox.scrollHeight;
-    }
-
-    function formatDateHeader(timestamp) {
-        const date = new Date(timestamp);
-        const today = new Date();
-        let headerText = '';
-        if (date.toDateString() === today.toDateString()) {
-            headerText = 'Сегодня';
-        } else if (new Date(today.setDate(today.getDate() - 1)).toDateString() === date.toDateString()) {
-            headerText = 'Вчера';
-        } else {
-            headerText = date.toLocaleDateString();
-        }
-        return headerText;
-    }
-
-    function addMessageToChat(data, isHistory = false) {
-        const currentHeader = formatDateHeader(data.timestamp);
-
-        if (currentHeader !== lastDateHeader) {
-            const dateDivider = document.createElement('div');
-            dateDivider.className = 'chat-date-divider';
-            dateDivider.innerText = currentHeader;
-            document.getElementById('chat-messages').appendChild(dateDivider);
-            lastDateHeader = currentHeader;
+        function escapeHTML(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
-        const msg = document.createElement('div');
-        msg.className = data.is_support ? 'message-support' : 'message-client';
-
-        const time = `${new Date(data.timestamp).getHours().toString().padStart(2, '0')}:${new Date(data.timestamp).getMinutes().toString().padStart(2, '0')}`;
-        const senderName = data.sender || (data.is_support ? 'Специалист' : 'Клиент');
-
-        msg.innerHTML = `
-            <div class="chat-message-bubble">${escapeHTML(data.message)}</div>
-            <div class="chat-message-footer">
-                <span class="chat-sender">${escapeHTML(senderName)}</span>
-                <span class="chat-time">${time}</span>
-            </div>
-        `;
-
-        document.getElementById('chat-messages').appendChild(msg);
-        scrollChatToBottom();
-
-        if (!isHistory && (!isChatOpen || !document.hasFocus())) {
-            unreadCount++;
-            notificationSound.play().catch(() => {});
-            showChatNotification();
+        function updateUnreadCount(count) {
+            console.log('Обновление unread_count:', count);
+            const unreadBadge = document.getElementById('unread-count');
+            unreadBadge.textContent = count;
+            unreadBadge.style.display = count > 0 ? 'block' : 'none';
         }
-    }
 
-    function startChatWebSocket() {
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        socket = new WebSocket(`${protocol}//${window.location.host}/ws/chat/${sessionId}/`);
-        socket.onopen = () => {
-            console.log('WebSocket подключен');
-            document.getElementById('chat-status').textContent = 'Специалист на связи';
-        };
-        socket.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'typing') {
-                const typingIndicator = document.getElementById('chat-typing-indicator');
-                const typingName = document.getElementById('typing-name');
-                typingName.textContent = escapeHTML(data.sender || 'Собеседник');
-                typingIndicator.style.display = data.is_typing ? 'block' : 'none';
+        function showChatNotification() {
+            document.getElementById('chat-toggle').classList.add('chat-notification');
+            updateUnreadCount(unreadCount);
+        }
+
+        function clearChatNotification() {
+            document.getElementById('chat-toggle').classList.remove('chat-notification');
+            unreadCount = 0;
+            updateUnreadCount(unreadCount);
+        }
+
+        function sendTypingEvent(isTyping) {
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'typing',
+                    is_typing: isTyping,
+                    sender: localStorage.getItem('chatName') || 'Клиент'
+                }));
+            }
+        }
+
+        function scrollChatToBottom() {
+            const messagesBox = document.getElementById('chat-messages');
+            messagesBox.scrollTop = messagesBox.scrollHeight;
+        }
+
+        function formatDateHeader(timestamp) {
+            const date = new Date(timestamp);
+            const today = new Date();
+            let headerText = '';
+            if (date.toDateString() === today.toDateString()) {
+                headerText = 'Сегодня';
+            } else if (new Date(today.setDate(today.getDate() - 1)).toDateString() === date.toDateString()) {
+                headerText = 'Вчера';
+            } else {
+                headerText = date.toLocaleDateString('ru-RU');
+            }
+            return headerText;
+        }
+
+        function addMessageToChat(data, isHistory = false) {
+            if (loadedMessageIds.has(data.message_id)) return;
+            loadedMessageIds.add(data.message_id);
+
+            const fragment = document.createDocumentFragment();
+            const currentHeader = formatDateHeader(data.timestamp);
+            if (currentHeader !== lastDateHeader) {
+                const dateDivider = document.createElement('div');
+                dateDivider.className = 'chat-date-divider';
+                dateDivider.innerText = currentHeader;
+                fragment.appendChild(dateDivider);
+                lastDateHeader = currentHeader;
+            }
+
+            const msg = document.createElement('div');
+            msg.className = data.is_support ? 'message-support' : 'message-client';
+            msg.dataset.messageId = data.message_id;
+            const time = new Date(data.timestamp).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit', hour12: false });
+            const senderName = escapeHTML(data.sender || (data.is_support ? 'Специалист' : localStorage.getItem('chatName') || 'Клиент'));
+            let messageContent = escapeHTML(data.message);
+            if (data.attachment) {
+                if (data.attachment.match(/\.(jpg|jpeg|png|gif)$/i)) {
+                    messageContent = `<img src="${data.attachment}" alt="Вложение" style="max-width: 100%; border-radius: 8px;" />`;
+                } else {
+                    messageContent = `<a href="${data.attachment}" target="_blank">Скачать файл</a>`;
+                }
+            }
+
+            msg.innerHTML = `
+                <div class="chat-message-bubble">${messageContent}</div>
+                <div class="chat-message-footer">
+                    <span class="chat-sender">${senderName}</span>
+                    <span class="chat-time">${time}</span>
+                </div>
+            `;
+            fragment.appendChild(msg);
+            document.getElementById('chat-messages').appendChild(fragment);
+            scrollChatToBottom();
+
+            if (!isHistory && (!isChatOpen || !document.hasFocus())) {
+                unreadCount++;
+                notificationSound.play().catch(() => {});
+                if ('vibrate' in navigator) navigator.vibrate(200);
+                showChatNotification();
+            }
+        }
+
+        function showError(message, persistent = false) {
+            const errorDiv = document.getElementById('chat-error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            if (!persistent) {
+                setTimeout(() => errorDiv.style.display = 'none', 5000);
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    const trimmed = cookie.trim();
+                    if (trimmed.startsWith(name + '=')) {
+                        cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            if (!cookieValue) console.warn('CSRF-токен не найден');
+            return cookieValue;
+        }
+
+        function startChatWebSocket() {
+            const contact = encodeURIComponent(localStorage.getItem('chatContact') || '');
+            if (!contact || !sessionId) {
+                showError('Ошибка: отсутствует контакт или ID сессии.', true);
                 return;
             }
-            if (data.type === 'chat_message') {
-                addMessageToChat(data, data.history || false);
-            }
-        };
-        socket.onerror = () => {
-            showError('Ошибка соединения с чатом');
-        };
-        socket.onclose = () => {
-            showError('Соединение с чатом закрыто, пытаемся переподключиться...');
-            setTimeout(startChatWebSocket, 5000);
-        };
-    }
-
-    function showError(message) {
-        const errorDiv = document.getElementById('chat-error');
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-    }
-
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                const trimmed = cookie.trim();
-                if (trimmed.startsWith(name + '=')) {
-                    cookieValue = decodeURIComponent(trimmed.substring(name.length + 1));
-                    break;
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            socket = new WebSocket(`${protocol}//${window.location.host}/ws/chat/${sessionId}/?token=${contact}&skip_history=true`);
+            socket.onopen = () => {
+                console.log('WebSocket подключен');
+                document.getElementById('chat-status').textContent = 'Специалист на связи';
+                reconnectAttempts = 0;
+                updateUnreadCountFromServer();
+            };
+            socket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log('WebSocket сообщение:', data);
+                if (data.type === 'error') {
+                    showError(data.message, true);
+                    if (data.message.includes('Сессия не найдена') || data.message.includes('Сессия закрыта')) {
+                        document.getElementById('chat-close').click();
+                    }
+                    return;
                 }
+                if (data.type === 'typing') {
+                    const typingIndicator = document.getElementById('chat-typing-indicator');
+                    const typingName = document.getElementById('typing-name');
+                    typingName.textContent = escapeHTML(data.sender || 'Собеседник');
+                    typingIndicator.style.display = data.is_typing ? 'block' : 'none';
+                    return;
+                }
+                if (data.type === 'chat_message') {
+                    addMessageToChat(data, data.history || false);
+                    if (data.is_support && isChatOpen) {
+                        updateUnreadCountFromServer();
+                    }
+                }
+                if (data.type === 'read_status') {
+                    unreadCount = data.unread_count;
+                    updateUnreadCount(unreadCount);
+                    if (unreadCount === 0) clearChatNotification();
+                }
+                if (data.type === 'session_closed') {
+                    showError(data.message, true);
+                    document.getElementById('chat-close').click();
+                }
+            };
+            socket.onerror = () => {
+                showError('Ошибка соединения с чатом');
+            };
+            socket.onclose = () => {
+                showError('Соединение с чатом закрыто.');
+                if (reconnectAttempts < maxReconnectAttempts) {
+                    setTimeout(startChatWebSocket, 5000 * (reconnectAttempts + 1));
+                    reconnectAttempts++;
+                } else {
+                    showError('Не удалось подключиться к чату. <button onclick="reconnectChat()">Попробовать снова</button>', true);
+                }
+            };
+        }
+
+        function reconnectChat() {
+            reconnectAttempts = 0;
+            startChatWebSocket();
+        }
+
+        async function updateUnreadCountFromServer() {
+            if (!sessionId) return;
+            try {
+                const response = await fetch(`/chat/api/unread/?session_id=${sessionId}`);
+                const data = await response.json();
+                console.log('Получен unread_count:', data.unread);
+                unreadCount = data.unread;
+                updateUnreadCount(unreadCount);
+                if (unreadCount > 0 && !isChatOpen) showChatNotification();
+                else if (unreadCount === 0) clearChatNotification();
+            } catch (error) {
+                console.error('Ошибка загрузки непрочитанных сообщений:', error);
             }
         }
-        return cookieValue;
-    }
 
-    // Event listeners
-    document.getElementById('chat-toggle').onclick = () => {
-        const modal = document.getElementById('chat-modal');
-        modal.style.display = 'flex';
-        modal.setAttribute('aria-hidden', 'false');
-        isChatOpen = true;
-        clearChatNotification();
-        document.getElementById('chat-name').focus();
-    };
+        document.getElementById('chat-toggle').onclick = () => {
+            const modal = document.getElementById('chat-modal');
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+            isChatOpen = true;
+            clearChatNotification();
+            document.getElementById('chat-name').focus();
+            if (sessionId) updateUnreadCountFromServer();
+        };
 
-    document.getElementById('chat-close').onclick = () => {
-        const modal = document.getElementById('chat-modal');
-        modal.style.display = 'none';
-        modal.setAttribute('aria-hidden', 'true');
-        if (socket) socket.close();
-        document.getElementById('chat-messages').innerHTML = '';
-        document.getElementById('chat-input').value = '';
-        document.getElementById('chat-user-form').style.display = 'block';
-        document.getElementById('chat-input-wrapper').style.display = 'none';
-        document.getElementById('chat-error').style.display = 'none';
-        localStorage.removeItem('chatSessionId');
-        localStorage.removeItem('chatName');
-        localStorage.removeItem('chatContact');
-        isChatOpen = false;
-        sendTypingEvent(false);
-        clearChatNotification();
-    };
-
-    document.getElementById('chat-start').onclick = async () => {
-        const name = document.getElementById('chat-name').value.trim();
-        const contact = document.getElementById('chat-contact').value.trim();
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        const phoneRegex = /^\+?\d{10,15}$/;
-        document.getElementById('chat-error').style.display = 'none';
-        if (!name || (!emailRegex.test(contact) && !phoneRegex.test(contact))) {
-            showError('Пожалуйста, введите корректное имя и контакт (email или телефон).');
-            return;
-        }
-        document.getElementById('chat-user-form').style.display = 'none';
-        showError('Создание сессии...');
-        try {
-            const response = await fetch('/chat/api/start/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                body: JSON.stringify({ name, contact }),
-            });
-            if (!response.ok) throw new Error('Ошибка сервера');
-            const data = await response.json();
-            sessionId = data.session_id;
-            localStorage.setItem('chatSessionId', sessionId);
-            localStorage.setItem('chatName', name);
-            localStorage.setItem('chatContact', contact);
-            startChatWebSocket();
-            document.getElementById('chat-messages').style.display = 'flex';
-            document.getElementById('chat-input-wrapper').style.display = 'flex';
-            document.getElementById('chat-error').style.display = 'none';
-            document.getElementById('chat-input').focus();
-        } catch (error) {
-            showError('Ошибка при создании сессии. Попробуйте снова.');
+        document.getElementById('chat-close').onclick = async () => {
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'close_session' }));
+            }
+            const modal = document.getElementById('chat-modal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            if (socket) socket.close();
+            document.getElementById('chat-messages').innerHTML = '';
+            loadedMessageIds.clear();
+            lastDateHeader = null;
+            document.getElementById('chat-input').value = '';
             document.getElementById('chat-user-form').style.display = 'block';
-        }
-    };
-
-    document.getElementById('chat-send-btn').onclick = () => sendMessage();
-    document.getElementById('chat-input').addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' && e.target.value.trim() !== '') {
-            sendMessage();
-            e.preventDefault();
-        }
-    });
-
-    function sendMessage() {
-        const input = document.getElementById('chat-input');
-        const message = input.value.trim();
-        if (message.length > 1000) {
-            showError('Сообщение слишком длинное (максимум 1000 символов).');
-            return;
-        }
-        if (message.length === 0) return;
-        if (socket?.readyState === WebSocket.OPEN) {
-            socket.send(JSON.stringify({
-                message: message,
-                is_support: false
-            }));
-            input.value = '';
+            document.getElementById('chat-input-wrapper').style.display = 'none';
+            document.getElementById('chat-error').style.display = 'none';
+            localStorage.removeItem('chatSessionId');
+            localStorage.removeItem('chatName');
+            localStorage.removeItem('chatContact');
+            isChatOpen = false;
             sendTypingEvent(false);
-        } else {
-            showError('Нет соединения с сервером. Попробуйте позже.');
-        }
-    }
+            clearChatNotification();
+        };
 
-    // File upload
-    document.getElementById('chat-file').addEventListener('change', async function () {
-        const file = this.files[0];
-        if (!file) return;
+        document.getElementById('chat-start').onclick = async () => {
+            const name = document.getElementById('chat-name').value.trim();
+            const contact = document.getElementById('chat-contact').value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const phoneRegex = /^\+?\d{10,15}$/;
+            document.getElementById('chat-error').style.display = 'none';
 
-        const formData = new FormData();
-        formData.append('file', file);
+            if (!name) {
+                showError('Пожалуйста, введите ваше имя.');
+                document.getElementById('chat-name').classList.add('error');
+                return;
+            }
+            if (!emailRegex.test(contact) && !phoneRegex.test(contact)) {
+                showError('Введите корректный email или телефон (10-15 цифр).');
+                document.getElementById('chat-contact').classList.add('error');
+                return;
+            }
 
-        try {
-            const response = await fetch('/chat/api/upload/', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            });
-            const result = await response.json();
-            socket.send(JSON.stringify({ message: `[Файл]: ${result.file_url}`, is_support: false }));
-        } catch (err) {
-            showError('Ошибка загрузки файла.');
-        }
-    });
-
-    // Typing indicator logic
-    const input = document.getElementById('chat-input');
-    let typing = false;
-    let typingTimeout = null;
-    input.addEventListener('input', () => {
-        if (!typing) {
-            typing = true;
-            sendTypingEvent(true);
-        }
-        clearTimeout(typingTimeout);
-        typingTimeout = setTimeout(() => {
-            typing = false;
-            sendTypingEvent(false);
-        }, 3000);
-    });
-
-    // Initialize chat on load
-    window.addEventListener('load', () => {
-        sessionId = localStorage.getItem('chatSessionId');
-        const name = localStorage.getItem('chatName');
-        const contact = localStorage.getItem('chatContact');
-        if (sessionId && name && contact) {
+            document.getElementById('chat-name').classList.remove('error');
+            document.getElementById('chat-contact').classList.remove('error');
             document.getElementById('chat-user-form').style.display = 'none';
-            document.getElementById('chat-messages').style.display = 'flex';
-            document.getElementById('chat-input-wrapper').style.display = 'flex';
-            startChatWebSocket();
+            showError('Создание сессии...');
+
+            try {
+                const response = await fetch('/chat/api/start/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken'),
+                    },
+                    body: JSON.stringify({ name, contact }),
+                });
+                if (!response.ok) throw new Error('Ошибка сервера');
+                const data = await response.json();
+                sessionId = data.session_id;
+                localStorage.setItem('chatSessionId', sessionId);
+                localStorage.setItem('chatName', name);
+                localStorage.setItem('chatContact', contact);
+                document.getElementById('chat-messages').innerHTML = '';
+                loadedMessageIds.clear();
+                lastDateHeader = null;
+                document.getElementById('chat-messages').style.display = 'flex';
+                document.getElementById('chat-input-wrapper').style.display = 'flex';
+                document.getElementById('chat-error').style.display = 'none';
+                document.getElementById('chat-input').focus();
+                try {
+                    const response = await fetch(`/chat/api/history/${sessionId}/`);
+                    if (!response.ok) throw new Error('Сессия недоступна');
+                    const messages = await response.json();
+                    messages.forEach(msg => addMessageToChat(msg, true));
+                } catch (error) {
+                    showError('Ошибка загрузки истории чата.');
+                }
+                startChatWebSocket();
+            } catch (error) {
+                showError('Ошибка при создании сессии. Попробуйте снова.');
+                document.getElementById('chat-user-form').style.display = 'block';
+            }
+        };
+
+        document.getElementById('chat-send-btn').onclick = () => sendMessage();
+        document.getElementById('chat-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                sendMessage();
+                e.preventDefault();
+            }
+        });
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message.length > 1000) {
+                showError('Сообщение слишком длинное (максимум 1000 символов).');
+                return;
+            }
+            if (message.length === 0) return;
+            if (socket?.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    message: message,
+                    is_support: false,
+                    sender: localStorage.getItem('chatName') || 'Клиент'
+                }));
+                input.value = '';
+                sendTypingEvent(false);
+            } else {
+                showError('Нет соединения с сервером. Попробуйте позже.', true);
+            }
         }
-    });
-    window.addEventListener('beforeunload', () => {
-        sendTypingEvent(false);
-        if (socket) socket.close();
-    });
-</script>
+
+        document.getElementById('chat-file').addEventListener('change', async function () {
+            const file = this.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                showError('Файл не должен превышать 5 МБ.');
+                this.value = '';
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('session_id', sessionId);
+
+            try {
+                const response = await fetch('/chat/api/upload/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    }
+                });
+                const result = await response.json();
+                if (response.ok) {
+                    socket.send(JSON.stringify({
+                        message: '[Файл]',
+                        is_support: false,
+                        sender: localStorage.getItem('chatName') || 'Клиент',
+                        attachment: result.file_url
+                    }));
+                    this.value = '';
+                } else {
+                    showError(result.error || 'Ошибка загрузки файла.');
+                }
+            } catch (err) {
+                showError('Ошибка загрузки файла.');
+            }
+        });
+
+        const input = document.getElementById('chat-input');
+        let typing = false;
+        let typingTimeout = null;
+        input.addEventListener('input', () => {
+            const maxLength = 1000;
+            if (input.value.length > maxLength) {
+                input.value = input.value.slice(0, maxLength);
+                showError('Достигнут лимит в 1000 символов.');
+            }
+            if (!typing) {
+                typing = true;
+                sendTypingEvent(true);
+            }
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                typing = false;
+                sendTypingEvent(false);
+            }, 3000);
+        });
+
+        document.getElementById('chat-messages').addEventListener('scroll', async () => {
+            const messagesBox = document.getElementById('chat-messages');
+            if (messagesBox.scrollTop === 0) {
+                const offset = messagesBox.children.length;
+                try {
+                    const response = await fetch(`/chat/api/history/${sessionId}/?offset=${offset}`);
+                    const messages = await response.json();
+                    messages.forEach(msg => addMessageToChat(msg, true));
+                } catch (error) {
+                    showError('Ошибка загрузки истории чата.');
+                }
+            }
+        });
+
+        window.addEventListener('load', async () => {
+            sessionId = localStorage.getItem('chatSessionId');
+            const name = localStorage.getItem('chatName');
+            const contact = localStorage.getItem('chatContact');
+            if (sessionId && name && contact) {
+                try {
+                    const response = await fetch(`/chat/api/history/${sessionId}/`);
+                    if (!response.ok) {
+                        localStorage.removeItem('chatSessionId');
+                        localStorage.removeItem('chatName');
+                        localStorage.removeItem('chatContact');
+                        document.getElementById('chat-user-form').style.display = 'block';
+                        showError('Сессия недоступна. Пожалуйста, начните новый чат.', true);
+                        return;
+                    }
+                    document.getElementById('chat-user-form').style.display = 'none';
+                    document.getElementById('chat-messages').style.display = 'flex';
+                    document.getElementById('chat-input-wrapper').style.display = 'flex';
+                    document.getElementById('chat-messages').innerHTML = '';
+                    loadedMessageIds.clear();
+                    lastDateHeader = null;
+                    const messages = await response.json();
+                    messages.forEach(msg => addMessageToChat(msg, true));
+                    startChatWebSocket();
+                } catch (error) {
+                    showError('Ошибка загрузки сессии.', true);
+                }
+            }
+            await updateUnreadCountFromServer();
+        });
+
+        window.addEventListener('beforeunload', () => {
+            sendTypingEvent(false);
+            if (socket) socket.close();
+        });
+    </script>
 </body>
 </html>
