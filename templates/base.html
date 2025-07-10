@@ -241,10 +241,19 @@
 
         function showError(message, persistent = false) {
             const errorDiv = document.getElementById('chat-error');
-            errorDiv.textContent = message;
+            errorDiv.innerHTML = message; // Используем innerHTML для поддержки HTML (например, кнопок)
             errorDiv.style.display = 'block';
             if (!persistent) {
                 setTimeout(() => errorDiv.style.display = 'none', 5000);
+            }
+        }
+
+        function updateOnlineStatus(isOnline, isSupport) {
+            const statusDiv = document.getElementById('chat-status');
+            if (isSupport) {
+                statusDiv.textContent = isOnline ? 'Специалист на связи' : 'Ожидание специалиста...';
+            } else {
+                statusDiv.textContent = isOnline ? 'Клиент на связи' : 'Клиент оффлайн';
             }
         }
 
@@ -274,7 +283,6 @@
             socket = new WebSocket(`${protocol}//${window.location.host}/ws/chat/${sessionId}/?token=${contact}&skip_history=true`);
             socket.onopen = () => {
                 console.log('WebSocket подключен');
-                document.getElementById('chat-status').textContent = 'Специалист на связи';
                 reconnectAttempts = 0;
                 updateUnreadCountFromServer();
             };
@@ -309,6 +317,9 @@
                 if (data.type === 'session_closed') {
                     showError(data.message, true);
                     document.getElementById('chat-close').click();
+                }
+                if (data.type === 'online_status') {
+                    updateOnlineStatus(data.is_online, data.is_support);
                 }
             };
             socket.onerror = () => {
@@ -350,7 +361,7 @@
             modal.style.display = 'flex';
             modal.setAttribute('aria-hidden', 'false');
             isChatOpen = true;
-            document.body.style.overflow = 'hidden';
+            modal.addEventListener('touchmove', (e) => e.preventDefault(), { passive: false });
             clearChatNotification();
             document.getElementById('chat-name').focus();
             if (sessionId) updateUnreadCountFromServer();
@@ -361,9 +372,10 @@
             modal.style.display = 'none';
             modal.setAttribute('aria-hidden', 'true');
             isChatOpen = false;
-            document.body.style.overflow = '';
+            modal.removeEventListener('touchmove', (e) => e.preventDefault());
             sendTypingEvent(false);
             clearChatNotification();
+            if (socket) socket.close();
         };
 
         document.getElementById('chat-start').onclick = async () => {

@@ -5987,6 +5987,7 @@ button.swiper-pagination-bullet {
     z-index: 1001;
     transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
     transform: translateY(100%);
+    -webkit-overflow-scrolling: touch;
     opacity: 0;
 }
 .chat-modal[aria-hidden="false"] {
@@ -6114,7 +6115,7 @@ button.swiper-pagination-bullet {
 @keyframes blink {
     0% { opacity: 0.3; }
     20% { opacity: 1; }
-    100 此处内容被截断，以下为续写： 100% { opacity: 0.3; }
+    100% { opacity: 0.3; }
 }
 .chat-input-wrapper {
     display: flex;
@@ -6239,6 +6240,7 @@ button.swiper-pagination-bullet {
         scroll-behavior: smooth;
         display: flex;
         flex-direction: column;
+        max-height: calc(100dvh - 48px - 69px);
     }
     .chat-toggle-btn {
         width: 50px;
