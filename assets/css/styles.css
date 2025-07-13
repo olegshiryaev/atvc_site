@@ -5669,6 +5669,10 @@ button.swiper-pagination-bullet {
 }
 
 /* Левая колонка с фичами */
+.tv-console__features-scroller {
+    overflow: visible;
+}
+
 .tv-console__features-col {
     flex: 1 1 50%;
     min-width: 300px;
@@ -5842,6 +5846,43 @@ button.swiper-pagination-bullet {
     
     .tv-console__features-col {
         padding-right: 0;
+    }
+
+    .tv-console__features-scroller {
+        overflow-x: auto;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tv-console__features-list {
+        display: flex;
+        flex-wrap: nowrap;
+        gap: 15px;
+        padding: 0 15px 5px;
+        width: max-content;
+    }
+    
+    .tv-console__feature {
+        flex: 0 0 280px;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-radius: var(--radius-md);
+        padding: 20px;
+        box-shadow: var(--shadow-card);
+    }
+    
+    .tv-console__feature-icon {
+        margin: 0 auto 15px;
+    }
+    
+    .tv-console__feature-text {
+        text-align: center;
+    }
+    
+    .tv-console__features-scroller::-webkit-scrollbar {
+        display: none;
     }
     
     .tv-console__banner {
