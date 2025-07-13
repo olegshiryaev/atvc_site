@@ -349,7 +349,7 @@ class Feedback(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя")
     phone = models.CharField(
         max_length=20,
-        verbose_name="Номер телефона",
+        verbose_name="Номер телефона", blank=True, null=True,
         validators=[
             RegexValidator(
                 regex=r'^\+7\d{10}$',
