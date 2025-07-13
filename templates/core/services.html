@@ -14,6 +14,93 @@
             {% include "core/partials/tariffs_list.html" %}
         </section>
 
+        <!-- Блок ТВ-приставки с новой цветовой схемой -->
+        <section class="tv-console block">
+            <div class="tv-console__wrap">
+                <div class="tv-console__header">
+                    <h2 class="tv-console__title block__title">Smart-TV приставка Wink Box Mini</h2>
+                    <p class="tv-console__description">Фильмы, сериалы, ТВ‑каналы, игры и голосовой помощник Маруся в одном устройстве</p>
+                    <div class="tv-console__rating">
+                        <div class="stars">★★★★★</div>
+                        <span>4.8/5 на основе 1,200 отзывов</span>
+                    </div>
+                </div>
+                
+                <div class="tv-console__content">
+                    <!-- Левая колонка -->
+                    <div class="tv-console__features-col">
+                        <div class="tv-console__features-list">
+                            <div class="tv-console__feature">
+                                <div class="tv-console__feature-icon">
+                                    <img src="{% static 'img/iconwithtv.png' %}" alt="Новая жизнь вашего ТВ" class="tv-console__icon-img">
+                                </div>
+                                <div class="tv-console__feature-text">
+                                    <strong>Новая жизнь вашего ТВ</strong><br>
+                                    Откройте новые возможности для вашего телевизора с легкостью подключив приставку по HDMI.
+                                </div>
+                            </div>
+                            
+                            <div class="tv-console__feature">
+                                <div class="tv-console__feature-icon">
+                                    <img src="{% static 'img/icon-ios.png' %}" alt="Разрешение 4К" class="tv-console__icon-img">
+                                </div>
+                                <div class="tv-console__feature-text">
+                                    <strong>Разрешение 4К</strong><br>
+                                    Погрузитесь в более детальное и яркое изображение с 4K Ultra HD.
+                                </div>
+                            </div>
+                            
+                            <div class="tv-console__feature">
+                                <div class="tv-console__feature-icon">
+                                    <img src="{% static 'img/assist.webp' %}" alt="Голосовое управление" class="tv-console__icon-img">
+                                </div>
+                                <div class="tv-console__feature-text">
+                                    <strong>Голосовое управление</strong><br>
+                                    Управляйте устройством с помощью голосового ассистента Маруся и находите то, что вам точно понравится.
+                                </div>
+                            </div>
+                            
+                            <div class="tv-console__feature">
+                                <div class="tv-console__feature-icon">
+                                    <img src="{% static 'img/game.webp' %}" alt="Игры и развлечения" class="tv-console__icon-img">
+                                </div>
+                                <div class="tv-console__feature-text">
+                                    <strong>Игры и развлечения</strong><br>
+                                    Наслаждайтесь любимыми играми и сервисами облачного гейминга на большом экране вашего телевизора.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="tv-console__price-box tv-console__price-box--desktop">
+                            <button class="tv-console__buy-btn btn">Купить</button>
+                            <div class="tv-console__price-info">
+                                <div class="tv-console__price-main">3 900<span class="tv-console__currency">₽</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Правая колонка -->
+                    <div class="tv-console__image-col">
+                        <div class="tv-console__banner">
+                            <div class="tv-console__banner-text">Простое подключение за 2 минуты без лишних проводов!</div>
+                        </div>
+                        
+                        <div class="tv-console__product-image">
+                            <img src="{% static 'img/Wink Box Mini.webp' %}" alt="ТВ-приставка Wink Box Mini" class="tv-console__product-img">
+                        </div>
+                    </div>
+                    
+                    <!-- Нижний блок (для мобильной версии) -->
+                    <div class="tv-console__price-box tv-console__price-box--mobile">
+                        <button class="tv-console__buy-btn btn">Купить</button>
+                        <div class="tv-console__price-info">
+                            <div class="tv-console__price-main">3 900<span class="tv-console__currency">₽</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="advantages-block block">
             <h2 class="advantages-block__title block__title">Преимущества интернета от АТК</h2>
             <div class="advantages-block__wrapper_slider">

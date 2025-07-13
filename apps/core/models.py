@@ -1,7 +1,8 @@
 import logging
 from django.db import models
 from ckeditor.fields import RichTextField
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import RegexValidator
 from pytils.translit import slugify as pytils_slugify
 import os
 from django.core.exceptions import ValidationError
@@ -10,7 +11,6 @@ from apps.core.tasks import generate_thumbnail_async
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
 from pdf2image import convert_from_bytes
-from django.core.validators import MinValueValidator, MaxValueValidator
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -348,7 +348,14 @@ class Feedback(models.Model):
 
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя")
     phone = models.CharField(
-        max_length=20, blank=True, null=True, verbose_name="Номер телефона"
+        max_length=20,
+        verbose_name="Номер телефона",
+        validators=[
+            RegexValidator(
+                regex=r'^\+7\d{10}$',
+                message="Номер телефона должен быть в формате: '+79999999999'."
+            )
+        ]
     )
     content = models.TextField(verbose_name="Сообщение")
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
@@ -360,7 +367,6 @@ class Feedback(models.Model):
         verbose_name = "Обратная связь"
         verbose_name_plural = "Обратная связь"
         ordering = ["-time_create"]
-        db_table = "app_feedback"
 
     def __str__(self):
         return f"Сообщение от {self.phone}"

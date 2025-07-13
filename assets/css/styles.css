@@ -3786,7 +3786,8 @@ button.swiper-pagination-bullet {
     margin-bottom: 1.5rem;
 }
 
-.location-select-modal .location-select-modal__search-input {
+.location-select-modal .location-select-modal__search-input,
+.mobile-location-offcanvas .location-select-modal__search-input {
     box-sizing: border-box;
     width: 100%;
     max-width: 100%;
@@ -3798,7 +3799,8 @@ button.swiper-pagination-bullet {
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.location-select-modal .location-select-modal__search-input:focus {
+.location-select-modal .location-select-modal__search-input:focus,
+.mobile-location-offcanvas .location-select-modal__search-input:focus {
     background-color: #fff;
     outline: none;
     border-color: #86b7fe;
@@ -5602,6 +5604,359 @@ button.swiper-pagination-bullet {
 
     .form2-block__form {
         padding: 20px;
+    }
+}
+
+.tv-console {
+    --text-primary: #2c3e50;
+    --text-secondary: #4a5568;
+    --bg-light: #f8f9fa;
+    
+    padding: 3rem 0;
+    background: #f2f6f8;
+    border-radius: var(--radius-xl);
+    position: relative;
+}
+
+.tv-console__wrap {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+}
+
+.tv-console__header {
+    margin-bottom: 3rem;
+    max-width: 800px;
+}
+
+.tv-console__title {
+    margin-bottom: 1.5rem;
+    font-size: 2.25rem;
+    line-height: 1.2;
+    color: var(--text-primary);
+}
+
+.tv-console__description {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.tv-console__rating {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.tv-console__rating .stars {
+    color: #FFB800;
+    font-size: 1.25rem;
+}
+
+.tv-console__rating span {
+    font-size: 0.9375rem;
+    color: var(--text-secondary);
+}
+
+.tv-console__content {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3rem;
+    position: relative;
+}
+
+/* Левая колонка с фичами */
+.tv-console__features-col {
+    flex: 1 1 50%;
+    min-width: 300px;
+    padding-right: 1rem;
+}
+
+.tv-console__features-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.tv-console__feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+}
+
+.tv-console__feature-icon {
+    width: 4rem;
+    height: 4rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+}
+
+.tv-console__icon-img {
+    max-width: 70%;
+    height: auto;
+}
+
+.tv-console__feature-text {
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    color: var(--text-primary);
+}
+
+.tv-console__feature-text strong {
+    font-weight: 700;
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--main-color);
+}
+
+/* Правая колонка с изображением */
+.tv-console__image-col {
+    flex: 1 1 45%;
+    position: relative;
+}
+
+.tv-console__banner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    max-width: 5500px;
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
+    z-index: 2;
+}
+
+.tv-console__banner-text {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+    line-height: 1.4;
+}
+
+.tv-console__product-image {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    margin-top: 4rem;
+}
+
+.tv-console__product-img {
+    max-width: 100%;
+    height: auto;
+    max-height: 450px;
+    display: block;
+    margin: 0 auto;
+    filter: drop-shadow(0 10px 20px rgba(0,0,0,0.1));
+}
+
+/* Стили для цены */
+.tv-console__price-box {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.tv-console__price-box--desktop {
+    display: flex;
+}
+
+.tv-console__price-box--mobile {
+    display: none;
+    justify-content: center;
+    width: 100%;
+}
+
+.tv-console__price-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.tv-console__price-main {
+    font-size: 2.5rem;
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.128px;
+    color: var(--main-color);
+    white-space: nowrap;
+}
+
+.tv-console__buy-btn {
+    padding: 1rem 2rem;
+    min-width: 200px;
+    border-radius: var(--radius-lg);
+    font-size: 1.125rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+    border: none;
+    background: var(--main-color);
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 145, 213, 0.3);
+    flex-shrink: 0;
+}
+
+.tv-console__buy-btn:hover {
+    background: var(--main-color-on-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 98, 166, 0.4);
+}
+
+/* Адаптив */
+@media (max-width: 1024px) {
+    .tv-console__title {
+        font-size: 2rem;
+    }
+    
+    .tv-console__description {
+        font-size: 1.125rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .tv-console {
+        padding: 2rem 0;
+        border-radius: var(--radius-lg);
+    }
+    
+    .tv-console__wrap {
+        padding: 0 1.5rem;
+    }
+    
+    .tv-console__features-col,
+    .tv-console__image-col {
+        flex: 1 1 100%;
+    }
+    
+    .tv-console__features-col {
+        padding-right: 0;
+    }
+    
+    .tv-console__banner {
+        position: relative;
+        max-width: 100%;
+        margin-bottom: 1.5rem;
+    }
+    
+    .tv-console__product-image {
+        margin-top: 2rem;
+    }
+    
+    .tv-console__price-box--desktop {
+        display: none;
+    }
+    
+    .tv-console__price-box--mobile {
+        display: flex;
+        margin-top: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .tv-console__title {
+        font-size: 1.75rem;
+    }
+    
+    .tv-console__description {
+        font-size: 1rem;
+    }
+    
+    .tv-console__features-list {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .tv-console__feature {
+        gap: 1rem;
+    }
+    
+    .tv-console__price-main {
+        font-size: 2rem;
+    }
+    
+    .tv-console__buy-btn {
+        min-width: 100%;
+        padding: 0.875rem 1rem;
+    }
+    
+    .tv-console__price-box--mobile {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .tv-console__price-info {
+        align-items: center;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1083px) {
+    .tv-console__content {
+        flex-direction: column;
+    }
+
+    .tv-console__features-col {
+        width: 100%;
+        padding-right: 0;
+        order: 2; /* Перемещаем фичи вниз */
+    }
+
+    .tv-console__image-col {
+        width: 100%;
+        order: 1; /* Изображение и баннер вверху */
+        margin-bottom: 2rem;
+    }
+
+    .tv-console__banner {
+        position: relative;
+        max-width: 100%;
+        margin-bottom: 1rem;
+        top: auto;
+        right: auto;
+    }
+
+    .tv-console__product-image {
+        margin-top: 0;
+        text-align: right; /* Выравниваем изображение вправо */
+        padding-right: 2rem;
+    }
+
+    .tv-console__product-img {
+        max-height: 280px;
+        margin-right: auto;
+        margin-left: auto;
+    }
+
+    .tv-console__price-box--desktop {
+        justify-content: flex-start; /* Кнопка и цена в строку слева */
+    }
+
+    /* Улучшаем отображение фич */
+    .tv-console__features-list {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2rem;
+    }
+
+    .tv-console__feature {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .tv-console__feature-icon {
+        margin-bottom: 1rem;
     }
 }
 

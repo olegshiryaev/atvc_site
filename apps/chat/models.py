@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import uuid
 
@@ -6,12 +7,19 @@ def validate_file_size(value):
     if value.size > 5 * 1024 * 1024:  # 5MB
         raise ValidationError("Файл не должен превышать 5 МБ.")
 
+class ChatOperator(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    telegram_chat_id = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.user.get_full_name() or self.user.username
+
 class ChatSession(models.Model):
     name = models.CharField(max_length=100)
     contact = models.CharField(max_length=100)
+    operator = models.ForeignKey(ChatOperator, on_delete=models.SET_NULL, null=True, blank=True, related_name='sessions')
     created_at = models.DateTimeField(auto_now_add=True)
     is_closed = models.BooleanField(default=False)
-    is_online = models.BooleanField(default=False)  # Для статуса онлайн/офлайн
     token = models.CharField(max_length=32, unique=True, blank=True)  # Для аутентификации WebSocket
 
     def __str__(self):

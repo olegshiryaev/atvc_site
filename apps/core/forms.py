@@ -62,6 +62,11 @@ class FeedbackCreateForm(forms.ModelForm):
             'content': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Сообщение'}),
         }
 
+    def clean_phone(self):
+        phone = self.cleaned_data.get('phone')
+        if not phone.startswith('+7'):
+            phone = '+7' + phone[1:] if phone.startswith('8') else phone
+        return phone
 
 class DocumentForm(forms.ModelForm):
     class Meta:
@@ -86,37 +91,17 @@ class ContactForm(forms.Form):
     )
 
 
-class FeedbackForm(forms.ModelForm):
-    phone_validator = RegexValidator(
-        regex=r"^\+7 \(\d{3}\) \d{3}-\d{2}-\d{2}$",
-        message="Введите номер в формате +7 (XXX) XXX-XX-XX",
-    )
-
+class FeedbackCreateForm(forms.ModelForm):
+    """
+    Форма отправки обратной связи
+    """
     class Meta:
         model = Feedback
-        fields = ["name", "phone", "content"]
+        fields = ['name', 'phone', 'content']
         widgets = {
-            "name": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Как вас зовут?",
-                    "required": True,
-                }
-            ),
-            "phone": forms.TextInput(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "+7 (XXX) XXX-XX-XX",
-                    "required": True,
-                }
-            ),
-            "content": forms.Textarea(
-                attrs={
-                    "class": "form-control",
-                    "placeholder": "Сообщение",
-                    "rows": 4,
-                }
-            ),
+            'name': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': 'Ваше имя'}),
+            'phone': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': '+7 (___) ___-__-__', 'id': 'phone-input'}),
+            'content': forms.Textarea(attrs={'class': 'callback-input', 'placeholder': 'Сообщение'}),
         }
 
     def clean_phone(self):

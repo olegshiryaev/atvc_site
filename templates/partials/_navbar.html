@@ -307,7 +307,7 @@
             <div class="mobile-location-offcanvas__body px-3 pb-3">
                 <!-- Поиск -->
                 <div class="search-container mb-3 position-relative">
-                    <input x-model="searchQuery" type="text" class="form-control" placeholder="Поиск" x-ref="searchInput">
+                    <input x-model="searchQuery" type="search" class="location-select-modal__search-input" placeholder="Найти" x-ref="searchInput">
                     <template x-if="searchQuery && filteredLocalities().length > 0">
                         <ul class="list-group position-absolute w-100 mt-1 shadow-sm border rounded overflow-hidden z-3">
                             <template x-for="(locality, index) in filteredLocalities().slice(0, 5)" :key="index">

@@ -19,7 +19,6 @@ from .forms import (
     ApplicationForm,
     ContactForm,
     FeedbackCreateForm,
-    FeedbackForm,
 )
 from .models import (
     AdditionalService,
@@ -228,7 +227,7 @@ def about_company(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
 
     if request.method == "POST":
-        form = FeedbackForm(request.POST)
+        form = FeedbackCreateForm(request.POST)
         if form.is_valid():
             feedback = form.save(commit=False)
             feedback.ip_address = request.META.get("REMOTE_ADDR")
@@ -281,22 +280,16 @@ def b2b_internet_view(request, locality_slug):
 
 @require_POST
 def feedback_form(request, locality_slug):
-    name = request.POST.get("name")
-    phone = request.POST.get("phone")
-    content = request.POST.get("content", "Обратная связь")
-
-    if phone:  # можно добавить валидацию, если нужно
+    form = FeedbackCreateForm(request.POST)
+    if form.is_valid():
         Feedback.objects.create(
-            name=name,
-            phone=phone,
-            content=content,
-            ip_address=request.META.get("REMOTE_ADDR"),
+            **form.cleaned_data,
+            ip_address=request.META.get("REMOTE_ADDR")
         )
         if request.htmx:
             return render(request, "core/callback_success.html")
-        return redirect("core:index")  # если без HTMX
-    else:
-        return render(request, "core/callback_form.html", {"error": "Телефон обязателен"})
+        return redirect("core:index")
+    return render(request, "core/callback_form.html", {"form": form})
 
 
 def services(request, service_slug, locality_slug):
