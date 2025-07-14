@@ -5710,7 +5710,6 @@ button.swiper-pagination-bullet {
 }
 
 .tv-console__feature-text {
-    font-size: 1.0625rem;
     line-height: 1.5;
     color: var(--text-primary);
 }
@@ -5769,7 +5768,6 @@ button.swiper-pagination-bullet {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-top: 2rem;
 }
 
 .tv-console__price-box--desktop {
@@ -5850,8 +5848,6 @@ button.swiper-pagination-bullet {
 
     .tv-console__features-scroller {
         overflow-x: auto;
-        padding-bottom: 15px;
-        margin-bottom: 20px;
         -webkit-overflow-scrolling: touch;
     }
 
@@ -5910,7 +5906,6 @@ button.swiper-pagination-bullet {
         display: flex;
         justify-content: center;
         width: 100%;
-        margin-top: 2rem;
     }
 }
 
