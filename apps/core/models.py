@@ -458,8 +458,9 @@ class Banner(models.Model):
     title = models.CharField("Заголовок", max_length=255)
     description = models.TextField("Описание", blank=True)
     background_image = models.ImageField(
-        "Фоновое изображение", upload_to="banners/backgrounds/", blank=True, null=True
+        "Изображение для десктопа", upload_to="banners/", blank=True, null=True
     )
+    mobile_image = models.ImageField("Изображение для мобильных", upload_to="banners/mobile/", blank=True, null=True)
     button_text = models.CharField(
         "Текст кнопки", blank=True, null=True, max_length=100
     )
