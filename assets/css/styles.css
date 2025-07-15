@@ -328,17 +328,105 @@ select,
 
 .mainbanner-block {
     position: relative;
+}
+
+.mainbanner-block__carousel {
+    box-shadow: var(--shadow-card);
+}
+
+.mainbanner-block__slide {
+    position: relative;
+    height: 460px;
     overflow: hidden;
+}
+
+.mainbanner-block__image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mainbanner-block__content {
+    position: relative;
+    z-index: 2;
+    color: #fff;
+    padding: 1.5rem 3rem;
+}
+
+.mainbanner-block__badge {
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.35rem 0.75rem;
+    display: inline-block;
+    border-radius: 0.25rem;
+}
+
+.mainbanner-block__title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.mainbanner-block__description {
+    font-size: 1.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.mainbanner-block__button {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    color: #fff;
+    background-color: var(--color-ocean-blue);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.mainbanner-block__button:hover {
+    background-color: var(--color-ocean-blue);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.mainbanner-block__button:focus {
+    outline: 3px solid rgba(255, 255, 255, 0.5);
+    outline-offset: 2px;
+}
+
+.mainbanner-block__indicators {
+    bottom: 1rem;
+}
+
+.mainbanner-block__indicators button {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.5);
+    border: none;
+    margin: 0 6px;
     padding: 0;
+    transition: background-color 0.3s ease;
 }
 
-.mainbanner-block__wrapper {
-    position: relative;
+.mainbanner-block__indicators .active {
+    background-color: #fff;
 }
 
-.mainbanner-block .carousel-inner {
-    position: relative;
-    border-radius: 40px;
+@media (max-width: 768px) {
+    .mainbanner-block__slide {
+        height: 300px;
+    }
+    .mainbanner-block__content {
+        padding: 1rem 2rem;
+    }
+    .mainbanner-block__title {
+        font-size: 2rem;
+    }
+    .mainbanner-block__description {
+        font-size: 1rem;
+    }
 }
 
 .block_alignfull {
@@ -1544,7 +1632,7 @@ button.swiper-pagination-bullet {
 /* Внутренняя часть карусели */
 .carousel-inner {
     border-radius: 0.25rem;
-    overflow: hidden;
+    overflow: hidden; /* Убедитесь, что содержимое не выходит за скругленные углы */
 }
 
 .carousel-item {
@@ -1570,9 +1658,8 @@ button.swiper-pagination-bullet {
 /* Фон слайда */
 .carousel-slide {
     position: relative;
-    min-height: 300px;
-    height: auto;
-    background-size: contain;
+    height: 460px;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     display: flex;
@@ -1693,10 +1780,7 @@ button.swiper-pagination-bullet {
         box-shadow: var(--shadow-card);
     }
     .carousel-slide {
-        min-height: 200px; /* Уменьшаем минимальную высоту для мобильных */
-        height: auto;
-        background-size: contain; /* Полное отображение изображения */
-        padding-bottom: 56.25%; /* Соотношение 16:9 для адаптивности */
+        height: 500px;
     }
     .carousel-text {
         padding: 1rem 2rem;
@@ -1728,10 +1812,6 @@ button.swiper-pagination-bullet {
         width: 100vw;
         margin-left: calc(-50vw + 50%);
         border-radius: 0;
-        background-size: contain; /* Полное отображение изображения */
-        min-height: 250px;
-        height: auto;
-        padding-bottom: 56.25%; /* Соотношение 16:9 */
     }
 
     .carousel.slide,
