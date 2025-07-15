@@ -213,6 +213,11 @@ class Tariff(models.Model):
         related_name="tariffs",
     )
     slug = models.SlugField("URL-адрес", max_length=120, blank=True, unique=True)
+    priority = models.PositiveSmallIntegerField(
+        "Приоритет отображения", 
+        default=0,
+        help_text="Чем выше число, тем выше тариф в списке"
+    )
     is_active = models.BooleanField("Активен", default=True)
 
     def save(self, *args, **kwargs):
@@ -262,7 +267,7 @@ class Tariff(models.Model):
     class Meta:
         verbose_name = "Тариф"
         verbose_name_plural = "Тарифы"
-        ordering = ["name", "price"]
+        ordering = ["-priority", "name", "price"]
 
 
 def equipment_image_upload_to(instance, filename):
