@@ -419,7 +419,17 @@ select,
 @media (min-width: 769px) {
     .mainbanner-block__slide {
         height: 460px;
-        padding-top: 0;
+        overflow: hidden;
+        position: relative;
+    }
+    .mainbanner-block__image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover; /* для десктопа обрезка допускается */
+        object-position: right center;
     }
 }
 
@@ -427,9 +437,9 @@ select,
 @media (max-width: 768px) {
     .mainbanner-block__slide {
         position: relative;
-        height: 300px; /* фиксированная высота */
+        height: 220px; /* фиксированная высота мобильного слайда */
         overflow: hidden;
-        background-color: var(--color-ocean-blue); /* цвет фона или fallback */
+        background-color: white; /* фон сайта */
     }
     .mainbanner-block__image {
         position: absolute;
@@ -437,9 +447,10 @@ select,
         left: 50%;
         width: 100%;
         height: 100%;
+        max-height: 100%;
         transform: translate(-50%, -50%);
         object-fit: contain;
-        object-position: center center;
+        object-position: right center; /* важная часть справа */
         background-color: transparent;
     }
 }
