@@ -426,9 +426,21 @@ select,
 /* Мобильные: адаптивная высота с пропорциями */
 @media (max-width: 768px) {
     .mainbanner-block__slide {
+        position: relative;
+        height: 300px; /* фиксированная высота */
+        overflow: hidden;
+        background-color: var(--color-ocean-blue); /* цвет фона или fallback */
+    }
+    .mainbanner-block__image {
+        position: absolute;
+        top: 50%;
+        left: 50%;
         width: 100%;
-        padding-top: 34.6%; /* 450 / 1300 ≈ 0.346 */
-        height: auto;
+        height: 100%;
+        transform: translate(-50%, -50%);
+        object-fit: contain;
+        object-position: center center;
+        background-color: transparent;
     }
 }
 
