@@ -272,7 +272,6 @@ class TariffResource(resources.ModelResource):
             'is_active'
         )
         import_id_fields = ('slug',)
-        export_order = fields
         skip_unchanged = True
         report_skipped = True
 
@@ -284,11 +283,17 @@ class TariffResource(resources.ModelResource):
                 base_slug = pytils_slugify(name)
                 row['slug'] = base_slug
                 
-                # Проверяем уникальность
+                # Проверяем уникальность среди существующих и уже обработанных записей
                 counter = 1
-                while Tariff.objects.filter(slug=row['slug']).exists():
+                while Tariff.objects.filter(slug=row['slug']).exists() or self.is_slug_in_import(row['slug'], kwargs):
                     row['slug'] = f"{base_slug}-{counter}"
                     counter += 1
+
+    def is_slug_in_import(self, slug, kwargs):
+        """Проверяет, используется ли slug в других строках текущего импорта"""
+        # Получаем все уже обработанные строки
+        existing_rows = kwargs.get('existing_rows', [])
+        return any(r.get('slug') == slug for r in existing_rows)
 
 
 @admin.register(Tariff)

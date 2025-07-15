@@ -5644,23 +5644,6 @@ button.swiper-pagination-bullet {
     margin-bottom: 1.5rem;
 }
 
-.tv-console__rating {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    margin-top: 1rem;
-}
-
-.tv-console__rating .stars {
-    color: #FFB800;
-    font-size: 1.25rem;
-}
-
-.tv-console__rating span {
-    font-size: 0.9375rem;
-    color: var(--text-secondary);
-}
-
 .tv-console__content {
     display: flex;
     flex-wrap: wrap;
