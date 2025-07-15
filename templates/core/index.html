@@ -24,6 +24,8 @@
                                 <img src="{{ banner.background_image.url }}"
                                     alt="{{ banner.title }}"
                                     class="mainbanner-block__image">
+                                {% else %}
+                                <div class="mainbanner-block__fallback-bg"></div>
                                 {% endif %}
 
                                 <div class="mainbanner-block__content container">
@@ -64,6 +66,7 @@
             </div>
         </section>
         {% endif %}
+
 
         <!-- Блок услуг -->
         {% include 'core/available_services.html' %}
