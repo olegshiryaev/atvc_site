@@ -339,6 +339,15 @@ select,
     overflow: hidden;
 }
 
+.mainbanner-block__slide::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.25); /* легкий тёмный полупрозрачный фон */
+    z-index: 1;
+    pointer-events: none;
+}
+
 .mainbanner-block__image {
     position: absolute;
     top: 0;
@@ -354,6 +363,7 @@ select,
     z-index: 2;
     color: #fff;
     padding: 1.5rem 3rem;
+    max-width: 90%;
 }
 
 .mainbanner-block__badge {
@@ -441,6 +451,14 @@ select,
         overflow: hidden;
         background-color: white; /* фон сайта */
     }
+    .mainbanner-block__content {
+        padding: 1rem 1.5rem;
+        max-width: 90%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* вертикальный центр */
+    }
     .mainbanner-block__image {
         position: absolute;
         top: 50%;
@@ -452,6 +470,19 @@ select,
         object-fit: contain;
         object-position: right center; /* важная часть справа */
         background-color: transparent;
+    }
+    .mainbanner-block__title {
+        font-size: 1.8rem;
+        margin-bottom: 0.5rem;
+    }
+    .mainbanner-block__description {
+        font-size: 1rem;
+        margin-bottom: 1rem;
+    }
+    .mainbanner-block__button {
+        align-self: flex-start;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.9rem;
     }
 }
 
