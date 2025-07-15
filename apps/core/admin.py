@@ -303,7 +303,8 @@ class TariffAdmin(ImportExportModelAdmin):
     list_display = (
         'name', 
         'service', 
-        'display_price', 
+        'display_price',
+        'priority', 
         'is_active', 
         'is_featured', 
         'is_promo',
@@ -318,7 +319,8 @@ class TariffAdmin(ImportExportModelAdmin):
         'is_featured', 
         'is_promo',
         'service',
-        'technology'
+        'technology',
+        'priority'
     )
     search_fields = ('name', 'description')
     filter_horizontal = ('included_channels', 'localities')
@@ -331,6 +333,7 @@ class TariffAdmin(ImportExportModelAdmin):
             'fields': (
                 'name', 
                 'slug',
+                'priority',
                 'service',
                 'description',
                 'is_active'
@@ -369,6 +372,9 @@ class TariffAdmin(ImportExportModelAdmin):
             _hd_channels_count=Count('included_channels', filter=Q(included_channels__is_hd=True))
         )
         return qs.prefetch_related('included_channels', 'localities')
+    
+    def get_ordering(self, request):
+        return ['-priority', 'name', 'price']
 
     # Кастомные методы для отображения
     def display_price(self, obj):
