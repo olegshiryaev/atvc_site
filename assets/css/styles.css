@@ -2357,8 +2357,8 @@ button.swiper-pagination-bullet {
 
 .callback-modal-close {
     position: absolute;
-    top: 15px;
-    right: 20px;
+    top: 5px;
+    right: 10px;
     background: none;
     border: none;
     font-size: 24px;
