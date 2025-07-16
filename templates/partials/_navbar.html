@@ -185,6 +185,7 @@
                     </div>
                 </div>
                 <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning btn-sm">Оплатить</a>
+                <button class="btn">Подключить</button>
             </div>
             <!-- Мобильное местоположение -->
             <div class="ms-auto d-flex align-items-center gap-3 d-lg-none">
@@ -207,7 +208,8 @@
                             x-transition:enter-end="loc-confirm-enter-end"
                             x-transition:leave="loc-confirm-leave"
                             x-transition:leave-start="loc-confirm-leave-start"
-                            x-transition:leave-end="loc-confirm-leave-end">
+                            x-transition:leave-end="loc-confirm-leave-end"
+                            style="display: none;">
                         <div class="loc-confirm-backdrop" @click="closePopover()"></div>
                         <div class="loc-confirm-container">
                             <div class="loc-confirm-header">
