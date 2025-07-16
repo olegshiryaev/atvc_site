@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Новое сообщение обратной связи</title>
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; }
+        h2 { color: #1a73e8; }
+        p { margin: 5px 0; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Новое сообщение обратной связи</h2>
+        <p><strong>Имя:</strong> {{ name|default:"Не указано" }}</p>
+        <p><strong>Телефон:</strong> {{ phone|default:"Не указано" }}</p>
+        <p><strong>Сообщение:</strong> {{ content|escape }}</p>
+        <p><strong>Дата:</strong> {{ time_create }}</p>
+        <p><strong>IP:</strong> {{ ip_address|default:"Не указано" }}</p>
+    </div>
+</body>
+</html>
