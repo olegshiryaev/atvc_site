@@ -350,7 +350,12 @@ class Feedback(models.Model):
     """
     Модель обратной связи
     """
-
+    STATUS_CHOICES = (
+        ('new', 'Новая'),
+        ('in_progress', 'В обработке'),
+        ('resolved', 'Решена'),
+    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='new', verbose_name="Статус")
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя")
     phone = models.CharField(
         max_length=20, blank=True, null=True,
@@ -366,6 +371,10 @@ class Feedback(models.Model):
         verbose_name = "Обратная связь"
         verbose_name_plural = "Обратная связь"
         ordering = ["-time_create"]
+        indexes = [
+            models.Index(fields=['time_create']),
+            models.Index(fields=['phone']),
+        ]
 
     def __str__(self):
         return f"Сообщение от {self.phone}"
