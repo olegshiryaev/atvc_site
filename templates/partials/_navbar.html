@@ -169,35 +169,16 @@
             <div class="d-none d-lg-flex align-items-center gap-3 ms-auto">
                 <div class="position-relative">
                     <!-- Popover подтверждения местоположения (десктоп) -->
-                    <div class="location-confirm-popover"
-                        x-show="isPopoverOpen"
-                        x-transition:enter="popover-enter"
-                        x-transition:enter-start="popover-enter-start"
-                        x-transition:enter-end="popover-enter-end"
-                        x-transition:leave="popover-leave"
-                        x-transition:leave-start="popover-leave-start"
-                        x-transition:leave-end="popover-leave-end"
-                        style="display: none;">
-                        <div class="location-confirm-popover__content">
-                            <div class="location-confirm-popover__header">
-                                <button type="button" class="btn-close" @click="closePopover()">×</button>
+                    <div class="nav-locality-popover" x-show="isPopoverOpen" x-transition:enter="nav-popover-enter" x-transition:enter-start="nav-popover-enter-start" x-transition:enter-end="nav-popover-enter-end" x-transition:leave="nav-popover-leave" x-transition:leave-start="nav-popover-leave-start" x-transition:leave-end="nav-popover-leave-end">
+                        <div class="nav-locality-popover__content">
+                            <div class="nav-locality-popover__header">
+                                <button type="button" class="nav-locality-popover__close" @click="closePopover()">×</button>
                             </div>
-                            <div class="location-confirm-popover__body text-center">
-                                <p class="mb-4">Вы находитесь в <span x-text="currentLocalityNamePrepositional"></span>?</p>
-                                <div class="d-flex justify-content-center gap-3">
-                                    <button class="btn btn-outline-secondary"
-                                            @click="() => {
-                                                openModal();
-                                                closePopover();
-                                            }"
-                                            aria-label="Выбрать другое местоположение">
-                                        Нет, изменить
-                                    </button>
-                                    <button class="btn btn-primary"
-                                            @click="confirmLocality()"
-                                            aria-label="Подтвердить местоположение">
-                                        Да, спасибо
-                                    </button>
+                            <div class="nav-locality-popover__body">
+                                <p class="nav-locality-popover__text">Вы находитесь в <span x-text="currentLocalityNamePrepositional"></span>?</p>
+                                <div class="nav-locality-popover__buttons">
+                                    <button class="nav-button nav-button--secondary" @click="openModal(); closePopover()">Нет, изменить</button>
+                                    <button class="nav-button nav-button--primary" @click="confirmLocality()">Да, спасибо</button>
                                 </div>
                             </div>
                         </div>
@@ -219,36 +200,31 @@
                         <span class="nav-link">{{ request.locality.name }}</span>
                     </a>
                     <!-- Popover подтверждения местоположения (мобильный) -->
-                    <div class="location-confirm-popover"
-                         x-show="isPopoverOpen"
-                         x-transition:enter="popover-enter"
-                         x-transition:enter-start="popover-enter-start"
-                         x-transition:enter-end="popover-enter-end"
-                         x-transition:leave="popover-leave"
-                         x-transition:leave-start="popover-leave-start"
-                         x-transition:leave-end="popover-leave-end"
-                         style="display: none;">
-                        <div class="location-confirm-popover__content">
-                            <div class="location-confirm-popover__header">
-                                <button type="button" class="btn-close" @click="closePopover()">×</button>
+                    <div class="loc-confirm-popover" 
+                            x-show="isPopoverOpen"
+                            x-transition:enter="loc-confirm-enter"
+                            x-transition:enter-start="loc-confirm-enter-start"
+                            x-transition:enter-end="loc-confirm-enter-end"
+                            x-transition:leave="loc-confirm-leave"
+                            x-transition:leave-start="loc-confirm-leave-start"
+                            x-transition:leave-end="loc-confirm-leave-end">
+                        <div class="loc-confirm-backdrop" @click="closePopover()"></div>
+                        <div class="loc-confirm-container">
+                            <div class="loc-confirm-header">
+                            <button type="button" class="loc-confirm-close" @click="closePopover()">×</button>
                             </div>
-                            <div class="location-confirm-popover__body text-center">
-                                <p class="mb-4">Хотите подключиться в <span x-text="currentLocalityNamePrepositional"></span>?</p>
-                                <div class="d-flex justify-content-center gap-3">
-                                    <button class="btn btn-outline-secondary"
-                                            @click="() => {
-                                                openMobileSelector();
-                                                closePopover();
-                                            }"
-                                            aria-label="Изменить местоположение">
-                                        Нет, изменить
-                                    </button>
-                                    <button class="btn btn-primary"
-                                            @click="confirmLocality()"
-                                            aria-label="Подтвердить местоположение">
-                                        Да, верно
-                                    </button>
-                                </div>
+                            <div class="loc-confirm-body">
+                            <p class="loc-confirm-text">Хотите подключиться в <span x-text="currentLocalityNamePrepositional"></span>?</p>
+                            <div class="loc-confirm-buttons">
+                                <button class="loc-confirm-btn loc-confirm-btn--change"
+                                        @click="openMobileSelector(); closePopover()">
+                                Нет, изменить
+                                </button>
+                                <button class="loc-confirm-btn loc-confirm-btn--confirm"
+                                        @click="confirmLocality()">
+                                Да, верно
+                                </button>
+                            </div>
                             </div>
                         </div>
                     </div>

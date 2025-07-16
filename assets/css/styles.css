@@ -6867,3 +6867,241 @@ button.swiper-pagination-bullet {
     clip: rect(0, 0, 0, 0);
     border: 0;
 }
+
+/* Поповер */
+.nav-locality-popover {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 320px;
+  z-index: 1050;
+  display: none;
+  margin-top: 10px;
+}
+
+.nav-locality-popover[x-show] {
+  display: block;
+}
+
+.nav-locality-popover__content {
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  padding: 16px;
+  position: relative;
+  border: 1px solid #e0e0e0;
+}
+
+.nav-locality-popover__header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.nav-locality-popover__close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+  transition: color 0.2s;
+}
+
+.nav-locality-popover__close:hover {
+  color: #333;
+}
+
+.nav-locality-popover__body {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.nav-locality-popover__text {
+  font-size: 15px;
+  line-height: 1.4;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.nav-locality-popover__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.nav-button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid transparent;
+}
+
+.nav-button--primary {
+    background: var(--main-color);
+    color: white;
+}
+
+.nav-button--primary:hover {
+  background: #1a6de4;
+}
+
+.nav-button--secondary {
+  background: white;
+  border-color: #d0d0d0;
+  color: #333;
+}
+
+.nav-button--secondary:hover {
+  background: #f5f5f5;
+  border-color: #b0b0b0;
+}
+
+/* Анимации для десктопного поповера */
+.nav-popover-enter-start {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+.nav-popover-enter-end {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-popover-leave-start {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-popover-leave-end {
+  opacity: 0;
+  transform: translateY(-10px);
+}
+
+/* Popover подтверждения местоположения */
+.loc-confirm-popover {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 10050;
+  display: none;
+  isolation: isolate;
+}
+
+.loc-confirm-popover[x-show] {
+  display: block;
+}
+
+.loc-confirm-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: -1;
+}
+
+.loc-confirm-container {
+  position: relative;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  border-radius: 16px 16px 0 0;
+  padding: 20px 16px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+.loc-confirm-header {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.loc-confirm-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  color: #999;
+  padding: 4px;
+}
+
+.loc-confirm-body {
+  text-align: center;
+}
+
+.loc-confirm-text {
+  font-size: 16px;
+  line-height: 1.4;
+  color: #333;
+  margin-bottom: 24px;
+  padding: 0 10px;
+}
+
+.loc-confirm-buttons {
+  display: flex;
+  gap: 12px;
+}
+
+.loc-confirm-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+}
+
+.loc-confirm-btn--change {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.loc-confirm-btn--confirm {
+    background: var(--main-color);
+    color: white;
+}
+
+/* Анимации (появление снизу) */
+.loc-confirm-enter-start .loc-confirm-container {
+  transform: translateY(100%);
+}
+
+.loc-confirm-enter-end .loc-confirm-container {
+  transform: translateY(0);
+}
+
+.loc-confirm-leave-start .loc-confirm-container {
+  transform: translateY(0);
+}
+
+.loc-confirm-leave-end .loc-confirm-container {
+  transform: translateY(100%);
+}
+
+/* Адаптация для разных экранов */
+@media (max-width: 575px) {
+  .loc-confirm-container {
+    padding: 16px;
+  }
+  
+  .loc-confirm-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .loc-confirm-btn {
+    width: 100%;
+  }
+}

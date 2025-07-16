@@ -84,7 +84,7 @@
                     <!-- Пакеты ТВ-каналов -->
                     {% if tv_packages %}
                     <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
-                        <h3 class="mb-4">Выберите пакет ТВ-каналов</h3>
+                        <h3 class="mb-4">Добавить пакеты каналов</h3>
                         <p class="text-muted mb-4">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
                         <div class="row g-4">
                             {% for package in tv_packages %}
@@ -137,7 +137,7 @@
                     {% endif %}
                     <!-- Оборудование -->
                     <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="products" role="tabpanel">
-                        <h3 class="mb-4">Выберите оборудование</h3>
+                        <h3 class="mb-4">Добавить оборудование</h3>
                         <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
                         <div class="row g-4">
                             {% for product in products %}
@@ -258,7 +258,7 @@
                                 </div>
                                 <div class="col-12 mt-3">
                                     <button type="submit" class="btn btn-primary btn-lg w-100">
-                                        <i class="bi bi-send-fill me-2"></i>Отправить заявку
+                                        <i class="bi bi-send-fill me-2"></i>Оставить заявку
                                     </button>
                                 </div>
                             </div>
@@ -271,7 +271,7 @@
             <div class="col-lg-4" id="summaryCardContainer">
                 <div class="card summary-card shadow-sm border-0">
                     <div class="card-body">
-                        <h3 class="card-title mb-4">Итоговая стоимость</h3>
+                        <h3 class="card-title mb-4">Заявка на подключение</h3>
                         <div class="mb-4">
                             <h5>Тариф</h5>
                             <div class="d-flex justify-content-between">
