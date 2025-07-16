@@ -129,6 +129,52 @@
         });
     </script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const callbackForm = document.getElementById('callbackForm');
+
+            if (!callbackForm) return;
+
+            // Инициализация маски для телефона
+            const phoneInput = document.querySelector('[name="phone"]');
+            const phoneMask = IMask(phoneInput, {
+                mask: '+{7}(000)000-00-00',
+                lazy: false,
+                placeholderChar: '_'
+            });
+
+            // Функция для подготовки номера телефона к отправке
+            function preparePhoneNumber(phoneValue) {
+                const digits = phoneValue.replace(/\D/g, '');
+                if (digits.length === 11 && digits.startsWith('7')) {
+                    return '+7' + digits.substring(1);
+                }
+                return null;
+            }
+
+            function openModal() {
+                document.getElementById('callbackModal').style.display = 'flex';
+            }
+
+            function closeModal() {
+                document.getElementById('callbackModal').style.display = 'none';
+            }
+
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape') {
+                    closeModal();
+                }
+            });
+
+            document.body.addEventListener('htmx:afterRequest', function(event) {
+                if (event.detail.successful) {
+                    closeModal();
+                } else {
+                    console.error('HTMX request failed:', event.detail.xhr.status);
+                }
+            });
+        });
+    </script>
+    <script>
         let sessionId = null;
         let socket = null;
         let isChatOpen = false;
@@ -443,6 +489,7 @@
             if (e.key === 'Enter' && e.target.value.trim() !== '') {
                 sendMessage();
                 e.preventDefault();
+                
             }
         });
 

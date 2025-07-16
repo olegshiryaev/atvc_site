@@ -1,40 +1,4 @@
 {% load static %}
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('IMask script running');
-        const phoneInput = document.querySelector('#phone-input');
-        console.log('Phone input:', phoneInput);
-        if (phoneInput) {
-            const mask = IMask(phoneInput, {
-                mask: '+{7} (000) 000-00-00',
-                lazy: false,
-                placeholderChar: '_'
-            });
-        } else {
-            console.error('Phone input not found');
-        }
-    });
-
-    function openModal() {
-        document.getElementById('callbackModal').style.display = 'flex';
-    }
-
-    function closeModal() {
-        document.getElementById('callbackModal').style.display = 'none';
-    }
-
-    document.addEventListener('keydown', function(event) {
-        if (event.key === 'Escape') {
-            closeModal();
-        }
-    });
-
-    document.body.addEventListener('htmx:afterRequest', function(event) {
-        if (event.detail.successful) {
-            closeModal();
-        }
-    });
-</script>
 <div class="callback-modal" id="callbackModal" style="display: none;">
     <div class="callback-modal-backdrop" onclick="closeModal()"></div>
     <div class="callback-modal-content">
@@ -47,7 +11,7 @@
               hx-swap="innerHTML">
             {% csrf_token %}
             <input type="text" name="name" placeholder="Ваше имя" class="callback-input">
-            <input type="tel" name="phone" placeholder="Ваш телефон" required class="callback-input">
+            <input type="tel" name="phone" id="phone" class="callback-input" placeholder="+7 (___) ___-__-__" required>
             <input type="hidden" name="content" value="Запрос консультации">
             <button type="submit" class="callback-btn">Отправить</button>
             <label class="callback-checkbox">
@@ -57,17 +21,15 @@
         </form>
     </div>
 </div>
-<script defer src="{% static 'js/imask.min.js' %}"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const phoneInput = document.querySelector('[name="phone"]');
-        if (phoneInput) {
-            const mask = IMask(phoneInput, {
-                mask: '+{7} (000) 000-00-00',
-                lazy: false,
-                placeholderChar: '_'
-            });
-        }
+        const callbackForm = document.getElementById('callbackForm');
+        const phoneInput = callbackForm.querySelector('[name="phone"]');
+        const phoneMask = IMask(phoneInput, {
+            mask: '+{7}(000)000-00-00',
+            lazy: false,
+            placeholderChar: '_'
+        });
     });
 
     function openModal() {
@@ -84,9 +46,10 @@
         }
     });
 
-    document.body.addEventListener('htmx:afterRequest', function(event) {
-        if (event.detail.successful) {
-            closeModal();
+    // Ensure modal is visible after HTMX content swap
+    document.body.addEventListener('htmx:afterSwap', function(event) {
+        if (event.detail.target.id === 'callbackModal' || event.detail.target.classList.contains('callback-modal-content')) {
+            document.getElementById('callbackModal').style.display = 'flex';
         }
     });
 </script>

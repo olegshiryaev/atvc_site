@@ -18,7 +18,7 @@ from apps.orders.forms import OrderForm
 from .forms import (
     ApplicationForm,
     ContactForm,
-    FeedbackCreateForm,
+    FeedbackForm,
 )
 from .models import (
     AdditionalService,
@@ -280,7 +280,7 @@ def b2b_internet_view(request, locality_slug):
 
 @require_POST
 def feedback_form(request, locality_slug):
-    form = FeedbackCreateForm(request.POST)
+    form = FeedbackForm(request.POST)
     if form.is_valid():
         Feedback.objects.create(
             **form.cleaned_data,
@@ -289,7 +289,9 @@ def feedback_form(request, locality_slug):
         if request.htmx:
             return render(request, "core/callback_success.html")
         return redirect("core:index")
-    return render(request, "core/callback_form.html", {"form": form})
+    else:
+        print(form.errors)  # Debug form errors
+        return render(request, "core/callback_form.html", {"form": form})
 
 
 def services(request, service_slug, locality_slug):

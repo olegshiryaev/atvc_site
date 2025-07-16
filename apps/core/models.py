@@ -354,15 +354,9 @@ class Feedback(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя")
     phone = models.CharField(
         max_length=20,
-        verbose_name="Номер телефона", blank=True, null=True,
-        validators=[
-            RegexValidator(
-                regex=r'^\+7\d{10}$',
-                message="Номер телефона должен быть в формате: '+79999999999'."
-            )
-        ]
+        verbose_name="Номер телефона",
     )
-    content = models.TextField(verbose_name="Сообщение")
+    content = models.TextField(verbose_name="Сообщение", blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
     ip_address = models.GenericIPAddressField(
         verbose_name="IP отправителя", blank=True, null=True

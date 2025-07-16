@@ -91,21 +91,27 @@ class ContactForm(forms.Form):
     )
 
 
-class FeedbackCreateForm(forms.ModelForm):
-    """
-    Форма отправки обратной связи
-    """
+class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
         fields = ['name', 'phone', 'content']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': 'Ваше имя'}),
-            'phone': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': '+7 (___) ___-__-__', 'id': 'phone-input'}),
-            'content': forms.Textarea(attrs={'class': 'callback-input', 'placeholder': 'Сообщение'}),
+            'phone': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': '+7 (___) ___-__-__', "autocomplete": "tel", "required": "required",}),
+            'content': forms.HiddenInput(),
         }
 
     def clean_phone(self):
-        phone = self.cleaned_data.get("phone")
-        if phone:
-            self.phone_validator(phone)
-        return phone
+        phone = self.cleaned_data.get("phone") or ""
+        phone = phone.strip()
+
+        # Удаляем все нецифровые символы
+        cleaned_phone = re.sub(r"[^\d]", "", phone)
+
+        # Проверяем длину и начало номера
+        if len(cleaned_phone) != 11 or not cleaned_phone.startswith("7"):
+            raise forms.ValidationError(
+                "Введите номер телефона в формате +7 (XXX) XXX-XX-XX"
+            )
+
+        return f"+7{cleaned_phone[1:]}"  # Возвращаем в формате +7XXXXXXXXXX

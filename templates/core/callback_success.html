@@ -1,15 +1,12 @@
-<button class="callback-modal-close" onclick="closeModal()">&times;</button>
-
+<button class="callback-modal-close" onclick="closeModal()">×</button>
 <h3 class="callback-modal-title">Спасибо!</h3>
 <p class="callback-modal-subtitle">
     Заявка принята!<br>
     Наши специалисты свяжутся с Вами в ближайшее время.
 </p>
-
-<button onclick="closeModal()" class="callback-btn mt-3">Закрыть</button>
-
+<button onclick="closeModal()" class="callback-btn">Закрыть</button>
 <script>
-    setTimeout(() => {
-        closeModal();
-    }, 5000);
+    // Ensure the modal is visible before setting the timeout
+    document.getElementById('callbackModal').style.display = 'flex';
+    setTimeout(closeModal, 3000);
 </script>
