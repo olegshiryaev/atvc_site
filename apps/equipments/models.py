@@ -74,6 +74,9 @@ class Product(models.Model):
 
     def get_main_image(self):
         return self.images.filter(is_main=True).first()
+    
+    def get_price(self):
+        return self.price
 
     class Meta:
         verbose_name = "Товар"
@@ -96,8 +99,7 @@ class ProductImage(models.Model):
     
     def save(self, *args, **kwargs):
         if self.is_main:
-            self.product.images.filter(is_main=True).update(is_main=False)
-        super().save(*args, **kwargs)
+            self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
 
     class Meta:
         ordering = ["order"]
@@ -126,6 +128,14 @@ class ProductVariant(models.Model):
 
     def __str__(self):
         return f"{self.product.name} ({self.get_color_display()})"
+    
+    def get_price(self):
+        return self.price if self.price is not None else self.product.get_price()
+    
+    def save(self, *args, **kwargs):
+        if self.price is None:
+            self.price = self.product.price
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Вариант товара"
