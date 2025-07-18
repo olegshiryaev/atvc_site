@@ -458,7 +458,7 @@ class Banner(models.Model):
         ("info", "Голубой"),
         ("dark", "Чёрный"),
     )
-    title = models.CharField("Заголовок", max_length=255)
+    title = models.CharField("Заголовок", max_length=255, blank=True, null=True)
     description = models.TextField("Описание", blank=True)
     background_image = models.ImageField(
         "Изображение для десктопа", upload_to="banners/", blank=True, null=True

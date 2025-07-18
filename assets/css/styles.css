@@ -7105,3 +7105,169 @@ button.swiper-pagination-bullet {
     width: 100%;
   }
 }
+
+/* Основные стили страницы */
+.offices-page {
+    padding: 2rem 0 4rem;
+    background: #fff;
+}
+
+/* Фильтр городов */
+.offices-filter {
+    margin-bottom: 2.5rem;
+    background: #f5f7fa;
+    border-radius: 0.5rem;
+    padding: 0.25rem;
+}
+
+.offices-filter__scroller {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+
+.offices-filter__scroller::-webkit-scrollbar {
+    display: none;
+}
+
+.offices-filter__nav {
+    display: inline-flex;
+    gap: 0.25rem;
+    min-width: 100%;
+}
+
+.offices-filter__btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.375rem;
+    background: transparent;
+    border: none;
+    color: #4b5563;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.offices-filter__btn:hover {
+    background: #e5e7eb;
+}
+
+.offices-filter__btn.active {
+    background: #3b82f6;
+    color: white;
+}
+
+/* Карточка офиса */
+.office-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+@media (min-width: 768px) {
+    .office-card {
+        flex-direction: row;
+    }
+}
+
+.office-card__info {
+    flex: 0 0 100%;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+@media (min-width: 768px) {
+    .office-card__info {
+        flex: 0 0 22rem;
+    }
+}
+
+.office-card__image {
+    height: 12rem;
+}
+
+.office-card__image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.office-card__details {
+    padding: 1.5rem;
+}
+
+.office-detail {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.office-detail:last-child {
+    margin-bottom: 0;
+}
+
+.office-icon {
+    flex: 0 0 1.5rem;
+    height: 1.5rem;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-top: 0.25rem;
+}
+
+.office-icon--location {
+    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+}
+
+.office-icon--clock {
+    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+}
+
+.office-icon--phone {
+    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+}
+
+.office-detail__title {
+    font-size: 0.875rem;
+    color: #6b7280;
+    margin-bottom: 0.25rem;
+}
+
+.office-detail__value {
+    font-weight: 500;
+    color: #1f2937;
+    margin: 0;
+}
+
+/* Карта */
+.office-card__map {
+    flex: 1;
+    min-height: 20rem;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.office-card__map iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Сообщение об отсутствии офисов */
+.offices-empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 3rem 0;
+}
+
+/* Скрытие неактивных городов */
+.offices-city {
+    display: none;
+}
+
+.offices-city.active {
+    display: block;
+}

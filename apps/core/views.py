@@ -135,22 +135,29 @@ def submit_application(request, locality_slug):
         return JsonResponse({"success": False, "errors": errors}, status=400)
 
 
-def office_list(request, locality_slug):
-    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    offices = Office.objects.filter(locality=locality).prefetch_related("schedules")
-
+def office_list(request, locality_slug=None):
+    # Получаем все активные населённые пункты с офисами
+    localities = Locality.objects.filter(
+        is_active=True,
+        office__isnull=False
+    ).distinct().prefetch_related('office_set__schedules')
+    
+    # Определяем текущий выбранный город
+    if locality_slug:
+        current_locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    else:
+        current_locality = localities.first()
+    
     context = {
-        "locality": locality,
-        "offices": offices,
-        "title": f"Офис обслуживания в {locality.name_prepositional}",
-        "meta_title": f"Офисы обслуживания АТК в {locality.name_prepositional}",
-        "meta_description": f"Контакты и адреса офисов обслуживания АТК в {locality.name_prepositional}. Узнайте расписание работы и как связаться с нами.",
+        "localities": localities,
+        "current_locality": current_locality,
+        "title": "Офисы обслуживания",
+        "meta_title": f"Офисы обслуживания АТК {f'в {current_locality.name_prepositional}' if current_locality else ''}",
         "breadcrumbs": [
             {"title": "Главная", "url": "core:home"},
             {"title": "Офисы обслуживания", "url": None},
         ],
     }
-
     return render(request, "core/offices.html", context)
 
 
