@@ -36,8 +36,12 @@
                                                 {{ banner.get_badge }}
                                             </span>
                                             {% endif %}
-                                            <h2 class="mainbanner-block__title">{{ banner.title }}</h2>
-                                            <p class="mainbanner-block__description">{{ banner.description }}</p>
+                                            {% if banner.title %}
+                                                <h2 class="mainbanner-block__title">{{ banner.title }}</h2>
+                                            {% endif %}
+                                            {% if banner.description %}
+                                                <p class="mainbanner-block__description">{{ banner.description }}</p>
+                                            {% endif %}
                                             {% if banner.link %}
                                             <a href="{{ banner.link }}" class="mainbanner-block__button btn">
                                                 {{ banner.button_text }}
