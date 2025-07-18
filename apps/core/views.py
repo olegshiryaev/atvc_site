@@ -136,18 +136,21 @@ def submit_application(request, locality_slug):
 
 
 def office_list(request, locality_slug=None):
-    # Получаем все активные населённые пункты с офисами
     localities = Locality.objects.filter(
         is_active=True,
         office__isnull=False
     ).distinct().prefetch_related('office_set__schedules')
-    
-    # Определяем текущий выбранный город
+
+    current_locality = None
+
     if locality_slug:
-        current_locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    else:
-        current_locality = localities.first()
-    
+        # Ищем населённый пункт только среди тех, где есть офисы
+        current_locality = localities.filter(slug=locality_slug).first()
+
+    if not current_locality:
+        # Если не найден или не передан — Архангельск в приоритете
+        current_locality = localities.filter(name__icontains="Архангельск").first() or localities.first()
+
     context = {
         "localities": localities,
         "current_locality": current_locality,

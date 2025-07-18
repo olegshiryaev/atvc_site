@@ -7162,7 +7162,6 @@ button.swiper-pagination-bullet {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
-    margin-bottom: 3rem;
 }
 
 @media (min-width: 768px) {
@@ -7171,8 +7170,14 @@ button.swiper-pagination-bullet {
     }
 }
 
+.office-card__left {
+    flex: 0 0 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
 .office-card__info {
-    flex: 0 0 100%;
     border-radius: 0.75rem;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -7180,7 +7185,7 @@ button.swiper-pagination-bullet {
 
 @media (min-width: 768px) {
     .office-card__info {
-        flex: 0 0 22rem;
+        flex: none;
     }
 }
 
@@ -7243,8 +7248,8 @@ button.swiper-pagination-bullet {
 
 /* Карта */
 .office-card__map {
-    flex: 1;
-    min-height: 20rem;
+    flex: 0 0 60%;
+    min-height: 22rem;
     border-radius: 0.75rem;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -7270,4 +7275,42 @@ button.swiper-pagination-bullet {
 
 .offices-city.active {
     display: block;
+}
+
+.office-card__contacts {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.office-contact-row {
+    display: flex;
+    gap: 1rem;
+}
+
+.office-contact {
+    background: var(--main-color);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 20px 20px 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-weight: 500;
+    font-size: 20px;
+    flex: 1;
+}
+
+.office-contact--full {
+    flex: 1 1 100%;
+}
+
+.office-contact--half {
+    flex: 1 1 calc(50% - 0.5rem);
+}
+
+.office-contact a {
+    color: white;
+    font-size: 26px;
+    line-height: 1;
+    letter-spacing: -.04em;
+    font-weight: 700;
 }
