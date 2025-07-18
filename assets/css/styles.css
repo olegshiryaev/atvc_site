@@ -7159,7 +7159,7 @@ button.swiper-pagination-bullet {
 }
 
 .offices-filter__btn.active {
-    background: #3b82f6;
+    background: var(--main-color);
     color: white;
 }
 
@@ -7469,7 +7469,7 @@ button.swiper-pagination-bullet {
     }
 
     .office-contact {
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .office-contact a {
