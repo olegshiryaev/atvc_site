@@ -7106,13 +7106,19 @@ button.swiper-pagination-bullet {
   }
 }
 
-/* Основные стили страницы */
+/* ================== */
+/* === Base Styles === */
+/* ================== */
+
 .offices-page {
     padding: 2rem 0 4rem;
     background: #fff;
 }
 
-/* Фильтр городов */
+/* ================== */
+/* === Filters === */
+/* ================== */
+
 .offices-filter {
     margin-bottom: 2.5rem;
     background: #f5f7fa;
@@ -7157,25 +7163,59 @@ button.swiper-pagination-bullet {
     color: white;
 }
 
-/* Карточка офиса */
+/* ================== */
+/* === Office Card === */
+/* ================== */
+
 .office-card {
     display: flex;
     flex-direction: column;
+}
+
+.office-card__left {
+    flex: 0 0 100%;
+    display: flex;
+    flex-direction: column;
     gap: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+.office-card__map {
+    flex: 0 0 100%;
 }
 
 @media (min-width: 768px) {
     .office-card {
         flex-direction: row;
     }
+
+    .office-card__left {
+        flex: 0 0 40%;
+    }
+
+    .office-card__map {
+        flex: 0 0 60%;
+    }
 }
 
-.office-card__left {
-    flex: 0 0 40%;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+/* Дополнительная адаптивность для десктопа */
+@media (min-width: 1024px) {
+    .office-card__left {
+        flex: 0 0 45%;
+    }
+
+    .office-card__map {
+        flex: 0 0 55%;
+    }
+
+    .office-card__map iframe {
+        min-height: 30rem;
+    }
 }
+
+/* ================== */
+/* === Office Info === */
+/* ================== */
 
 .office-card__info {
     border-radius: 0.75rem;
@@ -7183,24 +7223,42 @@ button.swiper-pagination-bullet {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-@media (min-width: 768px) {
-    .office-card__info {
-        flex: none;
-    }
+.office-card__info-row {
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    padding: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .office-card__image {
-    height: 12rem;
+    flex: 0 0 12rem;
+    height: 10rem;
 }
 
-.office-card__image img {
+.office-card__image img,
+.office-card__image-placeholder {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 0.5rem;
+}
+
+.office-card__image-placeholder {
+    background: #f3f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 1.5rem;
+    border-radius: 0.5rem;
 }
 
 .office-card__details {
-    padding: 1.5rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 .office-detail {
@@ -7223,15 +7281,15 @@ button.swiper-pagination-bullet {
 }
 
 .office-icon--location {
-    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+    background-image: url("data:image/svg+xml,%3Csvg...");
 }
 
 .office-icon--clock {
-    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+    background-image: url("data:image/svg+xml,%3Csvg...");
 }
 
 .office-icon--phone {
-    background-image: url("data:image/svg+xml,%3Csvg..."); /* SVG иконка */
+    background-image: url("data:image/svg+xml,%3Csvg...");
 }
 
 .office-detail__title {
@@ -7246,10 +7304,12 @@ button.swiper-pagination-bullet {
     margin: 0;
 }
 
-/* Карта */
+/* ================== */
+/* === Map === */
+/* ================== */
+
 .office-card__map {
-    flex: 0 0 60%;
-    min-height: 22rem;
+    min-height: 20rem;
     border-radius: 0.75rem;
     overflow: hidden;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
@@ -7261,21 +7321,9 @@ button.swiper-pagination-bullet {
     border: none;
 }
 
-/* Сообщение об отсутствии офисов */
-.offices-empty {
-    text-align: center;
-    color: #6b7280;
-    padding: 3rem 0;
-}
-
-/* Скрытие неактивных городов */
-.offices-city {
-    display: none;
-}
-
-.offices-city.active {
-    display: block;
-}
+/* ================== */
+/* === Contacts === */
+/* ================== */
 
 .office-card__contacts {
     display: flex;
@@ -7286,6 +7334,7 @@ button.swiper-pagination-bullet {
 .office-contact-row {
     display: flex;
     gap: 1rem;
+    flex-wrap: wrap;
 }
 
 .office-contact {
@@ -7313,4 +7362,117 @@ button.swiper-pagination-bullet {
     line-height: 1;
     letter-spacing: -.04em;
     font-weight: 700;
+}
+
+.office-contact--social {
+    background: #ffffff;
+    color: #1f2937;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border-radius: 10px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.office-contact--social .social-icon {
+    width: 5rem;
+    height: 5rem;
+    object-fit: contain;
+    transition: transform 0.2s ease;
+}
+
+.office-contact--social .social-icon:hover {
+    transform: scale(1.1);
+}
+
+/* ================== */
+/* === Empty State === */
+/* ================== */
+
+.offices-empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 3rem 0;
+}
+
+/* ================== */
+/* === Tabs & Hidden Cities === */
+/* ================== */
+
+.offices-city {
+    display: none;
+}
+
+.offices-city.active {
+    display: block;
+}
+
+/* ================== */
+/* === Mobile Styles === */
+/* ================== */
+
+@media (max-width: 767px) {
+    /* Макет карточки */
+    .office-card {
+        flex-direction: column;
+    }
+
+    /* Левая часть карточки */
+    .office-card__left {
+        flex: 0 0 100%;
+        padding-right: 0; /* Убираем лишний отступ справа */
+    }
+
+    .office-card__info-row {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .office-card__image {
+        flex: 0 0 16rem;
+        height: 10rem;
+        width: 100%;
+    }
+
+    /* Карта под карточкой */
+    .office-card__map {
+        flex: 0 0 auto;
+        margin-top: 1.5rem;
+        width: 100%;
+        min-height: 20rem;
+    }
+
+    .office-card__map iframe {
+        width: 100%;
+        height: 100%;
+        min-height: 20rem;
+        display: block;
+    }
+
+    /* Текст и отступы */
+    .office-card__details {
+        padding: 1rem;
+    }
+
+    .offices-filter__btn {
+        font-size: 0.85rem;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .office-detail__title {
+        font-size: 0.8rem;
+    }
+
+    .office-detail__value {
+        font-size: 1rem;
+    }
+
+    .office-contact {
+        font-size: 16px;
+    }
+
+    .office-contact a {
+        font-size: 18px;
+    }
 }

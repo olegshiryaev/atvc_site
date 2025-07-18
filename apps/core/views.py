@@ -139,7 +139,7 @@ def office_list(request, locality_slug=None):
     localities = Locality.objects.filter(
         is_active=True,
         office__isnull=False
-    ).distinct().prefetch_related('office_set__schedules')
+    ).distinct().prefetch_related('office_set', 'office_set__schedules')
 
     current_locality = None
 

@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
-
 {% block title %}Офисы обслуживания{% endblock %}
-
 {% block content %}
 <div class="offices-page">
     <div class="container">
         {% include 'partials/page_header.html' with title=title %}
-        
         <!-- Фильтр по городам -->
         <div class="offices-filter">
             <div class="offices-filter__scroller">
@@ -25,62 +22,66 @@
                 </div>
             </div>
         </div>
-
         <!-- Контент офисов -->
         <div class="offices-content">
             {% for locality in localities %}
             <div class="offices-city {% if locality == current_locality %}active{% endif %}" 
                  id="office-city-{{ locality.slug }}"
                  role="tabpanel">
-                 
                 {% for office in locality.office_set.all %}
                 <div class="office-card">
                     <div class="office-card__left">
                         <div class="office-card__info">
-                            <div class="office-card__image">
-                                <img src="{{ office.image.url }}" alt="Офис {{ office.address }}" loading="lazy">
-                            </div>
-                            <div class="office-card__details">
-                                <div class="office-detail">
-                                    <i class="office-icon office-icon--location"></i>
-                                    <div>
-                                        <h3 class="office-detail__title">Адрес</h3>
-                                        <p class="office-detail__value">{{ office.address }}</p>
-                                    </div>
+                            <div class="office-card__info-row">
+                                <div class="office-card__image">
+                                    {% if office.image %}
+                                        <img src="{{ office.image.url }}" alt="Офис {{ office.address }}" loading="lazy">
+                                    {% else %}
+                                        <div class="office-image-placeholder">
+                                            <i class="placeholder-icon"></i>
+                                        </div>
+                                    {% endif %}
                                 </div>
-                                
-                                <div class="office-detail">
-                                    <i class="office-icon office-icon--clock"></i>
-                                    <div>
-                                        <h3 class="office-detail__title">Режим работы</h3>
-                                        {% for schedule in office.schedules.all %}
-                                        <p class="office-detail__value">
-                                            {{ schedule.days }}: 
-                                            {% if schedule.is_closed %}выходной
-                                            {% else %}{{ schedule.start_time|time:"H:i" }}–{{ schedule.end_time|time:"H:i" }}
-                                            {% endif %}
-                                        </p>
-                                        {% endfor %}
+                                <div class="office-card__details">
+                                    <div class="office-detail">
+                                        <i class="office-icon office-icon--location"></i>
+                                        <div>
+                                            <h3 class="office-detail__title">Адрес</h3>
+                                            <p class="office-detail__value">{{ office.address }}</p>
+                                        </div>
                                     </div>
-                                </div>
-                                
-                                {% if office.phone %}
-                                <div class="office-detail">
-                                    <i class="office-icon office-icon--phone"></i>
-                                    <div>
-                                        <h3 class="office-detail__title">Телефон</h3>
-                                        <p class="office-detail__value">
-                                            <a href="tel:{{ office.phone }}">{{ office.phone }}</a>
-                                        </p>
+                                    <div class="office-detail">
+                                        <i class="office-icon office-icon--clock"></i>
+                                        <div>
+                                            <h3 class="office-detail__title">Режим работы</h3>
+                                            {% for schedule in office.schedules.all %}
+                                            <p class="office-detail__value">
+                                                {{ schedule.days }}: 
+                                                {% if schedule.is_closed %}выходной
+                                                {% else %}{{ schedule.start_time|time:"H:i" }}–{{ schedule.end_time|time:"H:i" }}
+                                                {% endif %}
+                                            </p>
+                                            {% endfor %}
+                                        </div>
                                     </div>
+                                    {% if office.phone %}
+                                    <div class="office-detail">
+                                        <i class="office-icon office-icon--phone"></i>
+                                        <div>
+                                            <h3 class="office-detail__title">Телефон</h3>
+                                            <p class="office-detail__value">
+                                                <a href="tel:{{ office.phone }}">{{ office.phone }}</a>
+                                            </p>
+                                        </div>
+                                    </div>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
                             </div>
                         </div>
                         <div class="office-card__contacts">
                             <div class="office-contact office-contact--full">
                                 По любым вопросам пишите нам<br>
-                                <a href="https://vk.com/yourgroup" target="_blank">ВКонтакте</a>
+                                <a href="https://vk.com/yourgroup " target="_blank">ВКонтакте</a>
                             </div>
                             <div class="office-contact-row">
                                 <div class="office-contact office-contact--half">
@@ -92,17 +93,22 @@
                                     <a href="tel:+78182639639">+7 (8182) 639-639</a>
                                 </div>
                             </div>
-                            <div class="office-contact office-contact--full">
+                            <div class="office-contact office-contact--social">
                                 Подписывайтесь на наши соцсети<br>
-                                <a href="https://vk.com/yourgroup" target="_blank">ВКонтакте</a>
+                                <a href="https://vk.com/yourgroup " target="_blank" class="social-link">
+                                    <img src="{% static 'icons/vk.webp' %}" alt="Мы в ВКонтакте" class="social-icon">
+                                </a>
                             </div>
                         </div>
                     </div>
-                    
                     <div class="office-card__map">
-                        <iframe loading="lazy"
-                                src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16&pt={{ office.longitude }},{{ office.latitude }}"
-                                allowfullscreen="true"></iframe>
+                        <iframe 
+                            loading="lazy"
+                            src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16"
+                            allowfullscreen="true"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            sandbox="allow-scripts allow-same-origin">
+                        </iframe>
                     </div>
                 </div>
                 {% empty %}
