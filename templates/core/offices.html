@@ -44,14 +44,18 @@
                                 </div>
                                 <div class="office-card__details">
                                     <div class="office-detail">
-                                        <i class="office-icon office-icon--location"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="office-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                        </svg>
                                         <div>
                                             <h3 class="office-detail__title">Адрес</h3>
                                             <p class="office-detail__value">{{ office.address }}</p>
                                         </div>
                                     </div>
                                     <div class="office-detail">
-                                        <i class="office-icon office-icon--clock"></i>
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="office-icon" viewBox="0 0 20 20" fill="currentColor">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"></path>
+                                        </svg>
                                         <div>
                                             <h3 class="office-detail__title">Режим работы</h3>
                                             {% for schedule in office.schedules.all %}
@@ -66,7 +70,7 @@
                                     </div>
                                     {% if office.phone %}
                                     <div class="office-detail">
-                                        <i class="office-icon office-icon--phone"></i>
+                                        <img src="{% static 'icons/phone.svg' %}" alt="" class="office-icon" loading="lazy">
                                         <div>
                                             <h3 class="office-detail__title">Телефон</h3>
                                             <p class="office-detail__value">
@@ -81,33 +85,37 @@
                         <div class="office-card__contacts">
                             <div class="office-contact office-contact--full">
                                 По любым вопросам пишите нам<br>
-                                <a href="https://vk.com/yourgroup " target="_blank">ВКонтакте</a>
+                                <a href="https://vk.com" target="_blank" class="office-contact__link">ВКонтакте</a>
                             </div>
-                            <div class="office-contact-row">
+                            <div class="office-contact__row">
                                 <div class="office-contact office-contact--half">
                                     Или на почту<br>
-                                    <a href="mailto:support@atvc.ru">support@atvc.ru</a>
+                                    <a href="mailto:support@atvc.ru" class="office-contact__link office-contact__link--email">support@atvc.ru</a>
                                 </div>
                                 <div class="office-contact office-contact--half">
                                     Или звоните<br>
-                                    <a href="tel:+78182639639">+7 (8182) 639-639</a>
+                                    <a href="tel:+78182639639" class="office-contact__link office-contact__link--tel">+7 (8182) 639-639</a>
                                 </div>
                             </div>
                             <div class="office-contact office-contact--social">
-                                Подписывайтесь на наши соцсети<br>
-                                <a href="https://vk.com/yourgroup " target="_blank" class="social-link">
+                                Подписывайтесь на наши социальные сети<br>
+                                <a href="https://vk.com/atvc_public" target="_blank" class="social-link">
                                     <img src="{% static 'icons/vk.webp' %}" alt="Мы в ВКонтакте" class="social-icon">
                                 </a>
                             </div>
                         </div>
                     </div>
-                    <div class="office-card__map">
+                    <div class="office-card__map map-container">
+                        <div class="map-loader">
+                            <div class="spinner"></div>
+                        </div>
                         <iframe 
                             loading="lazy"
                             src="https://yandex.ru/map-widget/v1/?ll={{ office.longitude }},{{ office.latitude }}&z=16"
                             allowfullscreen="true"
                             referrerpolicy="no-referrer-when-downgrade"
-                            sandbox="allow-scripts allow-same-origin">
+                            sandbox="allow-scripts allow-same-origin"
+                            onload="this.previousElementSibling.classList.add('hidden')">
                         </iframe>
                     </div>
                 </div>
