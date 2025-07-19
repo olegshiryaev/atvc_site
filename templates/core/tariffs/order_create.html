@@ -5,8 +5,8 @@
     <div class="container">
 
         <!-- Основной контент -->
-        <div class="row">
-            <div class="col-lg-8">
+        <div class="order-form__layout">
+            <div class="order-form__main">
                 <!-- Информация о тарифе -->
                 <div class="card mb-4 border-0 shadow-sm card-hover">
                     <div class="card-body">
@@ -86,55 +86,51 @@
                     <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
                         <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
                         <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
-                        <div class="row g-4">
+                        <div class="tv-packages__list">
                             {% for package in tv_packages %}
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-body d-flex flex-column justify-content-between">
-                                        <div>
-                                            <div class="d-flex justify-content-between align-items-start">
-                                                <div>
-                                                    <div class="form-check form-switch mb-2">
-                                                        <input class="form-check-input" type="checkbox"
-                                                            id="package-{{ package.id }}"
-                                                            onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
-                                                        <label class="tv-package__label" for="package-{{ package.id }}">
-                                                            <h5 class="tv-package__name">{{ package.name }}</h5>
-                                                            <!-- Блок с количеством каналов и ссылкой -->
-                                                            <div class="tv-package__meta">
-                                                                <div class="tv-package__channels">
-                                                                    {{ package.total_channels }} каналов
-                                                                </div>
-                                                                <a href="#"
-                                                                   data-bs-toggle="modal"
-                                                                   data-bs-target="#channelsModal-package-{{ package.id }}"
-                                                                   class="tv-package__channels-link"
-                                                                   aria-label="Посмотреть каналы пакета {{ package.name }}">
-                                                                    Список каналов
-                                                                </a>
+                                <article class="tv-package">
+                                    <div class="tv-package__content">
+                                        <div class="tv-package__header">
+                                            <div class="tv-package__info">
+                                                <div class="form-check form-switch mb-2">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="package-{{ package.id }}"
+                                                        onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
+                                                    <label class="tv-package__label" for="package-{{ package.id }}">
+                                                        <h5 class="tv-package__name">{{ package.name }}</h5>
+                                                        <!-- Блок с количеством каналов и ссылкой -->
+                                                        <div class="tv-package__meta">
+                                                            <div class="tv-package__channels">
+                                                                {{ package.total_channels }} каналов
                                                             </div>
-                                                        </label>
-                                                    </div>
-                                                </div>
-                                                <div class="tv-package__image-container">
-                                                    {% if package.image %}
-                                                        <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
-                                                    {% else %}
-                                                        <div class="tv-package__image-placeholder" aria-hidden="true">
-                                                            <span>Нет изображения</span>
+                                                            <a href="#"
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#channelsModal-package-{{ package.id }}"
+                                                                class="tv-package__channels-link"
+                                                                aria-label="Посмотреть каналы пакета {{ package.name }}">
+                                                                Список каналов
+                                                            </a>
                                                         </div>
-                                                    {% endif %}
+                                                    </label>
                                                 </div>
                                             </div>
-                                            <p class="tv-package__description">{{ package.description|safe }}</p>
+                                            <div class="tv-package__image-container">
+                                                {% if package.image %}
+                                                    <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
+                                                {% else %}
+                                                    <div class="tv-package__image-placeholder" aria-hidden="true">
+                                                        <span>Нет изображения</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
                                         </div>
-                                        <div class="tv-package__footer">
-                                            <div class="tv-package__price">{{ package.price }} ₽/мес</div>
-                                        </div>
+                                        <p class="tv-package__description">{{ package.description|safe }}</p>
                                     </div>
-                                </div>
+                                    <div class="tv-package__footer">
+                                        <div class="tv-package__price">{{ package.price }} ₽/мес</div>
+                                    </div>
+                                </article>
                                 {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
-                            </div>
                             {% endfor %}
                         </div>
                     </div>
@@ -268,48 +264,45 @@
             </div>
 
             <!-- Итоговая стоимость -->
-            <div class="col-lg-4" id="summaryCardContainer">
-                <div class="card summary-card shadow-sm border-0">
-                    <div class="card-body">
-                        <h3 class="card-title mb-4">Заявка на подключение</h3>
-                        <div class="mb-4">
-                            <h5>Тариф</h5>
-                            <div class="d-flex justify-content-between">
-                                <span>{{ tariff.name }}</span>
-                                <span>{{ tariff.price }} ₽/мес</span>
-                            </div>
-                        </div>
-                        <div class="mb-4" id="equipmentSummary">
-                            <h5>Оборудование</h5>
-                            <div class="text-muted">Не выбрано</div>
-                        </div>
-                        <div class="mb-4" id="servicesSummary">
-                            <h5>Дополнительные услуги</h5>
-                            <div class="text-muted">Не выбрано</div>
-                        </div>
-                        <div class="mb-4" id="tvPackagesSummary">
-                            <h5>Пакеты ТВ</h5>
-                            <div class="text-muted">Не выбрано</div>
-                        </div>
-                        <div class="mb-4">
-                            <h5>Подключение</h5>
-                            <div class="d-flex justify-content-between">
-                                <span>Разово</span>
-                                <span id="connectionPrice">{{ tariff.connection_price }} ₽</span>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="d-flex justify-content-between mb-2">
-                            <h5>Итого к оплате:</h5>
-                            <h5 id="totalPrice">200 ₽</h5>
-                        </div>
-                        <div class="alert alert-info mt-4">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+            <aside class="summary" id="summaryCardContainer">
+                <div class="summary__content">
+                    <h3 class="summary__title">Заявка на подключение</h3>
+                    <div class="summary__section">
+                        <h5 class="summary__section-title">Тариф</h5>
+                        <div class="summary__item">
+                            <span class="summary__item-name">{{ tariff.name }}</span>
+                            <span class="summary__item-value">{{ tariff.price }} ₽/мес</span>
                         </div>
                     </div>
+                    <div class="summary__section" id="equipmentSummary">
+                        <h5 class="summary__section-title">Оборудование</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    <div class="summary__section" id="servicesSummary">
+                        <h5 class="summary__section-title">Дополнительные услуги</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    <div class="summary__section" id="tvPackagesSummary">
+                        <h5 class="summary__section-title">Пакеты ТВ</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    <div class="summary__section">
+                        <h5 class="summary__section-title">Подключение</h5>
+                        <div class="summary__item">
+                            <span class="summary__item-name">Разово</span>
+                            <span class="summary__item-value" id="connectionPrice">{{ tariff.connection_price }} ₽</span>
+                        </div>
+                    </div>
+                    <hr class="summary__divider">
+                    <div class="summary__total">
+                        <h5 class="summary__total-title">Итого к оплате:</h5>
+                        <h5 class="summary__total-value" id="totalPrice">{{ tariff.price }} ₽</h5>
+                    </div>
+                    <div class="summary__info">
+                        <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+                    </div>
                 </div>
-            </div>
+            </aside>
         </div>
     </div>
 </div>

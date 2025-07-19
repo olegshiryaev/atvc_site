@@ -7631,7 +7631,6 @@ button.swiper-pagination-bullet {
 .feedback-form__textarea {
     width: 100%;
     padding: 14px 16px;
-    border: 1px solid var(--border-color);
     border-radius: 8px;
     font-size: 16px;
     line-height: 1.5;
@@ -7844,6 +7843,26 @@ button.swiper-pagination-bullet {
     }
 }
 
+/* Макет */
+.order-form__layout {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: var(--spacing-lg);
+    align-items: start;
+}
+
+@media (max-width: 991px) {
+    .order-form__layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+.order-form__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
 /* Пакеты ТВ-каналов */
 .tv-packages__title {
     font-size: var(--font-size-lg);
@@ -7852,6 +7871,38 @@ button.swiper-pagination-bullet {
 
 .tv-packages__description {
     color: var(--muted-color);
+    margin-bottom: var(--spacing-md);
+}
+
+.tv-packages__list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .tv-packages__list {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tv-package {
+    border: 1px solid var(--smoky-white-color);
+    background-color: var(--background-color);
+    border-radius: 15px;
+    box-shadow: var(--shadow-card);
+}
+
+.tv-package__content {
+    padding: var(--spacing-lg);
+    flex: 1;
+}
+
+.tv-package__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
     margin-bottom: var(--spacing-md);
 }
 
@@ -7927,6 +7978,7 @@ button.swiper-pagination-bullet {
 }
 
 .tv-package__footer {
+    padding: var(--spacing-lg);
     padding-top: 0;
     display: flex;
     justify-content: space-between;
@@ -7948,56 +8000,87 @@ button.swiper-pagination-bullet {
 .order-form__section-title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
+    color: var(--text-color, #1f2937);
 }
 
 .order-form__fields {
     display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 колонки для десктопа */
     gap: var(--spacing-md);
 }
 
 .order-form__field--street {
-    grid-column: span 2;
+    grid-column: 1 / 3; /* Улица занимает 2 колонки */
 }
 
 .order-form__field--house {
-    grid-column: span 1;
+    grid-column: 3 / 4; /* Дом занимает 1 колонку */
+}
+
+.order-form__field--comments,
+.order-form__field--submit {
+    grid-column: 1 / 4; /* Комментарий и кнопка на всю ширину */
 }
 
 .order-form__label {
     display: block;
     margin-bottom: var(--spacing-sm);
     font-size: var(--font-size-base);
+    color: var(--text-color, #1f2937);
 }
 
 .order-form__input,
 .order-form__textarea {
     width: 100%;
-    padding: var(--spacing-sm);
-    border: 1px solid var(--border-color);
-    border-radius: var(--border-radius);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
     font-size: var(--font-size-base);
+    background-color: var(--color-white);
+    transition: border-color 0.2s ease;
+}
+
+.order-form__input:focus,
+.order-form__textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.order-form__input:invalid:not(:placeholder-shown),
+.order-form__textarea:invalid:not(:placeholder-shown) {
+    border-color: #ef4444;
 }
 
 .order-form__textarea {
     resize: vertical;
+    min-height: 80px; /* Увеличено для удобства */
 }
 
 .order-form__checkbox-wrapper {
     display: flex;
     align-items: center;
+    gap: var(--spacing-sm);
 }
 
 .order-form__checkbox {
-    margin-right: var(--spacing-sm);
+    width: 1.25rem;
+    height: 1.25rem;
+    cursor: pointer;
 }
 
 .order-form__checkbox-label {
     font-size: var(--font-size-sm);
+    color: var(--muted-color);
 }
 
 .order-form__link {
     color: var(--primary-color);
-    text-decoration: none;
+    text-decoration: underline; /* Добавлено для лучшей видимости */
+    transition: color 0.2s ease;
+}
+
+.order-form__link:hover {
+    color: var(--primary-color-hover);
 }
 
 .order-form__submit {
@@ -8006,11 +8089,148 @@ button.swiper-pagination-bullet {
     background-color: var(--main-color);
     color: #ffffff;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--radius-sm);
     font-size: var(--font-size-base);
+    font-weight: 500;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
 .order-form__submit:hover {
     background-color: var(--main-color-on-hover);
+}
+
+.order-form__submit:disabled {
+    background-color: var(--muted-color);
+    cursor: not-allowed;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .order-form__fields {
+        grid-template-columns: 1fr; /* Одна колонка для мобильных */
+    }
+
+    .order-form__field--street,
+    .order-form__field--house,
+    .order-form__field--comments,
+    .order-form__field--submit {
+        grid-column: 1 / 2; /* Все поля на всю ширину */
+    }
+
+    .order-form__section {
+        padding: var(--spacing-md);
+    }
+
+    .order-form__textarea {
+        min-height: 100px; /* Увеличено для сенсорных устройств */
+    }
+}
+
+@media (max-width: 480px) {
+    .order-form__section-title {
+        font-size: var(--font-size-base);
+    }
+
+    .order-form__input,
+    .order-form__textarea {
+        padding: var(--spacing-sm);
+    }
+
+    .order-form__submit {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: var(--font-size-sm);
+    }
+}
+
+/* Итоговая стоимость */
+.summary {
+    height: 100%;
+}
+
+.summary__content {
+    background: #f3f8f2;
+    border-radius: var(--radius-xl);
+    /* overflow: hidden; */
+    padding: 24px 32px 32px;
+    margin-top: -355px;
+    /* z-index: 99; */
+    position: sticky;
+    top: 145px;
+}
+
+.summary__title {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+    color: var(--text-color, #1f2937);
+}
+
+.summary__section {
+    margin-bottom: var(--spacing-md);
+}
+
+.summary__section-title {
+    font-size: var(--font-size-base);
+    margin-bottom: var(--spacing-sm);
+    color: var(--text-color, #1f2937);
+}
+
+.summary__item {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-sm);
+}
+
+.summary__item--empty {
+    color: var(--muted-color);
+}
+
+.summary__divider {
+    border: none;
+    border-top: 1px solid var(--border-color);
+    margin: var(--spacing-md) 0;
+}
+
+.summary__total {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-base);
+    font-weight: 500;
+}
+
+.summary__total-title,
+.summary__total-value {
+    color: var(--text-color, #1f2937);
+}
+
+.summary__info {
+    margin-top: var(--spacing-md);
+    color: var(--muted-color);
+    font-size: var(--font-size-sm);
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 991px) {
+    .order-form__mobile-summary .summary {
+        margin-top: var(--spacing-lg);
+        padding: var(--spacing-md);
+        border-radius: var(--radius-xl);
+        background-color: var(--summary-background);
+        height: auto; /* Высота по содержимому */
+    }
+}
+
+@media (max-width: 480px) {
+    .summary {
+        padding: var(--spacing-md);
+    }
+
+    .summary__title {
+        font-size: var(--font-size-base);
+    }
+
+    .summary__section-title,
+    .summary__total {
+        font-size: var(--font-size-sm);
+    }
 }
