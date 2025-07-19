@@ -2215,6 +2215,7 @@ button.swiper-pagination-bullet {
     position: relative;
 }
 
+/* Основной слайд */
 .info-slide {
     height: 100%;
     min-height: 493px;
@@ -2225,7 +2226,6 @@ button.swiper-pagination-bullet {
     justify-content: space-between;
     flex-direction: column;
     color: white;
-    background: #0091d5;
     background: linear-gradient(135deg, #0091d5 0%, #0077b5 100%);
     box-shadow: var(--shadow-card);
     overflow: hidden;
@@ -2236,10 +2236,10 @@ button.swiper-pagination-bullet {
     margin: 0 auto;
 }
 
+/* Заголовок и текст */
 .info-slide__title {
     font-size: 24px;
     margin-bottom: 15px;
-    color: white;
 }
 
 .info-slide__text {
@@ -2247,28 +2247,36 @@ button.swiper-pagination-bullet {
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* Контакты */
 .info-slide__contacts {
     margin-bottom: 20px;
 }
 
-.contact-phone {
+.info-contact-phone {
     margin-bottom: 15px;
 }
 
-.phone-link {
+.info-contact-phone__link {
     display: block;
     font-size: 18px;
     font-weight: bold;
     color: white;
     text-decoration: none;
     margin-bottom: 5px;
+    transition: opacity 0.2s;
 }
 
-.contact-phone span {
+.info-contact-phone__link:hover {
+    color: white !important;
+    opacity: 0.9;
+}
+
+.info-contact-phone__hours {
     font-size: 14px;
     color: rgba(255, 255, 255, 0.8);
 }
 
+/* Кнопка */
 .info-slide__feedback-btn {
     background: white;
     color: var(--main-color);
@@ -2277,7 +2285,6 @@ button.swiper-pagination-bullet {
     border-radius: 4px;
     font-size: 16px;
     font-weight: 600;
-    line-height: 150%;
     cursor: pointer;
     margin-bottom: 20px;
     width: 100%;
@@ -2290,37 +2297,44 @@ button.swiper-pagination-bullet {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
-.info-slide__social {
+/* Соцсети и QR */
+.info-slide__social-block {
     margin-top: 20px;
 }
 
-.info-slide__social p {
+.info-slide__social-title {
     margin-bottom: 10px;
     color: rgba(255, 255, 255, 0.8);
 }
 
-.social-links {
+.info-social-links {
     display: flex;
-    justify-content: center;
+    align-items: center;
     gap: 15px;
 }
 
-.social-link {
-    color: white;
-    font-size: 24px;
-    transition: all 0.3s;
-    opacity: 0.8;
+.info-social-link {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 48px;
+    height: 48px;
+    background-color: var(--smoky-white-color);
+    border-radius: 8px;
+    transition: transform 0.3s ease;
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
-.social-link:hover {
-    color: white;
-    opacity: 1;
+.info-social-link:hover {
+    transform: scale(1.05) translateZ(0);
 }
 
-/* Иконки (можно заменить на свои) */
-.icon-vk:before { content: "VK"; font-family: Arial; font-weight: bold; }
-.icon-telegram:before { content: "TG"; font-family: Arial; font-weight: bold; }
-.icon-whatsapp:before { content: "WA"; font-family: Arial; font-weight: bold; }
+.info-social-icon {
+    width: 24px;
+    height: 24px;
+    image-rendering: crisp-edges;
+}
 
 /* Уникальные стили для callback формы */
 .callback-modal {

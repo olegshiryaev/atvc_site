@@ -1,5 +1,6 @@
 {% load channel_extras %}
 {% load ru_plural %}
+{% load static %}
 <div class="tariff-swiper-wrapper">
     <!-- Swiper -->
     <div class="swiper tariff-swiper">
@@ -131,9 +132,13 @@
                         <p class="info-slide__text">Наши специалисты с радостью помогут вам с выбором тарифа и ответят на все ваши вопросы</p>
                         
                         <div class="info-slide__contacts">
-                            <div class="contact-phone">
-                                <a href="tel:+78001234567" class="phone-link">8 (8182) 639-639</a>
-                                <span>ежедневно с 08.00 до 21.00</span>
+                            <div class="info-contact-phone">
+                                <a href="tel:+78182639639" class="info-contact-phone__link">8 (8182) 639-639</a>
+                                <span class="info-contact-phone__hours">ежедневно с 08.00 до 21.00</span>
+                            </div>
+                            <div class="info-contact-phone">
+                                <a href="tel:+78002004875" class="info-contact-phone__link">8 800 200-48-75</a>
+                                <span class="info-contact-phone__hours">для звонков по области</span>
                             </div>
                         </div>
                         
@@ -141,11 +146,11 @@
                             Форма обратной связи
                         </button>
                         
-                        <div class="info-slide__social">
-                            <p>Мы в социальных сетях:</p>
-                            <div class="social-links">
-                                <a href="https://vk.com/atvc_public" class="social-link" target="_blank" rel="noopener">
-                                    <i class="icon-vk"></i>
+                        <div class="info-slide__social-block">
+                            <p class="info-slide__social-title">Мы в социальных сетях</p>
+                            <div class="info-social-links">
+                                <a href="https://vk.com/atvc_public" class="info-social-link" target="_blank" rel="noopener">
+                                    <img src="{% static 'icons/vk_2.webp' %}" alt="VK" class="info-social-icon" width="32" height="32">
                                 </a>
                             </div>
                         </div>
