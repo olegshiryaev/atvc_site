@@ -84,8 +84,8 @@
                     <!-- Пакеты ТВ-каналов -->
                     {% if tv_packages %}
                     <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
-                        <h3 class="mb-4">Добавить пакеты каналов</h3>
-                        <p class="text-muted mb-4">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
+                        <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
+                        <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
                         <div class="row g-4">
                             {% for package in tv_packages %}
                             <div class="col-md-6">
@@ -98,38 +98,42 @@
                                                         <input class="form-check-input" type="checkbox"
                                                             id="package-{{ package.id }}"
                                                             onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
-                                                        <label class="form-check-label" for="package-{{ package.id }}">
-                                                            <h5 class="mb-1">{{ package.name }}</h5>
+                                                        <label class="tv-package__label" for="package-{{ package.id }}">
+                                                            <h5 class="tv-package__name">{{ package.name }}</h5>
                                                             <!-- Блок с количеством каналов и ссылкой -->
-                                                            <div class="d-flex flex-column flex-xxl-row align-items-start align-items-xxl-center gap-1">
-                                                                <small class="text-muted me-xxl-2">
+                                                            <div class="tv-package__meta">
+                                                                <div class="tv-package__channels">
                                                                     {{ package.total_channels }} каналов
-                                                                </small>
+                                                                </div>
                                                                 <a href="#"
                                                                    data-bs-toggle="modal"
-                                                                   data-bs-target="#channelsModal-{{ package.id }}"
-                                                                   class="text-primary"
-                                                                   style="font-size: 0.875rem; text-decoration: none;">
+                                                                   data-bs-target="#channelsModal-package-{{ package.id }}"
+                                                                   class="tv-package__channels-link"
+                                                                   aria-label="Посмотреть каналы пакета {{ package.name }}">
                                                                     Список каналов
                                                                 </a>
                                                             </div>
                                                         </label>
                                                     </div>
                                                 </div>
-                                                {% if package.image %}
-                                                <div>
-                                                    <img src="{{ package.image.url }}" alt="{{ package.name }}" width="114" height="62" class="rounded">
+                                                <div class="tv-package__image-container">
+                                                    {% if package.image %}
+                                                        <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
+                                                    {% else %}
+                                                        <div class="tv-package__image-placeholder" aria-hidden="true">
+                                                            <span>Нет изображения</span>
+                                                        </div>
+                                                    {% endif %}
                                                 </div>
-                                                {% endif %}
                                             </div>
-                                            <p class="text-muted mt-3">{{ package.description|safe }}</p>
+                                            <p class="tv-package__description">{{ package.description|safe }}</p>
                                         </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-auto pt-3">
-                                            <div class="h5 mb-0">{{ package.price }} ₽/мес</div>
+                                        <div class="tv-package__footer">
+                                            <div class="tv-package__price">{{ package.price }} ₽/мес</div>
                                         </div>
                                     </div>
                                 </div>
-                                {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all %}
+                                {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
                             </div>
                             {% endfor %}
                         </div>
@@ -211,60 +215,56 @@
                 <div id="mobileSummaryTarget" class="mt-4"></div>
 
                 <!-- Форма заявки -->
-                <div class="card mt-5 border-0 shadow-sm">
-                    <div class="card-body">
-                        <h3 class="mb-4">Оформление заявки</h3>
-                        <form id="orderForm" method="post">
-                            {% csrf_token %}
-                            <!-- Скрытые поля для ManyToMany -->
-                            <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids">
-                            <input type="hidden" name="selected_service_slugs" id="selected_service_slugs">
-                            <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids">
-                            <!-- Вспомогательные скрытые поля для подсчета -->
-                            <input type="hidden" id="total_equipment_cost">
-                            <input type="hidden" id="total_services_cost">
-                            <input type="hidden" id="total_tv_packages_cost">
-                            <input type="hidden" id="total_price">
+                <section class="order-form__section">
+                    <h3 class="order-form__section-title">Оформление заявки</h3>
+                    <form class="order-form__form" id="orderForm" method="post">
+                        {% csrf_token %}
+                        <!-- Скрытые поля для ManyToMany -->
+                        <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids">
+                        <input type="hidden" name="selected_service_slugs" id="selected_service_slugs">
+                        <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids">
+                        <!-- Вспомогательные скрытые поля для подсчета -->
+                        <input type="hidden" id="total_equipment_cost">
+                        <input type="hidden" id="total_services_cost">
+                        <input type="hidden" id="total_tv_packages_cost">
+                        <input type="hidden" id="total_price">
 
-                            <!-- Основные поля формы -->
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <label for="name" class="form-label">Ваше имя</label>
-                                    <input type="text" name="full_name" class="form-control" id="name" required>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="phone" class="form-label">Номер телефона</label>
-                                    <input type="tel" name="phone" class="form-control" id="phone" required>
-                                </div>
-                                <div class="col-md-8">
-                                    <label for="street" class="form-label">Улица</label>
-                                    <input type="text" name="street" class="form-control" id="street" required>
-                                </div>
-                                <div class="col-md-4">
-                                    <label for="house" class="form-label">Дом</label>
-                                    <input type="text" name="house" class="form-control" id="house" required>
-                                </div>
-                                <div class="col-12">
-                                    <label for="comments" class="form-label">Комментарий (необязательно)</label>
-                                    <textarea name="comment" class="form-control" id="comments" rows="2"></textarea>
-                                </div>
-                                <div class="col-12">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="agree" required>
-                                        <label class="form-check-label" for="agree">
-                                            Я согласен на обработку персональных данных и ознакомлен с <a href="#">договором оферты</a>
-                                        </label>
-                                    </div>
-                                </div>
-                                <div class="col-12 mt-3">
-                                    <button type="submit" class="btn btn-primary btn-lg w-100">
-                                        <i class="bi bi-send-fill me-2"></i>Оставить заявку
-                                    </button>
+                        <!-- Основные поля формы -->
+                        <div class="order-form__fields">
+                            <div class="order-form__field">
+                                <label for="name" class="order-form__label">Ваше имя</label>
+                                <input type="text" name="full_name" class="order-form__input" id="name" required>
+                            </div>
+                            <div class="order-form__field">
+                                <label for="phone" class="order-form__label">Номер телефона</label>
+                                <input type="tel" name="phone" class="order-form__input" id="phone" required>
+                            </div>
+                            <div class="order-form__field order-form__field--street">
+                                <label for="street" class="order-form__label">Улица</label>
+                                <input type="text" name="street" class="order-form__input" id="street" required>
+                            </div>
+                            <div class="order-form__field order-form__field--house">
+                                <label for="house" class="order-form__label">Дом</label>
+                                <input type="text" name="house" class="order-form__input" id="house" required>
+                            </div>
+                            <div class="order-form__field order-form__field--comments">
+                                <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
+                                <textarea name="comment" class="order-form__textarea" id="comments" rows="2"></textarea>
+                            </div>
+                            <div class="order-form__field">
+                                <div class="order-form__checkbox-wrapper">
+                                    <input class="order-form__checkbox" type="checkbox" id="agree" required>
+                                    <label class="order-form__checkbox-label" for="agree">
+                                        Я согласен на обработку персональных данных и ознакомлен с <a href="#" class="order-form__link">договором оферты</a>
+                                    </label>
                                 </div>
                             </div>
-                        </form>
-                    </div>
-                </div>
+                            <div class="order-form__field">
+                                <button type="submit" class="order-form__submit">Оставить заявку</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
             </div>
 
             <!-- Итоговая стоимость -->
