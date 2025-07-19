@@ -144,12 +144,28 @@ def office_list(request, locality_slug=None):
     current_locality = None
 
     if locality_slug:
-        # Ищем населённый пункт только среди тех, где есть офисы
         current_locality = localities.filter(slug=locality_slug).first()
 
     if not current_locality:
-        # Если не найден или не передан — Архангельск в приоритете
         current_locality = localities.filter(name__icontains="Архангельск").first() or localities.first()
+
+    # Обработка формы обратной связи
+    if request.method == 'POST':
+        form = FeedbackForm(request.POST)
+        if form.is_valid():
+            feedback = form.save(commit=False)
+            feedback.ip_address = request.META.get('REMOTE_ADDR')
+            feedback.save()
+            
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': True})
+            messages.success(request, 'Ваше сообщение успешно отправлено!')
+            return redirect(request.path)
+        else:
+            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+                return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = FeedbackForm()
 
     context = {
         "localities": localities,
@@ -160,6 +176,7 @@ def office_list(request, locality_slug=None):
             {"title": "Главная", "url": "core:home"},
             {"title": "Офисы обслуживания", "url": None},
         ],
+        "form": form,
     }
     return render(request, "core/offices.html", context)
 
