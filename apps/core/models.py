@@ -105,6 +105,8 @@ class Service(models.Model):
     )
     slug = models.SlugField("URL-адрес", unique=True)
     is_active = models.BooleanField("Активна", default=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
 
     class Meta:
         ordering = ["name"]
@@ -113,6 +115,11 @@ class Service(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = pytils_slugify(self.name)
+        super().save(*args, **kwargs)
 
 
 def channel_logo_upload_to(instance, filename):
@@ -137,6 +144,7 @@ class TVChannel(models.Model):
         ("music", "Музыка"),
         ("news", "Бизнес, новости"),
         ("sport", "Спорт"),
+        ("other", "Другое"),
     ]
 
     name = models.CharField("Название канала", max_length=100)
@@ -145,7 +153,7 @@ class TVChannel(models.Model):
         "Категория",
         max_length=20,
         choices=CATEGORY_CHOICES,
-        blank=True,
+        default="other",
     )
     is_hd = models.BooleanField("HD качество", default=False)
     logo = models.ImageField(
@@ -714,9 +722,16 @@ class TVChannelPackage(models.Model):
     def price_display(self):
         return f"{self.price} ₽/мес"
     
+    def has_category(self, category):
+        return self.channels.filter(category=category).exists()
+    
+    def total_price_with_tariff(self, tariff):
+        return tariff.get_actual_price() + self.price
+    
     class Meta:
         verbose_name = "Пакет ТВ-каналов"
         verbose_name_plural = "Пакеты ТВ-каналов"
+        ordering = ["name"]
 
 
 class StaticPage(models.Model):

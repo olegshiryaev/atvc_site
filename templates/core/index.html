@@ -78,10 +78,6 @@
         <!-- Блок тарифов -->
         {% include 'core/partials/tariffs_section.html' %}
 
-        {% if tv_packages %}
-            {% include 'core/partials/tv_packages_block.html' with tv_packages=tv_packages %}
-        {% endif %}
-
         {% comment %} <!-- Модальное окно -->
         {% include 'core/partials/order_modal.html' %} {% endcomment %}
 

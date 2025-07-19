@@ -1,9 +1,12 @@
 document.addEventListener("DOMContentLoaded", function () {
     document.querySelectorAll('[id^="channelsModal"]').forEach(modal => {
-        const modalId = modal.id.split("-")[1];
-        const channelList = document.getElementById(`channelList-${modalId}`);
-        const filterButtons = modal.querySelectorAll(".btn-category"); // Только фильтры по category
-        const categoryToggle = modal.querySelector(".btn-category-toggle"); // Отдельно кнопка "Категории"
+        // Извлекаем modal_type и id из формата channelsModal-<modal_type>-<id>
+        const modalParts = modal.id.split("-");
+        const modalType = modalParts[1]; // tariff или package
+        const modalId = modalParts[2];   // id объекта
+        const channelList = document.getElementById(`channelList-${modalType}-${modalId}`);
+        const filterButtons = modal.querySelectorAll(".btn-category");
+        const categoryToggle = modal.querySelector(".btn-category-toggle");
         const dropdownItems = modal.querySelectorAll(".channel-category-item");
 
         if (!channelList) return;

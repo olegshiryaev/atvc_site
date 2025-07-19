@@ -178,9 +178,9 @@
     </div>
 </div>
 
-<!-- Модальные окна со списком каналов для каждого тарифа -->
+<!-- Модальные окна для тарифов -->
 {% for tariff in displayed_tariffs %}
     {% with channels=tariff.included_channels.all %}
-        {% include 'core/partials/channels_modal.html' with object=tariff channels=channels category_choices=TVChannel.CATEGORY_CHOICES %}
+        {% include 'core/partials/channels_modal.html' with object=tariff channels=channels category_choices=TVChannel.CATEGORY_CHOICES modal_type="tariff" %}
     {% endwith %}
 {% endfor %}
