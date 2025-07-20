@@ -1,214 +1,177 @@
 {% extends "base.html" %}
 {% load static %}
 {% block content %}
-<div class="bg-white w-100">
-    <div class="container">
-
+<div class="order-form">
+    <div class="order-form__container container">
         <!-- Основной контент -->
         <div class="order-form__layout">
             <div class="order-form__main">
                 <!-- Информация о тарифе -->
-                <div class="card mb-4 border-0 shadow-sm card-hover">
-                    <div class="card-body">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h3 class="mb-3">{{ tariff.name }}</h3>
-                                <div class="d-flex flex-wrap gap-2 mb-3">
-                                    <span class="badge bg-primary tariff-badge">
-                                        <i class="bi bi-speedometer2 me-1"></i>{{ tariff.speed }} Мбит/с
+                <section class="tariff-info">
+                    <div class="tariff-info__content">
+                        <div class="tariff-info__details">
+                            <h3 class="tariff-info__title">{{ tariff.name }}</h3>
+                            <div class="tariff-info__badges">
+                                <span class="tariff-info__badge tariff-info__badge--speed">
+                                    <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                        <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 10a4 4 0 110-8 4 4 0 010 8zm2-4a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                    </svg>
+                                    {{ tariff.speed }} Мбит/с
+                                </span>
+                                {% if tariff.free_router %}
+                                    <span class="tariff-info__badge tariff-info__badge--router">
+                                        <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                            <path d="M2 4h12v2H2V4zm0 4h12v2H2V8zm0 4h12v2H2v-2z"/>
+                                        </svg>
+                                        Wi-Fi роутер в подарок
                                     </span>
-                                    {% if tariff.free_router %}
-                                        <span class="badge bg-success tariff-badge">
-                                            <i class="bi bi-router me-1"></i>Wi-Fi роутер в подарок
-                                        </span>
-                                    {% endif %}
-                                    {% if tariff.tv_channels %}
-                                        <span class="badge bg-info tariff-badge">
-                                            <i class="bi bi-tv me-1"></i>{{ tariff.tv_channels }} ТВ-каналов
-                                        </span>
-                                    {% endif %}
-                                </div>
-                                <p class="text-muted">{{ tariff.description|safe }}</p>
+                                {% endif %}
+                                {% if tariff.tv_channels %}
+                                    <span class="tariff-info__badge tariff-info__badge--tv">
+                                        <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                                            <path d="M2 3h12v8H2V3zm2 2v4h8V5H4z"/>
+                                        </svg>
+                                        {{ tariff.tv_channels }} ТВ-каналов
+                                    </span>
+                                {% endif %}
                             </div>
-                            <div class="col-md-4 text-center">
-                                <div class="display-4 text-primary">{{ tariff.price }} ₽</div>
-                                <small class="text-muted">в месяц</small>
-                            </div>
+                            <p class="tariff-info__description">{{ tariff.description|safe }}</p>
+                        </div>
+                        <div class="tariff-info__price">
+                            <div class="tariff-info__price-value">{{ tariff.price }} ₽</div>
+                            <small class="tariff-info__price-unit">в месяц</small>
                         </div>
                     </div>
-                </div>
-                <!-- Навигация для десктопов -->
-                <ul class="nav nav-pills mb-4 d-none d-md-flex gap-3" id="myTab" role="tablist">
-                    {% if tv_packages %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#tv-packages" role="tab">
-                            Пакеты каналов
-                        </button>
-                    </li>
-                    {% endif %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="products-tab" data-bs-toggle="pill" data-bs-target="#products" role="tab">
-                            <i class="bi bi-router me-1"></i>Оборудование
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" type="button" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" role="tab">
-                            <i class="bi bi-plus-circle me-1"></i>Дополнительные услуги
-                        </button>
-                    </li>
-                </ul>
-                <!-- Навигация для мобильных -->
-                <div class="tab-nav-scroll d-md-none d-block overflow-auto pb-2 mb-4">
-                    <ul class="nav nav-pills nav-justified flex-nowrap gap-3 " id="myTabMobile" role="tablist">
-                        {% if tv_packages %}
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" type="button" data-bs-toggle="pill" data-bs-target="#tv-packages" role="tab">
-                                Пакеты каналов
-                            </button>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link {% if not tv_packages %}active{% endif %}" type="button" id="products-tab" data-bs-toggle="pill" data-bs-target="#products" role="tab">
-                                <i class="bi bi-router me-1"></i>Оборудование
-                            </button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" type="button" id="services-tab" data-bs-toggle="pill" data-bs-target="#services" role="tab">
-                                <i class="bi bi-plus-circle me-1"></i>Дополнительные услуги
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                <!-- Контент разделов -->
-                <div class="tab-content" id="myTabContent">
-                    <!-- Пакеты ТВ-каналов -->
-                    {% if tv_packages %}
-                    <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
-                        <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
-                        <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
-                        <div class="tv-packages__list">
-                            {% for package in tv_packages %}
-                                <article class="tv-package">
-                                    <div class="tv-package__content">
-                                        <div class="tv-package__header">
-                                            <div class="tv-package__info">
-                                                <div class="form-check form-switch mb-2">
-                                                    <input class="form-check-input" type="checkbox"
-                                                        id="package-{{ package.id }}"
-                                                        onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
-                                                    <label class="tv-package__label" for="package-{{ package.id }}">
-                                                        <h5 class="tv-package__name">{{ package.name }}</h5>
-                                                        <!-- Блок с количеством каналов и ссылкой -->
-                                                        <div class="tv-package__meta">
-                                                            <div class="tv-package__channels">
-                                                                {{ package.total_channels }} каналов
-                                                            </div>
-                                                            <a href="#"
-                                                                data-bs-toggle="modal"
-                                                                data-bs-target="#channelsModal-package-{{ package.id }}"
-                                                                class="tv-package__channels-link"
-                                                                aria-label="Посмотреть каналы пакета {{ package.name }}">
-                                                                Список каналов
-                                                            </a>
+                </section>
+                
+                <!-- Пакеты ТВ-каналов -->
+                {% if tv_packages %}
+                <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
+                    <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
+                    <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
+                    <div class="tv-packages__list">
+                        {% for package in tv_packages %}
+                            <article class="tv-package">
+                                <div class="tv-package__content">
+                                    <div class="tv-package__header">
+                                        <div class="tv-package__info">
+                                            <div class="form-check form-switch mb-2">
+                                                <input class="form-check-input" type="checkbox"
+                                                    id="package-{{ package.id }}"
+                                                    onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
+                                                <label class="tv-package__label" for="package-{{ package.id }}">
+                                                    <h5 class="tv-package__name">{{ package.name }}</h5>
+                                                    <!-- Блок с количеством каналов и ссылкой -->
+                                                    <div class="tv-package__meta">
+                                                        <div class="tv-package__channels">
+                                                            {{ package.total_channels }} каналов
                                                         </div>
-                                                    </label>
-                                                </div>
-                                            </div>
-                                            <div class="tv-package__image-container">
-                                                {% if package.image %}
-                                                    <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
-                                                {% else %}
-                                                    <div class="tv-package__image-placeholder" aria-hidden="true">
-                                                        <span>Нет изображения</span>
+                                                        <a href="#"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#channelsModal-package-{{ package.id }}"
+                                                            class="tv-package__channels-link"
+                                                            aria-label="Посмотреть каналы пакета {{ package.name }}">
+                                                            Список каналов
+                                                        </a>
                                                     </div>
-                                                {% endif %}
+                                                </label>
                                             </div>
                                         </div>
-                                        <p class="tv-package__description">{{ package.description|safe }}</p>
-                                    </div>
-                                    <div class="tv-package__footer">
-                                        <div class="tv-package__price">{{ package.price }} ₽/мес</div>
-                                    </div>
-                                </article>
-                                {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
-                            {% endfor %}
-                        </div>
-                    </div>
-                    {% endif %}
-                    <!-- Оборудование -->
-                    <div class="tab-pane fade {% if not tv_packages %}show active{% endif %}" id="products" role="tabpanel">
-                        <h3 class="mb-4">Добавить оборудование</h3>
-                        <p class="text-muted mb-4">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
-                        <div class="row g-4">
-                            {% for product in products %}
-                            <div class="col-md-6">
-                                <div class="card equipment-item h-100" data-id="{{ product.id }}" onclick="selectEquipment(this, {{ product.price }})">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <div class="bg-light p-3 rounded me-3">
-                                                {% if product.get_main_image %}
-                                                    <img src="{{ product.get_main_image.image.url }}" alt="{{ product.name }}" width="50" height="50">
-                                                {% else %}
-                                                    <i class="bi bi-router text-primary" style="font-size: 2rem;"></i>
-                                                {% endif %}
-                                            </div>
-                                            <div>
-                                                <h5 class="mb-0">{{ product.name }}</h5>
-                                                <span class="text-muted">{{ product.short_description }}</span>
-                                            </div>
-                                        </div>
-                                        <div class="equipment-description mb-3">
-                                            {{ equipment.description|safe }}
-                                        </div>
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <div class="h5 mb-0">{{ product.price }} ₽</div>
-                                            {% if product.category %}
-                                            <div class="badge bg-light text-dark">
-                                                {{ product.category.name }}
-                                            </div>
+                                        <div class="tv-package__image-container">
+                                            {% if package.image %}
+                                                <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
+                                            {% else %}
+                                                <div class="tv-package__image-placeholder" aria-hidden="true">
+                                                    <span>Нет изображения</span>
+                                                </div>
                                             {% endif %}
                                         </div>
                                     </div>
+                                    <p class="tv-package__description">{{ package.description|safe }}</p>
                                 </div>
-                            </div>
-                            {% endfor %}
-                        </div>
-                        <div class="form-check mt-4">
-                            <input class="form-check-input" type="checkbox" id="noEquipment" onclick="toggleNoEquipment()">
-                            <label class="form-check-label" for="noEquipment">
-                                У меня есть свое оборудование, ничего не нужно
-                            </label>
-                        </div>
-                    </div>
-                    <!-- Дополнительные услуги -->
-                    <div class="tab-pane fade" id="services" role="tabpanel">
-                        <h3 class="mb-4">Дополнительные услуги</h3>
-                        <p class="text-muted mb-4">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
-                        <div class="row g-4">
-                            {% for service in services %}
-                            <div class="col-md-6">
-                                <div class="card h-100">
-                                    <div class="card-body">
-                                        <div class="form-check form-switch mb-3">
-                                            <input class="form-check-input" type="checkbox" id="{{ service.slug }}" onclick="updateService('{{ service.slug }}', {{ service.price }})">
-                                            <label class="form-check-label" for="{{ service.slug }}">
-                                                <h5>{{ service.name }}</h5>
-                                            </label>
-                                        </div>
-                                        <p class="text-muted">{{ service.description|safe }}</p>
-                                        <div class="d-flex justify-content-between align-items-center mt-3">
-                                            <div class="h5 mb-0">{{ service.price }} ₽/мес</div>
-                                        </div>
-                                    </div>
+                                <div class="tv-package__footer">
+                                    <div class="tv-package__price">{{ package.price }} ₽/мес</div>
                                 </div>
-                            </div>
-                            {% endfor %}
-                        </div>
+                            </article>
+                            {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
+                        {% endfor %}
                     </div>
                 </div>
+                {% endif %}
+                
+                <!-- Оборудование -->
+                <section class="equipment">
+                    <h3 class="equipment__title">Добавить оборудование</h3>
+                    <p class="equipment__description">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
+                    <div class="equipment__list">
+                        {% for product in products %}
+                            <article class="equipment__item" data-id="{{ product.id }}" onclick="selectEquipment(this, {{ product.price }})">
+                                <div class="equipment__content">
+                                    <div class="equipment__header">
+                                        <div class="equipment__image-container">
+                                            {% if product.get_main_image %}
+                                                <img src="{{ product.get_main_image.image.url }}" alt="{{ product.name }}" class="equipment__image">
+                                            {% else %}
+                                                <div class="equipment__image-placeholder" aria-hidden="true">
+                                                    <svg class="equipment__image-icon" width="32" height="32" viewBox="0 0 16 16" fill="currentColor">
+                                                        <path d="M2 4h12v2H2V4zm0 4h12v2H2V8zm0 4h12v2H2v-2z"/>
+                                                    </svg>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="equipment__info">
+                                            <h5 class="equipment__name">{{ product.name }}</h5>
+                                            <p class="equipment__short-description">{{ product.short_description }}</p>
+                                        </div>
+                                    </div>
+                                    <p class="equipment__description">{{ product.description|safe }}</p>
+                                    <div class="equipment__footer">
+                                        <div class="equipment__price">{{ product.price }} ₽</div>
+                                        {% if product.category %}
+                                            <div class="equipment__category">{{ product.category.name }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                    <div class="equipment__no-equipment">
+                        <input class="equipment__checkbox" type="checkbox" id="noEquipment" onclick="toggleNoEquipment()">
+                        <label class="equipment__label" for="noEquipment">
+                            У меня есть свое оборудование, ничего не нужно
+                        </label>
+                    </div>
+                </section>
+
+                <!-- Дополнительные услуги -->
+                <section class="services">
+                    <h3 class="services__title">Дополнительные услуги</h3>
+                    <p class="services__description">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
+                    <div class="services__list">
+                        {% for service in services %}
+                            <article class="services__item">
+                                <div class="services__content">
+                                    <div class="services__header">
+                                        <div class="services__switch">
+                                            <input class="services__checkbox" type="checkbox" id="{{ service.slug }}"
+                                                   onclick="updateService('{{ service.slug }}', {{ service.price }})">
+                                            <label class="services__label" for="{{ service.slug }}">
+                                                <h5 class="services__name">{{ service.name }}</h5>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <p class="services__description">{{ service.description|safe }}</p>
+                                    <div class="services__footer">
+                                        <div class="services__price">{{ service.price }} ₽/мес</div>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
 
                 <!-- Место для вставки блока "Итоговая стоимость" на мобильных -->
-                <div id="mobileSummaryTarget" class="mt-4"></div>
+                <div class="order-form__mobile-summary" id="mobileSummaryTarget"></div>
 
                 <!-- Форма заявки -->
                 <section class="order-form__section">
@@ -310,16 +273,16 @@
 <!-- Скрипты -->
 <script>
     // === Переменные для хранения выбранных значений ===
-    let selectedEquipment = {}; // Множественный выбор оборудования
+    let selectedEquipment = {};
     let selectedEquipmentPrice = 0;
-    let selectedServices = {};  // Храним доп. услуги
-    let totalServicesPrice = 0; // Сумма доп. услуг
-    let selectedTVPackages = {}; // ТВ-пакеты
+    let selectedServices = {};
+    let totalServicesPrice = 0;
+    let selectedTVPackages = {};
     let totalTVPackagesPrice = 0;
 
-    // === Функция выбора оборудования (множественный выбор) ===
+    // === Функция выбора оборудования ===
     function selectEquipment(element, price) {
-        const name = element.querySelector('h5').textContent.trim();
+        const name = element.querySelector('.equipment__name').textContent.trim();
         if (element.classList.contains('selected')) {
             element.classList.remove('selected');
             delete selectedEquipment[name];
@@ -337,7 +300,7 @@
     function toggleNoEquipment() {
         const noEquipmentChecked = document.getElementById('noEquipment').checked;
         if (noEquipmentChecked) {
-            document.querySelectorAll('.equipment-item').forEach(item => item.classList.remove('selected'));
+            document.querySelectorAll('.equipment__item').forEach(item => item.classList.remove('selected'));
             selectedEquipment = {};
             selectedEquipmentPrice = 0;
         }
@@ -349,7 +312,7 @@
     function updateService(serviceId, price) {
         const checkbox = document.getElementById(serviceId);
         const label = checkbox.nextElementSibling;
-        const serviceName = label ? label.textContent.trim() : 'Неизвестная услуга';
+        const serviceName = label?.querySelector('.services__name').textContent.trim() || 'Неизвестная услуга';
         if (checkbox.checked) {
             selectedServices[serviceId] = { name: serviceName, price: parseInt(price) };
         } else {
@@ -363,7 +326,7 @@
     // === Выбор ТВ-пакета ===
     function updateTVPackage(packageId, price) {
         const checkbox = document.getElementById(`package-${packageId}`);
-        const name = checkbox?.nextElementSibling?.querySelector('h5')?.textContent?.trim() || 'Пакет каналов';
+        const name = checkbox?.nextElementSibling?.querySelector('.tv-package__name').textContent.trim() || 'Пакет каналов';
         if (checkbox.checked) {
             selectedTVPackages[packageId] = { name, price: parseInt(price) };
         } else {
@@ -378,17 +341,17 @@
     function updateEquipmentSummary() {
         const container = document.getElementById('equipmentSummary');
         if (Object.keys(selectedEquipment).length > 0) {
-            let html = '<h5>Оборудование</h5>';
+            let html = '<h5 class="summary__section-title">Оборудование</h5>';
             for (const [name, price] of Object.entries(selectedEquipment)) {
                 html += `
-                    <div class="d-flex justify-content-between">
-                        <span>${name}</span>
-                        <span>${price.toLocaleString()} ₽</span>
+                    <div class="summary__item">
+                        <span class="summary__item-name">${name}</span>
+                        <span class="summary__item-value">${price.toLocaleString()} ₽</span>
                     </div>`;
             }
             container.innerHTML = html;
         } else {
-            container.innerHTML = `<h5>Оборудование</h5><div class="text-muted">Не выбрано</div>`;
+            container.innerHTML = `<h5 class="summary__section-title">Оборудование</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
         }
     }
 
@@ -396,17 +359,17 @@
     function updateServicesSummary() {
         const container = document.getElementById('servicesSummary');
         if (Object.keys(selectedServices).length > 0) {
-            let html = '<h5>Дополнительные услуги</h5>';
+            let html = '<h5 class="summary__section-title">Дополнительные услуги</h5>';
             for (const key in selectedServices) {
                 html += `
-                    <div class="d-flex justify-content-between">
-                        <span>${selectedServices[key].name}</span>
-                        <span>${selectedServices[key].price.toLocaleString()} ₽/мес</span>
+                    <div class="summary__item">
+                        <span class="summary__item-name">${selectedServices[key].name}</span>
+                        <span class="summary__item-value">${selectedServices[key].price.toLocaleString()} ₽/мес</span>
                     </div>`;
             }
             container.innerHTML = html;
         } else {
-            container.innerHTML = `<h5>Дополнительные услуги</h5><div class="text-muted">Не выбрано</div>`;
+            container.innerHTML = `<h5 class="summary__section-title">Дополнительные услуги</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
         }
     }
 
@@ -414,17 +377,17 @@
     function updateTVPackageSummary() {
         const container = document.getElementById('tvPackagesSummary');
         if (Object.keys(selectedTVPackages).length > 0) {
-            let html = '<h5>Пакеты ТВ</h5>';
+            let html = '<h5 class="summary__section-title">Пакеты ТВ</h5>';
             for (const key in selectedTVPackages) {
                 html += `
-                    <div class="d-flex justify-content-between">
-                        <span>${selectedTVPackages[key].name}</span>
-                        <span>${selectedTVPackages[key].price.toLocaleString()} ₽/мес</span>
+                    <div class="summary__item">
+                        <span class="summary__item-name">${selectedTVPackages[key].name}</span>
+                        <span class="summary__item-value">${selectedTVPackages[key].price.toLocaleString()} ₽/мес</span>
                     </div>`;
             }
             container.innerHTML = html;
         } else {
-            container.innerHTML = `<h5>Пакеты ТВ</h5><div class="text-muted">Не выбрано</div>`;
+            container.innerHTML = `<h5 class="summary__section-title">Пакеты ТВ</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
         }
     }
 
@@ -442,31 +405,53 @@
     // === Отправка формы ===
     document.getElementById('orderForm').addEventListener('submit', function(e) {
         e.preventDefault();
-        // Заполняем скрытые поля
         document.getElementById('selected_equipment_ids').value = Object.keys(selectedEquipment);
         document.getElementById('selected_service_slugs').value = Object.keys(selectedServices);
         document.getElementById('selected_tv_package_ids').value = Object.keys(selectedTVPackages);
-        // Отправляем форму
         this.submit();
     });
 
-    // === Перемещение блока "Итоговая стоимость" между секциями ===
+    // === Перемещение блока "Итоговая стоимость" ===
     function moveSummaryCard() {
         const isMobile = window.innerWidth < 992;
-        const summaryCard = document.querySelector('#summaryCardContainer .summary-card');
-        if (!summaryCard) return;
+        const summaryContent = document.querySelector('.summary__content');
+        if (!summaryContent) return;
 
-        if (!isMobile && summaryCard.closest('#mobileSummaryTarget')) {
+        if (!isMobile && summaryContent.closest('.order-form__mobile-summary')) {
             const originalContainer = document.getElementById('summaryCardContainer');
-            originalContainer.appendChild(summaryCard);
-        } else if (isMobile && !summaryCard.closest('#mobileSummaryTarget')) {
+            originalContainer.appendChild(summaryContent);
+        } else if (isMobile && !summaryContent.closest('.order-form__mobile-summary')) {
             const mobileTarget = document.getElementById('mobileSummaryTarget');
             if (mobileTarget) {
                 mobileTarget.innerHTML = '';
-                mobileTarget.appendChild(summaryCard);
+                mobileTarget.appendChild(summaryContent);
             }
         }
     }
+
+    // === Обработчик модальных окон ===
+    document.querySelectorAll('[data-modal-target]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            e.preventDefault();
+            const modalId = button.getAttribute('data-modal-target');
+            const modal = document.getElementById(modalId);
+            if (modal) {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            }
+        });
+    });
+
+    // === Закрытие модальных окон ===
+    document.querySelectorAll('.modal-close').forEach(button => {
+        button.addEventListener('click', () => {
+            const modal = button.closest('.modal');
+            if (modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+    });
 
     // === Инициализация ===
     window.addEventListener('DOMContentLoaded', moveSummaryCard);
