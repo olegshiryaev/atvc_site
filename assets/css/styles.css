@@ -2906,7 +2906,7 @@ button.swiper-pagination-bullet {
     border-radius: 0.5rem;
     padding: 0.25rem 0.75rem;
     font-size: 1rem;
-    color: #6c757d; /* Серый цвет по умолчанию */
+    color: #6c757d;
     cursor: pointer;
     transition: color 0.2s ease;
 }
@@ -2917,6 +2917,21 @@ button.swiper-pagination-bullet {
 
 .z-index-sticky {
     z-index: 1055;
+}
+
+.category-toggle {
+    background: none;
+    border: none;
+    border-radius: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 1rem;
+    color: #6c757d;
+    cursor: pointer;
+    transition: color 0.2s ease;
+}
+
+.category-toggle[aria-expanded="true"] {
+    color: var(--color-ocean-blue);
 }
 
 /* Адаптивность */
@@ -8429,7 +8444,7 @@ button.swiper-pagination-bullet {
     border-radius: 8px;
     font-size: var(--font-size-base);
     background-color: var(--color-white);
-    border: 1px solid var(--border-color);
+    border: 1px solid #989898;
     color: var(--text-color);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
