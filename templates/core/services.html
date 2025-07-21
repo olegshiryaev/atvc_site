@@ -388,4 +388,38 @@
         });
     });
 </script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const swiper = new Swiper('.tv-packages-block .swiper', {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        navigation: {
+            nextEl: '.tv-packages-block .slider-navs__next',
+            prevEl: '.tv-packages-block .slider-navs__prev',
+        },
+        pagination: {
+            el: '.tv-packages-block .slider-navs__pag',
+            clickable: true,
+        },
+        lazy: {
+            loadPrevNext: true,
+        },
+        breakpoints: {
+            640: {
+                slidesPerView: 2,
+                spaceBetween: 20,
+            },
+            1024: {
+                slidesPerView: 4,
+                spaceBetween: 30,
+            },
+        },
+        a11y: {
+            prevSlideMessage: 'Предыдущий слайд',
+            nextSlideMessage: 'Следующий слайд',
+            paginationBulletMessage: 'Перейти к слайду {{index}}'
+        }
+    });
+});
+</script>
 {% endblock %}
