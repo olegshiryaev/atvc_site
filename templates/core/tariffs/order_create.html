@@ -234,15 +234,16 @@
                                 <div class="order-form__checkbox-wrapper">
                                     <input class="order-form__checkbox" type="checkbox" id="agree" required aria-label="Согласие с обработкой персональных данных">
                                     <label class="order-form__checkbox-label" for="agree">
-                                        Нажимая кнопку «Отправить заявку», вы соглашаетесь с 
+                                        Я согласен с  
                                         <a 
                                             target="_blank" 
                                             class="order-form__link" 
                                             href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
                                             rel="noopener noreferrer"
                                         >
-                                            Условиями обработки персональных данных
+                                            Политикой конфиденциальности
                                         </a>
+                                         и разрешаю обработку персональных данных
                                     </label>
                                 </div>
                                 <button type="submit" class="order-form__submit" aria-label="Отправить заявку на подключение">Отправить заявку</button>
@@ -293,8 +294,21 @@
                         <h5 class="summary__total-title">Итого к оплате:</h5>
                         <h5 class="summary__total-value" id="totalPrice">{{ tariff.price }} ₽</h5>
                     </div>
+                    <div class="summary__breakdown">
+                        <div class="summary__breakdown-item">
+                            <span class="summary__breakdown-name">Из них:</span>
+                        </div>
+                        <div class="summary__breakdown-item">
+                            <span class="summary__breakdown-name">Абонентская плата:</span>
+                            <span class="summary__breakdown-value" id="monthlyPrice">{{ tariff.price }} ₽/мес</span>
+                        </div>
+                        <div class="summary__breakdown-item">
+                            <span class="summary__breakdown-name">При подключении:</span>
+                            <span class="summary__breakdown-value" id="connectionTotalPrice">{{ tariff.connection_price }} ₽</span>
+                        </div>
+                    </div>
                     <div class="summary__info">
-                        <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование оплачивается единоразово при подключении.</small>
+                        <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование и подключение оплачиваются единоразово при подключении.</small>
                     </div>
                 </div>
             </aside>
@@ -610,13 +624,34 @@
     }
 
     function calculateTotal() {
-        const connectionPriceElement = document.getElementById('connectionPrice');
-        const connectionPrice = connectionPriceElement ? parseInt(connectionPriceElement.textContent) || 0 : 0;
-        const totalPrice = connectionPrice + selectedEquipmentPrice + totalServicesPrice + totalTVPackagesPrice;
+        const tariffPrice = parseInt('{{ tariff.price }}') || 0; // Стоимость тарифа
+        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0; // Стоимость подключения
+
+        // Абонентская плата: тариф + услуги + ТВ-пакеты
+        const monthlyPrice = tariffPrice + totalServicesPrice + totalTVPackagesPrice;
+
+        // При подключении: оборудование + стоимость подключения
+        const connectionTotalPrice = selectedEquipmentPrice + connectionPrice;
+
+        // Итоговая стоимость: абонентская плата + стоимость подключения
+        const totalPrice = monthlyPrice + connectionTotalPrice;
+
+        // Обновление отображения
         const totalPriceElement = document.getElementById('totalPrice');
+        const monthlyPriceElement = document.getElementById('monthlyPrice');
+        const connectionTotalPriceElement = document.getElementById('connectionTotalPrice');
+
         if (totalPriceElement) {
             totalPriceElement.textContent = `${totalPrice.toLocaleString()} ₽`;
         }
+        if (monthlyPriceElement) {
+            monthlyPriceElement.textContent = `${monthlyPrice.toLocaleString()} ₽/мес`;
+        }
+        if (connectionTotalPriceElement) {
+            connectionTotalPriceElement.textContent = `${connectionTotalPrice.toLocaleString()} ₽`;
+        }
+
+        // Обновление скрытых полей
         document.getElementById('total_equipment_cost').value = selectedEquipmentPrice;
         document.getElementById('total_services_cost').value = totalServicesPrice;
         document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;

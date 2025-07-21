@@ -8641,6 +8641,25 @@ button.swiper-pagination-bullet {
     color: var(--text-color);
 }
 
+.summary__breakdown {
+    margin-top: 1rem;
+}
+
+.summary__breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.summary__breakdown-name {
+    color: #333;
+}
+
+.summary__breakdown-value {
+    font-weight: 500;
+}
+
 .summary__info {
     margin-top: var(--spacing-md);
     color: var(--muted-color);
