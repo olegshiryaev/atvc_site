@@ -8142,10 +8142,11 @@ button.swiper-pagination-bullet {
 
 .equipment__item {
     background-color: var(--background-color);
-    border: 1px solid var(--border-color);
-    border-radius: var(--radius-xl);
+    border: 1px solid var(--smoky-white-color);
+    border-radius: 15px;
     padding: var(--spacing-md);
     cursor: pointer;
+    box-shadow: var(--shadow-card);
     transition: border-color 0.2s ease;
 }
 
@@ -8162,11 +8163,12 @@ button.swiper-pagination-bullet {
 
 .equipment__header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--spacing-md);
 }
 
 .equipment__image-container {
+    flex-shrink: 0;
     width: 50px;
     height: 50px;
     border-radius: var(--border-radius);
@@ -8199,21 +8201,14 @@ button.swiper-pagination-bullet {
 
 .equipment__info {
     flex-grow: 1;
+    min-width: 0;
 }
 
 .equipment__name {
     font-size: var(--font-size-md);
-    margin-bottom: var(--spacing-sm);
-}
-
-.equipment__short-description {
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
-}
-
-.equipment__description {
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
+    margin-bottom: 0;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 
 .equipment__footer {
