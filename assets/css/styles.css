@@ -7406,10 +7406,19 @@ button.swiper-pagination-bullet {
     gap: 1rem;
 }
 
-.office-contact__row {
+.office-contact__container {
     display: flex;
+    flex-wrap: nowrap;
     gap: 1rem;
-    flex-wrap: wrap;
+    width: 100%;
+}
+
+.office-contact__left {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    flex: 1 1 50%;
+    min-width: 0;
 }
 
 .office-contact {
@@ -7423,12 +7432,44 @@ button.swiper-pagination-bullet {
     flex: 1;
 }
 
-.office-contact--full {
+.office-contact--stacked {
     flex: 1 1 100%;
+    min-height: 120px;
+    box-sizing: border-box;
 }
 
-.office-contact--half {
-    flex: 1 1 calc(50% - 0.5rem);
+.office-contact--tall {
+    flex: 1 1 50%;
+    min-height: 280px;
+    background: var(--main-color);
+    color: rgba(255, 255, 255, 0.8);
+    padding: 20px 20px 30px 40px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    font-weight: 500;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.office-contact__phone-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+.office-contact__label {
+    font-size: 16px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.7);
+    line-height: 1.2;
+}
+
+.office-contact__label--no-opacity {
+    color: rgb(255, 255, 255);
 }
 
 .office-contact__link {
@@ -7499,6 +7540,20 @@ button.swiper-pagination-bullet {
 
 /* Адаптивность */
 @media (max-width: 768px) {
+    .office-contact__container {
+        flex-direction: column;
+        flex-wrap: wrap;
+    }
+
+    .office-contact__left {
+        flex: 1 1 100%;
+    }
+
+    .office-contact--tall {
+        flex: 1 1 100%;
+        min-height: 240px;
+    }
+
     .office-contact__link {
         font-size: 22px;
         padding-bottom: 2px;
