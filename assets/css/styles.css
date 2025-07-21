@@ -6421,6 +6421,7 @@ button.swiper-pagination-bullet {
 
 .tv-packages-block {
     position: relative;
+    margin-top: 70px;
 }
 
 .tv-packages-block .swiper {

@@ -340,8 +340,16 @@ def services(request, service_slug, locality_slug):
     tariffs = (
         Tariff.objects.filter(service=service, localities=locality, is_active=True)
         .select_related("service")
-        .prefetch_related("included_channels")
+        .prefetch_related(
+            Prefetch('included_channels', queryset=TVChannel.objects.all()),
+            'localities',
+            'tv_packages',
+        )
     )
+
+    # Собираем уникальные ТВ-пакеты, связанные с тарифами
+    tv_package_ids = tariffs.values_list('tv_packages', flat=True).distinct()
+    tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids).prefetch_related('channels')
 
     products = Product.objects.filter(
         is_available=True, services=service
@@ -366,6 +374,7 @@ def services(request, service_slug, locality_slug):
         "products": products,
         "breadcrumbs": breadcrumbs,
         "title": title,
+        "tv_packages": tv_packages,
     }
 
     return render(request, "core/services.html", context)

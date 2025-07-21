@@ -12,6 +12,9 @@
         <!-- Блок тарифов -->
         <section id="tariff" class="tariffs block">
             {% include "core/partials/tariffs_list.html" %}
+            {% if service.name == "Телевидение" and tv_packages %}
+                {% include 'core/partials/tv_packages_block.html' with tv_packages=tv_packages %}
+            {% endif %}
         </section>
 
         {% if service.name == "Телевидение" %}
