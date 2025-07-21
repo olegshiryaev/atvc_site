@@ -62,7 +62,14 @@
                     <div class="address-check__form-footer">
                         <p class="address-check__agreement-text">
                             Нажимая кнопку "Проверить адрес", вы соглашаетесь с 
-                            <a href="#" class="address-check__policy-link">Условиями обработки персональных данных</a>
+                            <a 
+                                href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}" 
+                                class="address-check__policy-link" 
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                Условиями обработки персональных данных
+                            </a>
                         </p>
                         <button type="submit" class="address-check__submit-btn" id="submitConnectionBtn">
                             Проверить адрес

@@ -167,7 +167,14 @@
                                 <!-- Согласие с политикой -->
                                 <div class="feedback-form__policy">
                                     Нажимая кнопку «Отправить», вы соглашаетесь с 
-                                    <a target="_blank" class="feedback-form__policy-link" href="#">Условиями обработки персональных данных</a>
+                                    <a 
+                                        target="_blank" 
+                                        class="feedback-form__policy-link" 
+                                        href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Условиями обработки персональных данных
+                                    </a>
                                 </div>
                                 
                                 <!-- Кнопка отправки -->

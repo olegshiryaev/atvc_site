@@ -16,7 +16,16 @@
             <button type="submit" class="callback-btn">Отправить</button>
             <label class="callback-checkbox">
                 <input type="checkbox" required>
-                Я согласен с <a href="/privacy/">Политикой конфиденциальности</a> и разрешаю обработку персональных данных
+                Я согласен с 
+                <a 
+                    href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    class="callback-checkbox__link"
+                >
+                    Политикой конфиденциальности
+                </a> 
+                и разрешаю обработку персональных данных
             </label>
         </form>
     </div>
