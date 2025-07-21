@@ -250,16 +250,15 @@
         </div>
         <div class="offcanvas-body">
             <ul class="navbar-nav mb-3">
-                <li class="nav-item dropdown">
-                    <a class="nav-link" href="#" data-bs-toggle="dropdown">Тарифы</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Для частных лиц</a></li>
-                        <li><a class="dropdown-item" href="#">Для юр. лиц</a></li>
-                    </ul>
+                {% for service in available_services %}
+                    <li class="nav-item">
+                    <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}" class="nav-link">
+                        {{ service.name }}
+                    </a>
                 </li>
-                <li class="nav-item"><a class="nav-link" href="#">Акции</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
+                {% endfor %}
+                <li class="nav-item"><a class="nav-link" href="{% url 'equipments:equipment_list' locality.slug %}">Оборудование</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'core:contacts' locality_slug=request.locality.slug %}">Контакты</a></li>
             </ul>
             <hr>
             <div class="d-flex flex-column gap-2">
