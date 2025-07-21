@@ -7911,26 +7911,50 @@ button.swiper-pagination-bullet {
     margin-bottom: var(--spacing-md);
 }
 
+.tariff-info__included {
+    margin-top: 1rem;
+}
+
+.tariff-info__included-title {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
 .tariff-info__badges {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
+    gap: 0.5rem;
 }
 
 .tariff-info__badge {
     display: flex;
     align-items: center;
-    gap: var(--spacing-sm);
-    padding: var(--spacing-sm) var(--spacing-md);
-    border-radius: var(--border-radius);
-    font-size: var(--font-size-sm);
-    background-color: var(--form-background);
+    padding: 0.5rem 1rem;
+    border-radius: 0.25rem;
+    font-size: 0.9rem;
+    background-color: #f8f9fa;
 }
 
-.tariff-info__badge-icon {
-    width: 16px;
-    height: 16px;
+.tariff-info__badge-icon,
+.tariff-info__badge .bi {
+    margin-right: 0.5rem;
+}
+
+.tariff-info__badge--speed {
+    background-color: #e6f3ff;
+    color: #005566;
+}
+
+.tariff-info__badge--router {
+    background-color: #e6ffec;
+    color: #006644;
+}
+
+.tariff-info__badge--tv {
+    background-color: #fff3e6;
+    color: #664200;
 }
 
 .tariff-info__description {

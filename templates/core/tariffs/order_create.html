@@ -11,35 +11,35 @@
                     <div class="tariff-info__content">
                         <div class="tariff-info__details">
                             <h3 class="tariff-info__title">{{ tariff.name }}</h3>
-                            <div class="tariff-info__badges">
-                                <span class="tariff-info__badge tariff-info__badge--speed">
-                                    <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                        <path d="M8 2a6 6 0 100 12A6 6 0 008 2zm0 10a4 4 0 110-8 4 4 0 010 8zm2-4a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                    </svg>
-                                    {{ tariff.speed }} Мбит/с
-                                </span>
-                                {% if tariff.free_router %}
-                                    <span class="tariff-info__badge tariff-info__badge--router">
-                                        <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                            <path d="M2 4h12v2H2V4zm0 4h12v2H2V8zm0 4h12v2H2v-2z"/>
-                                        </svg>
-                                        Wi-Fi роутер в подарок
-                                    </span>
-                                {% endif %}
-                                {% if tariff.tv_channels %}
-                                    <span class="tariff-info__badge tariff-info__badge--tv">
-                                        <svg class="tariff-info__badge-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
-                                            <path d="M2 3h12v8H2V3zm2 2v4h8V5H4z"/>
-                                        </svg>
-                                        {{ tariff.tv_channels }} ТВ-каналов
-                                    </span>
-                                {% endif %}
-                            </div>
+                            {% if tariff.description %}
                             <p class="tariff-info__description">{{ tariff.description|safe }}</p>
+                            {% endif %}
+                            <div class="tariff-info__included">
+                                <h4 class="tariff-info__included-title">В тариф включено:</h4>
+                                <div class="tariff-info__badges">
+                                    {% if tariff.speed %}
+                                        <span class="tariff-info__badge tariff-info__badge--speed">
+                                            <i class="bi bi-wifi"></i>
+                                            Скорость: {{ tariff.speed }} Мбит/с
+                                        </span>
+                                    {% endif %}
+                                    {% if tariff.total_channels %}
+                                        <span class="tariff-info__badge tariff-info__badge--tv">
+                                            <i class="bi bi-tv"></i>
+                                            {{ tariff.total_channels }} ТВ-каналов
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
                         </div>
                         <div class="tariff-info__price">
-                            <div class="tariff-info__price-value">{{ tariff.price }} ₽</div>
-                            <small class="tariff-info__price-unit">в месяц</small>
+                            <div class="tariff-info__price-value">{{ tariff.get_actual_price }} ₽</div>
+                            <small class="tariff-info__price-unit">
+                                в месяц
+                                {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
+                                    (акция на {{ tariff.promo_months }} мес.)
+                                {% endif %}
+                            </small>
                         </div>
                     </div>
                 </section>
@@ -261,7 +261,12 @@
                         <h5 class="summary__section-title">Тариф</h5>
                         <div class="summary__item">
                             <span class="summary__item-name">{{ tariff.name }}</span>
-                            <span class="summary__item-value">{{ tariff.price }} ₽/мес</span>
+                            <span class="summary__item-value">
+                                {{ tariff.get_actual_price }} ₽/мес
+                                {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
+                                    (акция на {{ tariff.promo_months }} мес.)
+                                {% endif %}
+                            </span>
                         </div>
                     </div>
                     {% if products.exists %}
@@ -292,7 +297,7 @@
                     <hr class="summary__divider">
                     <div class="summary__total">
                         <h5 class="summary__total-title">Итого к оплате:</h5>
-                        <h5 class="summary__total-value" id="totalPrice">{{ tariff.price }} ₽</h5>
+                        <h5 class="summary__total-value" id="totalPrice">{{ tariff.get_actual_price|add:tariff.connection_price }} ₽</h5>
                     </div>
                     <div class="summary__breakdown">
                         <div class="summary__breakdown-item">
@@ -300,7 +305,7 @@
                         </div>
                         <div class="summary__breakdown-item">
                             <span class="summary__breakdown-name">Абонентская плата:</span>
-                            <span class="summary__breakdown-value" id="monthlyPrice">{{ tariff.price }} ₽/мес</span>
+                            <span class="summary__breakdown-value" id="monthlyPrice">{{ tariff.get_actual_price }} ₽/мес</span>
                         </div>
                         <div class="summary__breakdown-item">
                             <span class="summary__breakdown-name">При подключении:</span>
@@ -319,19 +324,13 @@
 <!-- Скрипты -->
 <script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
-    // Переменные для хранения выбранных значений
+// Переменные для хранения выбранных значений
     let selectedEquipment = {};
     let selectedEquipmentPrice = 0;
     let selectedServices = {};
     let totalServicesPrice = 0;
     let selectedTVPackages = {};
     let totalTVPackagesPrice = 0;
-
-    console.log('Отправляемые данные:', {
-        equipment_ids: document.getElementById('selected_equipment_ids').value,
-        service_slugs: document.getElementById('selected_service_slugs').value,
-        tv_package_ids: document.getElementById('selected_tv_package_ids').value
-    });
 
     // Инициализация маски для телефона
     const phoneInput = document.querySelector('#orderForm [name="phone"]');
@@ -392,11 +391,6 @@
         document.getElementById('selected_equipment_ids').value = JSON.stringify(equipmentIds);
         document.getElementById('selected_service_slugs').value = JSON.stringify(serviceSlugs);
         document.getElementById('selected_tv_package_ids').value = JSON.stringify(tvPackageIds);
-        console.log('Отправляемые данные:', {
-            equipment_ids: document.getElementById('selected_equipment_ids').value,
-            service_slugs: document.getElementById('selected_service_slugs').value,
-            tv_package_ids: document.getElementById('selected_tv_package_ids').value
-        });
 
         const formData = new FormData(this);
         if (phoneMask) {
@@ -410,7 +404,6 @@
                 return;
             }
             formData.set('phone', phone);
-            console.log('Отправляемый номер телефона:', phone);
         }
 
         // Валидация перед отправкой
@@ -512,7 +505,6 @@
 
     // Функции selectEquipment, toggleNoEquipment, updateService, updateTVPackage
     function selectEquipment(element, price) {
-        console.log('selectEquipment called with element:', element, 'price:', price);
         const name = element.querySelector('.equipment__name').textContent.trim();
         const id = element.getAttribute('data-id');
         if (element.classList.contains('selected')) {
@@ -540,7 +532,6 @@
     }
 
     function updateService(serviceId, price) {
-        console.log('updateService called with serviceId:', serviceId, 'price:', price);
         const checkbox = document.getElementById(serviceId);
         const label = checkbox.nextElementSibling;
         const serviceName = label?.querySelector('.services__name').textContent.trim() || 'Неизвестная услуга';
@@ -555,7 +546,6 @@
     }
 
     function updateTVPackage(packageId, price) {
-        console.log('updateTVPackage called with packageId:', packageId, 'price:', price);
         const checkbox = document.getElementById(`package-${packageId}`);
         const name = checkbox?.nextElementSibling?.querySelector('.tv-package__name').textContent.trim() || 'Пакет каналов';
         if (checkbox.checked) {
@@ -571,7 +561,7 @@
     // Обновление отображения
     function updateEquipmentSummary() {
         const container = document.getElementById('equipmentSummary');
-        if (!container) return; // Пропускаем, если блок отсутствует
+        if (!container) return;
         if (Object.keys(selectedEquipment).length > 0) {
             let html = '<h5 class="summary__section-title">Оборудование</h5>';
             for (const [id, item] of Object.entries(selectedEquipment)) {
@@ -589,7 +579,7 @@
 
     function updateServicesSummary() {
         const container = document.getElementById('servicesSummary');
-        if (!container) return; // Пропускаем, если блок отсутствует
+        if (!container) return;
         if (Object.keys(selectedServices).length > 0) {
             let html = '<h5 class="summary__section-title">Дополнительные услуги</h5>';
             for (const key in selectedServices) {
@@ -607,7 +597,7 @@
 
     function updateTVPackageSummary() {
         const container = document.getElementById('tvPackagesSummary');
-        if (!container) return; // Пропускаем, если блок отсутствует
+        if (!container) return;
         if (Object.keys(selectedTVPackages).length > 0) {
             let html = '<h5 class="summary__section-title">Пакеты ТВ</h5>';
             for (const key in selectedTVPackages) {
@@ -624,8 +614,8 @@
     }
 
     function calculateTotal() {
-        const tariffPrice = parseInt('{{ tariff.price }}') || 0; // Стоимость тарифа
-        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0; // Стоимость подключения
+        const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0; // Используем актуальную цену тарифа
+        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
 
         // Абонентская плата: тариф + услуги + ТВ-пакеты
         const monthlyPrice = tariffPrice + totalServicesPrice + totalTVPackagesPrice;
@@ -677,16 +667,12 @@
     }
 
     // Инициализация
-    window.addEventListener('DOMContentLoaded', moveSummaryCard);
+    window.addEventListener('DOMContentLoaded', () => {
+        moveSummaryCard();
+        calculateTotal(); // Вызываем calculateTotal при загрузке страницы
+    });
     window.addEventListener('resize', () => {
         setTimeout(moveSummaryCard, 100);
-    });
-
-    // Отладка начальных значений
-    console.log('Начальные значения скрытых полей:', {
-        equipment_ids: document.getElementById('selected_equipment_ids').value,
-        service_slugs: document.getElementById('selected_service_slugs').value,
-        tv_package_ids: document.getElementById('selected_tv_package_ids').value
     });
 </script>
 {% endblock %}
