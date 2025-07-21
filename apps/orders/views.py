@@ -24,7 +24,7 @@ def order_create(request, locality_slug, slug):
     locality = get_object_or_404(Locality, slug=locality_slug)
     tariff = get_object_or_404(Tariff, slug=slug)
 
-    products = Product.objects.filter(services__in=[tariff.service]).distinct()
+    products = tariff.products.all()
     services = AdditionalService.objects.filter(service_types=tariff.service)
     tv_packages = tariff.tv_packages.all()
 

@@ -2,6 +2,7 @@ from django.contrib import admin
 import os
 from django.conf import settings
 from django.core.files import File
+from django.urls import reverse
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
 from import_export import resources, fields
@@ -310,6 +311,7 @@ class TariffAdmin(ImportExportModelAdmin):
         'is_promo',
         'get_channels_count',
         'get_hd_channels_count',
+        'get_products_count',
         'technology_display',
         'localities_count',
         'slug'
@@ -323,7 +325,7 @@ class TariffAdmin(ImportExportModelAdmin):
         'priority'
     )
     search_fields = ('name', 'description')
-    filter_horizontal = ('included_channels', 'localities')
+    filter_horizontal = ('included_channels', 'localities', 'products')
     readonly_fields = ('slug', 'get_channels_count', 'get_hd_channels_count')
     list_per_page = 30
 
@@ -361,6 +363,7 @@ class TariffAdmin(ImportExportModelAdmin):
             'fields': (
                 'included_channels',
                 'localities',
+                'products',
             )
         }),
     )
@@ -369,9 +372,10 @@ class TariffAdmin(ImportExportModelAdmin):
         qs = super().get_queryset(request)
         qs = qs.annotate(
             _channels_count=Count('included_channels'),
-            _hd_channels_count=Count('included_channels', filter=Q(included_channels__is_hd=True))
+            _hd_channels_count=Count('included_channels', filter=Q(included_channels__is_hd=True)),
+            _products_count=Count('products')
         )
-        return qs.prefetch_related('included_channels', 'localities')
+        return qs.prefetch_related('included_channels', 'localities', 'products')
     
     def get_ordering(self, request):
         return ['-priority', 'name', 'price']
@@ -394,6 +398,19 @@ class TariffAdmin(ImportExportModelAdmin):
     def localities_count(self, obj):
         return obj.localities.count()
     localities_count.short_description = 'Локации'
+
+    def get_products_count(self, obj):
+        count = obj.products.count()
+        if count:
+            return format_html(
+                '<a href="{}?tariffs__id__exact={}">{}</a>',
+                reverse('admin:equipments_product_changelist'),
+                obj.id,
+                count
+            )
+        return count
+    get_products_count.short_description = 'Оборудование'
+    get_products_count.admin_order_field = '_products_count'
 
     def get_channels_count(self, obj):
         return obj.included_channels.count()

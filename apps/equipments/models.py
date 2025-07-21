@@ -5,8 +5,6 @@ from pytils.translit import slugify
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
-from apps.core.models import Service
-
 
 COLOR_CHOICES = [
     ("white", "Белый"),
@@ -55,7 +53,10 @@ class Product(models.Model):
         null=True,
     )
     services = models.ManyToManyField(
-        Service, related_name="products", verbose_name="Услуги", blank=True
+        "core.Service",
+        related_name="products",
+        verbose_name="Услуги",
+        blank=True
     )
 
     def __str__(self):

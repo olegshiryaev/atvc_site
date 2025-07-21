@@ -19,6 +19,8 @@ from django.contrib import messages
 from apps.cities.models import Locality
 from django.contrib.auth.models import User
 
+from apps.equipments.models import Product
+
 logger = logging.getLogger(__name__)
 
 
@@ -219,6 +221,12 @@ class Tariff(models.Model):
         blank=True,
         verbose_name="Населённые пункты",
         related_name="tariffs",
+    )
+    products = models.ManyToManyField(
+        Product,
+        verbose_name="Оборудование для тарифа",
+        related_name="tariffs",
+        blank=True
     )
     slug = models.SlugField("URL-адрес", max_length=120, blank=True, unique=True)
     priority = models.PositiveSmallIntegerField(
