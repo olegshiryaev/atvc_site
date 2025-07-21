@@ -30,61 +30,6 @@
             </ul>
         </div>
 
-        <!-- Популярные товары -->
-        {% if popular_products %}
-        <section class="products-slider-block block">
-            <div class="products-slider-block__header">
-                <h2 class="products-slider-block__title block__title">Популярные товары</h2>
-            </div>
-            <!-- Swiper Container -->
-            <div class="products-slider-block__wrapper">
-                <div class="swiper">
-                    <div class="swiper-wrapper">
-                        {% for product in popular_products %}
-                        <li class="product-card products-slider-block__item swiper-slide">
-                            <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
-                                <!-- Изображение -->
-                                {% with product.images.first as image %}
-                                    <div class="product-card__img-wrap">
-                                        {% if image %}
-                                            <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
-                                        {% else %}
-                                            <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
-                                        {% endif %}
-                                    </div>
-                                {% endwith %}
-
-                                <!-- Контент -->
-                                <h6 class="product-card__title h6">{{ product.name }}</h6>
-                                <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
-                                <div class="product-card__bottom d-flex justify-content-between">
-                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
-                                    <i class="bi bi-cart fs-5 text-secondary"></i>
-                                </div>
-                            </a>
-                        </li>
-                        {% endfor %}
-                    </div>
-                    <div class="products-slider-block__navs slider-navs">
-                        <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 19L8 12L15 5"></path>
-                            </svg>
-                        </button>
-                        <div class="slider-navs__pag"></div>
-                        <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M15 19L8 12L15 5"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-        {% endif %}
-
         <!-- Поиск и сортировка -->
         <section class="products-list-block block" style data-block-slug="products-list-block" data-block-appearance>
             <div class="products-list-block__content" data-products-cat>
@@ -243,6 +188,61 @@
 
         </ul>
         </nav>
+        {% endif %}
+
+        <!-- Популярные товары -->
+        {% if popular_products %}
+        <section class="products-slider-block block">
+            <div class="products-slider-block__header">
+                <h2 class="products-slider-block__title block__title">Популярные товары</h2>
+            </div>
+            <!-- Swiper Container -->
+            <div class="products-slider-block__wrapper">
+                <div class="swiper">
+                    <div class="swiper-wrapper">
+                        {% for product in popular_products %}
+                        <li class="product-card products-slider-block__item swiper-slide">
+                            <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                                <!-- Изображение -->
+                                {% with product.images.first as image %}
+                                    <div class="product-card__img-wrap">
+                                        {% if image %}
+                                            <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
+                                        {% else %}
+                                            <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
+                                        {% endif %}
+                                    </div>
+                                {% endwith %}
+
+                                <!-- Контент -->
+                                <h6 class="product-card__title h6">{{ product.name }}</h6>
+                                <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
+                                <div class="product-card__bottom d-flex justify-content-between">
+                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
+                                    <i class="bi bi-cart fs-5 text-secondary"></i>
+                                </div>
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </div>
+                    <div class="products-slider-block__navs slider-navs">
+                        <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 19L8 12L15 5"></path>
+                            </svg>
+                        </button>
+                        <div class="slider-navs__pag"></div>
+                        <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M15 19L8 12L15 5"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
         {% endif %}
 
     </div>
