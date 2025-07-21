@@ -9,6 +9,9 @@
         .field { margin: 10px 0; }
         .label { font-weight: bold; }
         .link { color: #005555; text-decoration: none; }
+        .section { margin: 20px 0; }
+        .section-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; }
+        .item { margin-left: 20px; margin-bottom: 5px; }
     </style>
 </head>
 <body>
@@ -27,6 +30,9 @@
             <span class="label">Телефон:</span> {{ order.phone }}
         </div>
         <div class="field">
+            <span class="label">Email:</span> {{ order.email|default:"Не указан" }}
+        </div>
+        <div class="field">
             <span class="label">Тариф:</span> {{ order.tariff.name|default:"Не указан" }}
         </div>
         <div class="field">
@@ -36,8 +42,38 @@
             <span class="label">Адрес:</span> 
             {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
         </div>
+        <div class="section">
+            <div class="section-title">Оборудование:</div>
+            {% for product in order.get_products_with_details %}
+                <div class="item">
+                    {{ product.product.name }} ({{ product.quantity }} шт.) - {{ product.price }} руб.
+                    {% if product.variant %}<br>Вариант: {{ product.variant.name }}{% endif %}
+                </div>
+            {% empty %}
+                <div class="item">Оборудование не выбрано</div>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <div class="section-title">Дополнительные услуги:</div>
+            {% for service in order.services.all %}
+                <div class="item">{{ service.name }} - {{ service.price }} руб.</div>
+            {% empty %}
+                <div class="item">Услуги не выбраны</div>
+            {% endfor %}
+        </div>
+        <div class="section">
+            <div class="section-title">Пакеты ТВ-каналов:</div>
+            {% for package in order.tv_packages.all %}
+                <div class="item">{{ package.name }} - {{ package.price }} руб.</div>
+            {% empty %}
+                <div class="item">Пакеты ТВ не выбраны</div>
+            {% endfor %}
+        </div>
         <div class="field">
-            <span class="label">Комментарий:</span> {{ order.comment|default_if_none:"" }}
+            <span class="label">Общая стоимость:</span> {{ order.total_cost }} руб.
+        </div>
+        <div class="field">
+            <span class="label">Комментарий:</span> {{ order.comment|default_if_none:"Не указан" }}
         </div>
         <div class="field">
             <a class="link" href="{{ admin_url }}">Посмотреть в админ-панели</a>

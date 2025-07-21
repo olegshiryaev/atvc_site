@@ -1,5 +1,32 @@
 Новая заявка #{{ order.id }}
 
-Дата создания: {{ order.created_at|date:"d.m.Y H:i" }} ФИО: {{ order.full_name }} Телефон: {{ order.phone }} Тариф: {{ order.tariff.name|default:"Без тарифа" }} Адрес: {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %} Населенный пункт: {{ order.locality.name }} Статус: {{ order.get_status_display }}
+Дата создания: {{ order.created_at|date:"d.m.Y H:i" }}
+ФИО: {{ order.full_name }}
+Телефон: {{ order.phone }}
+Email: {{ order.email|default:"Не указан" }}
+Тариф: {{ order.tariff.name|default:"Без тарифа" }}
+Населенный пункт: {{ order.locality.name }}
+Адрес: {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
+Статус: {{ order.get_status_display }}
+
+Оборудование:
+{% for product in order.get_products_with_details %}
+- {{ product.product.name }} ({{ product.quantity }} шт.) - {{ product.price }} руб.
+{% if product.variant %}Вариант: {{ product.variant.name }}{% endif %}
+{% endfor %}
+
+Дополнительные услуги:
+{% for service in order.services.all %}
+- {{ service.name }} - {{ service.price }} руб.
+{% endfor %}
+
+Пакеты ТВ-каналов:
+{% for package in order.tv_packages.all %}
+- {{ package.name }} - {{ package.price }} руб.
+{% endfor %}
+
+Общая стоимость: {{ order.total_cost }} руб.
+
+Комментарий: {{ order.comment|default:"Не указан" }}
 
 Подробности в админ-панели: {{ admin_url }}
