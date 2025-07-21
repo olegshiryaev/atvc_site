@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container py-4">
+  <h2 class="mb-4">Ваша корзина</h2>
+
+  {% if tariff %}
+    <div class="mb-3">
+      <h5>Тариф</h5>
+      <p><strong>{{ tariff.name }}</strong> — {{ tariff.get_actual_price }} ₽/мес</p>
+    </div>
+  {% endif %}
+
+  {% if products %}
+    <div class="mb-3">
+      <h5>Оборудование</h5>
+      <ul class="list-group">
+        {% for item in products %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>
+              {{ item.product.name }}
+              {% if item.variant %} ({{ item.variant.get_color_display }}){% endif %}
+              × {{ item.quantity }}
+            </div>
+            <div>{{ item.total }} ₽</div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if services %}
+    <div class="mb-3">
+      <h5>Дополнительные услуги</h5>
+      <ul class="list-group">
+        {% for service in services %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>{{ service.name }}</div>
+            <div>{{ service.price }} ₽/мес</div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  {% if tv_packages %}
+    <div class="mb-3">
+      <h5>Пакеты ТВ-каналов</h5>
+      <ul class="list-group">
+        {% for pack in tv_packages %}
+          <li class="list-group-item d-flex justify-content-between">
+            <div>{{ pack.name }}</div>
+            <div>{{ pack.price }} ₽/мес</div>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% endif %}
+
+  <hr>
+  <div class="d-flex justify-content-between">
+    <h5>Итого:</h5>
+    <h5>{{ total_price }} ₽</h5>
+  </div>
+
+  <div class="mt-4 text-end">
+    <a href="{% url 'orders:checkout_view' locality_slug=locality.slug %}" class="btn btn-primary">Оформить заявку</a>
+  </div>
+</div>
+{% endblock %}

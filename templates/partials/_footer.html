@@ -45,8 +45,8 @@
         <ul class="list-unstyled small">
           <li><a href="{% url 'core:office_list' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Офисы обслуживания</a></li>
           <li><a href="https://archangelsk.rt.ru/payment" target="_blank" class="footer-link text-decoration-none">Способы оплаты</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Вопросы и ответы</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Техническая поддержка</a></li>
+          {% comment %} <li><a href="#" class="footer-link text-decoration-none">Вопросы и ответы</a></li>
+          <li><a href="#" class="footer-link text-decoration-none">Техническая поддержка</a></li> {% endcomment %}
         </ul>
       </div>
 
@@ -62,8 +62,8 @@
             </li>
             {% endfor %}
             <li><a href="{% url 'equipments:equipment_list' locality.slug %}" class="footer-link text-decoration-none">Оборудование</a></li>
-            <li><a href="#" class="footer-link text-decoration-none">Акции</a></li>
-            <li><a href="#" class="footer-link text-decoration-none">Подключение в частном секторе</a></li>
+            {% comment %} <li><a href="#" class="footer-link text-decoration-none">Акции</a></li> {% endcomment %}
+            {% comment %} <li><a href="#" class="footer-link text-decoration-none">Подключение в частном секторе</a></li> {% endcomment %}
         </ul>
     </div>
 
@@ -72,7 +72,7 @@
         <h6 class="text-uppercase fw-semibold">О компании</h6>
         <ul class="list-unstyled small">
           <li><a href="{% url 'news:news_list' locality_slug=locality.slug %}" class="footer-link text-decoration-none">Новости</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Вакансии</a></li>
+          {% comment %} <li><a href="#" class="footer-link text-decoration-none">Вакансии</a></li> {% endcomment %}
           <li><a href="{% url 'core:company_detail' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Реквизиты и документы</a></li>
           <li><a href="#" class="footer-link text-decoration-none">Контакты</a></li>
           <li><a href="#" class="footer-link text-decoration-none">Политика конфиденциальности</a></li>

@@ -83,37 +83,6 @@ class Product(models.Model):
         verbose_name_plural = "Товары"
 
 
-class ProductImage(models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="images", verbose_name="Товар"
-    )
-    image = models.ImageField("Изображение", upload_to="product_images/")
-    is_main = models.BooleanField("Основное изображение", default=False)
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
-    order = models.PositiveIntegerField("Порядок", default=0)
-
-    def __str__(self):
-        return f"Изображение для {self.product.name}"
-    
-    def save(self, *args, **kwargs):
-        if self.is_main:
-            self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
-
-    class Meta:
-        ordering = ["order"]
-        verbose_name = "Изображение товара"
-        verbose_name_plural = "Изображения товаров"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["product"],
-                condition=models.Q(is_main=True),
-                name="unique_main_image_per_product"
-            )
-        ]
-
-
 class ProductVariant(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="variants", verbose_name="Товар"
@@ -144,6 +113,37 @@ class ProductVariant(models.Model):
             models.UniqueConstraint(
                 fields=["product", "color"],
                 name="unique_product_color"
+            )
+        ]
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(
+        Product, on_delete=models.CASCADE, related_name="images", verbose_name="Товар"
+    )
+    image = models.ImageField("Изображение", upload_to="product_images/")
+    is_main = models.BooleanField("Основное изображение", default=False)
+    color = models.CharField(
+        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
+    )
+    order = models.PositiveIntegerField("Порядок", default=0)
+
+    def __str__(self):
+        return f"Изображение для {self.product.name}"
+    
+    def save(self, *args, **kwargs):
+        if self.is_main:
+            self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
+
+    class Meta:
+        ordering = ["order"]
+        verbose_name = "Изображение товара"
+        verbose_name_plural = "Изображения товаров"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["product"],
+                condition=models.Q(is_main=True),
+                name="unique_main_image_per_product"
             )
         ]
 

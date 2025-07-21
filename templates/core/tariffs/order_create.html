@@ -61,7 +61,6 @@
                                                     onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
                                                 <label class="tv-package__label" for="package-{{ package.id }}">
                                                     <h5 class="tv-package__name">{{ package.name }}</h5>
-                                                    <!-- Блок с количеством каналов и ссылкой -->
                                                     <div class="tv-package__meta">
                                                         <div class="tv-package__channels">
                                                             {{ package.total_channels }} каналов
@@ -176,39 +175,52 @@
                 <!-- Форма заявки -->
                 <section class="order-form__section">
                     <h3 class="order-form__section-title">Оформление заявки</h3>
-                    <form class="order-form__form" id="orderForm" method="post">
+                    <noscript>
+                        <div class="alert alert-danger">Для корректной работы формы требуется включённый JavaScript.</div>
+                    </noscript>
+                    <form class="order-form__form" id="orderForm" method="post" action="{% url 'orders:submit_order' locality_slug=locality.slug %}">
                         {% csrf_token %}
-                        <!-- Скрытые поля для ManyToMany -->
-                        <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids">
-                        <input type="hidden" name="selected_service_slugs" id="selected_service_slugs">
-                        <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids">
-                        <!-- Вспомогательные скрытые поля для подсчета -->
-                        <input type="hidden" id="total_equipment_cost">
-                        <input type="hidden" id="total_services_cost">
-                        <input type="hidden" id="total_tv_packages_cost">
-                        <input type="hidden" id="total_price">
+                        <!-- Скрытые поля -->
+                        <input type="hidden" name="tariff_id" value="{{ tariff.id }}">
+                        <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value="[]">
+                        <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
+                        <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
+                        <input type="hidden" id="total_equipment_cost" value="0">
+                        <input type="hidden" id="total_services_cost" value="0">
+                        <input type="hidden" id="total_tv_packages_cost" value="0">
+                        <input type="hidden" id="total_price" value="0">
 
                         <!-- Основные поля формы -->
                         <div class="order-form__fields">
                             <div class="order-form__field">
                                 <label for="name" class="order-form__label">Ваше имя</label>
                                 <input type="text" name="full_name" class="order-form__input" id="name" required>
+                                <div id="error_full_name" class="order-form__validation-message"></div>
                             </div>
                             <div class="order-form__field">
                                 <label for="phone" class="order-form__label">Номер телефона</label>
                                 <input type="tel" name="phone" class="order-form__input" id="phone" required>
+                                <div id="error_phone" class="order-form__validation-message"></div>
                             </div>
                             <div class="order-form__field order-form__field--street">
                                 <label for="street" class="order-form__label">Улица</label>
-                                <input type="text" name="street" class="order-form__input" id="street" required>
+                                <input type="text" name="street" class="order-form__input" id="street">
+                                <div id="error_street" class="order-form__validation-message"></div>
                             </div>
                             <div class="order-form__field order-form__field--house">
                                 <label for="house" class="order-form__label">Дом</label>
-                                <input type="text" name="house" class="order-form__input" id="house" required>
+                                <input type="text" name="house" class="order-form__input" id="house">
+                                <div id="error_house" class="order-form__validation-message"></div>
+                            </div>
+                            <div class="order-form__field">
+                                <label for="apartment" class="order-form__label">Квартира</label>
+                                <input type="text" name="apartment" class="order-form__input" id="apartment">
+                                <div id="error_apartment" class="order-form__validation-message"></div>
                             </div>
                             <div class="order-form__field order-form__field--comments">
                                 <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
                                 <textarea name="comment" class="order-form__textarea" id="comments" rows="2"></textarea>
+                                <div id="error_comment" class="order-form__validation-message"></div>
                             </div>
                             <div class="order-form__field">
                                 <div class="order-form__checkbox-wrapper">
@@ -218,7 +230,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <div class="order-form__field">
+                            <div class="order-form__field order-form__field--submit">
                                 <button type="submit" class="order-form__submit">Оставить заявку</button>
                             </div>
                         </div>
@@ -272,7 +284,7 @@
 
 <!-- Скрипты -->
 <script>
-    // === Переменные для хранения выбранных значений ===
+    // Переменные для хранения выбранных значений
     let selectedEquipment = {};
     let selectedEquipmentPrice = 0;
     let selectedServices = {};
@@ -280,23 +292,200 @@
     let selectedTVPackages = {};
     let totalTVPackagesPrice = 0;
 
-    // === Функция выбора оборудования ===
+    // Инициализация маски для телефона
+    const phoneInput = document.querySelector('#orderForm [name="phone"]');
+    let phoneMask = null;
+    if (phoneInput) {
+        phoneMask = IMask(phoneInput, {
+            mask: '+{7}(000)000-00-00',
+            lazy: false,
+            placeholderChar: '_'
+        });
+    }
+
+    // Функция для подготовки номера телефона
+    function preparePhoneNumber(phoneValue) {
+        const digits = phoneValue.replace(/\D/g, '');
+        if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) {
+            return '+7' + digits.substring(1);
+        }
+        return null;
+    }
+
+    // Валидация формы
+    function validateOrderForm() {
+        const fullNameValid = document.querySelector('#orderForm [name="full_name"]').value.trim().length >= 3;
+        const phoneValid = phoneMask && preparePhoneNumber(phoneMask.unmaskedValue) !== null;
+        const agreeChecked = document.querySelector('#agree').checked;
+        document.querySelector('#orderForm .order-form__submit').disabled = !(fullNameValid && phoneValid && agreeChecked);
+    }
+
+    // Обработчики событий для валидации
+    document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"], #orderForm #agree').forEach(input => {
+        input.addEventListener('input', validateOrderForm);
+        if (input.type === 'checkbox') {
+            input.addEventListener('change', validateOrderForm);
+        }
+    });
+
+    // Инициализация валидации
+    validateOrderForm();
+
+    // Отправка формы
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+        e.preventDefault(); // Предотвращаем стандартную отправку формы
+
+        // Сброс ошибок
+        document.querySelectorAll('#orderForm .order-form__input, #orderForm .order-form__textarea').forEach(el => {
+            el.classList.remove('order-form__input--invalid');
+        });
+        document.querySelectorAll('#orderForm .order-form__validation-message').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+
+        // Подготовка данных
+        const equipmentIds = Object.keys(selectedEquipment);
+        const serviceSlugs = Object.keys(selectedServices);
+        const tvPackageIds = Object.keys(selectedTVPackages);
+        document.getElementById('selected_equipment_ids').value = JSON.stringify(equipmentIds);
+        document.getElementById('selected_service_slugs').value = JSON.stringify(serviceSlugs);
+        document.getElementById('selected_tv_package_ids').value = JSON.stringify(tvPackageIds);
+        console.log('Отправляемые данные:', {
+            equipment_ids: document.getElementById('selected_equipment_ids').value,
+            service_slugs: document.getElementById('selected_service_slugs').value,
+            tv_package_ids: document.getElementById('selected_tv_package_ids').value
+        });
+
+        const formData = new FormData(this);
+        if (phoneMask) {
+            const phone = preparePhoneNumber(phoneMask.unmaskedValue);
+            if (!phone) {
+                const phoneField = document.querySelector('#orderForm [name="phone"]');
+                phoneField.classList.add('order-form__input--invalid');
+                const errorElement = document.querySelector('#error_phone');
+                errorElement.textContent = 'Пожалуйста, введите номер телефона в формате +7 (XXX) XXX-XX-XX или 8 (XXX) XXX-XX-XX';
+                errorElement.style.display = 'block';
+                return;
+            }
+            formData.set('phone', phone);
+            console.log('Отправляемый номер телефона:', phone);
+        }
+
+        // Валидация перед отправкой
+        let isFormValid = true;
+        const fullNameField = document.querySelector('#orderForm [name="full_name"]');
+        if (fullNameField.value.trim().length < 3) {
+            fullNameField.classList.add('order-form__input--invalid');
+            const errorElement = document.querySelector('#error_full_name');
+            errorElement.textContent = 'Пожалуйста, введите полное имя (минимум 3 символа)';
+            errorElement.style.display = 'block';
+            isFormValid = false;
+        }
+
+        if (!isFormValid) return;
+
+        try {
+            const submitBtn = document.querySelector('#orderForm .order-form__submit');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('order-form__submit--loading');
+
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                this.reset();
+                if (phoneMask) phoneMask.updateValue();
+                window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
+            } else {
+                for (const [field, errors] of Object.entries(data.errors || {})) {
+                    const errorElement = document.querySelector(`#error_${field}`);
+                    if (errorElement) {
+                        errorElement.textContent = errors.join(' ');
+                        errorElement.style.display = 'block';
+                        const inputField = document.querySelector(`#orderForm [name="${field}"]`);
+                        if (inputField) inputField.classList.add('order-form__input--invalid');
+                    }
+                }
+                if (data.non_field_errors) {
+                    const modal = document.createElement('div');
+                    modal.className = 'modal fade';
+                    modal.innerHTML = `
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Ошибка</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    ${data.non_field_errors.join(' ')}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    document.body.appendChild(modal);
+                    const bsModal = new bootstrap.Modal(modal);
+                    bsModal.show();
+                }
+            }
+        } catch (error) {
+            console.error('Ошибка при отправке формы:', error);
+            const modal = document.createElement('div');
+            modal.className = 'modal fade';
+            modal.innerHTML = `
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Ошибка</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            Произошла ошибка при отправке заявки. Попробуйте снова.
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        } finally {
+            const submitBtn = document.querySelector('#orderForm .order-form__submit');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('order-form__submit--loading');
+        }
+    });
+
+    // Функции selectEquipment, toggleNoEquipment, updateService, updateTVPackage
     function selectEquipment(element, price) {
         const name = element.querySelector('.equipment__name').textContent.trim();
+        const id = element.getAttribute('data-id');
         if (element.classList.contains('selected')) {
             element.classList.remove('selected');
-            delete selectedEquipment[name];
+            delete selectedEquipment[id];
         } else {
             element.classList.add('selected');
-            selectedEquipment[name] = price;
+            selectedEquipment[id] = { name, price };
         }
-        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p, 0);
+        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p.price, 0);
         updateEquipmentSummary();
         calculateTotal();
         document.getElementById('noEquipment').checked = false;
     }
 
-    // === Выбор "у меня есть своё оборудование" ===
     function toggleNoEquipment() {
         const noEquipmentChecked = document.getElementById('noEquipment').checked;
         if (noEquipmentChecked) {
@@ -308,7 +497,6 @@
         calculateTotal();
     }
 
-    // === Выбор дополнительной услуги ===
     function updateService(serviceId, price) {
         const checkbox = document.getElementById(serviceId);
         const label = checkbox.nextElementSibling;
@@ -323,7 +511,6 @@
         calculateTotal();
     }
 
-    // === Выбор ТВ-пакета ===
     function updateTVPackage(packageId, price) {
         const checkbox = document.getElementById(`package-${packageId}`);
         const name = checkbox?.nextElementSibling?.querySelector('.tv-package__name').textContent.trim() || 'Пакет каналов';
@@ -337,16 +524,16 @@
         calculateTotal();
     }
 
-    // === Обновление отображения оборудования ===
+    // Обновление отображения
     function updateEquipmentSummary() {
         const container = document.getElementById('equipmentSummary');
         if (Object.keys(selectedEquipment).length > 0) {
             let html = '<h5 class="summary__section-title">Оборудование</h5>';
-            for (const [name, price] of Object.entries(selectedEquipment)) {
+            for (const [id, item] of Object.entries(selectedEquipment)) {
                 html += `
                     <div class="summary__item">
-                        <span class="summary__item-name">${name}</span>
-                        <span class="summary__item-value">${price.toLocaleString()} ₽</span>
+                        <span class="summary__item-name">${item.name}</span>
+                        <span class="summary__item-value">${item.price.toLocaleString()} ₽</span>
                     </div>`;
             }
             container.innerHTML = html;
@@ -355,7 +542,6 @@
         }
     }
 
-    // === Обновление отображения доп. услуг ===
     function updateServicesSummary() {
         const container = document.getElementById('servicesSummary');
         if (Object.keys(selectedServices).length > 0) {
@@ -373,7 +559,6 @@
         }
     }
 
-    // === Обновление отображения ТВ-пакетов ===
     function updateTVPackageSummary() {
         const container = document.getElementById('tvPackagesSummary');
         if (Object.keys(selectedTVPackages).length > 0) {
@@ -391,7 +576,6 @@
         }
     }
 
-    // === Подсчет итоговой суммы ===
     function calculateTotal() {
         const connectionPrice = parseInt(document.getElementById('connectionPrice').textContent) || 0;
         const totalPrice = connectionPrice + selectedEquipmentPrice + totalServicesPrice + totalTVPackagesPrice;
@@ -402,61 +586,35 @@
         document.getElementById('total_price').value = totalPrice;
     }
 
-    // === Отправка формы ===
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        document.getElementById('selected_equipment_ids').value = Object.keys(selectedEquipment);
-        document.getElementById('selected_service_slugs').value = Object.keys(selectedServices);
-        document.getElementById('selected_tv_package_ids').value = Object.keys(selectedTVPackages);
-        this.submit();
-    });
-
-    // === Перемещение блока "Итоговая стоимость" ===
+    // Перемещение блока "Итоговая стоимость"
     function moveSummaryCard() {
         const isMobile = window.innerWidth < 992;
-        const summaryContent = document.querySelector('.summary__content');
-        if (!summaryContent) return;
+        const summary = document.querySelector('.summary');
+        if (!summary) return;
 
-        if (!isMobile && summaryContent.closest('.order-form__mobile-summary')) {
+        if (!isMobile && summary.closest('.order-form__mobile-summary')) {
             const originalContainer = document.getElementById('summaryCardContainer');
-            originalContainer.appendChild(summaryContent);
-        } else if (isMobile && !summaryContent.closest('.order-form__mobile-summary')) {
+            originalContainer.appendChild(summary);
+        } else if (isMobile && !summary.closest('.order-form__mobile-summary')) {
             const mobileTarget = document.getElementById('mobileSummaryTarget');
             if (mobileTarget) {
                 mobileTarget.innerHTML = '';
-                mobileTarget.appendChild(summaryContent);
+                mobileTarget.appendChild(summary);
             }
         }
     }
 
-    // === Обработчик модальных окон ===
-    document.querySelectorAll('[data-modal-target]').forEach(button => {
-        button.addEventListener('click', (e) => {
-            e.preventDefault();
-            const modalId = button.getAttribute('data-modal-target');
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = 'block';
-                document.body.style.overflow = 'hidden';
-            }
-        });
-    });
-
-    // === Закрытие модальных окон ===
-    document.querySelectorAll('.modal-close').forEach(button => {
-        button.addEventListener('click', () => {
-            const modal = button.closest('.modal');
-            if (modal) {
-                modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
-            }
-        });
-    });
-
-    // === Инициализация ===
+    // Инициализация
     window.addEventListener('DOMContentLoaded', moveSummaryCard);
     window.addEventListener('resize', () => {
         setTimeout(moveSummaryCard, 100);
+    });
+
+    // Отладка начальных значений
+    console.log('Начальные значения скрытых полей:', {
+        equipment_ids: document.getElementById('selected_equipment_ids').value,
+        service_slugs: document.getElementById('selected_service_slugs').value,
+        tv_package_ids: document.getElementById('selected_tv_package_ids').value
     });
 </script>
 {% endblock %}

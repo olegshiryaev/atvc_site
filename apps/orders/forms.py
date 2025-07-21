@@ -1,13 +1,14 @@
 import re
 from django import forms
+from django.core.validators import RegexValidator
 
 from apps.core.models import Tariff
 from .models import Order
-from django.core.validators import RegexValidator
 
 
 class OrderForm(forms.ModelForm):
     tariff_id = forms.CharField(widget=forms.HiddenInput(), required=False)
+
     comment = forms.CharField(
         widget=forms.Textarea(attrs={
             'class': 'form-control',
@@ -76,21 +77,18 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, locality=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.locality = locality
+
         self.fields["full_name"].required = True
         self.fields["phone"].required = True
         self.fields["street"].required = False
         self.fields["house"].required = False
         self.fields["apartment"].required = False
-        self.fields["phone"].validators.append(
-            RegexValidator(
-                regex=r"^\+7\d{10}$",
-                message="Введите номер телефона в формате +7 (XXX) XXX-XX-XX",
-            )
-        )
+
+        # Обновлённая регулярка для ФИО
         self.fields["full_name"].validators.append(
             RegexValidator(
-                regex=r"^[А-Яа-яA-Za-z\s]+$",
-                message="Имя должно содержать только буквы и пробелы",
+                regex=r"^[А-Яа-яЁёA-Za-z\s\.\-]+$",
+                message="Имя может содержать только буквы, пробелы, точку и дефис",
             )
         )
 
@@ -105,16 +103,18 @@ class OrderForm(forms.ModelForm):
         phone = self.cleaned_data.get("phone") or ""
         phone = phone.strip()
 
-        # Удаляем все нецифровые символы
+        # Удаляем всё, кроме цифр
         cleaned_phone = re.sub(r"[^\d]", "", phone)
 
-        # Проверяем длину и начало номера
-        if len(cleaned_phone) != 11 or not cleaned_phone.startswith("7"):
-            raise forms.ValidationError(
-                "Введите номер телефона в формате +7 (XXX) XXX-XX-XX"
-            )
+        if len(cleaned_phone) != 11:
+            raise forms.ValidationError("Введите номер телефона в формате +7 (XXX) XXX-XX-XX")
 
-        return f"+7{cleaned_phone[1:]}"  # Возвращаем в формате +7XXXXXXXXXX
+        if cleaned_phone.startswith("8"):
+            cleaned_phone = "7" + cleaned_phone[1:]
+        elif not cleaned_phone.startswith("7"):
+            raise forms.ValidationError("Номер телефона должен начинаться с +7 или 8")
+
+        return f"+7{cleaned_phone[1:]}"  # нормализуем
 
     def clean_street(self):
         street = self.cleaned_data.get("street") or ""

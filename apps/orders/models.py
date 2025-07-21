@@ -26,8 +26,8 @@ class OrderProduct(models.Model):
         return f"{self.product.name}{variant_str} x{self.quantity} в заказе #{self.order.id}"
 
     def get_price(self):
-        """Возвращает цену из ProductVariant или Product"""
-        return self.price  # Цена уже сохранена при создании OrderProduct
+        """Возвращает сохранённую цену за единицу на момент добавления в заказ"""
+        return self.price
 
 
 class Order(models.Model):
@@ -145,10 +145,23 @@ class Order(models.Model):
         return sum(s.price for s in self.services.all())
 
     def total_cost(self):
-        products_cost = self.total_products_cost()
-        services_cost = self.total_services_cost()
-        tariff_price = self.tariff.price if self.tariff else 0
-        return products_cost + services_cost + tariff_price
+        total = 0
+        
+        # Тариф
+        if self.tariff:
+            total += self.tariff.get_actual_price()
+            total += self.tariff.connection_price  # Добавляем стоимость подключения
+        
+        # Оборудование
+        total += self.total_products_cost()
+        
+        # Доп. услуги
+        total += self.total_services_cost()
+        
+        # ТВ-пакеты
+        total += sum(p.price for p in self.tv_packages.all())
+        
+        return total
 
     def mark_as_processed(self):
         self.status = "processed"

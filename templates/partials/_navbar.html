@@ -161,7 +161,7 @@
                 </li>
                 {% endfor %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'equipments:equipment_list' locality.slug %}">Оборудование</a></li>
-                <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li>
+                {% comment %} <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li> {% endcomment %}
                 <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
             </ul>
             <!-- Действия (десктоп) -->
@@ -183,7 +183,10 @@
                         </div>
                     </div>
                 </div>
-                <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning btn-sm">Оплатить</a>
+                <a href="{% url 'orders:cart_view' locality_slug=locality.slug %}" class="cart-icon">
+                    🛒 <span id="cart-counter">0</span>
+                </a>
+                <a class="payment-link d-none d-xl-flex" href="https://archangelsk.rt.ru/payment">Оплатить</a>
                 <button class="btn">Подключить</button>
             </div>
             <!-- Мобильное местоположение -->
@@ -261,7 +264,7 @@
             </ul>
             <hr>
             <div class="d-flex flex-column gap-2">
-                <a href="https://archangelsk.rt.ru/payment" class="btn btn-warning">Оплатить</a>
+                <a class="payment-link d-none d-xl-flex" href="https://archangelsk.rt.ru/payment">Оплатить</a>
             </div>
         </div>
     </div>

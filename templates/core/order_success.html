@@ -4,10 +4,10 @@
 <div class="container">
     {% include 'partials/page_header.html' with title="Заказ оформлен" %}
     <section class="order-success-block">
-        <h4>Спасибо за ваш заказ!</h4>
-        <p>Номер заказа: <strong>#{{ order.id }}</strong></p>
+        <h2>Заявка успешно отправлена!</h2>
+        <p>Ваша заявка <strong>#{{ order.id }} принята.</strong></p>
         <p>Мы свяжемся с вами для подтверждения заказа.</p>
-        <a href="{% url 'equipments:equipment_list' locality_slug=locality_slug %}" class="btn btn-primary">Вернуться к покупкам</a>
+        <a href="{% url 'core:home' locality_slug=locality_slug %}" class="btn btn-primary">Вернуться на главную</a>
     </section>
 </div>
 {% endblock %}

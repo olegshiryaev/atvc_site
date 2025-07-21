@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
 from django.views.decorators.http import require_POST
+import json
 import logging
 
 
@@ -80,51 +81,95 @@ def order_create(request, locality_slug, slug):
 def submit_order(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     form = OrderForm(request.POST, locality=locality)
+    
     if form.is_valid():
         order = form.save(commit=False)
         order.locality = locality
         tariff_id = form.cleaned_data.get("tariff_id")
         if tariff_id:
-            order.tariff = Tariff.objects.get(id=tariff_id, is_active=True)
+            order.tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True)
         order.save()
+
+        # Обработка продуктов
+        equipment_ids_str = request.POST.get("selected_equipment_ids", "[]")
+        try:
+            equipment_ids = json.loads(equipment_ids_str)
+            if not isinstance(equipment_ids, list):
+                raise ValueError("selected_equipment_ids должен быть списком")
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Ошибка парсинга selected_equipment_ids: {equipment_ids_str}, ошибка: {str(e)}")
+            return JsonResponse({
+                "success": False,
+                "errors": {"non_field_errors": ["Ошибка в данных оборудования. Попробуйте снова."]}
+            }, status=400)
+
+        for product_id in equipment_ids:
+            product = get_object_or_404(Product, id=product_id)
+            OrderProduct.objects.create(
+                order=order,
+                product=product,
+                price=product.price,
+                quantity=1
+            )
+
+        # Обработка услуг
+        service_slugs_str = request.POST.get("selected_service_slugs", "[]")
+        try:
+            service_slugs = json.loads(service_slugs_str)
+            if not isinstance(service_slugs, list):
+                raise ValueError("selected_service_slugs должен быть списком")
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Ошибка парсинга selected_service_slugs: {service_slugs_str}, ошибка: {str(e)}")
+            return JsonResponse({
+                "success": False,
+                "errors": {"non_field_errors": ["Ошибка в данных услуг. Попробуйте снова."]}
+            }, status=400)
+
+        if service_slugs:
+            order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
+
+        # Обработка ТВ-пакетов
+        tv_package_ids_str = request.POST.get("selected_tv_package_ids", "[]")
+        try:
+            tv_package_ids = json.loads(tv_package_ids_str)
+            if not isinstance(tv_package_ids, list):
+                raise ValueError("selected_tv_package_ids должен быть списком")
+        except (json.JSONDecodeError, ValueError) as e:
+            logger.error(f"Ошибка парсинга selected_tv_package_ids: {tv_package_ids_str}, ошибка: {str(e)}")
+            return JsonResponse({
+                "success": False,
+                "errors": {"non_field_errors": ["Ошибка в данных ТВ-пакетов. Попробуйте снова."]}
+            }, status=400)
+
+        if tv_package_ids:
+            order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
+
+        # Логирование и уведомление
         logger.info(
             f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'не указан'}"
         )
-
-        # Асинхронная отправка уведомления
         try:
-            admin_url = request.build_absolute_uri(
-                f"/admin/core/order/{order.id}/change/"
-            )
+            admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
             send_order_notification.delay(order.id, admin_url)
-            logger.info(
-                f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь"
-            )
+            logger.info(f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь")
         except Exception as e:
-            logger.error(
-                f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}"
-            )
+            logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
 
-        return JsonResponse(
-            {
-                "success": True,
-                "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
-            }
-        )
+        return JsonResponse({
+            "success": True,
+            "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
+            "order_id": order.id,
+            "locality_slug": locality_slug
+        })
     else:
-        errors = {
-            field: [str(e) for e in errors] for field, errors in form.errors.items()
-        }
+        errors = {field: [str(e) for e in errors] for field, errors in form.errors.items()}
         non_field_errors = [str(error) for error in form.non_field_errors()]
         logger.warning(f"Ошибка валидации формы: {form.errors}")
-        return JsonResponse(
-            {
-                "success": False,
-                "errors": errors,
-                "non_field_errors": non_field_errors,
-            },
-            status=400,
-        )
+        return JsonResponse({
+            "success": False,
+            "errors": errors,
+            "non_field_errors": non_field_errors
+        }, status=400)
     
 
 def add_to_cart(request, locality_slug):
