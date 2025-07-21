@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 from .models import Category, Product, ProductImage, ProductVariant, SmartSpeaker, Camera, Router, TvBox, ViewCount
 
 
@@ -110,9 +111,15 @@ class ProductImageAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('product', 'image', 'color', 'is_main', 'order')
+            'fields': ('product', 'image', 'image_preview', 'color', 'is_main', 'order')
         }),
     )
+
+    def image_preview(self, obj):
+        if obj.image:
+            return mark_safe(f'<img src="{obj.image.url}" style="max-height: 200px;"/>')
+        return "No image"
+    image_preview.short_description = 'Preview'
 
 
 @admin.register(ProductVariant)

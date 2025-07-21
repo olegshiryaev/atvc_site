@@ -134,6 +134,7 @@ class ProductImage(models.Model):
     def save(self, *args, **kwargs):
         if self.is_main:
             self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ["order"]
