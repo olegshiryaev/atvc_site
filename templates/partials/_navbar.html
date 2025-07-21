@@ -162,7 +162,7 @@
                 {% endfor %}
                 <li class="nav-item"><a class="nav-link" href="{% url 'equipments:equipment_list' locality.slug %}">Оборудование</a></li>
                 {% comment %} <li class="nav-item"><a class="nav-link" href="#">Услуги</a></li> {% endcomment %}
-                <li class="nav-item"><a class="nav-link" href="#">Контакты</a></li>
+                <li class="nav-item"><a class="nav-link" href="{% url 'core:contacts' locality_slug=request.locality.slug %}">Контакты</a></li>
             </ul>
             <!-- Действия (десктоп) -->
             <div class="d-none d-lg-flex align-items-center gap-3 ms-auto">

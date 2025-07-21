@@ -170,11 +170,11 @@ def office_list(request, locality_slug=None):
     context = {
         "localities": localities,
         "current_locality": current_locality,
-        "title": "Офисы обслуживания",
+        "title": "Контакты",
         "meta_title": f"Офисы обслуживания АТК {f'в {current_locality.name_prepositional}' if current_locality else ''}",
         "breadcrumbs": [
             {"title": "Главная", "url": "core:home"},
-            {"title": "Офисы обслуживания", "url": None},
+            {"title": "Контакты", "url": None},
         ],
         "form": form,
     }

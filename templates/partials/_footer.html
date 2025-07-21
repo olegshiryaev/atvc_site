@@ -43,7 +43,7 @@
       <div class="col-12 col-md-6 col-lg-3">
         <h6 class="text-uppercase fw-semibold">Сервис и помощь</h6>
         <ul class="list-unstyled small">
-          <li><a href="{% url 'core:office_list' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Офисы обслуживания</a></li>
+          <li><a href="{% url 'core:contacts' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Контакты</a></li>
           <li><a href="https://archangelsk.rt.ru/payment" target="_blank" class="footer-link text-decoration-none">Способы оплаты</a></li>
           {% comment %} <li><a href="#" class="footer-link text-decoration-none">Вопросы и ответы</a></li>
           <li><a href="#" class="footer-link text-decoration-none">Техническая поддержка</a></li> {% endcomment %}

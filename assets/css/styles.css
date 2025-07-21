@@ -229,7 +229,7 @@ select,
     line-height: 140%;
     letter-spacing: 0.24px;
     border-radius: 8px;
-    border: none;
+    border: 1px solid #989898;
     background-color: #fff;
     padding: 18px 25px;
     width: 100%;

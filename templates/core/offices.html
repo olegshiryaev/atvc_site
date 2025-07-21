@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% load static %}
-{% block title %}Офисы обслуживания{% endblock %}
+{% block title %}Контакты{% endblock %}
 {% block content %}
 <div class="offices-page">
     <div class="container">
@@ -137,7 +137,7 @@
                     </div>
                     
                     <div class="feedback-form__form">
-                        <form id="feedback-form-submit" action="{% url 'core:office_list' locality_slug=current_locality.slug %}" method="post" class="form" aria-label="Форма обратной связи">
+                        <form id="feedback-form-submit" action="{% url 'core:contacts' locality_slug=current_locality.slug %}" method="post" class="form" aria-label="Форма обратной связи">
                             {% csrf_token %}
                             <div class="feedback-form__fields">
                                 <!-- Строка с именем и телефоном -->
