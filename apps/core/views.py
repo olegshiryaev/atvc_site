@@ -6,6 +6,7 @@ from django.http import JsonResponse, FileResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
+import random
 from django.db.models import Count, Q, Prefetch, F
 from django.contrib import messages
 import os
@@ -88,12 +89,23 @@ def index(request, locality_slug):
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
     # Популярные продукты
-    popular_products = (
+    # Получаем ID всех популярных продуктов
+    product_ids = list(
         Product.objects.filter(is_available=True)
         .annotate(view_count=Count("views"))
+        .order_by("-view_count")[:50]  # Берем топ-50 по просмотрам
+        .values_list('id', flat=True)
+    )
+
+    # Выбираем случайные 10 ID из топ-50
+    random_ids = random.sample(product_ids, min(10, len(product_ids)))
+
+    # Получаем полные объекты
+    popular_products = (
+        Product.objects.filter(id__in=random_ids)
         .select_related("category")
         .prefetch_related("images")
-        .order_by("-view_count")[:10]
+        .order_by('?')  # Дополнительная случайность
     )
 
     # Инициализируем форму
