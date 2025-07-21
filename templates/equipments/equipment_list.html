@@ -102,7 +102,7 @@
                                     <h6 class="product-card__title h6">{{ product.name }}</h6>
 
                                     <div class="product-card__desc">
-                                        {{ product.short_description|truncatewords:20 }}
+                                        {{ product.short_description|truncatewords:20|default_if_none:"" }}
                                     </div>
 
                                     <div class="product-card__bottom">

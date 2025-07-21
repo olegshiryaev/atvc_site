@@ -212,7 +212,13 @@
         {% if products.exists %}
         <section class="products-slider-block block block_alignwide" style="" data-block-slug="products-slider-block">
             <div class="products-slider-block__header">
-                <h2 class="products-slider-block__title block__title">Оборудование для стабильного интернета</h2>
+                {% if service.name == "Интернет" %}
+                    <h2 class="products-slider-block__title block__title">Оборудование для стабильного интернета</h2>
+                {% elsif service.name == "Телевидение" %}
+                    <h2 class="products-slider-block__title block__title">Оборудование для телевидения</h2>
+                {% else %}
+                    <h2 class="products-slider-block__title block__title">Оборудование</h2>
+                {% endif %}
             </div>
             <div class="products-slider-block__wrapper">
                 <div class="swiper">
