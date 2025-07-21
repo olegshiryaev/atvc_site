@@ -14,7 +14,8 @@
             {% include "core/partials/tariffs_list.html" %}
         </section>
 
-        <!-- Блок ТВ-приставки с новой цветовой схемой -->
+        {% if service.name == "Телевидение" %}
+        <!-- Блок ТВ-приставки -->
         <section class="tv-console block">
             <div class="tv-console__wrap">
                 <div class="tv-console__header">
@@ -98,6 +99,7 @@
                 </div>
             </div>
         </section>
+        {% endif %}
 
         <section class="advantages-block block">
             <h2 class="advantages-block__title block__title">Преимущества интернета от АТК</h2>
