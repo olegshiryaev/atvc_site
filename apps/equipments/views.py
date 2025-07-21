@@ -1,5 +1,6 @@
 from django.http import FileResponse, HttpResponseRedirect
 from django.urls import reverse
+import random
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import get_object_or_404, redirect, render
@@ -18,11 +19,19 @@ def equipment_list(request, locality_slug):
     # Все категории
     categories = Category.objects.all()
 
-    # Популярные товары (топ-4)
-    popular_products = (
+    # Популярные товары (4 случайных из топ-10)
+    top_product_ids = list(
         Product.objects.filter(is_available=True)
         .annotate(view_count=Count("views"))
-        .order_by("-view_count")[:4]
+        .order_by("-view_count")[:10]
+        .values_list('id', flat=True)
+    )
+    random_ids = random.sample(top_product_ids, min(4, len(top_product_ids)))
+    popular_products = (
+        Product.objects.filter(id__in=random_ids)
+        .select_related("category")
+        .prefetch_related("images")
+        .order_by('?')  # Дополнительная случайность
     )
 
     # Все доступные товары
