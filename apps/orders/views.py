@@ -21,40 +21,78 @@ import logging
 logger = logging.getLogger(__name__)
 
 def order_create(request, locality_slug, slug):
-    locality = get_object_or_404(Locality, slug=locality_slug)
-    tariff = get_object_or_404(Tariff, slug=slug)
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
-    products = tariff.products.all()
+    products = tariff.products.all().select_related('category')
     services = AdditionalService.objects.filter(service_types=tariff.service)
-    tv_packages = tariff.tv_packages.all()
+    tv_packages = tariff.tv_packages.all().prefetch_related('channels')
 
     if request.method == "POST":
-        form = OrderForm(request.POST)
+        form = OrderForm(request.POST, locality=locality)
+        logger.debug(f"Полученные данные формы: {request.POST}")
         if form.is_valid():
+            logger.debug(f"Очищенные данные: {form.cleaned_data}")
             order = form.save(commit=False)
             order.tariff = tariff
             order.locality = locality
             order.save()
 
-            # Получаем ID продуктов из формы
-            product_ids = request.POST.getlist("selected_product_ids")
-            service_slugs = request.POST.getlist("selected_service_slugs")
-            tv_package_ids = request.POST.getlist("selected_tv_package_ids")
-
-            # Сохраняем ManyToMany связи
-            if product_ids:
-                order.products.set(product_ids)
-            if service_slugs:
-                order.services.set(
-                    AdditionalService.objects.filter(slug__in=service_slugs)
+            # Обработка продуктов
+            equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
+            for product_id in equipment_ids:
+                product = get_object_or_404(Product, id=product_id)
+                OrderProduct.objects.create(
+                    order=order,
+                    product=product,
+                    price=product.price,
+                    quantity=1
                 )
-            if tv_package_ids:
-                order.tv_packages.set(tv_package_ids)
 
-            return redirect("order_success", pk=order.pk)
+            # Обработка услуг
+            service_slugs = form.cleaned_data.get("selected_service_slugs", [])
+            if service_slugs:
+                order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
+
+            # Обработка ТВ-пакетов
+            tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
+            if tv_package_ids:
+                order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
+
+            # Логирование и уведомление
+            logger.info(
+                f"Заявка #{order.id} создана для {locality.name}, тариф: {tariff.name}"
+            )
+            try:
+                admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
+                send_order_notification.delay(order.id, admin_url)
+                logger.info(f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь")
+            except Exception as e:
+                logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
+
+            # Если запрос AJAX, возвращаем JSON
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    "success": True,
+                    "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
+                    "order_id": order.id,
+                    "locality_slug": locality_slug
+                })
+            # Иначе редирект
+            return redirect("orders:order_success", pk=order.id)
+        else:
+            logger.warning(f"Ошибка валидации формы: {form.errors}")
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                errors = {field: [str(e) for e in errors] for field, errors in form.errors.items()}
+                non_field_errors = [str(error) for error in form.non_field_errors()]
+                return JsonResponse({
+                    "success": False,
+                    "errors": errors,
+                    "non_field_errors": non_field_errors
+                }, status=400)
 
     else:
-        form = OrderForm()
+        form = OrderForm(locality=locality)
 
     return render(
         request,
@@ -81,8 +119,12 @@ def order_create(request, locality_slug, slug):
 def submit_order(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     form = OrderForm(request.POST, locality=locality)
+
+    logger.debug(f"Полученные данные формы: {request.POST}")
+    logger.debug(f"Валидация формы: {form.is_valid()}")
     
     if form.is_valid():
+        logger.debug(f"Очищенные данные: {form.cleaned_data}")
         order = form.save(commit=False)
         order.locality = locality
         tariff_id = form.cleaned_data.get("tariff_id")
@@ -91,18 +133,7 @@ def submit_order(request, locality_slug):
         order.save()
 
         # Обработка продуктов
-        equipment_ids_str = request.POST.get("selected_equipment_ids", "[]")
-        try:
-            equipment_ids = json.loads(equipment_ids_str)
-            if not isinstance(equipment_ids, list):
-                raise ValueError("selected_equipment_ids должен быть списком")
-        except (json.JSONDecodeError, ValueError) as e:
-            logger.error(f"Ошибка парсинга selected_equipment_ids: {equipment_ids_str}, ошибка: {str(e)}")
-            return JsonResponse({
-                "success": False,
-                "errors": {"non_field_errors": ["Ошибка в данных оборудования. Попробуйте снова."]}
-            }, status=400)
-
+        equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
         for product_id in equipment_ids:
             product = get_object_or_404(Product, id=product_id)
             OrderProduct.objects.create(
@@ -113,34 +144,12 @@ def submit_order(request, locality_slug):
             )
 
         # Обработка услуг
-        service_slugs_str = request.POST.get("selected_service_slugs", "[]")
-        try:
-            service_slugs = json.loads(service_slugs_str)
-            if not isinstance(service_slugs, list):
-                raise ValueError("selected_service_slugs должен быть списком")
-        except (json.JSONDecodeError, ValueError) as e:
-            logger.error(f"Ошибка парсинга selected_service_slugs: {service_slugs_str}, ошибка: {str(e)}")
-            return JsonResponse({
-                "success": False,
-                "errors": {"non_field_errors": ["Ошибка в данных услуг. Попробуйте снова."]}
-            }, status=400)
-
+        service_slugs = form.cleaned_data.get("selected_service_slugs", [])
         if service_slugs:
             order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
 
         # Обработка ТВ-пакетов
-        tv_package_ids_str = request.POST.get("selected_tv_package_ids", "[]")
-        try:
-            tv_package_ids = json.loads(tv_package_ids_str)
-            if not isinstance(tv_package_ids, list):
-                raise ValueError("selected_tv_package_ids должен быть списком")
-        except (json.JSONDecodeError, ValueError) as e:
-            logger.error(f"Ошибка парсинга selected_tv_package_ids: {tv_package_ids_str}, ошибка: {str(e)}")
-            return JsonResponse({
-                "success": False,
-                "errors": {"non_field_errors": ["Ошибка в данных ТВ-пакетов. Попробуйте снова."]}
-            }, status=400)
-
+        tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
         if tv_package_ids:
             order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
 

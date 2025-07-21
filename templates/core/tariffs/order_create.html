@@ -45,7 +45,7 @@
                 </section>
                 
                 <!-- Пакеты ТВ-каналов -->
-                {% if tv_packages %}
+                {% if tv_packages.exists %}
                 <div class="tab-pane fade show active" id="tv-packages" role="tabpanel">
                     <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
                     <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
@@ -99,6 +99,7 @@
                 {% endif %}
                 
                 <!-- Оборудование -->
+                {% if products.exists %}
                 <section class="equipment">
                     <h3 class="equipment__title">Добавить оборудование</h3>
                     <p class="equipment__description">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
@@ -139,8 +140,10 @@
                         </label>
                     </div>
                 </section>
+                {% endif %}
 
                 <!-- Дополнительные услуги -->
+                {% if services.exists %}
                 <section class="services">
                     <h3 class="services__title">Дополнительные услуги</h3>
                     <p class="services__description">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
@@ -166,6 +169,7 @@
                         {% endfor %}
                     </div>
                 </section>
+                {% endif %}
 
                 <!-- Место для вставки блока "Итоговая стоимость" на мобильных -->
                 <div class="order-form__mobile-summary" id="mobileSummaryTarget"></div>
@@ -190,46 +194,58 @@
 
                         <!-- Основные поля формы -->
                         <div class="order-form__fields">
-                            <div class="order-form__field">
+                            <!-- Первый ряд: Имя, Номер телефона -->
+                            <div class="order-form__field order-form__field--full-name">
                                 <label for="name" class="order-form__label">Ваше имя</label>
-                                <input type="text" name="full_name" class="order-form__input" id="name" required>
+                                <input type="text" name="full_name" class="order-form__input" id="name" required placeholder="Введите ваше имя">
                                 <div id="error_full_name" class="order-form__validation-message"></div>
                             </div>
-                            <div class="order-form__field">
+                            <div class="order-form__field order-form__field--phone">
                                 <label for="phone" class="order-form__label">Номер телефона</label>
-                                <input type="tel" name="phone" class="order-form__input" id="phone" required>
+                                <input type="tel" name="phone" class="order-form__input" id="phone" required placeholder="+7 (___) ___-__-__">
                                 <div id="error_phone" class="order-form__validation-message"></div>
                             </div>
-                            <div class="order-form__field order-form__field--street">
-                                <label for="street" class="order-form__label">Улица</label>
-                                <input type="text" name="street" class="order-form__input" id="street">
-                                <div id="error_street" class="order-form__validation-message"></div>
-                            </div>
-                            <div class="order-form__field order-form__field--house">
-                                <label for="house" class="order-form__label">Дом</label>
-                                <input type="text" name="house" class="order-form__input" id="house">
-                                <div id="error_house" class="order-form__validation-message"></div>
-                            </div>
-                            <div class="order-form__field">
-                                <label for="apartment" class="order-form__label">Квартира</label>
-                                <input type="text" name="apartment" class="order-form__input" id="apartment">
-                                <div id="error_apartment" class="order-form__validation-message"></div>
-                            </div>
-                            <div class="order-form__field order-form__field--comments">
-                                <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
-                                <textarea name="comment" class="order-form__textarea" id="comments" rows="2"></textarea>
-                                <div id="error_comment" class="order-form__validation-message"></div>
-                            </div>
-                            <div class="order-form__field">
-                                <div class="order-form__checkbox-wrapper">
-                                    <input class="order-form__checkbox" type="checkbox" id="agree" required>
-                                    <label class="order-form__checkbox-label" for="agree">
-                                        Я согласен на обработку персональных данных и ознакомлен с <a href="#" class="order-form__link">договором оферты</a>
-                                    </label>
+                            <!-- Второй ряд: Улица, Дом, Квартира -->
+                            <div class="order-form__row--address">
+                                <div class="order-form__field order-form__field--street">
+                                    <label for="street" class="order-form__label">Улица</label>
+                                    <input type="text" name="street" class="order-form__input" id="street" placeholder="Введите улицу">
+                                    <div id="error_street" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--house">
+                                    <label for="house" class="order-form__label">Дом</label>
+                                    <input type="text" name="house" class="order-form__input" id="house" placeholder="Введите номер дома">
+                                    <div id="error_house" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--apartment">
+                                    <label for="apartment" class="order-form__label">Квартира</label>
+                                    <input type="text" name="apartment" class="order-form__input" id="apartment" placeholder="Введите номер квартиры">
+                                    <div id="error_apartment" class="order-form__validation-message"></div>
                                 </div>
                             </div>
-                            <div class="order-form__field order-form__field--submit">
-                                <button type="submit" class="order-form__submit">Оставить заявку</button>
+                            <!-- Третий ряд: Комментарий -->
+                            <div class="order-form__field order-form__field--comments">
+                                <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
+                                <textarea name="comment" class="order-form__textarea" id="comments" rows="2" placeholder="Введите ваш комментарий"></textarea>
+                                <div id="error_comment" class="order-form__validation-message"></div>
+                            </div>
+                            <!-- Четвёртый ряд: Чекбокс слева, Кнопка справа -->
+                            <div class="order-form__field order-form__field--actions">
+                                <div class="order-form__checkbox-wrapper">
+                                    <input class="order-form__checkbox" type="checkbox" id="agree" required aria-label="Согласие с обработкой персональных данных">
+                                    <label class="order-form__checkbox-label" for="agree">
+                                        Нажимая кнопку «Отправить заявку», вы соглашаетесь с 
+                                        <a 
+                                            target="_blank" 
+                                            class="order-form__link" 
+                                            href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
+                                            rel="noopener noreferrer"
+                                        >
+                                            Условиями обработки персональных данных
+                                        </a>
+                                    </label>
+                                </div>
+                                <button type="submit" class="order-form__submit" aria-label="Отправить заявку на подключение">Отправить заявку</button>
                             </div>
                         </div>
                     </form>
@@ -247,18 +263,24 @@
                             <span class="summary__item-value">{{ tariff.price }} ₽/мес</span>
                         </div>
                     </div>
+                    {% if products.exists %}
                     <div class="summary__section" id="equipmentSummary">
                         <h5 class="summary__section-title">Оборудование</h5>
                         <div class="summary__item summary__item--empty">Не выбрано</div>
                     </div>
+                    {% endif %}
+                    {% if services.exists %}
                     <div class="summary__section" id="servicesSummary">
                         <h5 class="summary__section-title">Дополнительные услуги</h5>
                         <div class="summary__item summary__item--empty">Не выбрано</div>
                     </div>
+                    {% endif %}
+                    {% if tv_packages.exists %}
                     <div class="summary__section" id="tvPackagesSummary">
                         <h5 class="summary__section-title">Пакеты ТВ</h5>
                         <div class="summary__item summary__item--empty">Не выбрано</div>
                     </div>
+                    {% endif %}
                     <div class="summary__section">
                         <h5 class="summary__section-title">Подключение</h5>
                         <div class="summary__item">
@@ -281,6 +303,7 @@
 </div>
 
 <!-- Скрипты -->
+<script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
     // Переменные для хранения выбранных значений
     let selectedEquipment = {};
@@ -289,6 +312,12 @@
     let totalServicesPrice = 0;
     let selectedTVPackages = {};
     let totalTVPackagesPrice = 0;
+
+    console.log('Отправляемые данные:', {
+        equipment_ids: document.getElementById('selected_equipment_ids').value,
+        service_slugs: document.getElementById('selected_service_slugs').value,
+        tv_package_ids: document.getElementById('selected_tv_package_ids').value
+    });
 
     // Инициализация маски для телефона
     const phoneInput = document.querySelector('#orderForm [name="phone"]');
@@ -469,6 +498,7 @@
 
     // Функции selectEquipment, toggleNoEquipment, updateService, updateTVPackage
     function selectEquipment(element, price) {
+        console.log('selectEquipment called with element:', element, 'price:', price);
         const name = element.querySelector('.equipment__name').textContent.trim();
         const id = element.getAttribute('data-id');
         if (element.classList.contains('selected')) {
@@ -496,6 +526,7 @@
     }
 
     function updateService(serviceId, price) {
+        console.log('updateService called with serviceId:', serviceId, 'price:', price);
         const checkbox = document.getElementById(serviceId);
         const label = checkbox.nextElementSibling;
         const serviceName = label?.querySelector('.services__name').textContent.trim() || 'Неизвестная услуга';
@@ -510,6 +541,7 @@
     }
 
     function updateTVPackage(packageId, price) {
+        console.log('updateTVPackage called with packageId:', packageId, 'price:', price);
         const checkbox = document.getElementById(`package-${packageId}`);
         const name = checkbox?.nextElementSibling?.querySelector('.tv-package__name').textContent.trim() || 'Пакет каналов';
         if (checkbox.checked) {
@@ -525,6 +557,7 @@
     // Обновление отображения
     function updateEquipmentSummary() {
         const container = document.getElementById('equipmentSummary');
+        if (!container) return; // Пропускаем, если блок отсутствует
         if (Object.keys(selectedEquipment).length > 0) {
             let html = '<h5 class="summary__section-title">Оборудование</h5>';
             for (const [id, item] of Object.entries(selectedEquipment)) {
@@ -542,6 +575,7 @@
 
     function updateServicesSummary() {
         const container = document.getElementById('servicesSummary');
+        if (!container) return; // Пропускаем, если блок отсутствует
         if (Object.keys(selectedServices).length > 0) {
             let html = '<h5 class="summary__section-title">Дополнительные услуги</h5>';
             for (const key in selectedServices) {
@@ -559,6 +593,7 @@
 
     function updateTVPackageSummary() {
         const container = document.getElementById('tvPackagesSummary');
+        if (!container) return; // Пропускаем, если блок отсутствует
         if (Object.keys(selectedTVPackages).length > 0) {
             let html = '<h5 class="summary__section-title">Пакеты ТВ</h5>';
             for (const key in selectedTVPackages) {
@@ -575,9 +610,13 @@
     }
 
     function calculateTotal() {
-        const connectionPrice = parseInt(document.getElementById('connectionPrice').textContent) || 0;
+        const connectionPriceElement = document.getElementById('connectionPrice');
+        const connectionPrice = connectionPriceElement ? parseInt(connectionPriceElement.textContent) || 0 : 0;
         const totalPrice = connectionPrice + selectedEquipmentPrice + totalServicesPrice + totalTVPackagesPrice;
-        document.getElementById('totalPrice').textContent = `${totalPrice.toLocaleString()} ₽`;
+        const totalPriceElement = document.getElementById('totalPrice');
+        if (totalPriceElement) {
+            totalPriceElement.textContent = `${totalPrice.toLocaleString()} ₽`;
+        }
         document.getElementById('total_equipment_cost').value = selectedEquipmentPrice;
         document.getElementById('total_services_cost').value = totalServicesPrice;
         document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
