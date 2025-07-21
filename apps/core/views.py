@@ -368,7 +368,7 @@ def static_page_view(request, slug, locality_slug):
         "locality": locality,
         "title": page.title,
         "breadcrumbs": [
-            {"title": "Главная", "url": f"/{locality.slug}/"},
+            {"title": "Главная", "url": "core:home"},
             {"title": page.title, "url": request.path},
         ],
     }
