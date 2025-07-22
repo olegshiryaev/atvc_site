@@ -11,7 +11,7 @@ Email: {{ order.email|default:"Не указан" }}
 
 Оборудование:
 {% for product in order.get_products_with_details %}
-- {{ product.product.name }} ({{ product.quantity }} шт.) - {% if product.payment_type == 'purchase' %}{{ product.price }} руб.{% else %}{{ product.price }} руб. ({{ product.price|div:12|floatformat:0 }} руб./мес. на 12 мес.){% elif product.payment_type == 'installment24' %}{{ product.price }} руб. ({{ product.price|div:24|floatformat:0 }} руб./мес. на 24 мес.){% endif %}
+- {{ product.product.name }} ({{ product.quantity }} шт.) - {% if product.payment_type == 'purchase' %}{{ product.price }} руб.{% elif product.payment_type == 'installment12' and product.installment_12_months %}{{ product.price }} руб. (рассрочка на 12 мес. по {{ product.installment_12_months }} руб./мес.){% elif product.payment_type == 'installment24' and product.installment_24_months %}{{ product.price }} руб. (рассрочка на 24 мес. по {{ product.installment_24_months }} руб./мес.){% else %}{{ product.price }} руб.{% endif %}
 {% if product.variant %}Вариант: {{ product.variant.name }}{% endif %}
 {% empty %}
 - Оборудование не выбрано

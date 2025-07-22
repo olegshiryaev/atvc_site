@@ -109,16 +109,19 @@ class Order(models.Model):
     )
 
     def get_products_with_details(self):
-        """Возвращает продукты с их вариантами и специализированными характеристиками"""
+        """Возвращает продукты с их вариантами, типом оплаты и ценами рассрочки"""
         products = []
-        for order_product in self.order_products.all():
+        for order_product in self.order_products.select_related('product', 'variant').all():
             product = order_product.product
             variant = order_product.variant
             details = {
                 'quantity': order_product.quantity,
                 'price': order_product.price,
+                'payment_type': order_product.payment_type,
                 'product': product,
                 'variant': variant,
+                'installment_12_months': product.installment_12_months if product.installment_available else None,
+                'installment_24_months': product.installment_24_months if product.installment_available else None,
                 'type': None,
                 'specifics': None
             }
