@@ -45,8 +45,15 @@ class Product(models.Model):
     description = models.TextField("Описание", blank=True, null=True)
     price = models.PositiveIntegerField("Цена", blank=True, null=True)
     is_available = models.BooleanField("В наличии", default=True)
+    installment_available = models.BooleanField("Доступна рассрочка", default=False)
+    installment_12_months = models.DecimalField(
+        "Ежемесячный платёж на 12 месяцев", max_digits=10, decimal_places=2, blank=True, null=True
+    )
+    installment_24_months = models.DecimalField(
+        "Ежемесячный платёж на 24 месяцев", max_digits=10, decimal_places=2, blank=True, null=True
+    )
     category = models.ForeignKey(
-        Category,
+        'Category',
         on_delete=models.SET_NULL,
         related_name="products",
         blank=True,
@@ -77,6 +84,24 @@ class Product(models.Model):
         return self.images.filter(is_main=True).first()
     
     def get_price(self):
+        return self.price
+
+    def get_installment_price(self, months):
+        if not self.installment_available:
+            return None
+        if months == 12:
+            return self.installment_12_months
+        if months == 24:
+            return self.installment_24_months
+        return None
+
+    def get_total_installment_price(self, months):
+        if not self.installment_available:
+            return self.price
+        if months == 12:
+            return self.installment_12_months * 12
+        if months == 24:
+            return self.installment_24_months * 24
         return self.price
 
     class Meta:

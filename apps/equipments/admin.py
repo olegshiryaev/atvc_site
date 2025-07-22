@@ -78,7 +78,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug', 'price', 'is_available', 'category', 'get_services')
+    list_display = ('name', 'slug', 'price', 'installment_available', 'is_available', 'category', 'get_services')
     search_fields = ('name', 'description', 'short_description')
     list_filter = ('is_available', 'category', 'services')
     prepopulated_fields = {'slug': ('name',)}
@@ -87,7 +87,7 @@ class ProductAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'category', 'price', 'is_available')
+            'fields': ('name', 'slug', 'category', 'price', 'installment_available', 'installment_12_months', 'installment_24_months', 'is_available')
         }),
         ('Descriptions', {
             'fields': ('short_description', 'description')
