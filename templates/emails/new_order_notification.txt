@@ -11,18 +11,24 @@ Email: {{ order.email|default:"Не указан" }}
 
 Оборудование:
 {% for product in order.get_products_with_details %}
-- {{ product.product.name }} ({{ product.quantity }} шт.) - {{ product.price }} руб.
+- {{ product.product.name }} ({{ product.quantity }} шт.) - {% if product.payment_type == 'purchase' %}{{ product.price }} руб.{% else %}{{ product.price }} руб. ({{ product.price|div:12|floatformat:0 }} руб./мес. на 12 мес.){% elif product.payment_type == 'installment24' %}{{ product.price }} руб. ({{ product.price|div:24|floatformat:0 }} руб./мес. на 24 мес.){% endif %}
 {% if product.variant %}Вариант: {{ product.variant.name }}{% endif %}
+{% empty %}
+- Оборудование не выбрано
 {% endfor %}
 
 Дополнительные услуги:
 {% for service in order.services.all %}
 - {{ service.name }} - {{ service.price }} руб.
+{% empty %}
+- Услуги не выбраны
 {% endfor %}
 
 Пакеты ТВ-каналов:
 {% for package in order.tv_packages.all %}
 - {{ package.name }} - {{ package.price }} руб.
+{% empty %}
+- Пакеты ТВ не выбраны
 {% endfor %}
 
 Общая стоимость: {{ order.total_cost }} руб.

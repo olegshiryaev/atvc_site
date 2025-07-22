@@ -18,9 +18,10 @@ import logging
 
 
 # Определение логгера
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('orders')
 
 def order_create(request, locality_slug, slug):
+    logger.debug(f"Получен запрос: {request.method}, URL: {request.path}, POST: {dict(request.POST)}")
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
@@ -30,7 +31,7 @@ def order_create(request, locality_slug, slug):
 
     if request.method == "POST":
         form = OrderForm(request.POST, locality=locality)
-        logger.debug(f"Полученные данные формы: {request.POST}")
+        logger.debug(f"Полученные данные формы: {dict(request.POST)}")
         if form.is_valid():
             logger.debug(f"Очищенные данные: {form.cleaned_data}")
             order = form.save(commit=False)
@@ -40,19 +41,29 @@ def order_create(request, locality_slug, slug):
 
             # Обработка продуктов
             equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
+            payment_options = form.cleaned_data.get("equipment_payment_options", {})
+            logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
             for product_id in equipment_ids:
                 product = get_object_or_404(Product, id=product_id)
+                payment_type = payment_options.get(str(product_id), 'purchase')
+                price = product.price  # Цена по умолчанию для покупки
+                if payment_type == 'installment12' and product.installment_12_months:
+                    price = int(product.installment_12_months)  # Преобразуем в int
+                elif payment_type == 'installment24' and product.installment_24_months:
+                    price = int(product.installment_24_months)  # Преобразуем в int
                 OrderProduct.objects.create(
                     order=order,
                     product=product,
-                    price=product.price,
-                    quantity=1
+                    price=price,
+                    quantity=1,
+                    payment_type=payment_type
                 )
 
             # Обработка услуг
             service_slugs = form.cleaned_data.get("selected_service_slugs", [])
             if service_slugs:
                 order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
+                logger.debug(f"Добавлены услуги: {service_slugs}")
 
             # Обработка ТВ-пакетов
             tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
@@ -117,6 +128,7 @@ def order_create(request, locality_slug, slug):
 
 @require_POST
 def submit_order(request, locality_slug):
+    logger.debug(f"Полученные данные формы: {request.POST}")
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     form = OrderForm(request.POST, locality=locality)
 
@@ -134,24 +146,37 @@ def submit_order(request, locality_slug):
 
         # Обработка продуктов
         equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
+        payment_options = form.cleaned_data.get("equipment_payment_options", {})
+        logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
         for product_id in equipment_ids:
             product = get_object_or_404(Product, id=product_id)
+            payment_type = payment_options.get(str(product_id), 'purchase')
+            # Используем get_total_installment_price для получения полной стоимости
+            if payment_type == 'installment12' and product.installment_12_months:
+                price = product.get_total_installment_price(12)  # Полная стоимость для 12 месяцев
+            elif payment_type == 'installment24' and product.installment_24_months:
+                price = product.get_total_installment_price(24)  # Полная стоимость для 24 месяцев
+            else:
+                price = product.price  # Цена для покупки
             OrderProduct.objects.create(
                 order=order,
                 product=product,
-                price=product.price,
-                quantity=1
+                price=price,
+                quantity=1,
+                payment_type=payment_type
             )
 
         # Обработка услуг
         service_slugs = form.cleaned_data.get("selected_service_slugs", [])
         if service_slugs:
             order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
+            logger.debug(f"Добавлены услуги: {service_slugs}")
 
         # Обработка ТВ-пакетов
         tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
         if tv_package_ids:
             order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
+            logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
 
         # Логирование и уведомление
         logger.info(

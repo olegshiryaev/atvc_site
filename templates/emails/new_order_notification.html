@@ -46,7 +46,15 @@
             <div class="section-title">Оборудование:</div>
             {% for product in order.get_products_with_details %}
                 <div class="item">
-                    {{ product.product.name }} ({{ product.quantity }} шт.) - {{ product.price }} руб.
+                    {{ product.product.name }} ({{ product.quantity }} шт.) - 
+                    {% if product.payment Mafiosi
+                    payment_type == 'purchase' %}
+                        {{ product.price }} руб.
+                    {% else %}
+                        {{ product.price }} руб. ({{ product.price|div:12|floatformat:0 }} руб./мес. на 12 мес.)
+                    {% elif product.payment_type == 'installment24' %}
+                        {{ product.price }} руб. ({{ product.price|div:24|floatformat:0 }} руб./мес. на 24 мес.)
+                    {% endif %}
                     {% if product.variant %}<br>Вариант: {{ product.variant.name }}{% endif %}
                 </div>
             {% empty %}

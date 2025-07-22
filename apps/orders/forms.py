@@ -1,4 +1,5 @@
 import re
+import logging
 from django import forms
 from django.core.validators import RegexValidator
 
@@ -11,11 +12,22 @@ from django import forms
 from django.core.validators import RegexValidator
 from .models import Order, Tariff, Product, AdditionalService, TVChannelPackage
 
+import json
+import re
+from django import forms
+from django.core.validators import RegexValidator
+from .models import Order, Tariff, Product, AdditionalService, TVChannelPackage
+
+
+# Определение логгера
+logger = logging.getLogger('orders.form')
+
 class OrderForm(forms.ModelForm):
     tariff_id = forms.CharField(widget=forms.HiddenInput(), required=False)
     selected_equipment_ids = forms.CharField(widget=forms.HiddenInput(), required=False)
     selected_service_slugs = forms.CharField(widget=forms.HiddenInput(), required=False)
     selected_tv_package_ids = forms.CharField(widget=forms.HiddenInput(), required=False)
+    equipment_payment_options = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     comment = forms.CharField(
         widget=forms.Textarea(attrs={
@@ -29,7 +41,11 @@ class OrderForm(forms.ModelForm):
 
     class Meta:
         model = Order
-        fields = ["full_name", "phone", "street", "house", "apartment", "comment", "selected_equipment_ids", "selected_service_slugs", "selected_tv_package_ids"]
+        fields = [
+            "full_name", "phone", "street", "house", "apartment", "comment",
+            "selected_equipment_ids", "selected_service_slugs", "selected_tv_package_ids",
+            "equipment_payment_options"
+        ]
         widgets = {
             "full_name": forms.TextInput(
                 attrs={
@@ -182,3 +198,55 @@ class OrderForm(forms.ModelForm):
             return tv_package_ids
         except json.JSONDecodeError:
             raise forms.ValidationError("Ошибка парсинга данных ТВ-пакетов")
+
+    def clean_equipment_payment_options(self):
+        data = self.cleaned_data.get("equipment_payment_options") or "{}"
+        equipment_ids = self.cleaned_data.get("selected_equipment_ids") or []
+        logger.debug(f"Валидация equipment_payment_options: data={data}, equipment_ids={equipment_ids}")
+        try:
+            payment_options = json.loads(data)
+            if not isinstance(payment_options, dict):
+                logger.error("Неверный формат equipment_payment_options: ожидается словарь")
+                raise forms.ValidationError("Неверный формат вариантов оплаты")
+            
+            # Сравниваем строки напрямую
+            invalid_ids = [pid for pid in payment_options.keys() if pid not in equipment_ids]
+            if invalid_ids:
+                logger.warning(f"Несоответствие ID в equipment_payment_options: invalid_ids={invalid_ids}")
+                raise forms.ValidationError(
+                    f"ID продуктов в вариантах оплаты не соответствуют выбранному оборудованию: {invalid_ids}"
+                )
+
+            valid_payment_types = ['purchase', 'installment12', 'installment24']
+            for product_id, payment_type in payment_options.items():
+                if payment_type not in valid_payment_types:
+                    logger.error(f"Недопустимый тип оплаты для продукта {product_id}: {payment_type}")
+                    raise forms.ValidationError(
+                        f"Недопустимый тип оплаты для продукта {product_id}: {payment_type}"
+                    )
+                try:
+                    product = Product.objects.get(id=product_id)
+                    if payment_type in ['installment12', 'installment24'] and not product.installment_available:
+                        logger.error(f"Рассрочка недоступна для продукта {product.name} (ID: {product_id})")
+                        raise forms.ValidationError(
+                            f"Рассрочка недоступна для продукта {product.name} (ID: {product_id})"
+                        )
+                    if payment_type == 'installment12' and not product.installment_12_months:
+                        logger.error(f"Рассрочка на 12 месяцев не настроена для продукта {product.name} (ID: {product_id})")
+                        raise forms.ValidationError(
+                            f"Рассрочка на 12 месяцев не настроена для продукта {product.name} (ID: {product_id})"
+                        )
+                    if payment_type == 'installment24' and not product.installment_24_months:
+                        logger.error(f"Рассрочка на 24 месяца не настроена для продукта {product.name} (ID: {product_id})")
+                        raise forms.ValidationError(
+                            f"Рассрочка на 24 месяца не настроена для продукта {product.name} (ID: {product_id})"
+                        )
+                except Product.DoesNotExist:
+                    logger.error(f"Продукт с ID {product_id} не существует")
+                    raise forms.ValidationError(f"Продукт с ID {product_id} не существует")
+
+            logger.debug(f"equipment_payment_options валидно: {payment_options}")
+            return payment_options
+        except json.JSONDecodeError:
+            logger.error("Ошибка парсинга equipment_payment_options: неверный JSON")
+            raise forms.ValidationError("Ошибка парсинга данных вариантов оплаты")

@@ -5,7 +5,7 @@ from apps.core.models import Locality, Tariff, TVChannelPackage, AdditionalServi
 
 class OrderProduct(models.Model):
     """Промежуточная модель для товаров в заказе"""
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_products', verbose_name="Заказ")
+    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_products', verbose_name="Заявка")
     product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
     variant = models.ForeignKey(
         ProductVariant, 
@@ -16,17 +16,27 @@ class OrderProduct(models.Model):
     )
     quantity = models.PositiveIntegerField("Количество", default=1)
     price = models.PositiveIntegerField("Цена за единицу")
+    payment_type = models.CharField(
+        "Тип оплаты",
+        max_length=20,
+        choices=[
+            ('purchase', 'Покупка'),
+            ('installment12', 'Рассрочка на 12 месяцев'),
+            ('installment24', 'Рассрочка на 24 месяцев'),
+        ],
+        default='purchase'
+    )
     
     class Meta:
-        verbose_name = "Товар в заказе"
-        verbose_name_plural = "Товары в заказе"
+        verbose_name = "Товар в заявке"
+        verbose_name_plural = "Товары в заявке"
     
     def __str__(self):
         variant_str = f" ({self.variant.get_color_display()})" if self.variant else ""
-        return f"{self.product.name}{variant_str} x{self.quantity} в заказе #{self.order.id}"
+        return f"{self.product.name}{variant_str} x{self.quantity} в заявке #{self.order.id}"
 
     def get_price(self):
-        """Возвращает сохранённую цену за единицу на момент добавления в заказ"""
+        """Возвращает сохранённую цену за единицу на момент добавления в заявку"""
         return self.price
 
 

@@ -46,11 +46,11 @@ class Product(models.Model):
     price = models.PositiveIntegerField("Цена", blank=True, null=True)
     is_available = models.BooleanField("В наличии", default=True)
     installment_available = models.BooleanField("Доступна рассрочка", default=False)
-    installment_12_months = models.DecimalField(
-        "Ежемесячный платёж на 12 месяцев", max_digits=10, decimal_places=2, blank=True, null=True
+    installment_12_months = models.PositiveIntegerField(
+        "Ежемесячный платёж на 12 месяцев", blank=True, null=True
     )
-    installment_24_months = models.DecimalField(
-        "Ежемесячный платёж на 24 месяцев", max_digits=10, decimal_places=2, blank=True, null=True
+    installment_24_months = models.PositiveIntegerField(
+        "Ежемесячный платёж на 24 месяцев", blank=True, null=True
     )
     category = models.ForeignKey(
         'Category',

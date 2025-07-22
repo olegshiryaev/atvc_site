@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
+{% load humanize %}
+
 {% block content %}
 <div class="order-form">
     <div class="order-form__container container">
@@ -33,7 +35,7 @@
                             </div>
                         </div>
                         <div class="tariff-info__price">
-                            <div class="tariff-info__price-value">{{ tariff.get_actual_price }} ₽</div>
+                            <div class="tariff-info__price-value">{{ tariff.get_actual_price }} руб.</div>
                             <small class="tariff-info__price-unit">
                                 в месяц
                                 {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
@@ -54,9 +56,7 @@
                             <article class="tv-package">
                                 <div class="tv-package__content">
                                     <div class="tv-package__header">
-                                        <!-- Левая часть: изображение и информация -->
                                         <div class="tv-package__content-left">
-                                            <!-- Изображение -->
                                             <div class="tv-package__image-container">
                                                 {% if package.image %}
                                                     <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
@@ -66,8 +66,6 @@
                                                     </div>
                                                 {% endif %}
                                             </div>
-
-                                            <!-- Текст: название и мета -->
                                             <div class="tv-package__info">
                                                 <h5 class="tv-package__name">{{ package.name }}</h5>
                                                 <div class="tv-package__meta">
@@ -75,22 +73,20 @@
                                                         {{ package.total_channels }} каналов
                                                     </div>
                                                     <a href="#"
-                                                    data-bs-toggle="modal"
-                                                    data-bs-target="#channelsModal-package-{{ package.id }}"
-                                                    class="tv-package__channels-link"
-                                                    aria-label="Посмотреть каналы пакета {{ package.name }}">
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#channelsModal-package-{{ package.id }}"
+                                                       class="tv-package__channels-link"
+                                                       aria-label="Посмотреть каналы пакета {{ package.name }}">
                                                         Список каналов
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-
-                                        <!-- Правая часть: свитчер -->
                                         <div class="tv-package__switch-container">
                                             <div class="form-check form-switch mb-0">
                                                 <input class="form-check-input" type="checkbox"
-                                                    id="package-{{ package.id }}"
-                                                    onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
+                                                       id="package-{{ package.id }}"
+                                                       onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
                                                 <label class="tv-package__label" for="package-{{ package.id }}"></label>
                                             </div>
                                         </div>
@@ -117,7 +113,6 @@
                             <article class="equipment__item" data-id="{{ product.id }}" data-price="{{ product.price }}">
                                 <div class="equipment__content">
                                     <div class="equipment__header">
-                                        <!-- Изображение -->
                                         <div class="equipment__image-container">
                                             {% if product.get_main_image %}
                                                 <img src="{{ product.get_main_image.image.url }}" alt="{{ product.name }}" class="equipment__image">
@@ -130,33 +125,72 @@
                                                 </div>
                                             {% endif %}
                                         </div>
-
-                                        <!-- Информация -->
                                         <div class="equipment__info-group">
                                             {% if product.category %}
                                                 <div class="equipment__category">{{ product.category.name }}</div>
                                             {% endif %}
                                             <h5 class="equipment__name">{{ product.name }}</h5>
                                         </div>
-
-                                        <!-- Новый блок: нижняя панель (цена + свитчер) -->
                                         <div class="equipment__footer">
-                                            <div class="equipment__price-block" onclick="openInstallmentModal('{{ product.id }}')">
-                                                <div class="equipment__payment-label" id="label-{{ product.id }}">Покупка</div>
-                                                <div class="equipment__price-value" id="price-{{ product.id }}">{{ product.price }} руб.</div>
+                                            <div class="equipment__price-block" {% if product.installment_available %}onclick="openInstallmentModal('{{ product.id }}', {{ product.price }}, {{ product.installment_12_months|default:'null' }}, {{ product.installment_24_months|default:'null' }}, {{ product.installment_available|yesno:'true,false' }})"{% endif %}>
+                                                <div class="equipment__payment-label" id="label-{{ product.id }}">Покупка{% if product.installment_available %}<svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>{% endif %}</div>
+                                                <div class="equipment__price-value" id="price-{{ product.id }}">{{ product.price|floatformat:0|default:0|intcomma }} руб.</div>
                                             </div>
                                             <div class="equipment__switch-container">
                                                 <div class="form-check form-switch mb-0">
                                                     <input class="form-check-input"
                                                         type="checkbox"
                                                         id="equipment-{{ product.id }}"
-                                                        onchange="toggleEquipmentSelection('{{ product.id }}', this.checked, {{ product.price }})">
+                                                        onchange="toggleEquipmentSelection('{{ product.id }}', this.checked, {{ product.price }}, {{ product.installment_12_months|default:'null' }}, {{ product.installment_24_months|default:'null' }})">
                                                     <label class="form-check-label" for="equipment-{{ product.id }}"></label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </article>
+                                </div>
+                            </article>
+                            {% if product.installment_available %}
+                            <div class="equipment-payment-modal fade" id="installmentModal-{{ product.id }}" tabindex="-1" aria-labelledby="installmentModalLabel-{{ product.id }}" aria-hidden="true">
+                                <div class="equipment-payment-modal__dialog">
+                                    <div class="equipment-payment-modal__content">
+                                        <div class="equipment-payment-modal__header">
+                                            <h5 class="equipment-payment-modal__title" id="installmentModalLabel-{{ product.id }}">{{ product.name }}</h5>
+                                            <button type="button" class="equipment-payment-modal__close" data-modal-close aria-label="Закрыть">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="equipment-payment-modal__body">
+                                            <div class="equipment-payment-modal__option">
+                                                <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-purchase-{{ product.id }}" value="purchase" checked>
+                                                <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-{{ product.id }}">
+                                                    Покупка - {{ product.price }} руб.
+                                                </label>
+                                            </div>
+                                            {% if product.installment_available %}
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment12-{{ product.id }}" value="installment12">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product.id }}">
+                                                        Рассрочка (на 12 мес.) - {{ product.installment_12_months }} руб./мес.
+                                                    </label>
+                                                </div>
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment24-{{ product.id }}" value="installment24">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product.id }}">
+                                                        Рассрочка (на 24 мес.) - {{ product.installment_24_months }} руб./мес.
+                                                    </label>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="equipment-payment-modal__footer">
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close>Отмена</button>
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption('{{ product.id }}', {{ product.price }}, {{ product.installment_12_months|default:'null' }}, {{ product.installment_24_months|default:'null' }})">Применить</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
                         {% endfor %}
                     </div>
                 </section>
@@ -207,6 +241,7 @@
                         <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value="[]">
                         <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
                         <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
+                        <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value="{}">
                         <input type="hidden" id="total_equipment_cost" value="0">
                         <input type="hidden" id="total_services_cost" value="0">
                         <input type="hidden" id="total_tv_packages_cost" value="0">
@@ -249,6 +284,8 @@
                                 <textarea name="comment" class="order-form__textarea" id="comments" rows="2" placeholder="Введите ваш комментарий"></textarea>
                                 <div id="error_comment" class="order-form__validation-message"></div>
                             </div>
+                            <!-- Блок для отображения ошибок формы -->
+                            <div id="form-errors" class="error-container"></div>
                             <!-- Четвёртый ряд: Чекбокс слева, Кнопка справа -->
                             <div class="order-form__field order-form__field--actions">
                                 <div class="order-form__checkbox-wrapper">
@@ -263,7 +300,7 @@
                                         >
                                             Политикой конфиденциальности
                                         </a>
-                                         и разрешаю обработку персональных данных
+                                        и разрешаю обработку персональных данных
                                     </label>
                                 </div>
                                 <button type="submit" class="order-form__submit" aria-label="Отправить заявку на подключение">Отправить заявку</button>
@@ -273,7 +310,6 @@
                 </section>
             </div>
 
-            <!-- Итоговая стоимость -->
             <aside class="summary" id="summaryCardContainer">
                 <div class="summary__content">
                     <h3 class="summary__title">Заявка на подключение</h3>
@@ -282,7 +318,7 @@
                         <div class="summary__item">
                             <span class="summary__item-name">{{ tariff.name }}</span>
                             <span class="summary__item-value">
-                                {{ tariff.get_actual_price }} руб./мес.
+                                {{ tariff.get_actual_price|intcomma }} руб./мес.
                                 {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
                                     (акция на {{ tariff.promo_months }} мес.)
                                 {% endif %}
@@ -311,29 +347,33 @@
                         <h5 class="summary__section-title">Подключение</h5>
                         <div class="summary__item">
                             <span class="summary__item-name">Разово</span>
-                            <span class="summary__item-value" id="connectionPrice">{{ tariff.connection_price }} руб.</span>
+                            <span class="summary__item-value" id="connectionPrice">{{ tariff.connection_price|intcomma }} руб.</span>
                         </div>
                     </div>
                     <hr class="summary__divider">
                     <div class="summary__total">
                         <h5 class="summary__total-title">Итого к оплате:</h5>
-                        <h5 class="summary__total-value" id="totalPrice">{{ tariff.get_actual_price|add:tariff.connection_price }} руб.</h5>
+                        <h5 class="summary__total-value" id="totalPrice">{{ tariff.get_actual_price|add:tariff.connection_price|intcomma }} руб.</h5>
                     </div>
                     <div class="summary__breakdown">
                         <div class="summary__breakdown-item">
                             <span class="summary__breakdown-name">Из них:</span>
                         </div>
-                        <div class="summary__breakdown-item">
+                        <div class="summary__breakdown-item summary__breakdown-item--monthly-price">
                             <span class="summary__breakdown-name">Абонентская плата:</span>
-                            <span class="summary__breakdown-value" id="monthlyPrice">{{ tariff.get_actual_price }} руб./мес.</span>
+                            <span class="summary__breakdown-value" id="monthlyPrice">{{ tariff.get_actual_price|intcomma }} руб./мес.</span>
                         </div>
-                        <div class="summary__breakdown-item">
+                        <div class="summary__breakdown-item summary__breakdown-item--installment" id="installmentBreakdown" style="display: none;">
+                            <span class="summary__breakdown-name">Рассрочка:</span>
+                            <span class="summary__breakdown-value" id="installmentPrice">0 руб./мес.</span>
+                        </div>
+                        <div class="summary__breakdown-item summary__breakdown-item--connection-price">
                             <span class="summary__breakdown-name">При подключении:</span>
-                            <span class="summary__breakdown-value" id="connectionTotalPrice">{{ tariff.connection_price }} руб.</span>
+                            <span class="summary__breakdown-value" id="connectionTotalPrice">{{ tariff.connection_price|intcomma }} руб.</span>
                         </div>
                     </div>
                     <div class="summary__info">
-                        <small>Абонентская плата начнет взиматься с момента активации тарифа. Оборудование и подключение оплачиваются единоразово при подключении.</small>
+                        <small>Абонентская плата и рассрочка взимаются ежемесячно с момента активации тарифа. Оборудование и подключение оплачиваются единоразово при подключении.</small>
                     </div>
                 </div>
             </aside>
@@ -344,13 +384,304 @@
 <!-- Скрипты -->
 <script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
-// Переменные для хранения выбранных значений
+    // Переменные для хранения выбранных значений
     let selectedEquipment = {};
     let selectedEquipmentPrice = 0;
     let selectedServices = {};
     let totalServicesPrice = 0;
     let selectedTVPackages = {};
     let totalTVPackagesPrice = 0;
+    let pendingPaymentOptions = {};
+
+    // Функции для управления модальными окнами
+    function openEquipmentModal(modal) {
+        if (typeof modal === 'string') modal = document.getElementById(`installmentModal-${modal}`);
+        if (!modal) {
+            console.error('Модальное окно не найдено.');
+            return;
+        }
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        modal.addEventListener('click', function closeOnBackdrop(e) {
+            if (e.target === modal) {
+                closeEquipmentModal(modal);
+                modal.removeEventListener('click', closeOnBackdrop);
+            }
+        });
+        modal.querySelectorAll('[data-modal-close]').forEach(button => {
+            button.addEventListener('click', () => closeEquipmentModal(modal));
+        });
+        document.addEventListener('keydown', function closeOnEscape(e) {
+            if (e.key === 'Escape') {
+                closeEquipmentModal(modal);
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        });
+    }
+
+    function closeEquipmentModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+    }
+
+    function openInstallmentModal(productId, purchasePrice, installment12Price, installment24Price, installmentAvailable) {
+        if (!installmentAvailable) {
+            // Если рассрочка недоступна, переключаем свитчер для выбора оборудования
+            const checkbox = document.getElementById(`equipment-${productId}`);
+            if (checkbox && !checkbox.checked) {
+                checkbox.checked = true;
+                toggleEquipmentSelection(productId, true, purchasePrice, null, null);
+            }
+            return;
+        }
+        const modal = document.getElementById(`installmentModal-${productId}`);
+        if (!modal) {
+            console.error(`Модальное окно с id="installmentModal-${productId}" не найдено.`);
+            return;
+        }
+        openEquipmentModal(modal);
+        const selected = selectedEquipment[productId] || { paymentType: 'purchase' };
+        const paymentType = selected.paymentType;
+        document.getElementById(`paymentOption-purchase-${productId}`).checked = paymentType === 'purchase';
+        document.getElementById(`paymentOption-installment12-${productId}`).checked = paymentType === 'installment12';
+        document.getElementById(`paymentOption-installment24-${productId}`).checked = paymentType === 'installment24';
+    }
+
+    function applyPaymentOption(productId, purchasePrice, installment12Price, installment24Price) {
+        const selectedOption = document.querySelector(`input[name="paymentOption-${productId}"]:checked`)?.value || 'purchase';
+        const labelElement = document.getElementById(`label-${productId}`);
+        const priceElement = document.getElementById(`price-${productId}`);
+        const checkbox = document.getElementById(`equipment-${productId}`);
+        let price = parseInt(purchasePrice);
+        let paymentType = 'purchase';
+        let labelText = 'Покупка';
+
+        if (selectedOption === 'installment12' && installment12Price !== null) {
+            price = parseInt(installment12Price);
+            paymentType = 'installment12';
+            labelText = 'Рассрочка (на 12 мес.)';
+        } else if (selectedOption === 'installment24' && installment24Price !== null) {
+            price = parseInt(installment24Price);
+            paymentType = 'installment24';
+            labelText = 'Рассрочка (на 24 мес.)';
+        }
+
+        if (isNaN(price)) {
+            console.error(`Некорректная цена для продукта ${productId}:`, { purchasePrice, installment12Price, installment24Price });
+            return;
+        }
+
+        // Сохраняем тип оплаты даже если свитчер не включён
+        pendingPaymentOptions[productId] = { paymentType, price, name: document.querySelector(`.equipment__item[data-id="${productId}"] .equipment__name`).textContent.trim() };
+
+        labelElement.innerHTML = `${labelText}<svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>`;
+        priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? 'руб.' : 'руб./мес.'}`;
+
+        // Обновляем данные только если оборудование выбрано (свитчер включен)
+        if (checkbox && checkbox.checked) {
+            const name = document.querySelector(`.equipment__item[data-id="${productId}"] .equipment__name`).textContent.trim();
+            selectedEquipment[productId] = { name, price, paymentType };
+        }
+        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + (p.paymentType === 'purchase' ? p.price : 0), 0);
+        updateEquipmentSummary();
+        calculateTotal();
+        saveSelections();
+        closeEquipmentModal(document.getElementById(`installmentModal-${productId}`));
+    }
+
+    function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price) {
+        const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
+        const name = element.querySelector('.equipment__name').textContent.trim();
+        const labelElement = document.getElementById(`label-${id}`);
+        const priceElement = document.getElementById(`price-${id}`);
+
+        // Используем сохранённый тип оплаты из pendingPaymentOptions или selectedEquipment, если он есть
+        let paymentType = pendingPaymentOptions[id]?.paymentType || selectedEquipment[id]?.paymentType || 'purchase';
+        let price;
+
+        if (paymentType === 'installment12' && installment12Price !== null) {
+            price = parseInt(installment12Price);
+        } else if (paymentType === 'installment24' && installment24Price !== null) {
+            price = parseInt(installment24Price);
+        } else {
+            paymentType = 'purchase';
+            price = parseInt(purchasePrice);
+        }
+
+        if (isNaN(price)) {
+            console.error(`Некорректная цена для продукта ${id}:`, { purchasePrice, installment12Price, installment24Price });
+            return;
+        }
+
+        if (checked) {
+            element.classList.add('selected');
+            selectedEquipment[id] = { name, price, paymentType };
+            labelElement.innerHTML = `${paymentType === 'installment12' ? 'Рассрочка (на 12 мес.)' : paymentType === 'installment24' ? 'Рассрочка (на 24 мес.)' : 'Покупка'}${installment12Price !== null || installment24Price !== null ? '<svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>' : ''}`;
+            priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? 'руб.' : 'руб./мес.'}`;
+        } else {
+            element.classList.remove('selected');
+            delete selectedEquipment[id];
+        }
+
+        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + (p.paymentType === 'purchase' ? p.price : 0), 0);
+        updateEquipmentSummary();
+        calculateTotal();
+        saveSelections();
+    }
+
+    function updateService(serviceId, price) {
+        const checkbox = document.getElementById(serviceId);
+        const label = checkbox.nextElementSibling;
+        const serviceName = label?.querySelector('.services__name').textContent.trim() || 'Неизвестная услуга';
+        if (checkbox.checked) {
+            selectedServices[serviceId] = { name: serviceName, price: parseInt(price) };
+        } else {
+            delete selectedServices[serviceId];
+        }
+        totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
+        updateServicesSummary();
+        calculateTotal();
+        saveSelections();
+    }
+
+    function updateTVPackage(packageId, price) {
+        const checkbox = document.getElementById(`package-${packageId}`);
+        const tvPackage = checkbox.closest('.tv-package');
+        const name = tvPackage.querySelector('.tv-package__name')?.textContent.trim() || 'Пакет каналов';
+        if (checkbox.checked) {
+            selectedTVPackages[packageId] = { name, price: parseInt(price) };
+        } else {
+            delete selectedTVPackages[packageId];
+        }
+        totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
+        updateTVPackageSummary();
+        calculateTotal();
+        saveSelections();
+    }
+
+    function updateEquipmentSummary() {
+        const container = document.getElementById('equipmentSummary');
+        if (!container) return;
+        if (Object.keys(selectedEquipment).length > 0) {
+            let html = '<h5 class="summary__section-title">Оборудование</h5>';
+            for (const [id, item] of Object.entries(selectedEquipment)) {
+                const priceDisplay = item.paymentType === 'purchase' 
+                    ? `${item.price.toLocaleString('ru-RU')} руб.` 
+                    : `${item.price.toLocaleString('ru-RU')} руб./мес.`;
+                html += `
+                    <div class="summary__item">
+                        <span class="summary__item-name">${item.name}</span>
+                        <span class="summary__item-value">${priceDisplay}</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<h5 class="summary__section-title">Оборудование</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        }
+    }
+
+    function updateServicesSummary() {
+        const container = document.getElementById('servicesSummary');
+        if (!container) return;
+        if (Object.keys(selectedServices).length > 0) {
+            let html = '<h5 class="summary__section-title">Дополнительные услуги</h5>';
+            for (const key in selectedServices) {
+                html += `
+                    <div class="summary__item">
+                        <span class="summary__item-name">${selectedServices[key].name}</span>
+                        <span class="summary__item-value">${selectedServices[key].price.toLocaleString('ru-RU')} руб./мес.</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<h5 class="summary__section-title">Дополнительные услуги</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        }
+    }
+
+    function updateTVPackageSummary() {
+        const container = document.getElementById('tvPackagesSummary');
+        if (!container) return;
+        if (Object.keys(selectedTVPackages).length > 0) {
+            let html = '<h5 class="summary__section-title">Пакеты ТВ</h5>';
+            for (const key in selectedTVPackages) {
+                html += `
+                    <div class="summary__item">
+                        <span class="summary__item-name">${selectedTVPackages[key].name}</span>
+                        <span class="summary__item-value">${selectedTVPackages[key].price.toLocaleString('ru-RU')} руб./мес.</span>
+                    </div>`;
+            }
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = `<h5 class="summary__section-title">Пакеты ТВ</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        }
+    }
+
+    function calculateTotal() {
+        const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0;
+        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
+        
+        // Абонентская плата: тариф + услуги + ТВ-пакеты
+        const monthlyPrice = tariffPrice + totalServicesPrice + totalTVPackagesPrice;
+        
+        // Стоимость оборудования для покупки (включается в "При подключении")
+        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
+            return sum + (p.paymentType === 'purchase' ? p.price : 0);
+        }, 0);
+        
+        // Стоимость рассрочки (ежемесячные платежи)
+        const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
+            return sum + (p.paymentType === 'installment12' || p.paymentType === 'installment24' ? p.price : 0);
+        }, 0);
+        
+        // При подключении: только оборудование с типом оплаты purchase + плата за подключение
+        const connectionTotalPrice = selectedEquipmentPrice + connectionPrice;
+        
+        // Итого к оплате: абонентская плата + при подключении + ежемесячная рассрочка
+        const totalPrice = monthlyPrice + connectionTotalPrice + installmentPrice;
+
+        const elements = {
+            totalPrice: document.getElementById('totalPrice'),
+            monthlyPrice: document.getElementById('monthlyPrice'),
+            connectionTotalPrice: document.getElementById('connectionTotalPrice'),
+            totalEquipmentCost: document.getElementById('total_equipment_cost'),
+            totalServicesCost: document.getElementById('total_services_cost'),
+            totalTVPackagesCost: document.getElementById('total_tv_packages_cost'),
+            totalPriceInput: document.getElementById('total_price'),
+            installmentBreakdown: document.getElementById('installmentBreakdown'),
+            installmentPrice: document.getElementById('installmentPrice'),
+        };
+
+        // Обновление отображаемых цен
+        if (elements.totalPrice) elements.totalPrice.textContent = `${totalPrice.toLocaleString('ru-RU')} руб.`;
+        if (elements.monthlyPrice) elements.monthlyPrice.textContent = `${monthlyPrice.toLocaleString('ru-RU')} руб./мес.`;
+        if (elements.connectionTotalPrice) elements.connectionTotalPrice.textContent = `${connectionTotalPrice.toLocaleString('ru-RU')} руб.`;
+        if (elements.totalEquipmentCost) elements.totalEquipmentCost.value = selectedEquipmentPrice;
+        if (elements.totalServicesCost) elements.totalServicesCost.value = totalServicesPrice;
+        if (elements.totalTVPackagesCost) elements.totalTVPackagesCost.value = totalTVPackagesPrice;
+        if (elements.totalPriceInput) elements.totalPriceInput.value = totalPrice;
+
+        // Обновление строки "Рассрочка"
+        if (elements.installmentBreakdown && elements.installmentPrice) {
+            if (installmentPrice > 0) {
+                // Суммируем все платежи по рассрочке и формируем название
+                const installmentItems = Object.values(selectedEquipment).filter(p => p.paymentType === 'installment12' || p.paymentType === 'installment24');
+                let label = '';
+                if (installmentItems.length === 1) {
+                    label = installmentItems[0].paymentType === 'installment12' ? 'Рассрочка (на 12 мес.)' : 'Рассрочка (на 24 мес.)';
+                } else {
+                    label = 'Рассрочка';
+                }
+                elements.installmentBreakdown.querySelector('.summary__breakdown-name').textContent = `${label}:`;
+                elements.installmentPrice.textContent = `${installmentPrice.toLocaleString('ru-RU')} руб./мес.`;
+                elements.installmentBreakdown.style.display = 'flex';
+            } else {
+                elements.installmentBreakdown.style.display = 'none';
+            }
+        }
+    }
 
     function saveSelections() {
         localStorage.setItem('selectedEquipment', JSON.stringify(selectedEquipment));
@@ -359,41 +690,57 @@
     }
 
     function loadSelections() {
-        // Загрузка сохранённых данных
-        selectedEquipment = JSON.parse(localStorage.getItem('selectedEquipment') || '{}');
-        selectedServices = JSON.parse(localStorage.getItem('selectedServices') || '{}');
-        selectedTVPackages = JSON.parse(localStorage.getItem('selectedTVPackages') || '{}');
-
-        // Обновление чекбоксов и классов для оборудования
-        Object.keys(selectedEquipment).forEach(id => {
-            const checkbox = document.getElementById(`equipment-${id}`);
-            const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
-            if (checkbox && element) {
-                checkbox.checked = true;
-                element.classList.add('selected');
+        const availableEquipmentIds = Array.from(document.querySelectorAll('.equipment__item')).map(item => item.dataset.id);
+        selectedEquipment = {};
+        const storedEquipment = JSON.parse(localStorage.getItem('selectedEquipment') || '{}');
+        
+        Object.keys(storedEquipment).forEach(id => {
+            if (availableEquipmentIds.includes(id)) {
+                const checkbox = document.getElementById(`equipment-${id}`);
+                const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
+                if (checkbox && element) {
+                    checkbox.checked = true; // Устанавливаем чекбокс
+                    element.classList.add('selected');
+                    selectedEquipment[id] = storedEquipment[id];
+                    
+                    // Обновляем отображение цены и типа оплаты
+                    const paymentType = storedEquipment[id].paymentType || 'purchase';
+                    const price = storedEquipment[id].price;
+                    const labelElement = document.getElementById(`label-${id}`);
+                    const priceElement = document.getElementById(`price-${id}`);
+                    if (paymentType === 'installment12') {
+                        labelElement.innerHTML = `Рассрочка (на 12 мес.) <svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} руб./мес.`;
+                    } else if (paymentType === 'installment24') {
+                        labelElement.innerHTML = `Рассрочка (на 24 мес.) <svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} руб./мес.`;
+                    } else {
+                        labelElement.innerHTML = `Покупка <svg class="equipment__dropdown-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 10.5L3.5 6h9L8 10.5z"/></svg>`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} руб.`;
+                    }
+                }
             }
         });
-        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p.price, 0);
 
-        // Обновление чекбоксов для услуг
+        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + (p.paymentType === 'purchase' ? p.price : 0), 0);
+
+        // Услуги
+        selectedServices = JSON.parse(localStorage.getItem('selectedServices') || '{}');
         Object.keys(selectedServices).forEach(slug => {
             const checkbox = document.getElementById(slug);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
+            if (checkbox) checkbox.checked = true;
         });
         totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
 
-        // Обновление чекбоксов для ТВ-пакетов
+        // ТВ-пакеты
+        selectedTVPackages = JSON.parse(localStorage.getItem('selectedTVPackages') || '{}');
         Object.keys(selectedTVPackages).forEach(id => {
             const checkbox = document.getElementById(`package-${id}`);
-            if (checkbox) {
-                checkbox.checked = true;
-            }
+            if (checkbox) checkbox.checked = true;
         });
         totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
 
-        // Обновление интерфейса
+        // Обновляем отображение
         updateEquipmentSummary();
         updateServicesSummary();
         updateTVPackageSummary();
@@ -431,17 +778,27 @@
     // Обработчики событий для валидации
     document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"], #orderForm #agree').forEach(input => {
         input.addEventListener('input', validateOrderForm);
-        if (input.type === 'checkbox') {
-            input.addEventListener('change', validateOrderForm);
-        }
+        if (input.type === 'checkbox') input.addEventListener('change', validateOrderForm);
     });
 
-    // Инициализация валидации
-    validateOrderForm();
+    // Синхронизация полей перед отправкой формы
+    function syncFormFields() {
+        const equipmentIds = Object.keys(selectedEquipment).filter(id => {
+            const checkbox = document.getElementById(`equipment-${id}`);
+            return checkbox && checkbox.checked;
+        });
+        const paymentOptions = Object.fromEntries(
+            equipmentIds.map(id => [id, selectedEquipment[id].paymentType || 'purchase'])
+        );
+        document.getElementById('selected_equipment_ids').value = JSON.stringify(equipmentIds);
+        document.getElementById('equipment_payment_options').value = JSON.stringify(paymentOptions);
+        document.getElementById('selected_service_slugs').value = JSON.stringify(Object.keys(selectedServices));
+        document.getElementById('selected_tv_package_ids').value = JSON.stringify(Object.keys(selectedTVPackages));
+    }
 
     // Отправка формы
     document.getElementById('orderForm').addEventListener('submit', async function(e) {
-        e.preventDefault(); // Предотвращаем стандартную отправку формы
+        e.preventDefault();
 
         // Сброс ошибок
         document.querySelectorAll('#orderForm .order-form__input, #orderForm .order-form__textarea').forEach(el => {
@@ -451,15 +808,13 @@
             el.textContent = '';
             el.style.display = 'none';
         });
+        const errorContainer = document.querySelector('#form-errors');
+        errorContainer.innerHTML = '';
+
+        // Синхронизация полей
+        syncFormFields();
 
         // Подготовка данных
-        const equipmentIds = Object.keys(selectedEquipment);
-        const serviceSlugs = Object.keys(selectedServices);
-        const tvPackageIds = Object.keys(selectedTVPackages);
-        document.getElementById('selected_equipment_ids').value = JSON.stringify(equipmentIds);
-        document.getElementById('selected_service_slugs').value = JSON.stringify(serviceSlugs);
-        document.getElementById('selected_tv_package_ids').value = JSON.stringify(tvPackageIds);
-
         const formData = new FormData(this);
         if (phoneMask) {
             const phone = preparePhoneNumber(phoneMask.unmaskedValue);
@@ -505,216 +860,46 @@
             const data = await response.json();
 
             if (response.ok && data.success) {
+                // Сброс формы и localStorage
                 this.reset();
                 if (phoneMask) phoneMask.updateValue();
-                // Очищаем localStorage после успешной отправки
                 localStorage.removeItem('selectedEquipment');
                 localStorage.removeItem('selectedServices');
                 localStorage.removeItem('selectedTVPackages');
+                localStorage.removeItem('pendingPaymentOptions');
+                // Перенаправление на страницу успеха
                 window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
             } else {
-                for (const [field, errors] of Object.entries(data.errors || {})) {
-                    const errorElement = document.querySelector(`#error_${field}`);
-                    if (errorElement) {
-                        errorElement.textContent = errors.join(' ');
-                        errorElement.style.display = 'block';
-                        const inputField = document.querySelector(`#orderForm [name="${field}"]`);
-                        if (inputField) inputField.classList.add('order-form__input--invalid');
-                    }
-                }
+                const errorList = document.createElement('ul');
+                errorList.className = 'errorlist';
                 if (data.non_field_errors) {
-                    const modal = document.createElement('div');
-                    modal.className = 'modal fade';
-                    modal.innerHTML = `
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Ошибка</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <div class="modal-body">
-                                    ${data.non_field_errors.join(' ')}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                    document.body.appendChild(modal);
-                    const bsModal = new bootstrap.Modal(modal);
-                    bsModal.show();
+                    data.non_field_errors.forEach(error => {
+                        const li = document.createElement('li');
+                        li.textContent = error;
+                        errorList.appendChild(li);
+                    });
                 }
+                for (const [field, errors] of Object.entries(data.errors || {})) {
+                    errors.forEach(error => {
+                        const li = document.createElement('li');
+                        li.textContent = `${field === 'equipment_payment_options' ? 'Варианты оплаты оборудования' : field}: ${error}`;
+                        errorList.appendChild(li);
+                    });
+                }
+                errorContainer.appendChild(errorList);
+                errorContainer.scrollIntoView({ behavior: 'smooth' });
             }
         } catch (error) {
             console.error('Ошибка при отправке формы:', error);
-            const modal = document.createElement('div');
-            modal.className = 'modal fade';
-            modal.innerHTML = `
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Ошибка</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            Произошла ошибка при отправке заявки. Попробуйте снова.
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            document.body.appendChild(modal);
-            const bsModal = new bootstrap.Modal(modal);
-            bsModal.show();
+            errorContainer.innerHTML = '<ul class="errorlist"><li>Произошла ошибка при отправке формы. Попробуйте снова.</li></ul>';
+            errorContainer.scrollIntoView({ behavior: 'smooth' });
         } finally {
-            // Сбрасываем индикатор загрузки
             submitBtn.disabled = false;
             submitBtn.classList.remove('order-form__submit--loading');
             submitBtn.innerHTML = 'Отправить заявку';
         }
     });
 
-    // Функции toggleEquipmentSelection, updateService, updateTVPackage
-    function toggleEquipmentSelection(id, checked, price) {
-        const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
-        const name = element.querySelector('.equipment__name').textContent.trim();
-        if (checked) {
-            element.classList.add('selected');
-            selectedEquipment[id] = { name, price: parseInt(price) };
-        } else {
-            element.classList.remove('selected');
-            delete selectedEquipment[id];
-        }
-        selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => sum + p.price, 0);
-        updateEquipmentSummary();
-        calculateTotal();
-        saveSelections();
-    }
-
-    function updateService(serviceId, price) {
-        const checkbox = document.getElementById(serviceId);
-        const label = checkbox.nextElementSibling;
-        const serviceName = label?.querySelector('.services__name').textContent.trim() || 'Неизвестная услуга';
-        if (checkbox.checked) {
-            selectedServices[serviceId] = { name: serviceName, price: parseInt(price) };
-        } else {
-            delete selectedServices[serviceId];
-        }
-        totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
-        updateServicesSummary();
-        calculateTotal();
-        saveSelections();
-    }
-
-    function updateTVPackage(packageId, price) {
-        const checkbox = document.getElementById(`package-${packageId}`);
-        const tvPackage = checkbox.closest('.tv-package');
-        const name = tvPackage.querySelector('.tv-package__name')?.textContent.trim() || 'Пакет каналов';
-        if (checkbox.checked) {
-            selectedTVPackages[packageId] = { name, price: parseInt(price) };
-        } else {
-            delete selectedTVPackages[packageId];
-        }
-        totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
-        updateTVPackageSummary();
-        calculateTotal();
-        saveSelections();
-    }
-
-    // Обновление отображения
-    function updateEquipmentSummary() {
-        const container = document.getElementById('equipmentSummary');
-        if (!container) return;
-        if (Object.keys(selectedEquipment).length > 0) {
-            let html = '<h5 class="summary__section-title">Оборудование</h5>';
-            for (const [id, item] of Object.entries(selectedEquipment)) {
-                html += `
-                    <div class="summary__item">
-                        <span class="summary__item-name">${item.name}</span>
-                        <span class="summary__item-value">${item.price.toLocaleString()} руб.</span>
-                    </div>`;
-            }
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `<h5 class="summary__section-title">Оборудование</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
-        }
-    }
-
-    function updateServicesSummary() {
-        const container = document.getElementById('servicesSummary');
-        if (!container) return;
-        if (Object.keys(selectedServices).length > 0) {
-            let html = '<h5 class="summary__section-title">Дополнительные услуги</h5>';
-            for (const key in selectedServices) {
-                html += `
-                    <div class="summary__item">
-                        <span class="summary__item-name">${selectedServices[key].name}</span>
-                        <span class="summary__item-value">${selectedServices[key].price.toLocaleString()} руб./мес.</span>
-                    </div>`;
-            }
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `<h5 class="summary__section-title">Дополнительные услуги</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
-        }
-    }
-
-    function updateTVPackageSummary() {
-        const container = document.getElementById('tvPackagesSummary');
-        if (!container) return;
-        if (Object.keys(selectedTVPackages).length > 0) {
-            let html = '<h5 class="summary__section-title">Пакеты ТВ</h5>';
-            for (const key in selectedTVPackages) {
-                html += `
-                    <div class="summary__item">
-                        <span class="summary__item-name">${selectedTVPackages[key].name}</span>
-                        <span class="summary__item-value">${selectedTVPackages[key].price.toLocaleString()} руб./мес.</span>
-                    </div>`;
-            }
-            container.innerHTML = html;
-        } else {
-            container.innerHTML = `<h5 class="summary__section-title">Пакеты ТВ</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
-        }
-    }
-
-    function calculateTotal() {
-        const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0; // Используем актуальную цену тарифа
-        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
-
-        // Абонентская плата: тариф + услуги + ТВ-пакеты
-        const monthlyPrice = tariffPrice + totalServicesPrice + totalTVPackagesPrice;
-
-        // При подключении: оборудование + стоимость подключения
-        const connectionTotalPrice = selectedEquipmentPrice + connectionPrice;
-
-        // Итоговая стоимость: абонентская плата + стоимость подключения
-        const totalPrice = monthlyPrice + connectionTotalPrice;
-
-        // Обновление отображения
-        const totalPriceElement = document.getElementById('totalPrice');
-        const monthlyPriceElement = document.getElementById('monthlyPrice');
-        const connectionTotalPriceElement = document.getElementById('connectionTotalPrice');
-
-        if (totalPriceElement) {
-            totalPriceElement.textContent = `${totalPrice.toLocaleString()} руб.`;
-        }
-        if (monthlyPriceElement) {
-            monthlyPriceElement.textContent = `${monthlyPrice.toLocaleString()} руб./мес.`;
-        }
-        if (connectionTotalPriceElement) {
-            connectionTotalPriceElement.textContent = `${connectionTotalPrice.toLocaleString()} руб.`;
-        }
-
-        // Обновление скрытых полей
-        document.getElementById('total_equipment_cost').value = selectedEquipmentPrice;
-        document.getElementById('total_services_cost').value = totalServicesPrice;
-        document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
-        document.getElementById('total_price').value = totalPrice;
-    }
-
-    // Перемещение блока "Итоговая стоимость"
     function moveSummaryCard() {
         const isMobile = window.innerWidth < 992;
         const summary = document.querySelector('.summary');
@@ -732,10 +917,10 @@
         }
     }
 
-    // Инициализация
     window.addEventListener('DOMContentLoaded', () => {
         moveSummaryCard();
         loadSelections();
+        validateOrderForm();
     });
     window.addEventListener('resize', () => {
         setTimeout(moveSummaryCard, 100);
