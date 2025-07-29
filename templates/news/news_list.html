@@ -2,32 +2,30 @@
 
 {% block content %}
 <section class="news-section">
-    <div class="bg-white w-100">
-        <div class="container">
-            {% include 'partials/page_header.html' with title=title %}
+    <div class="container">
+        {% include 'partials/page_header.html' with title=title %}
 
-            <!-- Сетка новостей -->
-            <div class="row g-4" id="news-container">
-                {% for news in news_list %}
-                <div class="col-12 col-sm-6 col-lg-4">
-                    {% include 'news/partials/news_card.html' with news=news is_preview=False %}
-                </div>
-                {% endfor %}
+        <!-- Сетка новостей -->
+        <div class="news-grid" id="news-container">
+            {% for news in news_list %}
+            <div class="news-grid__item">
+                {% include 'news/partials/news_card.html' with news=news is_preview=False %}
             </div>
-
-            <!-- Кнопка "Читать ещё" -->
-            {% if has_more_news %}
-            <div class="text-center mt-5">
-                <button id="load-more-btn" 
-                        class="btn btn-primary"
-                        data-next-page="2"
-                        data-city-slug="{{ locality.slug }}"
-                        aria-label="Загрузить больше новостей">
-                    Читать ещё
-                </button>
-            </div>
-            {% endif %}
+            {% endfor %}
         </div>
+
+        <!-- Кнопка "Читать ещё" -->
+        {% if has_more_news %}
+        <div class="text-center">
+            <button id="load-more-btn" 
+                    class="load-more-btn"
+                    data-next-page="2"
+                    data-city-slug="{{ locality.slug }}"
+                    aria-label="Загрузить больше новостей">
+                Читать ещё
+            </button>
+        </div>
+        {% endif %}
     </div>
 </section>
 

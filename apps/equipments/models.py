@@ -58,6 +58,7 @@ class Product(models.Model):
         related_name="products",
         blank=True,
         null=True,
+        verbose_name="Категория"
     )
     services = models.ManyToManyField(
         "core.Service",
@@ -181,6 +182,7 @@ class SmartSpeaker(models.Model):
         on_delete=models.CASCADE,
         primary_key=True,
         related_name="smart_speaker",
+        verbose_name="Товар"
     )
     
     max_power = models.CharField(
@@ -262,7 +264,8 @@ class SmartSpeaker(models.Model):
 
 class Camera(models.Model):
     product = models.OneToOneField(
-        Product, on_delete=models.CASCADE, primary_key=True, related_name="camera"
+        Product, on_delete=models.CASCADE, primary_key=True, related_name="camera",
+        verbose_name="Товар"
     )
 
     # ==== Характеристики камеры ====
@@ -322,7 +325,8 @@ class Camera(models.Model):
 
 class Router(models.Model):
     product = models.OneToOneField(
-        Product, on_delete=models.CASCADE, primary_key=True, related_name="router"
+        Product, on_delete=models.CASCADE, primary_key=True, related_name="router",
+        verbose_name="Товар"
     )
 
     # ==== Основные параметры ====
@@ -411,7 +415,8 @@ class Router(models.Model):
 
 class TvBox(models.Model):
     product = models.OneToOneField(
-        Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox"
+        Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox",
+        verbose_name="Товар"
     )
     color = models.CharField(
         "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
@@ -442,7 +447,8 @@ class TvBox(models.Model):
 
 class ViewCount(models.Model):
     product = models.ForeignKey(
-        "Product", on_delete=models.CASCADE, related_name="views"
+        "Product", on_delete=models.CASCADE, related_name="views",
+        verbose_name="Товар"
     )
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True

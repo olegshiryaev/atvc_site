@@ -89,6 +89,9 @@ def index(request, locality_slug):
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
     # Популярные продукты
+    # Проверяем, есть ли товары вообще
+    has_products = Product.objects.filter(is_available=True).exists()
+
     # Получаем ID всех популярных продуктов
     product_ids = list(
         Product.objects.filter(is_available=True)

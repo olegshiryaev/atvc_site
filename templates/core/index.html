@@ -84,6 +84,7 @@
         <!-- Секция проверки адреса -->
         {% include 'core/address_check_form.html' %}
 
+        {% if has_products %}
         <section id="shop" class="products-slider-block block" data-block-slug="products-slider-block" data-block-appearance="">
             <div class="products-slider-block__header">
                 <h2 class="products-slider-block__title block__title">Оборудование</h2>
@@ -157,6 +158,18 @@
                 </div>
             </div>
         </section>
+        {% else %}
+        <section id="shop" class="products-slider-block block" data-block-slug="products-slider-block">
+            <div class="products-slider-block__header">
+                <h2 class="products-slider-block__title block__title">Оборудование</h2>
+            </div>
+            <div class="products-slider-block__wrapper">
+                <div class="no-products-message">
+                    <p>Каталог оборудования временно недоступен. Мы работаем над его обновлением!</p>
+                </div>
+            </div>
+        </section>
+        {% endif %}
 
         <!-- Последние новости -->
         {% if latest_news %}
@@ -213,7 +226,7 @@
     document.addEventListener('DOMContentLoaded', () => {
         new Swiper('.main_news-block .swiper', {
             slidesPerView: 1,
-            spaceBetween: 20,
+            spaceBetween: 24,
             loop: false,
             pagination: {
                 el: '.main_news-block .slider-navs__pag',
@@ -225,13 +238,16 @@
             },
             breakpoints: {
                 768: {
-                    slidesPerView: 2.2,
+                    slidesPerView: 2,
+                    spaceBetween: 24,
                 },
                 1024: {
                     slidesPerView: 3,
+                    spaceBetween: 24,
                 },
                 1200: {
                     slidesPerView: 3,
+                    spaceBetween: 24,
                 }
             },
             a11y: {

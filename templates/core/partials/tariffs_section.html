@@ -7,7 +7,7 @@
         {% if available_services|length > 1 %}
         <!-- Навигация для десктопов -->
         <div class="tariffs-tabs-wrapper">
-            <ul class="nav nav-pills tariffs-tabs-nav" id="tariffTabs" role="tablist">
+            <ul class="nav nav-pills tariffs-tabs-nav" id="tariffTabs" role="tablist" aria-label="Фильтр услуг">
                 {% for service in available_services %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link {% if service.slug == first_service_slug %}active{% endif %}"
@@ -41,7 +41,13 @@
     </div>
 </section>
 {% else %}
-<div class="container py-5 text-start">
-    <p>Тарифы в {{ locality.name_prepositional }} временно недоступны.</p>
-</div>
+<section class="tariffs-unavailable block">
+    <h2 class="tariffs-block__title block__title h2">Тарифы в {{ locality.name_prepositional }}</h2>
+    <div class="tariffs-unavailable__content">
+        <p class="tariffs-unavailable__text">
+            В данный момент тарифы в {{ locality.name_prepositional }} временно недоступны. 
+            Мы работаем над расширением покрытия и скоро предложим вам лучшие тарифы на интернет и телевидение!
+        </p>
+    </div>
+</section>
 {% endif %}

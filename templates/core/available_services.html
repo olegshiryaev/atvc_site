@@ -1,3 +1,4 @@
+{% if available_services %}
 <section id="available-services" class="available-services-block block">
     <h2 class="available-services-block__title block__title">
         Услуги АТК, которые можно подключить в {{ locality.name_prepositional }}
@@ -33,9 +34,10 @@
                             <h3 class="service-card__title">{{ service.name }}</h3>
                             <p class="service-card__subtitle">{{ service.description|default:""|truncatewords:20 }}</p>
                             <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}"
-                               class="service-card__btn btn"
-                               role="button"
-                               aria-label="Подробнее об услуге {{ service.name }}">
+                            class="service-card__btn btn"
+                            role="button"
+                            title="Подробнее об услуге {{ service.name }} в {{ locality.name_prepositional }}"
+                            aria-label="Подробнее об услуге {{ service.name }}">
                                 Подробнее
                             </a>
                         </div>
@@ -60,3 +62,4 @@
         </div>
     </div>
 </section>
+{% endif %}
