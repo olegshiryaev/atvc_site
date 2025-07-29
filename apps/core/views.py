@@ -123,6 +123,7 @@ def index(request, locality_slug):
         "latest_news": latest_news,
         "banners": banners,
         "popular_products": popular_products,
+        "has_products": has_products,
         "form": form,
     }
 
