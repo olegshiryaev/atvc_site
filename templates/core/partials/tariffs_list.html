@@ -96,7 +96,7 @@
                                 {% endif %}
                             </div>
                             <div class="tariff-card-action-btn">
-                                <button class="connect-btn"
+                                <a href="{% url 'orders:order_create' locality_slug=locality.slug slug=tariff.slug %}" class="connect-btn"
                                     data-tariff-id="{{ tariff.id }}"
                                     data-tariff-name="{{ tariff.name }}"
                                     data-tariff-price="{% if tariff.promo_price %}{{ tariff.promo_price }}{% else %}{{ tariff.price }}{% endif %}"
@@ -104,12 +104,7 @@
                                     data-tariff-channels="{{ tariff.total_channels }}"
                                     data-tariff-hd-channels="{{ tariff.total_hd_channels }}">
                                 Подключить
-                            </button>
-                            </div>
-                            <div class="tariff-card-more-info-warp">
-                                <a href="{% url 'orders:order_create' locality_slug=locality.slug slug=tariff.slug %}">
-                                    Подробнее о тарифе
-                                </a>
+                            </a>
                             </div>
                         </div>
                     </div>

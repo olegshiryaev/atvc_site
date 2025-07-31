@@ -1,151 +1,148 @@
-function getCart() {
-  const cart = localStorage.getItem("cart");
-  if (cart) {
-    return JSON.parse(cart);
-  }
-  return {
-    tariff: null,
-    products: {}, // key = "product_id:variant_id"
-    services: [],
-    tv_packages: []
-  };
-}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Cart system initialized');
 
-function saveCart(cart) {
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartCounter();
-}
+    // Основные элементы
+    const cartCounter = document.getElementById('cart-counter');
+    const cartIcon = document.querySelector('.cart-icon');
 
-function updateCartCounter() {
-  const cart = getCart();
-  let total = 0;
+    // Инициализация корзины
+    initCart();
 
-  for (const key in cart.products) {
-    total += cart.products[key].quantity;
-  }
-  total += cart.services.length + cart.tv_packages.length;
-  if (cart.tariff) total += 1;
+    // Обработчики кнопок
+    document.querySelectorAll('[data-add-to-cart]').forEach(button => {
+        button.addEventListener('click', handleAddToCart);
+    });
 
-  const counterEl = document.querySelector("#cart-counter");
-  if (counterEl) {
-    counterEl.textContent = total;
-  }
-}
-
-// ------- Тариф -------
-function setTariff(tariffId) {
-  const cart = getCart();
-  cart.tariff = tariffId;
-  saveCart(cart);
-  showToast("Тариф выбран");
-}
-
-function clearTariff() {
-  const cart = getCart();
-  cart.tariff = null;
-  saveCart(cart);
-}
-
-// ------- Оборудование (товары) -------
-function addProduct(productId, variantId, price, quantity = 1) {
-  const cart = getCart();
-  const key = `${productId}:${variantId || "null"}`;
-  if (cart.products[key]) {
-    cart.products[key].quantity += quantity;
-  } else {
-    cart.products[key] = {
-      quantity,
-      price
-    };
-  }
-  saveCart(cart);
-  showToast("Оборудование добавлено");
-}
-
-function removeProduct(productId, variantId) {
-  const cart = getCart();
-  const key = `${productId}:${variantId || "null"}`;
-  delete cart.products[key];
-  saveCart(cart);
-}
-
-// ------- Доп. услуги -------
-function addService(serviceId) {
-  const cart = getCart();
-  if (!cart.services.includes(serviceId)) {
-    cart.services.push(serviceId);
-    saveCart(cart);
-    showToast("Услуга добавлена");
-  }
-}
-
-function removeService(serviceId) {
-  const cart = getCart();
-  cart.services = cart.services.filter(id => id !== serviceId);
-  saveCart(cart);
-}
-
-// ------- ТВ-пакеты -------
-function addTVPackage(packageId) {
-  const cart = getCart();
-  if (!cart.tv_packages.includes(packageId)) {
-    cart.tv_packages.push(packageId);
-    saveCart(cart);
-    showToast("ТВ-пакет добавлен");
-  }
-}
-
-function removeTVPackage(packageId) {
-  const cart = getCart();
-  cart.tv_packages = cart.tv_packages.filter(id => id !== packageId);
-  saveCart(cart);
-}
-
-// ------- Очистка корзины -------
-function clearCart() {
-  const cart = {
-    tariff: null,
-    products: {},
-    services: [],
-    tv_packages: []
-  };
-  saveCart(cart);
-  showToast("Корзина очищена");
-}
-
-// ------- Отправка корзины на сервер (пример через fetch) -------
-function submitCartForm(endpointUrl) {
-  const cart = getCart();
-  const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value;
-
-  fetch(endpointUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRFToken": csrfToken
-    },
-    body: JSON.stringify(cart)
-  })
-  .then(response => {
-    if (response.ok) {
-      showToast("Заявка отправлена");
-      clearCart();
-    } else {
-      alert("Ошибка при отправке заявки");
+    // Функция инициализации
+    async function initCart() {
+        try {
+            const localitySlug = getCurrentLocality();
+            const response = await fetch(`/${localitySlug}/get-cart-count/`);
+            const data = await response.json();
+            
+            if (data.success) {
+                updateCartCounter(data.items_count);
+            }
+        } catch (error) {
+            console.error('Cart init error:', error);
+        }
     }
-  })
-  .catch(() => alert("Ошибка сети"));
-}
 
-// ------- Уведомления -------
-function showToast(message) {
-  alert(message); // можно заменить на кастомный всплывающий элемент
-}
+    // Обработчик добавления в корзину
+    async function handleAddToCart(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
 
-document.addEventListener("click", function (e) {
-  if (e.target.closest("[data-add-package-cart]")) {
-    const btn = e.target.closest("[data-add-package-cart]");
-    const id = parseInt(btn.dataset.packageId);
-    addTVPackage(id);
-  }
+        const button = e.currentTarget;
+        if (button.disabled || button.classList.contains('processing')) return;
+
+        const productCard = button.closest('.product-card');
+        const productId = productCard.dataset.productId;
+        const priceText = productCard.querySelector('.product-card__price').textContent;
+
+        if (!productId || priceText.includes('запросу')) {
+            showToast('Этот товар недоступен для заказа', 'error');
+            return;
+        }
+
+        setButtonState(button, 'loading');
+
+        try {
+            const localitySlug = getCurrentLocality();
+            const response = await fetch(`/${localitySlug}/add-to-cart/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `model_type=product&object_id=${productId}`
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                updateCartCounter(data.items_count);
+                showToast('Товар добавлен в корзину', 'success');
+                animateCartIcon();
+                setButtonState(button, 'success');
+            } else {
+                throw new Error(data.error || 'Ошибка сервера');
+            }
+        } catch (error) {
+            console.error('Add to cart error:', error);
+            showToast(error.message, 'error');
+            setButtonState(button, 'error');
+        } finally {
+            setTimeout(() => setButtonState(button, 'reset'), 2000);
+        }
+    }
+
+    // Вспомогательные функции
+    function getCurrentLocality() {
+        return window.location.pathname.split('/')[1] || 'default';
+    }
+
+    function updateCartCounter(count) {
+        if (cartCounter) {
+            cartCounter.textContent = count;
+            cartCounter.classList.add('updated');
+            setTimeout(() => cartCounter.classList.remove('updated'), 500);
+        }
+    }
+
+    function animateCartIcon() {
+        if (cartIcon) {
+            cartIcon.classList.add('animate');
+            setTimeout(() => cartIcon.classList.remove('animate'), 500);
+        }
+    }
+
+    function setButtonState(button, state) {
+        const originalText = button.dataset.originalText || button.textContent;
+        button.dataset.originalText = originalText;
+
+        switch (state) {
+            case 'loading':
+                button.innerHTML = `
+                    <span class="button-loader"></span>
+                    <span class="button-text">Добавление...</span>
+                `;
+                button.classList.add('processing');
+                button.disabled = true;
+                break;
+                
+            case 'success':
+                button.innerHTML = `
+                    <span class="button-icon">✓</span>
+                    <span class="button-text">Добавлено</span>
+                `;
+                button.classList.add('success');
+                break;
+                
+            case 'error':
+                button.textContent = 'Ошибка';
+                button.classList.add('error');
+                break;
+                
+            case 'reset':
+                button.innerHTML = originalText;
+                button.classList.remove('processing', 'success', 'error');
+                button.disabled = false;
+                break;
+        }
+    }
+
+    function showToast(message, type = 'success') {
+        // Реализация toast-уведомлений (адаптируйте под свою систему)
+        console.log(`${type.toUpperCase()}: ${message}`);
+    }
+
+    function getCookie(name) {
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            const [key, value] = cookie.trim().split('=');
+            if (key === name) return decodeURIComponent(value);
+        }
+        return null;
+    }
 });

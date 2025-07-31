@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.utils import timezone
 from pytils.translit import slugify
+from ckeditor.fields import RichTextField
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
 
@@ -39,12 +40,18 @@ class Category(models.Model):
 class Product(models.Model):
     name = models.CharField("Название", max_length=255)
     slug = models.SlugField("URL", unique=True, blank=True)
-    short_description = models.CharField(
-        "Краткое описание", max_length=255, blank=True, null=True
+    short_description = RichTextField(
+        "Краткое описание", blank=True, null=True
     )
-    description = models.TextField("Описание", blank=True, null=True)
+    description = RichTextField("Описание", blank=True, null=True)
     price = models.PositiveIntegerField("Цена", blank=True, null=True)
-    is_available = models.BooleanField("В наличии", default=True)
+    discount_price = models.PositiveIntegerField("Акционная цена", blank=True, null=True)
+    sku = models.CharField(
+        "Артикул", max_length=50, blank=True, null=True
+    )
+    stock = models.PositiveIntegerField(
+        "Остаток на складе", default=0
+    )
     installment_available = models.BooleanField("Доступна рассрочка", default=False)
     installment_12_months = models.PositiveIntegerField(
         "Ежемесячный платёж на 12 месяцев", blank=True, null=True
@@ -66,6 +73,9 @@ class Product(models.Model):
         verbose_name="Услуги",
         blank=True
     )
+    warranty = models.PositiveIntegerField("Гарантия (месяцев)", default=12)
+    is_featured = models.BooleanField("Рекомендуемый товар", default=False)
+    is_available = models.BooleanField("В наличии", default=True)
 
     def __str__(self):
         return self.name or "Товар без названия"

@@ -1,5 +1,8 @@
 from django.db import models
 from django.conf import settings
+from django.contrib.sessions.models import Session
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
 from apps.equipments.models import Product, ProductVariant
 from apps.core.models import Locality, Tariff, TVChannelPackage, AdditionalService
 
@@ -192,3 +195,46 @@ class Order(models.Model):
     def __str__(self):
         tariff_name = self.tariff.name if self.tariff else "не указан"
         return f"Заявка #{self.id} от {self.full_name} ({tariff_name})"
+    
+
+
+class Cart(models.Model):
+    """Модель корзины, привязанная к сессии"""
+    session = models.ForeignKey(Session, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def total_price(self):
+        return sum(item.total_price() for item in self.items.all())
+
+    def __str__(self):
+        return f"Корзина (сессия: {self.session.session_key})"
+
+class CartItem(models.Model):
+    """Элемент корзины (может быть тарифом, товаром, ТВ-пакетом или услугой)"""
+    PAYMENT_TYPES = [
+        ('purchase', 'Покупка'),
+        ('installment12', 'Рассрочка 12 мес'),
+        ('installment24', 'Рассрочка 24 мес'),
+    ]
+
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
+    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    object_id = models.PositiveIntegerField()
+    content_object = GenericForeignKey('content_type', 'object_id')
+    quantity = models.PositiveIntegerField(default=1)
+    payment_type = models.CharField(
+        max_length=20, 
+        choices=PAYMENT_TYPES, 
+        default='purchase'
+    )
+    price = models.PositiveIntegerField()
+
+    def total_price(self):
+        return self.price * self.quantity
+
+    def __str__(self):
+        return f"{self.content_object} x{self.quantity}"
+
+    class Meta:
+        unique_together = ('cart', 'content_type', 'object_id', 'payment_type')

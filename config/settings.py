@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "imagekit",
     "ckeditor",
     "ckeditor_uploader",
     "widget_tweaks",
@@ -73,6 +74,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "apps.cities.middleware.LocalityMiddleware",
+    "apps.orders.middleware.CartMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"

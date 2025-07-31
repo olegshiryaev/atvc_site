@@ -1,0 +1,296 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<div class="order-form">
+    <div class="order-form__container container">
+        <div class="order-form__layout">
+            <div class="order-form__main">
+                <!-- Информация о товаре -->
+                <section class="product-info">
+                    <div class="product-info__content">
+                        <div class="product-info__image">
+                            {% with main_image=product.get_main_image %}
+                                {% if main_image %}
+                                    <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="product-info__img">
+                                {% else %}
+                                    <div class="product-info__img-placeholder">
+                                        <span>Нет изображения</span>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <div class="product-info__details">
+                            <h3 class="product-info__title">{{ product.name }}</h3>
+                            {% if product.short_description %}
+                                <p class="product-info__description">{{ product.short_description|safe }}</p>
+                            {% endif %}
+                            <div class="product-info__price-block">
+                                <div class="product-info__price-value">{{ product.price|intcomma }} руб.</div>
+                                {% if product.installment_available %}
+                                    <div class="product-info__installment">
+                                        <div>Рассрочка:</div>
+                                        <div>{{ product.installment_12_months|intcomma }} руб./мес. (12 мес.)</div>
+                                        <div>{{ product.installment_24_months|intcomma }} руб./мес. (24 мес.)</div>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Блок итогов (на мобильных — между товаром и формой) -->
+                <aside class="summary summary--mobile">
+                    <div class="summary__content">
+                        <h3 class="summary__title">Заявка на оборудование</h3>
+                        <div class="summary__section" id="equipmentSummary">
+                            <h5 class="summary__section-title">Оборудование</h5>
+                            <div class="summary__item">
+                                <span class="summary__item-name">{{ product.name }}</span>
+                                <span class="summary__item-value">{{ product.price|intcomma }} руб.</span>
+                            </div>
+                        </div>
+                        <div class="summary__total">
+                            <h5 class="summary__total-title">Итого к оплате:</h5>
+                            <h5 class="summary__total-value">{{ product.price|intcomma }} руб.</h5>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- Форма заявки -->
+                <section class="order-form__section">
+                    <h3 class="order-form__section-title">Оформление заявки</h3>
+                    <noscript>
+                        <div class="alert alert-danger">Для корректной работы формы требуется включённый JavaScript.</div>
+                    </noscript>
+                    <form class="order-form__form" id="orderForm" method="post" action="{% url 'orders:submit_order' locality_slug=locality.slug %}">
+                        {% csrf_token %}
+                        <!-- Скрытые поля -->
+                        <input type="hidden" name="tariff_id" value="">
+                        <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value='["{{ product.id }}"]'>
+                        <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
+                        <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
+                        <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value='{"{{ product.id }}": "purchase"}'>
+                        <input type="hidden" id="total_equipment_cost" value="{{ product.price }}">
+                        <input type="hidden" id="total_services_cost" value="0">
+                        <input type="hidden" id="total_tv_packages_cost" value="0">
+                        <input type="hidden" id="total_price" value="{{ product.price }}">
+
+                        <!-- Основные поля формы -->
+                        <div class="order-form__fields">
+                            <!-- Первый ряд: Имя, Номер телефона -->
+                            <div class="order-form__field order-form__field--full-name">
+                                <label for="name" class="order-form__label">Ваше имя</label>
+                                <input type="text" name="full_name" class="order-form__input" id="name" required placeholder="Введите ваше имя">
+                                <div id="error_full_name" class="order-form__validation-message"></div>
+                            </div>
+                            <div class="order-form__field order-form__field--phone">
+                                <label for="phone" class="order-form__label">Номер телефона</label>
+                                <input type="tel" name="phone" class="order-form__input" id="phone" required placeholder="+7 (___) ___-__-__">
+                                <div id="error_phone" class="order-form__validation-message"></div>
+                            </div>
+
+                            <!-- Второй ряд: Улица, Дом, Квартира -->
+                            <div class="order-form__row--address">
+                                <div class="order-form__field order-form__field--street">
+                                    <label for="street" class="order-form__label">Улица</label>
+                                    <input type="text" name="street" class="order-form__input" id="street" placeholder="Введите улицу">
+                                    <div id="error_street" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--house">
+                                    <label for="house" class="order-form__label">Дом</label>
+                                    <input type="text" name="house" class="order-form__input" id="house" placeholder="Введите номер дома">
+                                    <div id="error_house" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--apartment">
+                                    <label for="apartment" class="order-form__label">Квартира</label>
+                                    <input type="text" name="apartment" class="order-form__input" id="apartment" placeholder="Введите номер квартиры">
+                                    <div id="error_apartment" class="order-form__validation-message"></div>
+                                </div>
+                            </div>
+
+                            <!-- Третий ряд: Комментарий -->
+                            <div class="order-form__field order-form__field--comments">
+                                <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
+                                <textarea name="comment" class="order-form__textarea" id="comments" rows="2" placeholder="Введите ваш комментарий"></textarea>
+                                <div id="error_comment" class="order-form__validation-message"></div>
+                            </div>
+
+                            <!-- Ошибки формы -->
+                            <div id="form-errors" class="error-container"></div>
+
+                            <!-- Четвёртый ряд: Согласие и кнопка -->
+                            <div class="order-form__field order-form__field--actions">
+                                <div class="order-form__consent-text">
+                                    Нажимая кнопку «Отправить заявку», вы соглашаетесь с 
+                                    <a 
+                                        target="_blank" 
+                                        class="order-form__link" 
+                                        href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Условиями обработки персональных данных
+                                    </a>
+                                </div>
+                                <button type="submit" class="order-form__submit" disabled aria-label="Отправить заявку на подключение">Отправить заявку</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </div>
+
+            <!-- Боковая панель с итогами (только для десктопа) -->
+            <aside class="summary summary--desktop">
+                <div class="summary__content">
+                    <h3 class="summary__title">Заявка на оборудование</h3>
+                    <div class="summary__section" id="equipmentSummary">
+                        <h5 class="summary__section-title">Оборудование</h5>
+                        <div class="summary__item">
+                            <span class="summary__item-name">{{ product.name }}</span>
+                            <span class="summary__item-value">{{ product.price|intcomma }} руб.</span>
+                        </div>
+                    </div>
+                    <div class="summary__total">
+                        <h5 class="summary__total-title">Итого к оплате:</h5>
+                        <h5 class="summary__total-value">{{ product.price|intcomma }} руб.</h5>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
+<script>
+    // Переменные для хранения выбранных значений
+    let selectedEquipment = {};
+    let selectedServices = {};
+    let selectedTVPackages = {};
+    let pendingPaymentOptions = {};
+
+    // Маска телефона
+    const phoneInput = document.querySelector('#orderForm [name="phone"]');
+    let phoneMask = null;
+    if (phoneInput) {
+        phoneMask = IMask(phoneInput, {
+            mask: '+{7}(000)000-00-00',
+            lazy: false
+        });
+    }
+
+    // Подготовка номера телефона
+    function preparePhoneNumber(value) {
+        const digits = value.replace(/\D/g, '');
+        if (digits.length === 11 && ['7', '8'].includes(digits[0])) {
+            return '+7' + digits.slice(1);
+        }
+        return null;
+    }
+
+    // Валидация формы: активация кнопки при корректных данных
+    function validateOrderForm() {
+        const fullName = document.querySelector('#orderForm [name="full_name"]').value.trim();
+        const phoneValid = phoneMask && preparePhoneNumber(phoneMask.unmaskedValue);
+        const submitBtn = document.querySelector('.order-form__submit');
+        submitBtn.disabled = !(fullName.length >= 3 && phoneValid);
+    }
+
+    // Слушатели на ввод
+    document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"]').forEach(el => {
+        el.addEventListener('input', validateOrderForm);
+    });
+
+    // Основной обработчик отправки формы
+    document.getElementById('orderForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Сброс ошибок
+        document.querySelectorAll('.order-form__input, .order-form__textarea').forEach(el => {
+            el.classList.remove('order-form__input--invalid');
+        });
+        document.querySelectorAll('.order-form__validation-message').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        document.getElementById('form-errors').innerHTML = '';
+
+        const formData = new FormData(this);
+
+        // Валидация телефона
+        const phone = phoneMask ? preparePhoneNumber(phoneMask.unmaskedValue) : null;
+        if (!phone) {
+            const phoneField = document.querySelector('#phone');
+            phoneField.classList.add('order-form__input--invalid');
+            document.getElementById('error_phone').textContent = 'Введите корректный номер';
+            document.getElementById('error_phone').style.display = 'block';
+            return;
+        }
+        formData.set('phone', phone);
+
+        // Валидация имени
+        const fullName = formData.get('full_name').trim();
+        if (fullName.length < 3) {
+            document.querySelector('#name').classList.add('order-form__input--invalid');
+            document.getElementById('error_full_name').textContent = 'Минимум 3 символа';
+            document.getElementById('error_full_name').style.display = 'block';
+            return;
+        }
+
+        // Кнопка отправки
+        const submitBtn = document.querySelector('.order-form__submit');
+        submitBtn.disabled = true;
+        submitBtn.classList.add('order-form__submit--loading');
+        submitBtn.innerHTML = 'Отправка...';
+
+        try {
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+            const data = await response.json();
+            if (response.ok && data.success) {
+                this.reset();
+                if (phoneMask) phoneMask.updateValue();
+                localStorage.removeItem('selectedEquipment');
+                localStorage.removeItem('selectedServices');
+                localStorage.removeItem('selectedTVPackages');
+                window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
+            } else {
+                const errorList = document.createElement('ul');
+                errorList.className = 'errorlist';
+                (data.non_field_errors || []).forEach(err => {
+                    const li = document.createElement('li');
+                    li.textContent = err;
+                    errorList.appendChild(li);
+                });
+                for (const [field, errors] of Object.entries(data.errors || {})) {
+                    errors.forEach(err => {
+                        const li = document.createElement('li');
+                        li.textContent = err;
+                        errorList.appendChild(li);
+                    });
+                }
+                document.getElementById('form-errors').appendChild(errorList);
+                document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (error) {
+            console.error('Ошибка сети:', error);
+            document.getElementById('form-errors').innerHTML = '<ul class="errorlist"><li>Ошибка соединения. Попробуйте позже.</li></ul>';
+            document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('order-form__submit--loading');
+            submitBtn.innerHTML = 'Отправить заявку';
+        }
+    });
+
+    // Инициализация при загрузке
+    window.addEventListener('DOMContentLoaded', () => {
+        validateOrderForm();
+    });
+</script>
+{% endblock %}

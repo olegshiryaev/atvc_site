@@ -1,12 +1,16 @@
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 
 from apps.cities.models import Locality
 from apps.core.models import AdditionalService, TVChannel, TVChannelPackage, Tariff
 from apps.equipments.models import Product, ProductVariant
 from apps.orders.forms import OrderForm
-from apps.orders.models import Order, OrderProduct
+from apps.orders.models import CartItem, Order, OrderProduct
+from django.views.generic import TemplateView
 from apps.orders.tasks import send_order_notification
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib import messages
 
@@ -206,67 +210,67 @@ def submit_order(request, locality_slug):
         }, status=400)
     
 
-def add_to_cart(request, locality_slug):
-    if request.method == "POST":
-        cart = request.session.get("cart", {"products": {}, "tariff": None, "services": {}, "tv_packages": {}})
-        item_type = request.POST.get("item_type")  # product, tariff, service, tv_package
-        quantity = int(request.POST.get("quantity", 1))
+# def add_to_cart(request, locality_slug):
+#     if request.method == "POST":
+#         cart = request.session.get("cart", {"products": {}, "tariff": None, "services": {}, "tv_packages": {}})
+#         item_type = request.POST.get("item_type")  # product, tariff, service, tv_package
+#         quantity = int(request.POST.get("quantity", 1))
 
-        if item_type == "product":
-            variant_id = request.POST.get("variant_id")
-            variant = get_object_or_404(ProductVariant, id=variant_id)
-            product = variant.product
-            price = variant.price if variant.price is not None else product.price or 0
-            cart_key = f"variant_{variant_id}"
+#         if item_type == "product":
+#             variant_id = request.POST.get("variant_id")
+#             variant = get_object_or_404(ProductVariant, id=variant_id)
+#             product = variant.product
+#             price = variant.price if variant.price is not None else product.price or 0
+#             cart_key = f"variant_{variant_id}"
 
-            # Проверка остатка на складе
-            if variant.stock < quantity:
-                return JsonResponse({"success": False, "message": "Недостаточно товара на складе"}, status=400)
+#             # Проверка остатка на складе
+#             if variant.stock < quantity:
+#                 return JsonResponse({"success": False, "message": "Недостаточно товара на складе"}, status=400)
 
-            if cart_key in cart["products"]:
-                cart["products"][cart_key]["quantity"] += quantity
-            else:
-                cart["products"][cart_key] = {
-                    "product_id": product.id,
-                    "variant_id": variant_id,
-                    "quantity": quantity,
-                    "price": price,
-                    "name": product.name,
-                    "color": variant.get_color_display(),
-                }
+#             if cart_key in cart["products"]:
+#                 cart["products"][cart_key]["quantity"] += quantity
+#             else:
+#                 cart["products"][cart_key] = {
+#                     "product_id": product.id,
+#                     "variant_id": variant_id,
+#                     "quantity": quantity,
+#                     "price": price,
+#                     "name": product.name,
+#                     "color": variant.get_color_display(),
+#                 }
 
-        elif item_type == "tariff":
-            tariff_id = request.POST.get("tariff_id")
-            tariff = get_object_or_404(Tariff, id=tariff_id)
-            cart["tariff"] = {
-                "id": tariff.id,
-                "name": tariff.name,
-                "price": tariff.price,
-            }
+#         elif item_type == "tariff":
+#             tariff_id = request.POST.get("tariff_id")
+#             tariff = get_object_or_404(Tariff, id=tariff_id)
+#             cart["tariff"] = {
+#                 "id": tariff.id,
+#                 "name": tariff.name,
+#                 "price": tariff.price,
+#             }
 
-        elif item_type == "service":
-            service_id = request.POST.get("service_id")
-            service = get_object_or_404(AdditionalService, id=service_id)
-            cart["services"][str(service_id)] = {
-                "id": service.id,
-                "name": service.name,
-                "price": service.price,
-            }
+#         elif item_type == "service":
+#             service_id = request.POST.get("service_id")
+#             service = get_object_or_404(AdditionalService, id=service_id)
+#             cart["services"][str(service_id)] = {
+#                 "id": service.id,
+#                 "name": service.name,
+#                 "price": service.price,
+#             }
 
-        elif item_type == "tv_package":
-            tv_package_id = request.POST.get("tv_package_id")
-            tv_package = get_object_or_404(TVChannelPackage, id=tv_package_id)
-            cart["tv_packages"][str(tv_package_id)] = {
-                "id": tv_package.id,
-                "name": tv_package.name,
-                "price": tv_package.price,
-            }
+#         elif item_type == "tv_package":
+#             tv_package_id = request.POST.get("tv_package_id")
+#             tv_package = get_object_or_404(TVChannelPackage, id=tv_package_id)
+#             cart["tv_packages"][str(tv_package_id)] = {
+#                 "id": tv_package.id,
+#                 "name": tv_package.name,
+#                 "price": tv_package.price,
+#             }
 
-        request.session["cart"] = cart
-        request.session.modified = True
-        return JsonResponse({"success": True, "message": "Элемент добавлен в корзину"})
+#         request.session["cart"] = cart
+#         request.session.modified = True
+#         return JsonResponse({"success": True, "message": "Элемент добавлен в корзину"})
 
-    return JsonResponse({"success": False, "message": "Неверный запрос"}, status=400)
+#     return JsonResponse({"success": False, "message": "Неверный запрос"}, status=400)
 
 def cart_view(request, locality_slug):
     cart = request.session.get("cart", {"products": {}, "tariff": None, "services": {}, "tv_packages": {}})
@@ -397,3 +401,209 @@ def service_detail(request, locality_slug, service_id):
         "service": service,
         "locality_slug": locality_slug,
     })
+
+
+@csrf_exempt
+def debug_cart(request, locality_slug=None):  # Добавляем необязательный параметр
+    cart_info = [
+        f"Корзина ID: {request.cart.id}",
+        f"Сессия: {request.session.session_key}",
+        f"Товаров в корзине: {request.cart.items.count()}",
+        f"Общая сумма: {request.cart.total_price()} руб.",
+        f"Локация: {locality_slug}"  # Для проверки
+    ]
+    return HttpResponse("<br>".join(cart_info))
+
+
+
+@require_POST
+def add_to_cart(request, locality_slug):
+    model_type = request.POST.get('model_type')  # 'product', 'tariff', 'tvpackage', 'service'
+    object_id = request.POST.get('object_id')
+    
+    # Определяем модель по типу
+    if model_type == 'product':
+        from apps.equipments.models import Product
+        model = Product
+    elif model_type == 'tariff':
+        from apps.core.models import Tariff
+        model = Tariff
+    elif model_type == 'tvpackage':
+        from apps.core.models import TVChannelPackage
+        model = TVChannelPackage
+    elif model_type == 'service':
+        from apps.core.models import AdditionalService
+        model = AdditionalService
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid model type'})
+
+    # Получаем объект
+    obj = model.objects.get(pk=object_id)
+    
+    # Определяем цену
+    if hasattr(obj, 'get_actual_price'):  # Для тарифов с акциями
+        price = obj.get_actual_price()
+    else:
+        price = obj.price
+
+    # Создаем запись в корзине
+    content_type = ContentType.objects.get_for_model(model)
+    cart_item, created = CartItem.objects.get_or_create(
+        cart=request.cart,
+        content_type=content_type,
+        object_id=object_id,
+        defaults={'price': price}
+    )
+
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+
+    return JsonResponse({
+        'success': True,
+        'cart_total': request.cart.total_price(),
+        'items_count': request.cart.items.count()
+    })
+
+
+def get_cart_count(request, locality_slug):
+    return JsonResponse({
+        'success': True,
+        'items_count': request.cart.items.count()
+    })
+
+
+class CartView(TemplateView):
+    template_name = 'orders/cart.html'
+
+    def get(self, request, locality_slug):
+        cart_items = request.cart.items.select_related('content_type').all()
+        
+        # Группируем товары по типам
+        items_by_type = {}
+        for item in cart_items:
+            model_name = item.content_type.model
+            if model_name not in items_by_type:
+                items_by_type[model_name] = []
+            item.content_object = item.content_object  # Преобразуем generic relation
+            items_by_type[model_name].append(item)
+        
+        # Рассчитываем общую сумму
+        total_price = sum(item.total_price() for item in cart_items)
+
+        context = {
+            'locality_slug': locality_slug,
+            'items_by_type': items_by_type,
+            'total_price': total_price,
+            'cart_items_count': request.cart.items.count(),
+        }
+        return render(request, self.template_name, context)
+
+    def post(self, request, locality_slug):
+        action = request.POST.get('action')
+        
+        if action == 'update_quantity':
+            item_id = request.POST.get('item_id')
+            new_quantity = int(request.POST.get('quantity', 1))
+            
+            try:
+                item = request.cart.items.get(id=item_id)
+                if new_quantity > 0:
+                    item.quantity = new_quantity
+                    item.save()
+                    messages.success(request, 'Количество обновлено')
+                else:
+                    item.delete()
+                    messages.success(request, 'Товар удален из корзины')
+            except CartItem.DoesNotExist:
+                messages.error(request, 'Товар не найден в корзине')
+        
+        elif action == 'remove_item':
+            item_id = request.POST.get('item_id')
+            try:
+                item = request.cart.items.get(id=item_id)
+                item.delete()
+                messages.success(request, 'Товар удален из корзины')
+            except CartItem.DoesNotExist:
+                messages.error(request, 'Товар не найден в корзине')
+        
+        elif action == 'clear_cart':
+            request.cart.items.all().delete()
+            messages.success(request, 'Корзина очищена')
+        
+        return redirect('orders:cart_view', locality_slug=locality_slug)
+    
+
+class EquipmentOrderView(TemplateView):
+    template_name = 'orders/equipment_order.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = get_object_or_404(Product, pk=kwargs['product_id'])
+        locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
+
+        installment_12_total = product.get_total_installment_price(12) if product.installment_available else 0
+        installment_24_total = product.get_total_installment_price(24) if product.installment_available else 0
+
+        context.update({
+            'product': product,
+            'locality': locality,
+            'tariff': None,
+            'initial_equipment': [str(product.id)],
+            'initial_payment_options': {str(product.id): 'purchase'},
+            'installment_12_total': installment_12_total,
+            'installment_24_total': installment_24_total,
+            'form': OrderForm(locality=locality)
+        })
+        return context
+
+    def post(self, request, *args, **kwargs):
+        locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
+        product = get_object_or_404(Product, pk=kwargs['product_id'])
+
+        form = OrderForm(request.POST, locality=locality)
+
+        if form.is_valid():
+            order = form.save(commit=False)
+            order.locality = locality
+            order.save()
+
+            payment_options = json.loads(form.cleaned_data.get("equipment_payment_options", "{}"))
+            payment_type = payment_options.get(str(product.id), 'purchase')
+
+            if payment_type == 'installment12' and product.installment_12_months:
+                price = product.installment_12_months
+            elif payment_type == 'installment24' and product.installment_24_months:
+                price = product.installment_24_months
+            else:
+                price = product.price
+
+            OrderProduct.objects.create(
+                order=order,
+                product=product,
+                price=price,
+                quantity=1,
+                payment_type=payment_type
+            )
+
+            # ✅ Убедимся, что URL корректный
+            success_url = reverse('orders:order_success', kwargs={
+                'order_id': order.id
+            })
+
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'redirect_url': success_url
+                })
+
+            return redirect('orders:order_success', order_id=order.id)
+
+        # Ошибки формы
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            errors = {field: [str(e) for e in error_list] for field, error_list in form.errors.items()}
+            return JsonResponse({'success': False, 'errors': errors}, status=400)
+
+        context = self.get_context_data(**kwargs)
+        context['form'] = form
+        return self.render_to_response(context)

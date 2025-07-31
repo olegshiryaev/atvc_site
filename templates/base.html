@@ -107,11 +107,11 @@
     {% include 'partials/_footer.html' %}
 
     <!-- Bootstrap JS -->
-    <script defer src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <!-- IMask JS -->
-    <script defer src="{% static 'js/imask.min.js' %}"></script>
+    <script src="{% static 'js/imask.js' %}"></script>
     <!-- Alpine.js -->
-    <script defer src="{% static 'js/alpinejs.min.js' %}" defer></script>
+    <script src="{% static 'js/alpinejs.min.js' %}"></script>
     <!-- Swiper JS -->
     <script defer src="{% static 'js/swiper-bundle.min.js' %}"></script>
     <!-- Глобальные переменные и отладка -->
@@ -624,5 +624,6 @@
             if (socket) socket.close();
         });
     </script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

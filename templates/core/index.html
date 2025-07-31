@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static image_tags %}
 {% block title %}Главная страница{% endblock %}
 {% block content %}
 <div class="page__container container">
@@ -72,8 +72,8 @@
         {% endif %}
 
 
-        <!-- Блок услуг -->
-        {% include 'core/available_services.html' %}
+        {% comment %} <!-- Блок услуг -->
+        {% include 'core/available_services.html' %} {% endcomment %}
         
         <!-- Блок тарифов -->
         {% include 'core/partials/tariffs_section.html' %}
@@ -94,31 +94,35 @@
                     <div class="swiper-wrapper">
                         {% for product in popular_products %}
                             <li class="product-card products-slider-block__item swiper-slide" 
+                                data-product-id="{{ product.id }}"
                                 data-product-title="{{ product.name }}" 
                                 data-product-price="{{ product.price|default_if_none:'' }}">
-                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
-                                    <div class="product-card__cart" data-product-change-cart=""></div>
-                                    <div class="product-card__img-wrap">
-                                        {% with main_image=product.get_main_image %}
-                                            {% if main_image %}
-                                                <img data-lazy-src="{{ main_image.image.url }}" 
-                                                    width="400" height="400" 
-                                                    alt="{{ product.name }}" 
-                                                    class="product-card__img" 
-                                                    src="{{ main_image.image.url }}">
-                                            {% else %}
-                                                <img data-lazy-src="/static/placeholder/400x400.webp" 
-                                                    width="400" height="400" 
-                                                    alt="{{ product.name }}" 
-                                                    class="product-card__img" 
-                                                    src="/static/placeholder/400x400.webp">
-                                            {% endif %}
-                                        {% endwith %}
-                                    </div>
-                                    <h6 class="product-card__title h6">{{ product.name }}</h6>
-                                    <div class="product-card__desc">
-                                        <span>{{ product.short_description|default_if_none:'' }}</span>
-                                    </div>
+                                <div class="product-card__wrapper">
+                                    <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__link">
+                                        <div class="product-card__cart" data-product-change-cart=""></div>
+                                        <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
+                                            {% with main_image=product.get_main_image %}
+                                                {% if main_image %}
+                                                    <img data-lazy-src="{{ main_image.image.url }}" 
+                                                        width="400" height="400" 
+                                                        alt="{{ product.name }}" 
+                                                        class="product-card__img" 
+                                                        src="{{ main_image.image.url }}">
+                                                {% else %}
+                                                    <img data-lazy-src="/static/placeholder/400x400.webp" 
+                                                        width="400" height="400" 
+                                                        alt="{{ product.name }}" 
+                                                        class="product-card__img" 
+                                                        src="/static/placeholder/400x400.webp">
+                                                {% endif %}
+                                            {% endwith %}
+                                        </div>
+                                        <h6 class="product-card__title h6">{{ product.name }}</h6>
+                                        <div class="product-card__desc">
+                                            <span>{{ product.short_description|default_if_none:'' }}</span>
+                                        </div>
+                                    </a>
+                                    
                                     <div class="product-card__bottom">
                                         <div class="product-card__price h5">
                                             {% if product.price %}
@@ -127,9 +131,13 @@
                                                 Цена по запросу
                                             {% endif %}
                                         </div>
-                                        <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                                       <button class="product-card__btn btn" 
+                                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'"
+                                                {% if not product.price %}disabled title="Товар недоступен для заказа"{% endif %}>
+                                            {% if product.price %}Заказать{% else %}Цена по запросу{% endif %}
+                                        </button>
                                     </div>
-                                </a>
+                                </div>
                             </li>
                         {% empty %}
                             <li class="product-card products-slider-block__item swiper-slide">
@@ -215,8 +223,8 @@
         </section>
         {% endif %}
 
-        <!-- Форма -->
-        {% include "core/form_main_block.html" with form=form locality=locality %}
+        {% comment %} <!-- Форма -->
+        {% include "core/form_main_block.html" with form=form locality=locality %} {% endcomment %}
 
     </div>
 </div>
