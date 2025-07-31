@@ -8227,7 +8227,6 @@ button.swiper-pagination-bullet {
 .tariff-info__price-value {
     font-size: var(--font-size-lg);
     font-weight: 500;
-    text-align: end;
 }
 
 .tariff-info__price-unit {
@@ -8587,7 +8586,6 @@ button.swiper-pagination-bullet {
     .equipment__image-container {
         width: 100px;
         height: 56px;
-        align-self: center;
     }
 
     /* Группа информации растягивается, выравнивание слева */
