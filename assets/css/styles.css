@@ -8143,6 +8143,7 @@ button.swiper-pagination-bullet {
 .order-form__main {
     display: flex;
     flex-direction: column;
+    min-width: 0;
     gap: var(--spacing-lg);
 }
 
@@ -8519,9 +8520,9 @@ button.swiper-pagination-bullet {
     font-weight: 600;
     margin: 0;
     line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal;
+    overflow: visible;
+    word-wrap: break-word;
 }
 
 .equipment__footer {
@@ -9395,7 +9396,7 @@ button.swiper-pagination-bullet {
     }
 
     .summary--desktop {
-        display: block;
+        display: flex;
         background-color: #f3f8f2;
         border-radius: var(--radius-xl);
         box-shadow: var(--shadow);
@@ -9403,6 +9404,7 @@ button.swiper-pagination-bullet {
         height: fit-content;
         position: sticky;
         top: var(--spacing-lg);
+        min-width: 350px;
     }
 }
 
