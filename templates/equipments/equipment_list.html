@@ -102,12 +102,14 @@
                                     <h6 class="product-card__title h6">{{ product.name }}</h6>
 
                                     <div class="product-card__desc">
-                                        {{ product.short_description|truncatewords:20|default_if_none:"" }}
+                                        {{ product.short_description|truncatewords:20|default_if_none:""|default:"" }}
                                     </div>
 
                                     <div class="product-card__bottom">
                                         <div class="product-card__price h5">{{ product.price }} ₽</div>
-                                        <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                                        <button class="product-card__btn btn" 
+                                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                        </button>
                                     </div>
                                 </a>
                             </li>
@@ -216,7 +218,7 @@
 
                                 <!-- Контент -->
                                 <h6 class="product-card__title h6">{{ product.name }}</h6>
-                                <p class="product-card__desc">{{ product.short_description|truncatewords:12 }}</p>
+                                <p class="product-card__desc">{{ product.short_description|truncatewords:12|default_if_none:""|default:"" }}</p>
                                 <div class="product-card__bottom d-flex justify-content-between">
                                     <div class="product-card__price h5">{{ product.price }} ₽</div>
                                     <i class="bi bi-cart fs-5 text-secondary"></i>

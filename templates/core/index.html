@@ -132,9 +132,7 @@
                                             {% endif %}
                                         </div>
                                        <button class="product-card__btn btn" 
-                                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'"
-                                                {% if not product.price %}disabled title="Товар недоступен для заказа"{% endif %}>
-                                            {% if product.price %}Заказать{% else %}Цена по запросу{% endif %}
+                                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
                                         </button>
                                     </div>
                                 </div>
