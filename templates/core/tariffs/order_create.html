@@ -642,20 +642,33 @@
     function openEquipmentModal(modal) {
         if (typeof modal === 'string') modal = document.getElementById(`installmentModal-${modal}`);
         if (!modal) return;
+
         modal.classList.add('show');
         modal.style.display = 'flex';
+
+        // Получаем ID продукта из ID модального окна
+        const modalId = modal.id;
+        const productId = modalId.split('-').pop();
+
+        // Закрытие по клику на бэкдроп
         modal.addEventListener('click', function closeOnBackdrop(e) {
             if (e.target === modal) {
-                closeEquipmentModal(modal);
+                closeAndResetModal(productId); // ← сбрасываем выбор
                 modal.removeEventListener('click', closeOnBackdrop);
             }
         });
+
+        // Закрытие по кнопкам с data-modal-close
         modal.querySelectorAll('[data-modal-close]').forEach(button => {
-            button.addEventListener('click', () => closeEquipmentModal(modal));
+            button.addEventListener('click', () => {
+                closeAndResetModal(productId); // ← вместо closeEquipmentModal
+            });
         });
+
+        // Закрытие по Escape
         document.addEventListener('keydown', function closeOnEscape(e) {
             if (e.key === 'Escape') {
-                closeEquipmentModal(modal);
+                closeAndResetModal(productId); // ← сбрасываем выбор
                 document.removeEventListener('keydown', closeOnEscape);
             }
         });

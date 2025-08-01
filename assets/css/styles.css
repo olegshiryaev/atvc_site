@@ -8731,6 +8731,7 @@ button.swiper-pagination-bullet {
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     overflow: hidden;
+    max-width: 500px;
     animation: equipment-payment-modal__slide-in 0.3s ease-in-out;
 }
 
@@ -8784,6 +8785,10 @@ button.swiper-pagination-bullet {
     height: 1.25rem;
     cursor: pointer;
     accent-color: var(--main-color);
+}
+
+.equipment-payment-modal__option-label {
+    cursor: pointer;
 }
 
 .equipment-payment-modal__footer {
@@ -9000,6 +9005,10 @@ button.swiper-pagination-bullet {
 }
 
 /* Текстовое поле комментария */
+.order-form__field--comments {
+    grid-column: 1 / -1;
+}
+
 .order-form__textarea {
     resize: vertical;
     min-height: 80px;
