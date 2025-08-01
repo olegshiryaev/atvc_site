@@ -9199,7 +9199,7 @@ button.swiper-pagination-bullet {
     }
     
     .tariff-info__price-value {
-        font-size: var(--font-size-sm); /* Дополнительно уменьшено */
+        font-size: var(--font-size-base);
     }
     
     .tariff-info__title {
