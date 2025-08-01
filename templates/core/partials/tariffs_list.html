@@ -64,9 +64,6 @@
                                 <div class="tariff-card-attr-value">
                                     {{ tariff.total_channels }}
                                     <span class="tariff-card-attr-unit">{{ tariff.total_channels|decline_channel }}</span>
-                                    {% if tariff.total_hd_channels %}
-                                        <span class="tariff-card-attr-unit">({{ tariff.total_hd_channels }} HD)</span>
-                                    {% endif %}
                                 </div>
                             </div>
                             {% endif %}

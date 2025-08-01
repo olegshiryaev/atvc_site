@@ -714,8 +714,6 @@ class TVChannelPackage(models.Model):
         else:
             channel_word = "каналов"
         
-        if stats['hd'] > 0:
-            return f"{total} {channel_word} ({stats['hd']} HD)"
         return f"{total} {channel_word}"
 
     def has_hd_channels(self):
