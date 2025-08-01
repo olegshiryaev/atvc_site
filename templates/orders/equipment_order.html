@@ -21,22 +21,22 @@
                             {% endwith %}
                         </div>
                         <div class="product-info__details">
-                            <h3 class="product-info__title">{{ product.name }}</h3>
+                            <div class="product-info__header">
+                                <h3 class="product-info__title">{{ product.name }}</h3>
+                                <div class="product-info__price-inline">
+                                    <div class="product-info__price-value">{{ product.price|intcomma }} руб.</div>
+                                </div>
+                            </div>
                             {% if product.short_description %}
                                 <p class="product-info__description">{{ product.short_description|safe }}</p>
                             {% endif %}
-                            <div class="product-info__price-block">
-                                <div class="product-info__price">
-                                    <div class="product-info__price-value">{{ product.price|intcomma }} руб.</div>
+                            {% if product.installment_available %}
+                                <div class="product-info__installment">
+                                    <div>Рассрочка:</div>
+                                    <div>{{ product.installment_12_months|intcomma }} руб./мес. (12 мес.)</div>
+                                    <div>{{ product.installment_24_months|intcomma }} руб./мес. (24 мес.)</div>
                                 </div>
-                                {% if product.installment_available %}
-                                    <div class="product-info__installment">
-                                        <div>Рассрочка:</div>
-                                        <div>{{ product.installment_12_months|intcomma }} руб./мес. (12 мес.)</div>
-                                        <div>{{ product.installment_24_months|intcomma }} руб./мес. (24 мес.)</div>
-                                    </div>
-                                {% endif %}
-                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 </section>
