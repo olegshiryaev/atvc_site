@@ -4933,12 +4933,6 @@ button.swiper-pagination-bullet {
 /* Основные карточки товаров */
 .product-card {
     height: auto;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.product-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .product-card__wrapper {
@@ -4956,15 +4950,10 @@ button.swiper-pagination-bullet {
     margin: auto;
 }
 
-.product-card:hover .item__img-wrap {
-    transform: scale(1.1);
-}
-
 .product-card__img-wrap {
     position: relative;
     display: block;
     margin-bottom: 20px;
-    transition: all 0.3s linear;
 }
 
 .product-card__img-wrap:before {
