@@ -8741,6 +8741,33 @@ button.swiper-pagination-bullet {
     padding: 1rem 1.5rem;
 }
 
+.equipment-payment-modal__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0;
+    color: #1f2937;
+}
+
+.equipment-payment-modal__close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.equipment-payment-modal__close svg {
+    width: 20px;
+    height: 20px;
+    stroke: #6b7280;
+}
+
+.equipment-payment-modal__close:hover svg {
+    stroke: #1f2937;
+}
+
 .equipment-payment-modal__body {
     padding: 1.5rem;
 }
@@ -8774,6 +8801,24 @@ button.swiper-pagination-bullet {
     cursor: pointer;
     border: none;
     transition: background-color 0.2s;
+}
+
+.equipment-payment-modal__button--secondary {
+    background: #e5e7eb;
+    color: #1f2937;
+}
+
+.equipment-payment-modal__button--secondary:hover {
+    background: #d1d5db;
+}
+
+.equipment-payment-modal__button--primary {
+    background: var(--main-color);
+    color: #fff;
+}
+
+.equipment-payment-modal__button--primary:hover {
+    background: var(--main-color-on-hover);
 }
 
 /* Основной контейнер дополнительных услуг */
