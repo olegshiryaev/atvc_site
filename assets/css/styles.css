@@ -4932,22 +4932,23 @@ button.swiper-pagination-bullet {
 
 /* Основные карточки товаров */
 .product-card {
-    height: auto;
-}
-
-.product-card__wrapper {
     position: relative;
-    max-width: 400px;
     display: flex;
     flex-direction: column;
-    width: 100%;
     height: 100%;
-    padding: 30px;
-    color: #2d2d2d;
     border: 1px solid var(--smoky-white-color);
     border-radius: 15px;
     background-color: #fff;
-    margin: auto;
+    overflow: hidden;
+}
+
+.product-card__wrapper {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    padding: 30px;
+    color: #2d2d2d;
+    text-decoration: none;
 }
 
 .product-card__img-wrap {
@@ -5005,27 +5006,34 @@ button.swiper-pagination-bullet {
     line-height: 130%;
     letter-spacing: 0.28px;
     color: #575757;
-    margin-bottom: 5px;
+    margin-bottom: 15px;
+    flex-grow: 1;
 }
 
 .product-card__bottom {
-    margin: auto 0 0;
+    padding: 0 30px 30px;
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
+    justify-content: space-between;
     gap: 10px;
-    white-space: nowrap;
+    margin-top: auto;
 }
 
 .product-card__price {
-    font-size: 32px;
+    font-size: 24px;
     font-weight: 700;
-    line-height: 40px;
+    line-height: 1;
     letter-spacing: -0.128px;
+    white-space: nowrap;
 }
 
 .product-card__btn {
-    width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
+    border-radius: 8px;
+    flex-shrink: 0;
+    width: auto;
+    min-width: 120px;
 }
 
 .product-card__btn.loading {
@@ -5045,6 +5053,22 @@ button.swiper-pagination-bullet {
     border-top-color: currentColor;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+}
+
+@media (max-width: 768px) {
+    .product-card__wrapper {
+        padding: 20px;
+    }
+    .product-card__bottom {
+        padding: 0 20px 20px;
+    }
+    .product-card__price {
+        font-size: 20px;
+    }
+    .product-card__btn {
+        min-width: 100px;
+        padding: 10px 15px;
+    }
 }
 
 /* Стили для выбора цвета в виде кружков */
@@ -5099,6 +5123,11 @@ button.swiper-pagination-bullet {
 
 .products-slider-block .slider-navs {
     margin-top: 28px;
+}
+
+.products-slider-block__item.swiper-slide {
+    height: auto;
+    display: flex;
 }
 
 .products-slider-block__header {

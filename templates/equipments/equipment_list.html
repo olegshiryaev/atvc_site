@@ -90,13 +90,10 @@
                 <div class="products-list-block__wrapper" data-products-wrapper>
                     <ul class="products__list">
                         {% for product in products %}
-                            <li class="product-card" data-product="{{ product.id }}" data-product-title="{{ product.name }}" data-product-price="{{ product.price }}" data-product-incatalog="1">
-                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
-                                    
-                                    <div class="product-card__cart" data-product-change-cart="{{ product.uuid|default:'' }}"></div>
-                                    
+                            <li class="product-card" data-product-id="{{ product.id }}" data-product-title="{{ product.name }}" data-product-price="{{ product.price|default_if_none:'' }}" data-product-incatalog="1">
+                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">                                 
                                     <div class="product-card__img-wrap">
-                                        <img src="{{ product.images.first.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
+                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-card__img">
                                     </div>
 
                                     <h6 class="product-card__title h6">{{ product.name }}</h6>
@@ -104,14 +101,13 @@
                                     <div class="product-card__desc">
                                         {{ product.short_description|truncatewords:20|default_if_none:""|default:"" }}
                                     </div>
-
-                                    <div class="product-card__bottom">
-                                        <div class="product-card__price h5">{{ product.price }} ₽</div>
-                                        <button class="product-card__btn btn" 
-                                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
-                                        </button>
-                                    </div>
                                 </a>
+                                <div class="product-card__bottom">
+                                    <div class="product-card__price h5">{{ product.price }} руб.</div>
+                                    <button class="product-card__btn btn" 
+                                        onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                    </button>
+                                </div>
                             </li>
                         {% empty %}
                             <li class="alert alert-info">Товаров не найдено.</li>
@@ -203,27 +199,40 @@
                 <div class="swiper">
                     <div class="swiper-wrapper">
                         {% for product in popular_products %}
-                        <li class="product-card products-slider-block__item swiper-slide">
+                        <li class="product-card products-slider-block__item swiper-slide"
+                            data-product-id="{{ product.id }}"
+                            data-product-title="{{ product.name }}" 
+                            data-product-price="{{ product.price|default_if_none:'' }}">
                             <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
                                 <!-- Изображение -->
-                                {% with product.images.first as image %}
-                                    <div class="product-card__img-wrap">
-                                        {% if image %}
-                                            <img src="{{ image.image.url }}" class="product-card__img" alt="{{ product.name }}">
+                                <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
+                                    {% with main_image=product.get_main_image %}
+                                        {% if main_image %}
+                                            <img data-lazy-src="{{ main_image.image.url }}" 
+                                                alt="{{ product.name }}" 
+                                                class="product-card__img" 
+                                                src="{{ main_image.image.url }}">
                                         {% else %}
-                                            <img src="{% static 'img/no-image.png' %}" class="img-fluid popular-card-img" alt="Нет изображения">
+                                            <img data-lazy-src="/static/placeholder/400x400.webp" 
+                                                alt="{{ product.name }}" 
+                                                class="product-card__img" 
+                                                src="/static/placeholder/400x400.webp">
                                         {% endif %}
-                                    </div>
-                                {% endwith %}
+                                    {% endwith %}
+                                </div>
 
                                 <!-- Контент -->
                                 <h6 class="product-card__title h6">{{ product.name }}</h6>
-                                <p class="product-card__desc">{{ product.short_description|truncatewords:12|default_if_none:""|default:"" }}</p>
-                                <div class="product-card__bottom d-flex justify-content-between">
-                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
-                                    <i class="bi bi-cart fs-5 text-secondary"></i>
+                                <div class="product-card__desc">
+                                    {{ product.short_description|truncatewords:20|default_if_none:""|default:"" }}
                                 </div>
                             </a>
+                            <div class="product-card__bottom">
+                                <div class="product-card__price h5">{{ product.price }} руб.</div>
+                                <button class="product-card__btn btn" 
+                                    onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                </button>
+                            </div>
                         </li>
                         {% endfor %}
                     </div>
