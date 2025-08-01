@@ -9190,7 +9190,7 @@ button.swiper-pagination-bullet {
     flex-shrink: 0;
     min-width: 100px;
     text-align: right;
-    max-width: 50%;
+    max-width: 70%;
 }
 
 .summary__item--empty {
