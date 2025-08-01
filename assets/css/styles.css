@@ -8120,13 +8120,13 @@ button.swiper-pagination-bullet {
     }
 }
 
-/* Общие стили */
+/* Основной контейнер формы */
 .order-form {
     background-color: var(--color-white);
     width: 100%;
 }
 
-/* Макет */
+/* Сетка для основного макета: 2 колонки (основное содержимое и итоги) */
 .order-form__layout {
     display: grid;
     grid-template-columns: 2fr 1fr;
@@ -8134,12 +8134,7 @@ button.swiper-pagination-bullet {
     align-items: start;
 }
 
-@media (max-width: 991px) {
-    .order-form__layout {
-        grid-template-columns: 1fr;
-    }
-}
-
+/* Контейнер основного содержимого */
 .order-form__main {
     display: flex;
     flex-direction: column;
@@ -8147,7 +8142,7 @@ button.swiper-pagination-bullet {
     gap: var(--spacing-lg);
 }
 
-/* Тариф */
+/* Контейнер информации о тарифе */
 .tariff-info {
     background-color: var(--background-color);
     border-radius: var(--radius-xl);
@@ -8157,6 +8152,7 @@ button.swiper-pagination-bullet {
     margin-bottom: var(--spacing-lg);
 }
 
+/* Контент тарифа: название, описание, цена */
 .tariff-info__content {
     display: flex;
     justify-content: space-between;
@@ -8164,11 +8160,13 @@ button.swiper-pagination-bullet {
     gap: var(--spacing-md);
 }
 
+/* Заголовок тарифа */
 .tariff-info__title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
 }
 
+/* Блок "В тариф включено" */
 .tariff-info__included {
     margin-top: 1rem;
 }
@@ -8180,6 +8178,7 @@ button.swiper-pagination-bullet {
     color: #333;
 }
 
+/* Бейджи с информацией о скорости и ТВ-каналах */
 .tariff-info__badges {
     display: flex;
     flex-wrap: wrap;
@@ -8200,6 +8199,7 @@ button.swiper-pagination-bullet {
     margin-right: 0.5rem;
 }
 
+/* Специфические стили для разных типов бейджей */
 .tariff-info__badge--speed {
     background-color: #e6f3ff;
     color: #005566;
@@ -8215,11 +8215,13 @@ button.swiper-pagination-bullet {
     color: #664200;
 }
 
+/* Описание тарифа */
 .tariff-info__description {
     font-size: var(--font-size-sm);
     color: var(--muted-color);
 }
 
+/* Блок цены */
 .tariff-info__price {
     color: var(--main-color);
 }
@@ -8234,14 +8236,7 @@ button.swiper-pagination-bullet {
     color: var(--muted-color);
 }
 
-@media (max-width: 768px) {
-    .tariff-info__content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-}
-
-/* Пакеты ТВ-каналов */
+/* Основной контейнер пакетов ТВ */
 .tv-packages {
     margin-bottom: var(--spacing-lg);
     border-top: 1px solid var(--border-color);
@@ -8249,6 +8244,7 @@ button.swiper-pagination-bullet {
     animation: fadeIn 0.3s ease-in;
 }
 
+/* Заголовок и описание секции */
 .tv-packages__title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
@@ -8260,19 +8256,14 @@ button.swiper-pagination-bullet {
     margin-bottom: var(--spacing-md);
 }
 
+/* Сетка для отображения пакетов */
 .tv-packages__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
 }
 
-/* Адаптивность */
-@media (max-width: 600px) {
-    .tv-packages__list {
-        grid-template-columns: 1fr;
-    }
-}
-
+/* Карточка отдельного пакета */
 .tv-package {
     border: 1px solid var(--smoky-white-color);
     background-color: var(--background-color);
@@ -8281,8 +8272,13 @@ button.swiper-pagination-bullet {
     box-shadow: var(--shadow-card);
 }
 
-.tv-package__content {
-    flex: 1;
+/* Заголовок пакета с изображением и информацией */
+.tv-package__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
 }
 
 .tv-package__content-left {
@@ -8293,36 +8289,12 @@ button.swiper-pagination-bullet {
     min-width: 0; /* Чтобы текст нормально переносился */
 }
 
-.tv-package__header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: var(--spacing-md);
-    margin-bottom: var(--spacing-md);
-}
-
 .tv-package__info {
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: var(--spacing-xs);
     min-width: 0; /* Критично для переноса текста */
-}
-
-.tv-package__switch {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-}
-
-.tv-package__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-}
-
-.tv-package__label {
-    cursor: pointer;
 }
 
 .tv-package__name {
@@ -8343,14 +8315,6 @@ button.swiper-pagination-bullet {
     color: var(--muted-color);
 }
 
-@media (min-width: 768px) {
-    .tv-package__meta {
-        flex-direction: row;
-        align-items: center;
-        gap: var(--spacing-sm);
-    }
-}
-
 .tv-package__channels {
     white-space: nowrap;
 }
@@ -8361,11 +8325,7 @@ button.swiper-pagination-bullet {
     white-space: nowrap;
 }
 
-.tv-package__channels-link:hover {
-    color: var(--primary-color-hover);
-    text-decoration: underline;
-}
-
+/* Контейнер изображения пакета */
 .tv-package__image-container {
     width: 124px;
     height: 72px;
@@ -8392,6 +8352,7 @@ button.swiper-pagination-bullet {
     background-color: #e5e7eb;
 }
 
+/* Описание пакета и цена */
 .tv-package__description {
     font-size: var(--font-size-sm);
     color: var(--muted-color);
@@ -8407,6 +8368,7 @@ button.swiper-pagination-bullet {
     font-weight: 500;
 }
 
+/* Переключатель выбора пакета */
 .tv-package__switch-container {
     display: flex;
     align-items: center;
@@ -8414,7 +8376,7 @@ button.swiper-pagination-bullet {
     flex-shrink: 0;
 }
 
-/* Оборудование */
+/* Основной контейнер оборудования */
 .equipment {
     margin-bottom: var(--spacing-lg);
     border-top: 1px solid var(--border-color);
@@ -8422,6 +8384,7 @@ button.swiper-pagination-bullet {
     animation: fadeIn 0.3s ease-in;
 }
 
+/* Заголовок и описание секции */
 .equipment__title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
@@ -8433,12 +8396,14 @@ button.swiper-pagination-bullet {
     margin-bottom: var(--spacing-md);
 }
 
+/* Список оборудования */
 .equipment__list {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
 }
 
+/* Карточка отдельного оборудования */
 .equipment__item {
     background-color: var(--background-color);
     border: 1px solid var(--smoky-white-color);
@@ -8448,18 +8413,51 @@ button.swiper-pagination-bullet {
     transition: border-color 0.2s ease;
 }
 
-.equipment__content {
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacing-md);
-}
-
+/* Заголовок оборудования с изображением и информацией */
 .equipment__header {
     display: flex;
     align-items: center;
     gap: var(--spacing-lg);
 }
 
+.equipment__content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.equipment__info-group {
+    flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--spacing-xs);
+}
+
+.equipment__category {
+    font-size: var(--font-size-sm);
+    color: var(--main-color);
+    font-weight: 500;
+    margin: 0;
+}
+
+.equipment__name {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+    white-space: normal;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    /* Fallback для Firefox */
+    max-height: 2.8em;
+}
+
+/* Контейнер изображения оборудования */
 .equipment__image-container {
     width: 120px;
     height: 68px;
@@ -8493,37 +8491,7 @@ button.swiper-pagination-bullet {
     color: #9ca3af;
 }
 
-.equipment__info {
-    flex-grow: 1;
-    min-width: 0;
-}
-
-.equipment__info-group {
-    flex-grow: 1;
-    min-width: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: var(--spacing-xs);
-}
-
-.equipment__category {
-    font-size: var(--font-size-sm);
-    color: var(--main-color);
-    font-weight: 500;
-    margin: 0;
-}
-
-.equipment__name {
-    font-size: var(--font-size-md);
-    font-weight: 600;
-    margin: 0;
-    line-height: 1.4;
-    white-space: normal;
-    overflow: visible;
-    word-wrap: break-word;
-}
-
+/* Блок цены и переключатель */
 .equipment__footer {
     display: flex;
     justify-content: space-between;
@@ -8533,16 +8501,10 @@ button.swiper-pagination-bullet {
 .equipment__price-block {
     display: flex;
     flex-direction: column;
-    align-items: flex-start; /* Текст слева */
+    align-items: flex-start;
     gap: var(--spacing-xs);
     min-width: 150px;
     margin-right: 30px;
-}
-
-.equipment__dropdown-icon {
-    display: inline-block;
-    margin-left: 5px;
-    vertical-align: middle;
 }
 
 .equipment__payment-label {
@@ -8556,87 +8518,13 @@ button.swiper-pagination-bullet {
     font-weight: 500;
 }
 
-.equipment__no-equipment {
-    display: flex;
-    align-items: center;
-    gap: var(--spacing-sm);
-    margin-top: var(--spacing-md);
-}
-
-.equipment__checkbox {
-    width: 1.25rem;
-    height: 1.25rem;
-    cursor: pointer;
-}
-
-.equipment__label {
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
-}
-
-@media (max-width: 768px) {
-    /* Переход на двухстрочный макет */
-    .equipment__header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-
-    /* Изображение — остаётся, но чуть меньше */
-    .equipment__image-container {
-        width: 100px;
-        height: 56px;
-    }
-
-    /* Группа информации растягивается, выравнивание слева */
-    .equipment__info-group {
-        align-self: stretch;
-        text-align: left;
-    }
-
-    /* Название: разрешаем перенос, уменьшаем размер */
-    .equipment__name {
-        font-size: var(--font-size-sm);
-        white-space: normal;
-        line-height: 1.3;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
-
-    /* Блок цены и свитчер — в отдельной строке, по краям */
-    .equipment__footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        align-self: stretch;
-        margin-top: var(--spacing-xs);
-        padding-top: var(--spacing-xs);
-        border-top: 1px dashed var(--border-color);
-    }
-
-    /* Цена — компактнее */
-    .equipment__price-block {
-        min-width: auto;
-        text-align: left;
-        flex-shrink: 0;
-    }
-
-    /* Свитчер — справа, не сжимается */
-    .equipment__switch-container {
-        margin-left: auto;
-    }
-}
-
-/* Свитчер */
 .equipment__switch-container {
     flex-shrink: 0;
     display: flex;
     align-items: center;
 }
 
+/* Стили переключателя */
 .form-check-input {
     width: 2.2em;
     height: 1.2em;
@@ -8655,7 +8543,7 @@ button.swiper-pagination-bullet {
     box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
 }
 
-/* Модальное окно для выбора оплаты оборудования */
+/* Модальное окно для выбора способа оплаты оборудования */
 .equipment-payment-modal {
     position: fixed;
     top: 0;
@@ -8674,12 +8562,7 @@ button.swiper-pagination-bullet {
     animation: equipment-payment-modal__fade-in 0.3s ease-in-out;
 }
 
-.equipment-payment-modal__dialog {
-    max-width: 400px;
-    width: 90%;
-    margin: 1rem;
-}
-
+/* Элементы модального окна */
 .equipment-payment-modal__content {
     background: #fff;
     border-radius: 12px;
@@ -8693,33 +8576,6 @@ button.swiper-pagination-bullet {
     justify-content: space-between;
     align-items: center;
     padding: 1rem 1.5rem;
-}
-
-.equipment-payment-modal__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 0;
-    color: #1f2937;
-}
-
-.equipment-payment-modal__close {
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0.5rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.equipment-payment-modal__close svg {
-    width: 20px;
-    height: 20px;
-    stroke: #6b7280;
-}
-
-.equipment-payment-modal__close:hover svg {
-    stroke: #1f2937;
 }
 
 .equipment-payment-modal__body {
@@ -8740,12 +8596,6 @@ button.swiper-pagination-bullet {
     accent-color: var(--main-color);
 }
 
-.equipment-payment-modal__option-label {
-    font-size: 1rem;
-    color: #1f2937;
-    cursor: pointer;
-}
-
 .equipment-payment-modal__footer {
     display: flex;
     justify-content: flex-end;
@@ -8763,46 +8613,7 @@ button.swiper-pagination-bullet {
     transition: background-color 0.2s;
 }
 
-.equipment-payment-modal__button--secondary {
-    background: #e5e7eb;
-    color: #1f2937;
-}
-
-.equipment-payment-modal__button--secondary:hover {
-    background: #d1d5db;
-}
-
-.equipment-payment-modal__button--primary {
-    background: var(--main-color);
-    color: #fff;
-}
-
-.equipment-payment-modal__button--primary:hover {
-    background: var(--main-color-on-hover);
-}
-
-/* Анимации */
-@keyframes equipment-payment-modal__fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@keyframes equipment-payment-modal__slide-in {
-    from { transform: translateY(-20px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes equipment-payment-modal__fade-out {
-    from { opacity: 1; }
-    to { opacity: 0; }
-}
-
-@keyframes equipment-payment-modal__slide-out {
-    from { transform: translateY(0); opacity: 1; }
-    to { transform: translateY(-20px); opacity: 0; }
-}
-
-/* Дополнительные услуги */
+/* Основной контейнер дополнительных услуг */
 .services {
     margin-bottom: var(--spacing-lg);
     border-top: 1px solid var(--border-color);
@@ -8810,23 +8621,20 @@ button.swiper-pagination-bullet {
     animation: fadeIn 0.3s ease-in;
 }
 
+/* Заголовок */
 .services__title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
 }
 
-.services__description {
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
-    margin-bottom: var(--spacing-md);
-}
-
+/* Сетка для отображения услуг */
 .services__list {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
 }
 
+/* Карточка отдельной услуги */
 .services__item {
     background-color: var(--background-color);
     border: 1px solid var(--smoky-white-color);
@@ -8834,21 +8642,25 @@ button.swiper-pagination-bullet {
     box-shadow: var(--shadow-card);
     padding: var(--spacing-md);
     transition: border-color 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .services__content {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    flex: 1 0 auto;
 }
 
+/* Заголовок услуги */
 .services__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 1rem;
     width: 100%;
-    margin-bottom: 0.5rem;
 }
 
 .services__switch {
@@ -8859,7 +8671,7 @@ button.swiper-pagination-bullet {
 .services__label {
     cursor: pointer;
     display: flex;
-    align-items: center; /* Выравнивание содержимого лейбла */
+    align-items: center;
 }
 
 .services__name {
@@ -8872,6 +8684,7 @@ button.swiper-pagination-bullet {
     white-space: nowrap;
 }
 
+/* Описание услуги и цена */
 .services__description {
     font-size: var(--font-size-sm);
     color: var(--muted-color);
@@ -8880,6 +8693,7 @@ button.swiper-pagination-bullet {
 .services__footer {
     display: flex;
     justify-content: flex-start;
+    margin-top: auto;
 }
 
 .services__price {
@@ -8887,13 +8701,7 @@ button.swiper-pagination-bullet {
     font-weight: 500;
 }
 
-@media (max-width: 768px) {
-    .services__list {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* Форма заявки */
+/* Контейнер формы заявки */
 .order-form__section {
     background-color: #f2f6f8;
     border-radius: var(--radius-xl);
@@ -8903,39 +8711,31 @@ button.swiper-pagination-bullet {
     animation: fadeIn 0.3s ease-in;
 }
 
+/* Заголовок формы */
 .order-form__section-title {
     font-size: var(--font-size-lg);
     margin-bottom: var(--spacing-md);
     color: var(--text-color, #1f2937);
 }
 
+/* Сетка полей формы */
 .order-form__fields {
     display: grid;
-    grid-template-columns: repeat(2, 1fr); /* 2 колонки для имени и телефона */
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-md);
 }
 
+/* Строка для адреса (улица, дом, квартира) */
 .order-form__row--address {
-    grid-column: 1 / -1; /* Второй ряд на всю ширину */
+    grid-column: 1 / -1;
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr; /* Улица шире, Дом и Квартира уже */
+    grid-template-columns: 2fr 1fr 1fr;
     gap: var(--spacing-md);
 }
 
-.order-form__field--comments {
-    grid-column: 1 / -1; /* Комментарий на всю ширину */
-}
-
-.order-form__field--actions {
-    grid-column: 1 / -1; /* Чекбокс и кнопка на всю ширину */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: var(--spacing-md);
-}
-
+/* Поля формы */
 .order-form__field {
-    position: relative;
+    position: relative; /* Добавлено для правильного позиционирования ошибок */
 }
 
 .order-form__label {
@@ -8970,6 +8770,7 @@ button.swiper-pagination-bullet {
     box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
 }
 
+/* Валидация полей */
 .order-form__input--invalid,
 .order-form__input:invalid:not(:placeholder-shown),
 .order-form__textarea:invalid:not(:placeholder-shown) {
@@ -8990,9 +8791,19 @@ button.swiper-pagination-bullet {
     display: block;
 }
 
+/* Текстовое поле комментария */
 .order-form__textarea {
     resize: vertical;
     min-height: 80px;
+}
+
+/* Блок действий (чекбокс согласия и кнопка) */
+.order-form__field--actions {
+    grid-column: 1 / -1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-md);
 }
 
 .order-form__consent-text {
@@ -9006,23 +8817,7 @@ button.swiper-pagination-bullet {
     text-decoration: none;
 }
 
-@media (max-width: 576px) {
-    .order-form__consent-text {
-        font-size: 0.8125rem;
-        margin-bottom: 0.75rem;
-    }
-}
-
-.order-form__link {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.order-form__link:hover {
-    color: var(--primary-color-hover);
-}
-
+/* Кнопка отправки */
 .order-form__submit {
     padding: var(--spacing-md);
     background-color: var(--main-color);
@@ -9033,8 +8828,8 @@ button.swiper-pagination-bullet {
     font-weight: 500;
     cursor: pointer;
     transition: background-color 0.2s ease;
-    flex: 0 0 auto; /* Кнопка не растягивается */
-    min-width: 200px; /* Минимальная ширина кнопки */
+    flex: 0 0 auto;
+    min-width: 200px;
 }
 
 .order-form__submit:hover {
@@ -9066,91 +8861,28 @@ button.swiper-pagination-bullet {
     animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-    to {
-        transform: translateY(-50%) rotate(360deg);
-    }
-}
-
+/* Обработка ошибок */
 .error-container {
     margin-bottom: 1rem;
     color: #dc3545;
 }
+
 .errorlist {
     list-style: none;
     padding: 0;
     margin: 0;
 }
+
 .errorlist li {
     margin-bottom: 0.5rem;
 }
 
-/* Адаптивность */
-@media (max-width: 768px) {
-    .order-form__fields {
-        grid-template-columns: 1fr; /* Одна колонка для мобильных */
-    }
-
-    .order-form__row--address {
-        grid-template-columns: 1fr; /* Одна колонка для адреса */
-    }
-
-    .order-form__field--full-name,
-    .order-form__field--phone,
-    .order-form__field--street,
-    .order-form__field--house,
-    .order-form__field--apartment,
-    .order-form__field--comments,
-    .order-form__field--actions {
-        grid-column: 1 / -1; /* Все поля на всю ширину */
-    }
-
-    .order-form__field--actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-sm);
-    }
-
-    .order-form__submit {
-        width: 100%;
-        min-width: unset;
-    }
-
-    .order-form__section {
-        padding: var(--spacing-md);
-    }
-
-    .order-form__textarea {
-        min-height: 100px;
-    }
-}
-
-@media (max-width: 480px) {
-    .order-form__section-title {
-        font-size: var(--font-size-base);
-    }
-
-    .order-form__input,
-    .order-form__textarea {
-        padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 0.9375rem;
-    }
-
-    .order-form__textarea {
-        min-height: 120px;
-    }
-
-    .order-form__submit {
-        padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.9375rem;
-    }
-}
-
-/* Стили для блока итогов (общие) */
+/* Контейнер итогов */
 .summary__content {
     display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
+    width: -webkit-fill-available;
 }
 
 .summary__title {
@@ -9159,6 +8891,7 @@ button.swiper-pagination-bullet {
     color: var(--text-color);
 }
 
+/* Секции итогов */
 .summary__section {
     margin-bottom: var(--spacing-md);
 }
@@ -9170,6 +8903,7 @@ button.swiper-pagination-bullet {
     color: var(--text-color);
 }
 
+/* Элементы итогов */
 .summary__item {
     display: flex;
     justify-content: space-between;
@@ -9197,6 +8931,7 @@ button.swiper-pagination-bullet {
     color: var(--color-text-muted);
 }
 
+/* Разделители и общая сумма */
 .summary__divider {
     border: none;
     border-top: 1px solid var(--border-color);
@@ -9217,6 +8952,7 @@ button.swiper-pagination-bullet {
     font-weight: 600;
 }
 
+/* Детализация суммы */
 .summary__breakdown {
     margin-top: 1rem;
 }
@@ -9242,138 +8978,14 @@ button.swiper-pagination-bullet {
     font-size: var(--font-size-sm);
 }
 
+/* === ЕДИНЫЙ БЛОК АДАПТИВНЫХ СТИЛЕЙ === */
 @media (max-width: 991px) {
-    .order-form__mobile-summary {
-        margin-top: var(--spacing-lg);
-        padding: var(--spacing-md);
-        border-radius: var(--radius-xl);
-        background-color: #f3f8f2;
-        height: auto;
-        position: static;
-    }
-}
-
-@media (max-width: 480px) {
-    .summary {
-        padding: var(--spacing-md);
-    }
-
-    .summary__title {
-        font-size: var(--font-size-base);
-    }
-
-    .summary__section-title,
-    .summary__total {
-        font-size: var(--font-size-sm);
-    }
-}
-
-/* Стили для страницы заказа оборудования */
-.product-info {
-    background-color: var(--color-white);
-    border-radius: var(--radius-xl);
-    border: 1px solid var(--smoky-white-color);
-    box-shadow: var(--shadow-card);
-    padding: var(--spacing-lg);
-    margin-bottom: var(--spacing-lg);
-}
-.product-info__content {
-    display: flex;
-    gap: var(--spacing-lg);
-    align-items: start;
-}
-.product-info__image {
-    width: 200px;
-    flex-shrink: 0;
-}
-.product-info__img {
-    width: 100%;
-    border-radius: var(--radius-md);
-}
-.product-info__img-placeholder {
-    width: 100%;
-    height: 200px;
-    background-color: var(--form-background);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--muted-color);
-    border-radius: var(--radius-md);
-}
-.product-info__details {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Цена прижата вниз */
-    min-height: 150px; /* Фиксированная высота для корректной работы justify-content */
-}
-.product-info__title {
-    font-size: var(--font-size-lg);
-    margin-bottom: var(--spacing-md);
-}
-.product-info__description {
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
-    margin-bottom: var(--spacing-md);
-}
-.product-info__price-block {
-    margin-top: auto;
-}
-.product-info__price-value {
-    font-size: var(--font-size-xl);
-    font-weight: bold;
-    color: var(--main-color);
-}
-.product-info__installment {
-    margin-top: var(--spacing-md);
-    font-size: var(--font-size-sm);
-    color: var(--muted-color);
-}
-
-/* === МОБИЛЬНАЯ ВЕРСИЯ: товар === */
-@media (max-width: 768px) {
-    .product-info__content {
-        flex-direction: row;
-        align-items: flex-start;
-        gap: var(--spacing-md);
-    }
-
-    .product-info__image {
-        width: 100px;
-        height: 100%;
-    }
-
-    .product-info__img,
-    .product-info__img-placeholder {
-        height: 100%;
-        object-fit: cover;
-    }
-
-    .product-info__details {
-        min-height: 100px; /* Соответствует высоте изображения */
-    }
-
-    .order-form__fields {
+    /* Макет */
+    .order-form__layout {
         grid-template-columns: 1fr;
     }
-
-    .order-form__row--address {
-        grid-template-columns: 1fr;
-    }
-
-    .order-form__field--actions {
-        flex-direction: column;
-        align-items: stretch;
-        gap: var(--spacing-sm);
-    }
-
-    .order-form__submit {
-        width: 100%;
-    }
-}
-
-/* === МОБИЛЬНАЯ ВЕРСИЯ: итоги === */
-@media (max-width: 991px) {
+    
+    /* Мобильная версия итогов */
     .summary--mobile {
         display: block;
         margin-bottom: var(--spacing-lg);
@@ -9382,9 +8994,152 @@ button.swiper-pagination-bullet {
         box-shadow: var(--shadow);
         padding: var(--spacing-lg);
     }
-
     .summary--desktop {
         display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    /* Общие стили */
+    .tariff-info__content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Пакеты ТВ */
+    .tv-packages__list {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Оборудование */
+    .equipment__header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-sm);
+    }
+    .equipment__image-container {
+        width: 100px;
+        height: 56px;
+    }
+    .equipment__info-group {
+        align-self: stretch;
+        text-align: left;
+    }
+    .equipment__name,
+    .tv-package__name,
+    .services__name {
+        font-size: var(--font-size-base);
+        white-space: normal;
+        line-height: 1.3;
+    }
+    .equipment__price-value,
+    .tv-package__price,
+    .services__price {
+        font-size: var(--font-size-base);
+    }
+    .equipment__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-xs);
+        border-top: 1px dashed var(--border-color);
+    }
+    .equipment__price-block {
+        min-width: auto;
+        text-align: left;
+        flex-shrink: 0;
+    }
+    .equipment__switch-container {
+        margin-left: auto;
+    }
+    
+    /* Услуги */
+    .services__list {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Форма */
+    .order-form__fields {
+        grid-template-columns: 1fr;
+    }
+    .order-form__row--address {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Все поля формы на всю ширину */
+    .order-form__field--full-name,
+    .order-form__field--phone,
+    .order-form__field--street,
+    .order-form__field--house,
+    .order-form__field--apartment,
+    .order-form__field--comments,
+    .order-form__field--actions {
+        grid-column: 1 / -1;
+    }
+    
+    .order-form__field--actions {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--spacing-sm);
+    }
+    .order-form__submit {
+        width: 100%;
+        min-width: unset;
+    }
+    .order-form__section {
+        padding: var(--spacing-md);
+    }
+    .order-form__textarea {
+        min-height: 100px;
+    }
+}
+
+@media (max-width: 600px) {
+    /* Пакеты ТВ */
+    .tv-packages__list {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (min-width: 768px) {
+    /* Пакеты ТВ */
+    .tv-package__meta {
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-sm);
+    }
+}
+
+@media (max-width: 480px) {
+    /* Форма */
+    .order-form__section-title {
+        font-size: var(--font-size-base);
+    }
+    .order-form__input,
+    .order-form__textarea {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 0.9375rem;
+    }
+    .order-form__textarea {
+        min-height: 120px;
+    }
+    .order-form__submit {
+        padding: var(--spacing-sm) var(--spacing-md);
+        font-size: 0.9375rem;
+    }
+    
+    /* Итоги */
+    .summary {
+        padding: var(--spacing-md);
+    }
+    .summary__title {
+        font-size: var(--font-size-base);
+    }
+    .summary__section-title,
+    .summary__total {
+        font-size: var(--font-size-sm);
     }
 }
 
@@ -9393,7 +9148,6 @@ button.swiper-pagination-bullet {
     .summary--mobile {
         display: none;
     }
-
     .summary--desktop {
         display: flex;
         background-color: #f3f8f2;
@@ -9407,110 +9161,8 @@ button.swiper-pagination-bullet {
     }
 }
 
-/* Анимация */
+/* Анимации для плавного появления элементов */
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-/* Стили для корзины */
-.cart-icon {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    text-decoration: none;
-    color: inherit;
-}
-
-.cart-icon.animate {
-    animation: bounce 0.5s;
-}
-
-#cart-counter {
-    margin-left: 5px;
-    font-size: 0.8em;
-    background-color: #ff5722;
-    color: white;
-    border-radius: 50%;
-    padding: 2px 6px;
-}
-
-#cart-counter.updated {
-    animation: pulse 0.5s;
-}
-
-/* Стили для кнопок */
-[data-add-to-cart].processing {
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-[data-add-to-cart].success {
-    background-color: #4CAF50;
-    color: white;
-}
-
-.button-loader {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-radius: 50%;
-    border-top-color: white;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
-}
-
-.check-icon {
-    margin-right: 8px;
-}
-
-/* Toast уведомления */
-.toast {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    padding: 12px 24px;
-    color: white;
-    border-radius: 4px;
-    z-index: 1000;
-    animation: toast-in 0.3s ease forwards;
-}
-
-.toast-success {
-    background: #4CAF50;
-}
-
-.toast-error {
-    background: #F44336;
-}
-
-.toast.fade-out {
-    animation: toast-out 0.3s ease forwards;
-}
-
-/* Анимации */
-@keyframes bounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
-}
-
-@keyframes pulse {
-    0% { transform: scale(1); }
-    50% { transform: scale(1.2); }
-    100% { transform: scale(1); }
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-@keyframes toast-in {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes toast-out {
-    from { opacity: 1; transform: translateY(0); }
-    to { opacity: 0; transform: translateY(-20px); }
 }
