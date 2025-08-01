@@ -8979,13 +8979,15 @@ button.swiper-pagination-bullet {
 }
 
 /* === ЕДИНЫЙ БЛОК АДАПТИВНЫХ СТИЛЕЙ === */
-@media (max-width: 991px) {
-    /* Макет */
+
+/* Контрольная точка для планшетов и небольших ноутбуков */
+@media (max-width: 1280px) {
+    /* Основной макет: на планшетах и небольших экранах делаем одноколоночный макет */
     .order-form__layout {
         grid-template-columns: 1fr;
     }
     
-    /* Мобильная версия итогов */
+    /* Блок итогов: на планшетах показываем внизу */
     .summary--mobile {
         display: block;
         margin-bottom: var(--spacing-lg);
@@ -8999,71 +9001,24 @@ button.swiper-pagination-bullet {
     }
 }
 
-@media (max-width: 768px) {
-    /* Общие стили */
-    .tariff-info__content {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    
-    /* Пакеты ТВ */
+/* Контрольная точка для средних планшетов и малых экранов */
+@media (max-width: 1024px) {
+    /* Пакеты ТВ: при ширине до 1024px показываем по одному в ряду */
     .tv-packages__list {
         grid-template-columns: 1fr;
     }
     
-    /* Оборудование */
-    .equipment__header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: var(--spacing-sm);
-    }
-    .equipment__image-container {
-        width: 100px;
-        height: 56px;
-    }
-    .equipment__info-group {
-        align-self: stretch;
-        text-align: left;
-    }
-    .equipment__name,
-    .tv-package__name,
-    .services__name {
-        font-size: var(--font-size-base);
-        white-space: normal;
-        line-height: 1.3;
-    }
-    .equipment__price-value,
-    .tv-package__price,
-    .services__price {
-        font-size: var(--font-size-base);
-    }
-    .equipment__footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        align-self: stretch;
-        margin-top: var(--spacing-xs);
-        padding-top: var(--spacing-xs);
-        border-top: 1px dashed var(--border-color);
-    }
-    .equipment__price-block {
-        min-width: auto;
-        text-align: left;
-        flex-shrink: 0;
-    }
-    .equipment__switch-container {
-        margin-left: auto;
-    }
-    
-    /* Услуги */
+    /* Дополнительные услуги: при ширине до 1024px показываем по одному в ряду */
     .services__list {
         grid-template-columns: 1fr;
     }
     
-    /* Форма */
+    /* Форма: на средних экранах делаем поля в одну колонку */
     .order-form__fields {
         grid-template-columns: 1fr;
     }
+    
+    /* Адрес: на средних экранах делаем поля в одну колонку */
     .order-form__row--address {
         grid-template-columns: 1fr;
     }
@@ -9079,64 +9034,120 @@ button.swiper-pagination-bullet {
         grid-column: 1 / -1;
     }
     
+    /* Блок действий: на средних экранах делаем вертикальным */
     .order-form__field--actions {
         flex-direction: column;
         align-items: stretch;
         gap: var(--spacing-sm);
     }
+    
+    /* Кнопка отправки: на средних экранах занимает всю ширину */
     .order-form__submit {
         width: 100%;
         min-width: unset;
     }
+}
+
+/* Контрольная точка для малых планшетов и больших мобильных устройств */
+@media (max-width: 768px) {
+    /* Секции формы: уменьшаем отступы */
     .order-form__section {
         padding: var(--spacing-md);
     }
+    
+    /* Текстовое поле комментария: увеличиваем высоту */
     .order-form__textarea {
         min-height: 100px;
     }
-}
-
-@media (max-width: 600px) {
-    /* Пакеты ТВ */
-    .tv-packages__list {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (min-width: 768px) {
-    /* Пакеты ТВ */
-    .tv-package__meta {
-        flex-direction: row;
-        align-items: center;
+    
+    /* Оборудование: изменяем макет для мобильных */
+    .equipment__header {
+        flex-direction: column;
+        align-items: flex-start;
         gap: var(--spacing-sm);
     }
+    
+    .equipment__image-container {
+        width: 100px;
+        height: 56px;
+    }
+    
+    .equipment__info-group {
+        align-self: stretch;
+        text-align: left;
+    }
+    
+    .equipment__name,
+    .tv-package__name,
+    .services__name {
+        font-size: var(--font-size-base);
+        white-space: normal;
+        line-height: 1.3;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    
+    .equipment__price-value,
+    .tv-package__price,
+    .services__price {
+        font-size: var(--font-size-base);
+    }
+    
+    .equipment__footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        align-self: stretch;
+        margin-top: var(--spacing-xs);
+        padding-top: var(--spacing-xs);
+        border-top: 1px dashed var(--border-color);
+    }
+    
+    .equipment__price-block {
+        min-width: auto;
+        text-align: left;
+        flex-shrink: 0;
+    }
+    
+    .equipment__switch-container {
+        margin-left: auto;
+    }
 }
 
+/* Контрольная точка для малых мобильных устройств */
 @media (max-width: 480px) {
-    /* Форма */
+    /* Уменьшаем размеры текста и отступов */
     .order-form__section-title {
         font-size: var(--font-size-base);
     }
+    
     .order-form__input,
     .order-form__textarea {
         padding: var(--spacing-xs) var(--spacing-sm);
         font-size: 0.9375rem;
     }
+    
     .order-form__textarea {
         min-height: 120px;
     }
+    
     .order-form__submit {
         padding: var(--spacing-sm) var(--spacing-md);
         font-size: 0.9375rem;
     }
     
-    /* Итоги */
+    /* Итоги: уменьшаем отступы */
     .summary {
         padding: var(--spacing-md);
     }
+    
     .summary__title {
         font-size: var(--font-size-base);
     }
+    
     .summary__section-title,
     .summary__total {
         font-size: var(--font-size-sm);
@@ -9144,7 +9155,7 @@ button.swiper-pagination-bullet {
 }
 
 /* === ДЕСКТОПНАЯ ВЕРСИЯ: итог справа === */
-@media (min-width: 992px) {
+@media (min-width: 1281px) {
     .summary--mobile {
         display: none;
     }
