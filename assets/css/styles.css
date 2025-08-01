@@ -9115,6 +9115,45 @@ button.swiper-pagination-bullet {
     .equipment__switch-container {
         margin-left: auto;
     }
+    
+    /* Уменьшаем размер шрифта лейблов формы на мобильных устройствах */
+    .order-form__label {
+        font-size: 0.875rem; /* Уменьшено с var(--font-size-base) */
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    /* Уменьшаем размер шрифта полей формы на мобильных устройствах */
+    .order-form__input,
+    .order-form__textarea {
+        font-size: 0.875rem; /* Уменьшено с var(--font-size-base) */
+        padding: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    /* Изменяем макет тарифа для мобильных устройств */
+    .tariff-info__content {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    /* Перемещаем блок цены под "В тариф включено" */
+    .tariff-info__price {
+        margin-top: var(--spacing-md);
+        align-self: flex-start;
+    }
+    
+    .tariff-info__price-value {
+        font-size: var(--font-size-md); /* Уменьшено с var(--font-size-lg) */
+        font-weight: 500;
+    }
+    
+    .tariff-info__price-unit {
+        font-size: var(--font-size-sm);
+    }
+    
+    /* Уменьшаем размер шрифта заголовка тарифа на мобильных */
+    .tariff-info__title {
+        font-size: var(--font-size-base);
+    }
 }
 
 /* Контрольная точка для малых мобильных устройств */
@@ -9127,7 +9166,7 @@ button.swiper-pagination-bullet {
     .order-form__input,
     .order-form__textarea {
         padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 0.9375rem;
+        font-size: 0.8125rem; /* Дополнительно уменьшено для очень маленьких экранов */
     }
     
     .order-form__textarea {
@@ -9136,7 +9175,7 @@ button.swiper-pagination-bullet {
     
     .order-form__submit {
         padding: var(--spacing-sm) var(--spacing-md);
-        font-size: 0.9375rem;
+        font-size: 0.8125rem; /* Дополнительно уменьшено для очень маленьких экранов */
     }
     
     /* Итоги: уменьшаем отступы */
@@ -9151,6 +9190,20 @@ button.swiper-pagination-bullet {
     .summary__section-title,
     .summary__total {
         font-size: var(--font-size-sm);
+    }
+    
+    /* Дополнительные улучшения для очень маленьких экранов */
+    .order-form__label {
+        font-size: 0.8125rem; /* Дополнительно уменьшено */
+        margin-bottom: var(--spacing-xs);
+    }
+    
+    .tariff-info__price-value {
+        font-size: var(--font-size-sm); /* Дополнительно уменьшено */
+    }
+    
+    .tariff-info__title {
+        font-size: var(--font-size-sm); /* Дополнительно уменьшено */
     }
 }
 
@@ -9176,4 +9229,90 @@ button.swiper-pagination-bullet {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* Стили для страницы заказа оборудования */
+.product-info {
+    background-color: var(--color-white);
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--smoky-white-color);
+    box-shadow: var(--shadow-card);
+    padding: var(--spacing-lg);
+    margin-bottom: var(--spacing-lg);
+}
+.product-info__content {
+    display: flex;
+    gap: var(--spacing-lg);
+    align-items: start;
+}
+.product-info__image {
+    width: 200px;
+    flex-shrink: 0;
+}
+.product-info__img {
+    width: 100%;
+    border-radius: var(--radius-md);
+}
+.product-info__img-placeholder {
+    width: 100%;
+    height: 200px;
+    background-color: var(--form-background);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--muted-color);
+    border-radius: var(--radius-md);
+}
+.product-info__details {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Цена прижата вниз */
+    min-height: 150px; /* Фиксированная высота для корректной работы justify-content */
+}
+.product-info__title {
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
+}
+.product-info__description {
+    font-size: var(--font-size-sm);
+    color: var(--muted-color);
+    margin-bottom: var(--spacing-md);
+}
+.product-info__price-block {
+    margin-top: auto;
+}
+.product-info__price-value {
+    font-size: var(--font-size-xl);
+    font-weight: bold;
+    color: var(--main-color);
+}
+.product-info__installment {
+    margin-top: var(--spacing-md);
+    font-size: var(--font-size-sm);
+    color: var(--muted-color);
+}
+
+/* === МОБИЛЬНАЯ ВЕРСИЯ: товар === */
+@media (max-width: 768px) {
+    .product-info__content {
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--spacing-md);
+    }
+
+    .product-info__image {
+        width: 100px;
+        height: 100%;
+    }
+
+    .product-info__img,
+    .product-info__img-placeholder {
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-info__details {
+        min-height: 100px; /* Соответствует высоте изображения */
+    }
 }
