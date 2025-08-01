@@ -5072,6 +5072,11 @@ button.swiper-pagination-bullet {
 }
 
 /* Стили для выбора цвета в виде кружков */
+.color-circles {
+    display: flex;
+    gap: 8px;
+}
+
 .color-circle {
     display: inline-flex;
     align-items: center;
@@ -5108,6 +5113,13 @@ button.swiper-pagination-bullet {
     height: 2px;
     background: #999;
     transform: translate(-50%, -50%) rotate(45deg);
+}
+
+@media (max-width: 768px) {
+    .color-circle .circle {
+        width: 24px;
+        height: 24px;
+    }
 }
 
 /* Популярные товары */
@@ -8335,7 +8347,7 @@ button.swiper-pagination-bullet {
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    gap: var(--spacing-sm);
+    gap: var(--spacing-md);
 }
 
 .product-info__description {

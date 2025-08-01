@@ -9,12 +9,12 @@
                 <!-- Информация о товаре -->
                 <section class="product-info">
                     <div class="product-info__content">
-                        <div class="product-info__image">
+                        <div class="product-info__image" id="productImageContainer">
                             {% with main_image=product.get_main_image %}
                                 {% if main_image %}
-                                    <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="product-info__img">
+                                    <img src="{{ main_image.image.url }}" alt="{{ product.name }}" class="product-info__img" id="productImage">
                                 {% else %}
-                                    <div class="product-info__img-placeholder">
+                                    <div class="product-info__img-placeholder" id="productImagePlaceholder">
                                         <span>Нет изображения</span>
                                     </div>
                                 {% endif %}
@@ -29,6 +29,25 @@
                             </div>
                             {% if product.short_description %}
                                 <p class="product-info__description">{{ product.short_description|safe }}</p>
+                            {% endif %}
+                            {% if product.variants.exists %}
+                                <div class="product-info__color-selection">
+                                    <div class="color-circles">
+                                        {% for variant in product.variants.all %}
+                                            <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}">
+                                                <input
+                                                    type="radio"
+                                                    name="selected_variant_id"
+                                                    value="{{ variant.id }}"
+                                                    data-color="{{ variant.color }}"
+                                                    {% if forloop.first %}checked{% endif %}
+                                                    {% if variant.stock <= 0 %}disabled{% endif %}
+                                                >
+                                                <span class="circle" style="background-color: {{ variant.color }};"></span>
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
                             {% endif %}
                             {% if product.installment_available %}
                                 <div class="product-info__installment">
@@ -70,6 +89,7 @@
                         <!-- Скрытые поля -->
                         <input type="hidden" name="tariff_id" value="">
                         <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value='["{{ product.id }}"]'>
+                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{{ product.variants.first.id }}">
                         <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
                         <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
                         <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value='{"{{ product.id }}": "purchase"}'>
@@ -189,6 +209,74 @@
         return null;
     }
 
+    // Функция обновления итогов (цена везде)
+    function updateSummaryDisplay(price) {
+        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' руб.';
+
+        // Обновляем цену товара в основном блоке
+        const priceValueEl = document.querySelector('.product-info__price-value');
+        if (priceValueEl) {
+            priceValueEl.textContent = formattedPrice;
+        }
+
+        // Обновляем в мобильном итоге
+        const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');
+        if (mobileSummary) {
+            mobileSummary.textContent = formattedPrice;
+        }
+
+        // Обновляем в десктопном итоге
+        const desktopSummary = document.querySelector('.summary--desktop .summary__item-value');
+        if (desktopSummary) {
+            desktopSummary.textContent = formattedPrice;
+        }
+
+        // Обновляем итоговую стоимость
+        const totalValueEls = document.querySelectorAll('.summary__total-value');
+        totalValueEls.forEach(el => {
+            el.textContent = formattedPrice;
+        });
+
+        // Обновляем скрытые поля формы
+        document.getElementById('total_equipment_cost').value = price;
+        document.getElementById('total_price').value = price;
+    }
+
+    // === ФУНКЦИЯ ОБНОВЛЕНИЯ ИЗОБРАЖЕНИЯ ===
+    function updateProductImage(color) {
+        const container = document.getElementById('productImageContainer');
+        const currentImg = document.getElementById('productImage');
+        const placeholder = document.getElementById('productImagePlaceholder');
+
+        // Удаляем текущее изображение или заглушку
+        if (currentImg) currentImg.remove();
+        if (placeholder) placeholder.remove();
+
+        // Карта цветов → URL изображений (генерируется из Django)
+        const imageMap = {
+            {% for image in product.images.all %}
+                "{{ image.color }}": "{{ image.image.url }}",
+            {% endfor %}
+        };
+
+        if (imageMap[color]) {
+            const img = document.createElement('img');
+            img.id = 'productImage';
+            img.src = imageMap[color];
+            img.alt = "{{ product.name }} (цвет: " + color + ")";
+            img.className = 'product-info__img';
+            img.style.opacity = '0';
+            img.onload = () => { img.style.opacity = '1'; };
+            container.appendChild(img);
+        } else {
+            const div = document.createElement('div');
+            div.id = 'productImagePlaceholder';
+            div.className = 'product-info__img-placeholder';
+            div.innerHTML = '<span>Нет изображения</span>';
+            container.appendChild(div);
+        }
+    }
+
     // Валидация формы: активация кнопки при корректных данных
     function validateOrderForm() {
         const fullName = document.querySelector('#orderForm [name="full_name"]').value.trim();
@@ -200,6 +288,48 @@
     // Слушатели на ввод
     document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"]').forEach(el => {
         el.addEventListener('input', validateOrderForm);
+    });
+
+    // === ОБРАБОТКА ВАРИАНТОВ ТОВАРА (ЦВЕТА) ===
+    window.addEventListener('DOMContentLoaded', () => {
+        const colorRadios = document.querySelectorAll('input[name="selected_variant_id"]');
+        const variantPrices = {};
+
+        // Заполняем объект цен (id варианта → цена)
+        {% for variant in product.variants.all %}
+            variantPrices[{{ variant.id }}] = {{ variant.get_price }};
+        {% endfor %};
+
+        const basePrice = {{ product.price }};
+
+        if (colorRadios.length > 0) {
+            const firstVariantId = colorRadios[0].value;
+            const firstColor = colorRadios[0].dataset.color;
+            const initialPrice = variantPrices[firstVariantId] || basePrice;
+
+            // Устанавливаем начальное изображение
+            updateProductImage(firstColor);
+            updateSummaryDisplay(initialPrice);
+
+            // Добавляем обработчики на выбор цвета
+            colorRadios.forEach(radio => {
+                radio.addEventListener('change', function () {
+                    const variantId = this.value;
+                    const color = this.dataset.color;
+                    const price = variantPrices[variantId] || basePrice;
+
+                    // Обновляем скрытое поле
+                    document.getElementById('selected_variant_id').value = variantId;
+
+                    // Обновляем интерфейс
+                    updateSummaryDisplay(price);
+                    updateProductImage(color); // <--- Меняем изображение
+                });
+            });
+        }
+
+        // Инициализация валидации
+        validateOrderForm();
     });
 
     // Основной обработчик отправки формы
@@ -288,11 +418,6 @@
             submitBtn.classList.remove('order-form__submit--loading');
             submitBtn.innerHTML = 'Отправить заявку';
         }
-    });
-
-    // Инициализация при загрузке
-    window.addEventListener('DOMContentLoaded', () => {
-        validateOrderForm();
     });
 </script>
 {% endblock %}

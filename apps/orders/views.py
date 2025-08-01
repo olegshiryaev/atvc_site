@@ -136,9 +136,6 @@ def submit_order(request, locality_slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     form = OrderForm(request.POST, locality=locality)
 
-    logger.debug(f"Полученные данные формы: {request.POST}")
-    logger.debug(f"Валидация формы: {form.is_valid()}")
-    
     if form.is_valid():
         logger.debug(f"Очищенные данные: {form.cleaned_data}")
         order = form.save(commit=False)
@@ -152,20 +149,39 @@ def submit_order(request, locality_slug):
         equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
         payment_options = form.cleaned_data.get("equipment_payment_options", {})
         logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
+
         for product_id in equipment_ids:
             product = get_object_or_404(Product, id=product_id)
+
+            # === ОБРАБОТКА ВАРИАНТА (цвета) ===
+            variant = None
+            variant_id = request.POST.get(f"variant_id")  # Предполагаем, что один товар → один variant_id
+            if variant_id:
+                try:
+                    variant = ProductVariant.objects.get(id=variant_id, product=product)
+                except ProductVariant.DoesNotExist:
+                    logger.warning(f"Variant {variant_id} не найден для продукта {product_id}, используется базовая цена")
+            
+            # Определяем базовую цену (из варианта или продукта)
+            base_price = variant.get_price() if variant else product.get_price()
+
+            # Определяем тип оплаты
             payment_type = payment_options.get(str(product_id), 'purchase')
-            # Используем get_total_installment_price для получения полной стоимости
+
+            # Рассчитываем итоговую цену в зависимости от типа оплаты
             if payment_type == 'installment12' and product.installment_12_months:
-                price = product.get_total_installment_price(12)  # Полная стоимость для 12 месяцев
+                total_price = product.get_total_installment_price(12)
             elif payment_type == 'installment24' and product.installment_24_months:
-                price = product.get_total_installment_price(24)  # Полная стоимость для 24 месяцев
+                total_price = product.get_total_installment_price(24)
             else:
-                price = product.price  # Цена для покупки
+                total_price = base_price  # Покупка — цена из варианта или продукта
+
+            # Создаём запись в заказе
             OrderProduct.objects.create(
                 order=order,
                 product=product,
-                price=price,
+                variant=variant,  # может быть None
+                price=total_price,
                 quantity=1,
                 payment_type=payment_type
             )
