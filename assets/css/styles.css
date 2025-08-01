@@ -8356,6 +8356,13 @@ button.swiper-pagination-bullet {
   margin: 0;
 }
 
+.product-info__variant-title {
+    font-size: var(--font-size-base);
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
 .product-info__installment {
   font-size: var(--font-size-sm);
   color: var(--muted-color);

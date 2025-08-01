@@ -32,9 +32,10 @@
                             {% endif %}
                             {% if product.variants.exists %}
                                 <div class="product-info__color-selection">
+                                    <h5 class="product-info__variant-title">Цвет</h5>
                                     <div class="color-circles">
                                         {% for variant in product.variants.all %}
-                                            <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}">
+                                            <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}" title="{{ variant.get_color_display }}">
                                                 <input
                                                     type="radio"
                                                     name="selected_variant_id"
