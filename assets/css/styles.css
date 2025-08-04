@@ -8549,6 +8549,7 @@ button.swiper-pagination-bullet {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: var(--spacing-lg);
+    align-items: stretch;
 }
 
 /* Карточка отдельного пакета */
@@ -8558,6 +8559,9 @@ button.swiper-pagination-bullet {
     padding: var(--spacing-md);
     border-radius: 15px;
     box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 /* Заголовок пакета с изображением и информацией */
@@ -8647,13 +8651,14 @@ button.swiper-pagination-bullet {
 }
 
 .tv-package__footer {
+    margin-top: auto;
     display: flex;
     justify-content: flex-start;
 }
 
 .tv-package__price {
-    font-size: var(--font-size-md);
-    font-weight: 500;
+    font-size: var(--font-size-base);
+    font-weight: 600;
 }
 
 /* Переключатель выбора пакета */
@@ -8731,7 +8736,7 @@ button.swiper-pagination-bullet {
 }
 
 .equipment__name {
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-base);
     font-weight: 600;
     margin: 0;
     line-height: 1.4;
@@ -8802,8 +8807,8 @@ button.swiper-pagination-bullet {
 }
 
 .equipment__price-value {
-    font-size: var(--font-size-md);
-    font-weight: 500;
+    font-size: var(--font-size-base);
+    font-weight: 600;
 }
 
 .equipment__switch-container {
@@ -9035,8 +9040,8 @@ button.swiper-pagination-bullet {
 }
 
 .services__price {
-    font-size: var(--font-size-md);
-    font-weight: 500;
+    font-size: var(--font-size-base);
+    font-weight: 600;
 }
 
 /* Контейнер формы заявки */
