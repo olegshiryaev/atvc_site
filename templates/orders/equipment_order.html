@@ -30,7 +30,7 @@
                                     </a>
                                 </h3>
                                 <div class="product-info__price-inline">
-                                    <div class="product-info__price-value">{{ product.price|intcomma }} руб.</div>
+                                    <div class="product-info__price-value">{{ product.price|intcomma }} ₽</div>
                                 </div>
                             </div>
                             {% if product.short_description %}
@@ -75,7 +75,7 @@
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Покупка</span>
-                                <span class="payment-method__price">{{ product.price|intcomma }} руб.</span>
+                                <span class="payment-method__price">{{ product.price|intcomma }} ₽</span>
                             </span>
                         </label>
                         
@@ -88,7 +88,7 @@
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Рассрочка 12 месяцев</span>
-                                <span class="payment-method__price">{{ product.installment_12_months|intcomma }} руб./мес.</span>
+                                <span class="payment-method__price">{{ product.installment_12_months|intcomma }} ₽ в месяц</span>
                             </span>
                         </label>
                         
@@ -101,7 +101,7 @@
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Рассрочка 24 месяца</span>
-                                <span class="payment-method__price">{{ product.installment_24_months|intcomma }} руб./мес.</span>
+                                <span class="payment-method__price">{{ product.installment_24_months|intcomma }} ₽ в месяц</span>
                             </span>
                         </label>
                     </div>
@@ -116,12 +116,12 @@
                             <h5 class="summary__section-title">Оборудование</h5>
                             <div class="summary__item">
                                 <span class="summary__item-name">{{ product.name }}</span>
-                                <span class="summary__item-value">{{ product.price|intcomma }} руб.</span>
+                                <span class="summary__item-value">{{ product.price|intcomma }} ₽</span>
                             </div>
                         </div>
                         <div class="summary__total">
                             <h5 class="summary__total-title">Итого к оплате:</h5>
-                            <h5 class="summary__total-value">{{ product.price|intcomma }} руб.</h5>
+                            <h5 class="summary__total-value">{{ product.price|intcomma }} ₽</h5>
                         </div>
                     </div>
                 </aside>
@@ -217,12 +217,12 @@
                         <h5 class="summary__section-title">Оборудование</h5>
                         <div class="summary__item">
                             <span class="summary__item-name">{{ product.name }}</span>
-                            <span class="summary__item-value">{{ product.price|intcomma }} руб.</span>
+                            <span class="summary__item-value">{{ product.price|intcomma }} ₽</span>
                         </div>
                     </div>
                     <div class="summary__total">
                         <h5 class="summary__total-title">Итого к оплате:</h5>
-                        <h5 class="summary__total-value">{{ product.price|intcomma }} руб.</h5>
+                        <h5 class="summary__total-value">{{ product.price|intcomma }} ₽</h5>
                     </div>
                 </div>
             </aside>
@@ -259,7 +259,7 @@
 
     // Функция обновления итогов (цена везде)
     function updateSummaryDisplay(price, paymentMethod = 'purchase') {
-        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + (paymentMethod === 'purchase' ? ' руб.' : ' руб./мес.');
+        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + (paymentMethod === 'purchase' ? ' ₽' : ' ₽ в месяц');
 
         // Обновляем только в блоках итогов, не трогая карточку товара
         const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');

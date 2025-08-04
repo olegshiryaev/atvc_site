@@ -5051,7 +5051,7 @@ button.swiper-pagination-bullet {
 }
 
 .product-card__btn {
-    padding: 12px 20px;
+    padding: 0.75rem;
     font-size: var(--font-size-base);
     border-radius: 8px;
     flex-shrink: 0;
@@ -8314,7 +8314,9 @@ button.swiper-pagination-bullet {
 .tariff-info__price-value,
 .product-info__price-value {
     font-size: var(--font-size-lg);
-    font-weight: 600;
+    font-weight: 500;
+    line-height: 24px;
+    letter-spacing: 0;
 }
 
 .tariff-info__price-unit {
@@ -8387,6 +8389,7 @@ button.swiper-pagination-bullet {
   max-height: 2.8em;
   flex: 1 1 0;
   min-width: 0;
+  max-width: 500px;
 }
 
 .product-info__link {

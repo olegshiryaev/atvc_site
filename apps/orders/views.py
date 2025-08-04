@@ -155,7 +155,7 @@ def submit_order(request, locality_slug):
 
             # === ОБРАБОТКА ВАРИАНТА (цвета) ===
             variant = None
-            variant_id = request.POST.get(f"variant_id")  # Предполагаем, что один товар → один variant_id
+            variant_id = request.POST.get(f"variant_id")
             if variant_id:
                 try:
                     variant = ProductVariant.objects.get(id=variant_id, product=product)
@@ -180,7 +180,7 @@ def submit_order(request, locality_slug):
             OrderProduct.objects.create(
                 order=order,
                 product=product,
-                variant=variant,  # может быть None
+                variant=variant,
                 price=total_price,
                 quantity=1,
                 payment_type=payment_type
@@ -582,11 +582,16 @@ class EquipmentOrderView(TemplateView):
         if form.is_valid():
             order = form.save(commit=False)
             order.locality = locality
+
+            if not order.comment:
+                order.comment = "Заказ оборудования"
+
             order.save()
 
             payment_options = json.loads(form.cleaned_data.get("equipment_payment_options", "{}"))
             payment_type = payment_options.get(str(product.id), 'purchase')
 
+            # Обработка способа оплаты и добавление товара
             if payment_type == 'installment12' and product.installment_12_months:
                 price = product.installment_12_months
             elif payment_type == 'installment24' and product.installment_24_months:
@@ -602,11 +607,11 @@ class EquipmentOrderView(TemplateView):
                 payment_type=payment_type
             )
 
-            # ✅ Убедимся, что URL корректный
             success_url = reverse('orders:order_success', kwargs={
                 'order_id': order.id
             })
 
+            # Ответ для AJAX
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
@@ -615,11 +620,12 @@ class EquipmentOrderView(TemplateView):
 
             return redirect('orders:order_success', order_id=order.id)
 
-        # Ошибки формы
+        # Обработка ошибок (AJAX)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             errors = {field: [str(e) for e in error_list] for field, error_list in form.errors.items()}
             return JsonResponse({'success': False, 'errors': errors}, status=400)
 
+        # Ошибки при обычном запросе
         context = self.get_context_data(**kwargs)
         context['form'] = form
         return self.render_to_response(context)
