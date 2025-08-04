@@ -595,7 +595,7 @@ class BannerAdmin(admin.ModelAdmin):
             "Кнопка и ссылка",
             {"fields": ("button_text", "link"), "classes": ("collapse",)},
         ),
-        ("Изображение", {"fields": ("background_image",)}),
+        ("Изображение", {"fields": ("background_image", "mobile_image", "background_image_alt",)}),
         ("Настройки отображения", {"fields": ("is_active", "order", "localities")}),
     )
     readonly_fields = ("created_at", "updated_at")

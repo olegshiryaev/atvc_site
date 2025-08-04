@@ -14,6 +14,8 @@ from pdf2image import convert_from_bytes
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
+from django.core.validators import URLValidator
+from django.core.validators import FileExtensionValidator
 from django.contrib import messages
 
 from apps.cities.models import Locality
@@ -477,13 +479,28 @@ class Banner(models.Model):
     title = models.CharField("Заголовок", max_length=255, blank=True, null=True)
     description = models.TextField("Описание", blank=True)
     background_image = models.ImageField(
-        "Изображение для десктопа", upload_to="banners/", blank=True, null=True
+        "Изображение для десктопа",
+        upload_to="banners/",
+        blank=True,
+        null=True,
+        validators=[FileExtensionValidator(allowed_extensions=['jpg', 'jpeg', 'png'])],
+    )
+    background_image_alt = models.CharField(
+        "Альтернативный текст для изображения",
+        max_length=255,
+        blank=True,
+        null=True,
     )
     mobile_image = models.ImageField("Изображение для мобильных", upload_to="banners/mobile/", blank=True, null=True)
     button_text = models.CharField(
         "Текст кнопки", blank=True, null=True, max_length=100
     )
-    link = models.URLField("Ссылка", blank=True, null=True)
+    link = models.URLField(
+        "Ссылка",
+        blank=True,
+        null=True,
+        validators=[URLValidator(message="Введите корректный URL")],
+    )
     badge = models.CharField("Бейдж", max_length=50, blank=True, null=True)
     badge_color = models.CharField(
         "Цвет бейджa",
@@ -511,7 +528,7 @@ class Banner(models.Model):
 
     def get_badge(self):
         """Возвращает текст бейджа или None"""
-        return self.badge.strip() if self.badge else None
+        return self.badge if self.badge else None
 
     def get_badge_color_display_ru(self):
         """Возвращает название цвета на русском"""

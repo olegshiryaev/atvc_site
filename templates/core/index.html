@@ -15,17 +15,16 @@
                     data-bs-pause="hover"
                     role="region"
                     aria-label="Рекламная карусель">
-
                     <div class="carousel-inner">
                         {% for banner in banners %}
                         <div class="carousel-item {% if forloop.first %}active{% endif %}">
                             <div class="mainbanner-block__slide">
                                 {% if banner.background_image %}
                                 <img src="{{ banner.background_image.url }}"
-                                    alt="{{ banner.title }}"
+                                    alt="{{ banner.background_image_alt|default:'Баннер' }}"
                                     class="mainbanner-block__image">
                                 {% else %}
-                                <div class="mainbanner-block__fallback-bg"></div>
+                                <div class="mainbanner-block__fallback-bg" aria-hidden="true"></div>
                                 {% endif %}
 
                                 <div class="mainbanner-block__content container">
@@ -42,7 +41,7 @@
                                             {% if banner.description %}
                                                 <p class="mainbanner-block__description">{{ banner.description }}</p>
                                             {% endif %}
-                                            {% if banner.link %}
+                                            {% if banner.link and banner.button_text %}
                                             <a href="{{ banner.link }}" class="mainbanner-block__button btn">
                                                 {{ banner.button_text }}
                                             </a>
@@ -62,7 +61,7 @@
                                 data-bs-target="#mainbannerCarousel"
                                 data-bs-slide-to="{{ forloop.counter0 }}"
                                 {% if forloop.first %}class="active" aria-current="true"{% endif %}
-                                aria-label="Слайд {{ forloop.counter1 }}"></button>
+                                aria-label="Перейти к баннеру {{ banner.title|default:'№'|add:forloop.counter }}"></button>
                         {% endfor %}
                     </div>
                     {% endif %}
