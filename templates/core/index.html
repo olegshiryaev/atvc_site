@@ -369,6 +369,32 @@ document.addEventListener('DOMContentLoaded', function () {
         document.addEventListener('htmx:afterSwap', initChannelSearch);
     });
 </script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+    function initSwiper() {
+        if (window.innerWidth <= 600) {
+            new Swiper('.available-services-block__wrapper_slider .swiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                loop: true,
+                navigation: {
+                    nextEl: '.available-services-block__navs .slider-navs__next',
+                    prevEl: '.available-services-block__navs .slider-navs__prev',
+                },
+                pagination: {
+                    el: '.available-services-block__navs .slider-navs__pag',
+                    clickable: true,
+                    bulletClass: 'swiper-pagination-bullet',
+                    bulletActiveClass: 'swiper-pagination-bullet-active',
+                },
+            });
+        }
+    }
+
+    initSwiper();
+    window.addEventListener('resize', initSwiper);
+});
+</script>
 <!-- Инициализация Swiper для блока ТВ-пакетов -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
