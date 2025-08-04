@@ -5029,7 +5029,7 @@ button.swiper-pagination-bullet {
 
 .product-card__btn {
     padding: 12px 20px;
-    font-size: 14px;
+    font-size: var(--font-size-base);
     border-radius: 8px;
     flex-shrink: 0;
     width: auto;
@@ -6504,14 +6504,12 @@ button.swiper-pagination-bullet {
 }
 
 /* === Блок "Доступные услуги" === */
+
+/* Общие стили — активны на десктопе */
 .available-services-block__wrapper {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
-}
-
-.available-services-block__wrapper_slider {
-    display: none;
 }
 
 .available-services-block__title {
@@ -6524,7 +6522,7 @@ button.swiper-pagination-bullet {
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    background-color: #1c3d5a; /* Запасной цвет */
+    background-color: #1c3d5a;
     transition: all 0.3s linear;
     border-radius: 20px;
     min-height: 319px;
@@ -6610,28 +6608,22 @@ button.swiper-pagination-bullet {
     outline-offset: 2px;
 }
 
+/* Ширина карточек */
 .available-services-block__wrapper .item {
     width: calc(33.3333333333% - 14px);
 }
 
+/* Адаптация под планшеты (до 992px) */
 @media (max-width: 992px) {
     .available-services-block__wrapper .item {
         width: calc(50% - 10px);
     }
 }
 
+/* === Полное скрытие всего блока на мобильных (до 600px) === */
 @media (max-width: 600px) {
-    .available-services-block__wrapper {
-        display: none;
-    }
-
-    .available-services-block__wrapper_slider {
-        display: block;
-    }
-
-    .available-services-block__wrapper_slider .swiper-slide {
-        width: 100%;
-        padding: 30px;
+    #available-services {
+        display: none !important;
     }
 }
 
