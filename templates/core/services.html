@@ -228,7 +228,7 @@
                     <div class="swiper-wrapper">
                         {% for product in products %}
                             <li class="product-card products-slider-block__item swiper-slide">
-                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                                <a href="{{ product.get_absolute_url }}" class="product-card__wrapper">
                                     <div class="product-card__cart"></div>
                                     <div class="product-card__img-wrap">
                                         <img src="{{ product.get_main_image.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
@@ -237,8 +237,12 @@
                                     <div class="product-card__desc">{{ product.description|truncatewords:10 }}</div>
                                 </a>
                                 <div class="product-card__bottom">
-                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
-                                    <div class="product-card__btn btn">Заказать</div>
+                                    <div class="product-card__price h5">
+                                        {{ product.price }} руб.
+                                    </div>
+                                    <button class="product-card__btn btn" 
+                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                    </button>
                                 </div>
                             </li>
                         {% endfor %}
