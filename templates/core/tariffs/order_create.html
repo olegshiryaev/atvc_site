@@ -815,7 +815,7 @@
 
         selectedServices = JSON.parse(localStorage.getItem('selectedServices') || '{}');
         Object.keys(selectedServices).forEach(slug => {
-            const checkbox = document.getElementById(`service-${slug}`); // ✅ Правильный ID
+            const checkbox = document.getElementById(`service-${slug}`);
             if (checkbox) {
                 checkbox.checked = true;
             }
