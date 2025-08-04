@@ -22,44 +22,5 @@
             </div>
         {% endfor %}
     </div>
-    <div class="available-services-block__wrapper_slider">
-        <div class="swiper">
-            <div class="swiper-wrapper">
-                {% for service in available_services %}
-                    <div class="service-card__item item swiper-slide"
-                         {% if service.background_image %}
-                             style="background-image: url('{{ service.background_image.url|default_if_none:'' }}');"
-                         {% endif %}>
-                        <div class="service-card__content">
-                            <h3 class="service-card__title">{{ service.name }}</h3>
-                            <p class="service-card__subtitle">{{ service.description|default:""|truncatewords:20 }}</p>
-                            <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}"
-                            class="service-card__btn btn"
-                            role="button"
-                            title="Подробнее об услуге {{ service.name }} в {{ locality.name_prepositional }}"
-                            aria-label="Подробнее об услуге {{ service.name }}">
-                                Подробнее
-                            </a>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
-        <div class="available-services-block__navs slider-navs">
-            <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 19L8 12L15 5"></path>
-                </svg>
-            </button>
-            <div class="slider-navs__pag"></div>
-            <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                     stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 5L16 12L9 19"></path>
-                </svg>
-            </button>
-        </div>
-    </div>
 </section>
 {% endif %}
