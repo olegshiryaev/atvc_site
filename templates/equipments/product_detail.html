@@ -141,11 +141,11 @@
                     {% for item in recently_viewed %}
                     <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
                         <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
-                            <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
-                                {% with main_image=product.get_main_image %}
+                            <div class="product-card__img-wrap{% if not item.get_main_image %} no-image{% endif %}">
+                                {% with main_image=item.get_main_image %}
                                     {% if main_image %}
                                         <img data-lazy-src="{{ main_image.image.url }}"  
-                                            alt="{{ product.name|default:'Товар' }}" 
+                                            alt="{{ item.name|default:'Товар' }}" 
                                             class="product-card__img" 
                                             src="{{ main_image.image.url }}">
                                     {% else %}

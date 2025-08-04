@@ -507,8 +507,8 @@
             updateAll('.summary-installment-price', `${installmentPrice.toLocaleString('ru-RU')} ₽ в месяц`);
             document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
                 const nameEl = el.querySelector('.summary__breakdown-name');
-                if (nameEl) nameEl.textContent = `${label}:`;
-                el.style.display = 'flex'; // явно показываем
+                if (nameEl) nameEl.textContent = `${label}`;
+                el.style.display = 'flex';
             });
         } else {
             // Надёжно скрываем ВСЕ экземпляры
