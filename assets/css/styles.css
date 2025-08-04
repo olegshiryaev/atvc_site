@@ -2144,7 +2144,7 @@ button.swiper-pagination-bullet {
 
 .tariff-price-promo {
     font-variant-numeric: tabular-nums;
-    font-size: var(--font-size-xxl);
+    font-size: var(--font-size-xl);
     font-weight: 500;
     color: #1a1a1a;
     line-height: 24px;
@@ -5016,7 +5016,7 @@ button.swiper-pagination-bullet {
     line-height: 1.3;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
 }
 
@@ -5024,7 +5024,7 @@ button.swiper-pagination-bullet {
     font-size: var(--font-size-sm);
     line-height: 1.5;
     color: #666;
-    margin: 0 0 16px;
+    margin: 0 0 6px;
     flex-grow: 1;
     overflow: hidden;
     display: -webkit-box;
@@ -5042,7 +5042,7 @@ button.swiper-pagination-bullet {
 }
 
 .product-card__price {
-    font-size: var(--font-size-xxl);
+    font-size: var(--font-size-xl);
     font-weight: 500;
     color: #1a1a1a;
     line-height: 24px;
@@ -5086,7 +5086,7 @@ button.swiper-pagination-bullet {
     }
 
     .product-card__title {
-        font-size: var(--font-size-base);
+        font-size: var(--font-size-md);
         margin-bottom: 6px;
         line-height: 1.3;
     }
@@ -5094,12 +5094,7 @@ button.swiper-pagination-bullet {
     .product-card__desc {
         font-size: var(--font-size-sm);
         line-height: 1.45;
-        margin-bottom: 12px;
         -webkit-line-clamp: 3;
-    }
-
-    .product-card__bottom {
-        padding: 0 12px 12px;
     }
 
     .product-card__price {
@@ -5107,7 +5102,6 @@ button.swiper-pagination-bullet {
     }
 
     .product-card__btn {
-        font-size: 13px;
         padding: 10px 14px;
     }
 
@@ -5412,7 +5406,7 @@ button.swiper-pagination-bullet {
         font-size: 14px;
     }
     .product-card__price {
-        font-size: 32px;
+        font-size: var(--font-size-xl);
     }
     .product-card__wrapper {
         padding: 19px;
