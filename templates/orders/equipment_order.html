@@ -22,7 +22,13 @@
                         </div>
                         <div class="product-info__details">
                             <div class="product-info__header">
-                                <h3 class="product-info__title">{{ product.name }}</h3>
+                                <h3 class="product-info__title">
+                                    <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" 
+                                        class="product-info__link"
+                                        title="Подробнее о {{ product.name }}">
+                                            {{ product.name }}
+                                    </a>
+                                </h3>
                                 <div class="product-info__price-inline">
                                     <div class="product-info__price-value">{{ product.price|intcomma }} руб.</div>
                                 </div>
@@ -50,16 +56,57 @@
                                     </div>
                                 </div>
                             {% endif %}
-                            {% if product.installment_available %}
-                                <div class="product-info__installment">
-                                    <div>Рассрочка:</div>
-                                    <div>{{ product.installment_12_months|intcomma }} руб./мес. (12 мес.)</div>
-                                    <div>{{ product.installment_24_months|intcomma }} руб./мес. (24 мес.)</div>
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
                 </section>
+
+                {% if product.installment_available %}
+                <!-- Способ приобретения оборудования -->
+                <section class="payment-methods">
+                    <h3 class="payment-methods__title">Способ приобретения оборудования</h3>
+                    <div class="payment-methods__options">
+                        <label class="payment-method">
+                            <input 
+                                type="radio" 
+                                name="equipment_payment" 
+                                value="purchase" 
+                                checked
+                                data-price="{{ product.price }}"
+                            >
+                            <span class="payment-method__content">
+                                <span class="payment-method__title">Покупка</span>
+                                <span class="payment-method__price">{{ product.price|intcomma }} руб.</span>
+                            </span>
+                        </label>
+                        
+                        <label class="payment-method">
+                            <input 
+                                type="radio" 
+                                name="equipment_payment" 
+                                value="installment_12"
+                                data-price="{{ product.installment_12_months }}"
+                            >
+                            <span class="payment-method__content">
+                                <span class="payment-method__title">Рассрочка 12 месяцев</span>
+                                <span class="payment-method__price">{{ product.installment_12_months|intcomma }} руб./мес.</span>
+                            </span>
+                        </label>
+                        
+                        <label class="payment-method">
+                            <input 
+                                type="radio" 
+                                name="equipment_payment" 
+                                value="installment_24"
+                                data-price="{{ product.installment_24_months }}"
+                            >
+                            <span class="payment-method__content">
+                                <span class="payment-method__title">Рассрочка 24 месяца</span>
+                                <span class="payment-method__price">{{ product.installment_24_months|intcomma }} руб./мес.</span>
+                            </span>
+                        </label>
+                    </div>
+                </section>
+                {% endif %}
 
                 <!-- Блок итогов (на мобильных — между товаром и формой) -->
                 <aside class="summary summary--mobile">
@@ -211,22 +258,15 @@
     }
 
     // Функция обновления итогов (цена везде)
-    function updateSummaryDisplay(price) {
-        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' руб.';
+    function updateSummaryDisplay(price, paymentMethod = 'purchase') {
+        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + (paymentMethod === 'purchase' ? ' руб.' : ' руб./мес.');
 
-        // Обновляем цену товара в основном блоке
-        const priceValueEl = document.querySelector('.product-info__price-value');
-        if (priceValueEl) {
-            priceValueEl.textContent = formattedPrice;
-        }
-
-        // Обновляем в мобильном итоге
+        // Обновляем только в блоках итогов, не трогая карточку товара
         const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');
         if (mobileSummary) {
             mobileSummary.textContent = formattedPrice;
         }
 
-        // Обновляем в десктопном итоге
         const desktopSummary = document.querySelector('.summary--desktop .summary__item-value');
         if (desktopSummary) {
             desktopSummary.textContent = formattedPrice;
@@ -241,6 +281,12 @@
         // Обновляем скрытые поля формы
         document.getElementById('total_equipment_cost').value = price;
         document.getElementById('total_price').value = price;
+        
+        // Обновляем способ оплаты в скрытом поле
+        const equipmentPaymentOptions = {
+            "{{ product.id }}": paymentMethod
+        };
+        document.getElementById('equipment_payment_options').value = JSON.stringify(equipmentPaymentOptions);
     }
 
     // === ФУНКЦИЯ ОБНОВЛЕНИЯ ИЗОБРАЖЕНИЯ ===
@@ -291,45 +337,76 @@
         el.addEventListener('input', validateOrderForm);
     });
 
-    // === ОБРАБОТКА ВАРИАНТОВ ТОВАРА (ЦВЕТА) ===
+    // === ОБРАБОТКА ВАРИАНТОВ ТОВАРА (ЦВЕТА) И СПОСОБА ОПЛАТЫ ===
     window.addEventListener('DOMContentLoaded', () => {
         const colorRadios = document.querySelectorAll('input[name="selected_variant_id"]');
+        const paymentRadios = document.querySelectorAll('input[name="equipment_payment"]');
         const variantPrices = {};
 
         // Заполняем объект цен (id варианта → цена)
         {% for variant in product.variants.all %}
-            variantPrices[{{ variant.id }}] = {{ variant.get_price }};
+            variantPrices[{{ variant.id }}] = {
+                purchase: {{ variant.get_price }},
+                {% if product.installment_available %}
+                installment_12: {{ variant.get_installment_12_months_price }},
+                installment_24: {{ variant.get_installment_24_months_price }}
+                {% endif %}
+            };
         {% endfor %};
 
-        const basePrice = {{ product.price }};
+        const basePrice = {
+            purchase: {{ product.price }},
+            {% if product.installment_available %}
+            installment_12: {{ product.installment_12_months }},
+            installment_24: {{ product.installment_24_months }}
+            {% endif %}
+        };
+
+        // Функция для обновления цены на основе выбранных вариантов
+        function updatePrice() {
+            const selectedVariantId = document.querySelector('input[name="selected_variant_id"]:checked')?.value;
+            const selectedPayment = document.querySelector('input[name="equipment_payment"]:checked')?.value || 'purchase';
+            
+            let price;
+            if (selectedVariantId && variantPrices[selectedVariantId]) {
+                price = variantPrices[selectedVariantId][selectedPayment] || variantPrices[selectedVariantId].purchase;
+            } else {
+                price = basePrice[selectedPayment] || basePrice.purchase;
+            }
+            
+            updateSummaryDisplay(price, selectedPayment);
+        }
 
         if (colorRadios.length > 0) {
             const firstVariantId = colorRadios[0].value;
             const firstColor = colorRadios[0].dataset.color;
-            const initialPrice = variantPrices[firstVariantId] || basePrice;
+            const initialPrice = variantPrices[firstVariantId]?.purchase || basePrice.purchase;
 
             // Устанавливаем начальное изображение
             updateProductImage(firstColor);
-            updateSummaryDisplay(initialPrice);
+            // Инициализируем цену только в блоках итогов
+            updateSummaryDisplay(initialPrice, 'purchase');
 
             // Добавляем обработчики на выбор цвета
             colorRadios.forEach(radio => {
-                radio.addEventListener('change', function () {
+                radio.addEventListener('change', function() {
                     const variantId = this.value;
                     const color = this.dataset.color;
-                    const price = variantPrices[variantId] || basePrice;
-
-                    // Обновляем скрытое поле
+                    
                     document.getElementById('selected_variant_id').value = variantId;
-
-                    // Обновляем интерфейс
-                    updateSummaryDisplay(price);
-                    updateProductImage(color); // <--- Меняем изображение
+                    updateProductImage(color);
+                    updatePrice();
                 });
             });
         }
 
-        // Инициализация валидации
+        // Добавляем обработчики на выбор способа оплаты (только если есть рассрочка)
+        if (paymentRadios.length > 0) {
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', updatePrice);
+            });
+        }
+
         validateOrderForm();
     });
 

@@ -1,10 +1,14 @@
 from django.db import models
 from django.conf import settings
+from django.forms import ValidationError
 from django.utils import timezone
 from pytils.translit import slugify
 from ckeditor.fields import RichTextField
 from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.contrib.contenttypes.models import ContentType
+from imagekit.models import ProcessedImageField
+from imagekit.processors import ResizeToFit
+from pilkit.processors import Transpose
 
 
 COLOR_CHOICES = [
@@ -91,11 +95,22 @@ class Product(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
 
+    def clean(self):
+        if self.installment_available:
+            if not self.installment_12_months or not self.installment_24_months:
+                raise ValidationError("Для рассрочки необходимо указать ежемесячные платежи.")
+
     def get_main_image(self):
         return self.images.filter(is_main=True).first()
     
+    def is_in_stock(self):
+        return self.stock > 0
+    
     def get_price(self):
         return self.price
+    
+    def get_final_price(self):
+        return self.discount_price if self.discount_price else self.price
 
     def get_installment_price(self, months):
         if not self.installment_available:
@@ -135,8 +150,14 @@ class ProductVariant(models.Model):
     def __str__(self):
         return f"{self.product.name} ({self.get_color_display()})"
     
+    def is_in_stock(self):
+        return self.stock > 0 or self.variants.filter(stock__gt=0).exists()
+    
     def get_price(self):
         return self.price if self.price is not None else self.product.get_price()
+    
+    def get_final_price(self):
+        return self.discount_price if self.discount_price else self.price
     
     def save(self, *args, **kwargs):
         if self.price is None:
@@ -158,7 +179,16 @@ class ProductImage(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="images", verbose_name="Товар"
     )
-    image = models.ImageField("Изображение", upload_to="product_images/")
+    image = ProcessedImageField(
+        upload_to='product_images',
+        processors=[
+            Transpose(),  # Автоповорот по EXIF
+            ResizeToFit(800, 800)  # Сохраняет пропорции
+        ],
+        format='WEBP',
+        options={'quality': 90},
+        verbose_name="Изображение"
+    )
     is_main = models.BooleanField("Основное изображение", default=False)
     color = models.CharField(
         "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
@@ -169,9 +199,30 @@ class ProductImage(models.Model):
         return f"Изображение для {self.product.name}"
     
     def save(self, *args, **kwargs):
+        # Генерация имени файла перед сохранением (только для новых изображений)
+        if self.image and not self.pk:
+            self.image.name = self.generate_filename()
+        
+        # Обновление главного изображения
         if self.is_main:
             self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
+        
         super().save(*args, **kwargs)
+
+    def generate_filename(self):
+        """Генерирует уникальное имя файла в формате: `product_slug-123.webp`"""
+        ext = '.webp'
+        base_name = slugify(self.product.slug or self.product.name or 'product')
+        
+        # Уникальное имя: product_slug.webp, product_slug-1.webp и т.д.
+        filename = f"{base_name}{ext}"
+        counter = 1
+        
+        while ProductImage.objects.filter(image=f"product_images/{filename}").exists():
+            filename = f"{base_name}-{counter}{ext}"
+            counter += 1
+        
+        return filename  # Не добавляем 'product_images/' - это уже делает upload_to
 
     class Meta:
         ordering = ["order"]

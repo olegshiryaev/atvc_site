@@ -146,12 +146,12 @@
                                 <img width="400" height="400" alt="Изображение" data-src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" class="product-card__img ls-is-cached lazyloaded" src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}"><noscript><img src="" width="400" height="400" alt="Изображение" class="product-card__img"></noscript>
                             </div>
                             <h6 class="product-card__title h6">{{ item.name }}</h6>
-                            <div class="product-card__desc">{{ item.short_description|truncatewords:10 }}</div>
-                            <div class="product-card__bottom">
-                                <div class="product-card__price h5">{{ item.price }} ₽</div>
-                                <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
-                            </div>
+                            <div class="product-card__desc">{{ item.short_description|truncatewords:10|default_if_none:'' }}</div>
                         </a>
+                        <div class="product-card__bottom">
+                            <div class="product-card__price h5">{{ item.price }} ₽</div>
+                            <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                        </div>
                     </li>
                     {% endfor %}
                 </div>
