@@ -92,8 +92,19 @@
                         {% for product in products %}
                             <li class="product-card" data-product-id="{{ product.id }}" data-product-title="{{ product.name }}" data-product-price="{{ product.price|default_if_none:'' }}" data-product-incatalog="1">
                                 <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">                                 
-                                    <div class="product-card__img-wrap">
-                                        <img src="{{ product.images.first.image.url }}" alt="{{ product.name }}" class="product-card__img">
+                                    <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
+                                        {% with main_image=product.get_main_image %}
+                                            {% if main_image %}
+                                                <img data-lazy-src="{{ main_image.image.url }}"  
+                                                    alt="{{ product.name|default:'Товар' }}" 
+                                                    class="product-card__img" 
+                                                    src="{{ main_image.image.url }}">
+                                            {% else %}
+                                            <div class="product-card__placeholder">
+                                                <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                            </div>
+                                            {% endif %}
+                                        {% endwith %}
                                     </div>
 
                                     <h6 class="product-card__title h6">{{ product.name }}</h6>
@@ -208,15 +219,14 @@
                                 <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
                                     {% with main_image=product.get_main_image %}
                                         {% if main_image %}
-                                            <img data-lazy-src="{{ main_image.image.url }}" 
-                                                alt="{{ product.name }}" 
+                                            <img data-lazy-src="{{ main_image.image.url }}"  
+                                                alt="{{ product.name|default:'Товар' }}" 
                                                 class="product-card__img" 
                                                 src="{{ main_image.image.url }}">
                                         {% else %}
-                                            <img data-lazy-src="/static/placeholder/400x400.webp" 
-                                                alt="{{ product.name }}" 
-                                                class="product-card__img" 
-                                                src="/static/placeholder/400x400.webp">
+                                        <div class="product-card__placeholder">
+                                            <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                        </div>
                                         {% endif %}
                                     {% endwith %}
                                 </div>

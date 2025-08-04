@@ -2063,7 +2063,7 @@ button.swiper-pagination-bullet {
 
 /* === Заголовок и описание тарифа === */
 .tariff__title {
-    font-size: 1.4rem;
+    font-size: var(--font-size-lg);
     font-weight: 600;
     line-height: 32px;
     letter-spacing: -0.16px;
@@ -2083,7 +2083,7 @@ button.swiper-pagination-bullet {
 /* Тариф — описание */
 .tariff__desc {
     color: #666;
-    font-size: 0.9rem;
+    font-size: var(--font-size-sm);
     font-weight: 400;
     line-height: 20px;
     letter-spacing: 0.052px;
@@ -2741,7 +2741,7 @@ button.swiper-pagination-bullet {
 
 .news-card__title {
     font-weight: 700;
-    font-size: 20px;
+    font-size: var(--font-size-md);
     line-height: 1.4;
     max-height: calc(1.4em * 2);
     overflow: hidden;
@@ -4946,7 +4946,7 @@ button.swiper-pagination-bullet {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: 30px;
+    padding: 20px;
     color: #2d2d2d;
     text-decoration: none;
 }
@@ -4954,12 +4954,12 @@ button.swiper-pagination-bullet {
 .product-card__img-wrap {
     position: relative;
     display: block;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
 }
 
 .product-card__img-wrap:before {
     content: "";
-    padding-bottom: 63%;
+    padding-bottom: 50%;
     display: block;
 }
 
@@ -4970,7 +4970,16 @@ button.swiper-pagination-bullet {
     height: 100%;
     width: 100%;
     object-fit: contain;
-    border-radius: 16px;
+    border-radius: 12px;
+    max-height: 150px;
+}
+
+.product-card__img-wrap.no-image {
+    background-color: #f5f5f5;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
 }
 
 .product-card__placeholder {
@@ -4983,47 +4992,49 @@ button.swiper-pagination-bullet {
 }
 
 .product-card__no-image-label {
-    position: absolute;
-    bottom: 10px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    padding: 5px 10px;
-    font-size: 0.8rem;
-    border-radius: 4px;
+    width: 100%;
+    height: 100%;
+    background-color: #e6e6e6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #666;
+    border-radius: 12px;
 }
 
 .product-card__title {
     margin: 0 0 5px;
-    font-size: 18px;
+    font-size: var(--font-size-md);
     font-weight: 600;
     line-height: 110%;
-    letter-spacing: 0.36px;
+    letter-spacing: 0.32px;
 }
 
 .product-card__desc {
-    font-size: 14px;
+    font-size: var(--font-size-sm);
     font-weight: 400;
-    line-height: 130%;
-    letter-spacing: 0.28px;
-    color: #575757;
-    margin-bottom: 15px;
+    line-height: 20px;
+    letter-spacing: 0.24px;
+    color: #666;
+    margin-bottom: 10px;
     flex-grow: 1;
 }
 
 .product-card__bottom {
-    padding: 0 30px 30px;
+    padding: 0 20px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 10px;
+    gap: 8px;
     margin-top: auto;
 }
 
 .product-card__price {
-    font-size: 24px;
+    font-size: var(--font-size-lg);
     font-weight: 700;
     line-height: 1;
-    letter-spacing: -0.128px;
+    letter-spacing: -0.1px;
     white-space: nowrap;
 }
 
@@ -5039,6 +5050,7 @@ button.swiper-pagination-bullet {
 .product-card__btn.loading {
     position: relative;
     opacity: 0.7;
+    pointer-events: none;
 }
 
 .product-card__btn.loading:after {
@@ -5057,17 +5069,26 @@ button.swiper-pagination-bullet {
 
 @media (max-width: 768px) {
     .product-card__wrapper {
-        padding: 20px;
+        padding: 15px;
     }
     .product-card__bottom {
-        padding: 0 20px 20px;
+        padding: 0 15px 15px;
     }
     .product-card__price {
         font-size: 20px;
     }
     .product-card__btn {
-        min-width: 100px;
-        padding: 10px 15px;
+        min-width: 90px;
+        padding: 8px 12px;
+    }
+    .product-card__img {
+        max-height: 120px; /* Ограничение высоты для мобильных */
+    }
+    .product-card__title {
+        font-size: 14px; /* Уменьшено с 16px */
+    }
+    .product-card__desc {
+        font-size: 11px; /* Уменьшено с 12px */
     }
 }
 
@@ -7476,8 +7497,10 @@ button.swiper-pagination-bullet {
     animation: spin 1s ease-in-out infinite;
 }
 
+/* Анимация для спиннера */
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
 @media (min-width: 768px) {

@@ -101,14 +101,13 @@
                                         {% with main_image=product.get_main_image %}
                                             {% if main_image %}
                                                 <img data-lazy-src="{{ main_image.image.url }}"  
-                                                    alt="{{ product.name }}" 
+                                                    alt="{{ product.name|default:'Товар' }}" 
                                                     class="product-card__img" 
                                                     src="{{ main_image.image.url }}">
                                             {% else %}
-                                                <img data-lazy-src="/static/placeholder/400x400.webp" 
-                                                    alt="{{ product.name }}" 
-                                                    class="product-card__img" 
-                                                    src="/static/placeholder/400x400.webp">
+                                            <div class="product-card__placeholder">
+                                                <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                            </div>
                                             {% endif %}
                                         {% endwith %}
                                     </div>
@@ -119,7 +118,7 @@
                                 </a>
                                 
                                 <div class="product-card__bottom">
-                                    <div class="product-card__price h5">
+                                    <div class="product-card__price">
                                         {{ product.price }} ₽
                                     </div>
                                     <button class="product-card__btn btn" 

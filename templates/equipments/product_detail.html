@@ -141,9 +141,19 @@
                     {% for item in recently_viewed %}
                     <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
                         <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
-                            <div class="product-card__cart" data-product-change-cart="e8f7da8e2d75253e4003cbc4c24286ac"></div>
-                            <div class="product-card__img-wrap">
-                                <img width="400" height="400" alt="Изображение" data-src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}" class="product-card__img ls-is-cached lazyloaded" src="{{ item.images.first.image.url|default:'/static/images/no-image.png' }}"><noscript><img src="" width="400" height="400" alt="Изображение" class="product-card__img"></noscript>
+                            <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
+                                {% with main_image=product.get_main_image %}
+                                    {% if main_image %}
+                                        <img data-lazy-src="{{ main_image.image.url }}"  
+                                            alt="{{ product.name|default:'Товар' }}" 
+                                            class="product-card__img" 
+                                            src="{{ main_image.image.url }}">
+                                    {% else %}
+                                    <div class="product-card__placeholder">
+                                        <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                    </div>
+                                    {% endif %}
+                                {% endwith %}
                             </div>
                             <h6 class="product-card__title h6">{{ item.name }}</h6>
                             <div class="product-card__desc">{{ item.short_description|truncatewords:10|default_if_none:'' }}</div>
