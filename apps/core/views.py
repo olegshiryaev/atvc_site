@@ -359,6 +359,15 @@ def services(request, service_slug, locality_slug):
         is_available=True, services=service
     ).prefetch_related("images", "services")
 
+    try:
+        tv_box_product = Product.objects.filter(
+            services=service,
+            name__contains="Smart-TV приставка Wink Box Mini",
+            is_available=True
+        ).select_related('tvbox').prefetch_related('images').get()
+    except Product.DoesNotExist:
+        tv_box_product = None
+
     # Формируем breadcrumbs
     breadcrumbs = [
         {"title": "Главная", "url": "core:home"},
@@ -379,6 +388,7 @@ def services(request, service_slug, locality_slug):
         "breadcrumbs": breadcrumbs,
         "title": title,
         "tv_packages": tv_packages,
+        "tv_box_product": tv_box_product,
     }
 
     return render(request, "core/services.html", context)
