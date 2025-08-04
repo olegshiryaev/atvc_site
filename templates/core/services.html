@@ -58,7 +58,7 @@
                                     </div>
                                 </div>
                                 <div class="tv-console__feature">
-                                    <div class="tv_console__feature-icon">
+                                    <div class="tv-console__feature-icon">
                                         <img src="{% static 'img/game.webp' %}" alt="Игры и развлечения" class="tv-console__icon-img">
                                     </div>
                                     <div class="tv-console__feature-text">
@@ -95,7 +95,7 @@
                         </button>
                         <div class="tv-console__price-info">
                             <div class="tv-console__price-main">
-                                {{ tv_box_product.get_final_price }}<span class="tv-console__currency">руб.</span>
+                                {{ tv_box_product.get_final_price }}<span class="tv-console__currency"> ₽</span>
                             </div>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
                     <div class="swiper-wrapper">
                         {% for product in products %}
                             <li class="product-card products-slider-block__item swiper-slide">
-                                <a href="{{ product.get_absolute_url }}" class="product-card__wrapper">
+                                <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
                                     <div class="product-card__cart"></div>
                                     <div class="product-card__img-wrap">
                                         <img src="{{ product.get_main_image.image.url }}" width="400" height="400" alt="{{ product.name }}" class="product-card__img">
@@ -238,7 +238,7 @@
                                 </a>
                                 <div class="product-card__bottom">
                                     <div class="product-card__price h5">
-                                        {{ product.price }} руб.
+                                        {{ product.price }} ₽
                                     </div>
                                     <button class="product-card__btn btn" 
                                             onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать

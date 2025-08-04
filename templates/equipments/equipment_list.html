@@ -103,7 +103,7 @@
                                     </div>
                                 </a>
                                 <div class="product-card__bottom">
-                                    <div class="product-card__price h5">{{ product.price }} руб.</div>
+                                    <div class="product-card__price h5">{{ product.price }} ₽</div>
                                     <button class="product-card__btn btn" 
                                         onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
                                     </button>
@@ -228,7 +228,7 @@
                                 </div>
                             </a>
                             <div class="product-card__bottom">
-                                <div class="product-card__price h5">{{ product.price }} руб.</div>
+                                <div class="product-card__price h5">{{ product.price }} ₽</div>
                                 <button class="product-card__btn btn" 
                                     onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
                                 </button>
