@@ -45,7 +45,8 @@
                                                 <input
                                                     type="radio"
                                                     name="selected_variant_id"
-                                                    value="{{ variant.id }}"
+                                                    value="{{ variant.color }}"
+                                                    data-variant-id="{{ variant.id }}"
                                                     data-color="{{ variant.color }}"
                                                     {% if forloop.first %}checked{% endif %}
                                                     {% if variant.stock <= 0 %}disabled{% endif %}
@@ -251,271 +252,267 @@
 
 <script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
-    // Переменные для хранения выбранных значений
-    let selectedEquipment = {};
-    let selectedServices = {};
-    let selectedTVPackages = {};
-    let pendingPaymentOptions = {};
+// Переменные для хранения выбранных значений
+let selectedEquipment = {};
+let selectedServices = {};
+let selectedTVPackages = {};
+let pendingPaymentOptions = {};
 
-    // Маска телефона
-    const phoneInput = document.querySelector('#orderForm [name="phone"]');
-    let phoneMask = null;
-    if (phoneInput) {
-        phoneMask = IMask(phoneInput, {
-            mask: '+{7}(000)000-00-00',
-            lazy: false
-        });
+// Маска телефона
+const phoneInput = document.querySelector('#orderForm [name="phone"]');
+let phoneMask = null;
+if (phoneInput) {
+    phoneMask = IMask(phoneInput, {
+        mask: '+{7}(000)000-00-00',
+        lazy: false
+    });
+}
+
+// Подготовка номера телефона
+function preparePhoneNumber(value) {
+    const digits = value.replace(/\D/g, '');
+    if (digits.length === 11 && ['7', '8'].includes(digits[0])) {
+        return '+7' + digits.slice(1);
     }
+    return null;
+}
 
-    // Подготовка номера телефона
-    function preparePhoneNumber(value) {
-        const digits = value.replace(/\D/g, '');
-        if (digits.length === 11 && ['7', '8'].includes(digits[0])) {
-            return '+7' + digits.slice(1);
-        }
-        return null;
-    }
+// Функция обновления итогов (цена везде)
+function updateSummaryDisplay(price, paymentMethod = 'purchase') {
+    const isMonthly = paymentMethod !== 'purchase';
+    const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
+    
+    // Обновляем отображение цены в блоке оборудования
+    const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');
+    if (mobileSummary) mobileSummary.textContent = formattedPrice;
+    const desktopSummary = document.querySelector('.summary--desktop .summary__item-value');
+    if (desktopSummary) desktopSummary.textContent = formattedPrice;
 
-    // Функция обновления итогов (цена везде)
-    function updateSummaryDisplay(price, paymentMethod = 'purchase') {
-        const isMonthly = paymentMethod !== 'purchase';
-        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? ' в месяц' : '');
-        
-        // Обновляем отображение цены в блоке оборудования
-        const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');
-        if (mobileSummary) mobileSummary.textContent = formattedPrice;
-        const desktopSummary = document.querySelector('.summary--desktop .summary__item-value');
-        if (desktopSummary) desktopSummary.textContent = formattedPrice;
-
-        // Обновляем итоговую сумму
-        const totalValueEls = document.querySelectorAll('.summary__total-value');
-        totalValueEls.forEach(el => {
-            el.textContent = formattedPrice;
-        });
-
-        // Обновляем скрытые поля
-        document.getElementById('total_equipment_cost').value = price;
-        document.getElementById('total_price').value = price;
-
-        // Обновляем способ оплаты
-        const equipmentPaymentOptions = {
-            "{{ product.id }}": paymentMethod
-        };
-        document.getElementById('equipment_payment_options').value = JSON.stringify(equipmentPaymentOptions);
-    }
-
-    // === ФУНКЦИЯ ОБНОВЛЕНИЯ ИЗОБРАЖЕНИЯ ===
-    function updateProductImage(color) {
-        const container = document.getElementById('productImageContainer');
-        const currentImg = document.getElementById('productImage');
-        const placeholder = document.getElementById('productImagePlaceholder');
-
-        // Удаляем текущее изображение или заглушку
-        if (currentImg) currentImg.remove();
-        if (placeholder) placeholder.remove();
-
-        // Карта цветов → URL изображений (генерируется из Django)
-        const imageMap = {
-            {% for image in product.images.all %}
-                "{{ image.color }}": "{{ image.image.url }}",
-            {% endfor %}
-        };
-
-        if (imageMap[color]) {
-            const img = document.createElement('img');
-            img.id = 'productImage';
-            img.src = imageMap[color];
-            img.alt = "{{ product.name }} (цвет: " + color + ")";
-            img.className = 'product-info__img';
-            img.style.opacity = '0';
-            img.onload = () => { img.style.opacity = '1'; };
-            container.appendChild(img);
-        } else {
-            const div = document.createElement('div');
-            div.id = 'productImagePlaceholder';
-            div.className = 'product-info__img-placeholder';
-            div.innerHTML = '<span>Нет изображения</span>';
-            container.appendChild(div);
-        }
-    }
-
-    // Валидация формы: активация кнопки при корректных данных
-    function validateOrderForm() {
-        const fullName = document.querySelector('#orderForm [name="full_name"]').value.trim();
-        const phoneValid = phoneMask && preparePhoneNumber(phoneMask.unmaskedValue);
-        const submitBtn = document.querySelector('.order-form__submit');
-        submitBtn.disabled = !(fullName.length >= 3 && phoneValid);
-    }
-
-    // Слушатели на ввод
-    document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"]').forEach(el => {
-        el.addEventListener('input', validateOrderForm);
+    // Обновляем итоговую сумму
+    const totalValueEls = document.querySelectorAll('.summary__total-value');
+    totalValueEls.forEach(el => {
+        el.textContent = formattedPrice;
     });
 
-    // === ОБРАБОТКА ВАРИАНТОВ ТОВАРА (ЦВЕТА) И СПОСОБА ОПЛАТЫ ===
-    window.addEventListener('DOMContentLoaded', () => {
-        const colorRadios = document.querySelectorAll('input[name="selected_variant_id"]');
-        const paymentRadios = document.querySelectorAll('input[name="equipment_payment"]');
-        const variantPrices = {};
+    // Обновляем скрытые поля
+    document.getElementById('total_equipment_cost').value = price;
+    document.getElementById('total_price').value = price;
 
-        // Заполняем объект цен (id варианта → цена)
-        {% for variant in product.variants.all %}
-            variantPrices[{{ variant.id }}] = {
-                purchase: {{ variant.get_price }},
-                {% if product.installment_available %}
-                installment12: {{ variant.get_installment_12_months_price|default:product.installment_12_months }},
-                installment24: {{ variant.get_installment_24_months_price|default:product.installment_24_months }},
-                installment48: {{ variant.get_installment_48_months_price|default:product.installment_48_months }}
-                {% endif %}
-            };
+    // Обновляем способ оплаты
+    const equipmentPaymentOptions = {
+        "{{ product.id }}": paymentMethod
+    };
+    document.getElementById('equipment_payment_options').value = JSON.stringify(equipmentPaymentOptions);
+}
+
+// === ФУНКЦИЯ ОБНОВЛЕНИЯ ИЗОБРАЖЕНИЯ ===
+function updateProductImage(color) {
+    const container = document.getElementById('productImageContainer');
+    const currentImg = document.getElementById('productImage');
+    const placeholder = document.getElementById('productImagePlaceholder');
+
+    // Удаляем текущее изображение или заглушку
+    if (currentImg) currentImg.remove();
+    if (placeholder) placeholder.remove();
+
+    // Карта цветов → URL изображений (генерируется из Django)
+    const imageMap = {
+        {% for image in product.images.all %}
+            "{{ image.color }}": "{{ image.image.url }}",
         {% endfor %}
+    };
 
-        const basePrice = {
-            purchase: {{ product.price }},
+    if (imageMap[color]) {
+        const img = document.createElement('img');
+        img.id = 'productImage';
+        img.src = imageMap[color];
+        img.alt = "{{ product.name }} (цвет: " + color + ")";
+        img.className = 'product-info__img';
+        img.style.opacity = '0';
+        img.onload = () => { img.style.opacity = '1'; };
+        container.appendChild(img);
+    } else {
+        const div = document.createElement('div');
+        div.id = 'productImagePlaceholder';
+        div.className = 'product-info__img-placeholder';
+        div.innerHTML = '<span>Нет изображения</span>';
+        container.appendChild(div);
+    }
+}
+
+// Валидация формы: активация кнопки при корректных данных
+function validateOrderForm() {
+    const fullName = document.querySelector('#orderForm [name="full_name"]').value.trim();
+    const phoneValid = phoneMask && preparePhoneNumber(phoneMask.unmaskedValue);
+    const submitBtn = document.querySelector('.order-form__submit');
+    submitBtn.disabled = !(fullName.length >= 3 && phoneValid);
+}
+
+// Слушатели на ввод
+document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"]').forEach(el => {
+    el.addEventListener('input', validateOrderForm);
+});
+
+// === ОБРАБОТКА ВАРИАНТОВ ТОВАРА (ЦВЕТА) И СПОСОБА ОПЛАТЫ ===
+window.addEventListener('DOMContentLoaded', () => {
+    const colorRadios = document.querySelectorAll('input[name="selected_variant_id"]');
+    const paymentRadios = document.querySelectorAll('input[name="equipment_payment"]');
+    const variantPrices = {};
+
+    // Заполняем объект цен (id варианта → цена)
+    {% for variant in product.variants.all %}
+        variantPrices[{{ variant.id }}] = {
+            purchase: {{ variant.get_price }},
             {% if product.installment_available %}
-            installment12: {{ product.installment_12_months }},
-            installment24: {{ product.installment_24_months }},
-            installment48: {{ product.installment_48_months }}
+            installment12: {{ product.installment_12_months|default:0 }},
+            installment24: {{ product.installment_24_months|default:0 }},
+            installment48: {{ product.installment_48_months|default:0 }}
             {% endif %}
         };
+    {% endfor %}
 
-        // Функция для обновления цены на основе выбранных вариантов
-        function updatePrice() {
-            const selectedVariantId = document.querySelector('input[name="selected_variant_id"]:checked')?.value;
-            const selectedPayment = document.querySelector('input[name="equipment_payment"]:checked')?.value || 'purchase';
-            
-            let price;
-            if (selectedVariantId && variantPrices[selectedVariantId]) {
-                // Используем значения для выбранного варианта
-                price = variantPrices[selectedVariantId][selectedPayment] || variantPrices[selectedVariantId].purchase;
-            } else {
-                // Используем базовые значения
-                price = basePrice[selectedPayment] || basePrice.purchase;
-            }
-            
-            console.log('Selected Payment:', selectedPayment, 'Price:', price); // Для отладки
-            updateSummaryDisplay(price, selectedPayment);
+    const basePrice = {
+        purchase: {{ product.get_final_price }},
+        {% if product.installment_available %}
+        installment12: {{ product.installment_12_months|default:0 }},
+        installment24: {{ product.installment_24_months|default:0 }},
+        installment48: {{ product.installment_48_months|default:0 }}
+        {% endif %}
+    };
+
+    // Функция для обновления цены на основе выбранных вариантов
+    function updatePrice() {
+        const selectedVariantId = document.querySelector('input[name="selected_variant_id"]:checked')?.value;
+        const selectedPayment = document.querySelector('input[name="equipment_payment"]:checked')?.value || 'purchase';
+        
+        let price;
+        if (selectedVariantId && variantPrices[selectedVariantId]) {
+            price = variantPrices[selectedVariantId][selectedPayment] || variantPrices[selectedVariantId].purchase;
+        } else {
+            price = basePrice[selectedPayment] || basePrice.purchase;
         }
+        
+        updateSummaryDisplay(price, selectedPayment);
+    }
 
-        if (colorRadios.length > 0) {
-            const firstVariantId = colorRadios[0].value;
-            const firstColor = colorRadios[0].dataset.color;
-            const initialPrice = variantPrices[firstVariantId]?.purchase || basePrice.purchase;
+    if (colorRadios.length > 0) {
+        const firstVariantId = colorRadios[0].value;
+        const initialPrice = variantPrices[firstVariantId]?.purchase || basePrice.purchase;
 
-            // Устанавливаем начальное изображение
-            updateProductImage(firstColor);
-            // Инициализируем цену только в блоках итогов
-            updateSummaryDisplay(initialPrice, 'purchase');
+        // Устанавливаем начальное изображение
+        updateProductImage(firstVariantId);
+        // Инициализируем цену
+        updateSummaryDisplay(initialPrice, 'purchase');
 
-            // Добавляем обработчики на выбор цвета
-            colorRadios.forEach(radio => {
-                radio.addEventListener('change', function() {
-                    const variantId = this.value;
-                    const color = this.dataset.color;
-                    
-                    document.getElementById('selected_variant_id').value = variantId;
-                    updateProductImage(color);
-                    updatePrice();
-                });
+        // Добавляем обработчики на выбор цвета
+        colorRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                const variantId = this.dataset.variantId;
+                const color = this.value;
+
+                document.getElementById('selected_variant_id').value = variantId;
+                updateProductImage(color);
+                updatePrice();
             });
-        }
+        });
+    }
 
-        // Добавляем обработчики на выбор способа оплаты (только если есть рассрочка)
-        if (paymentRadios.length > 0) {
-            paymentRadios.forEach(radio => {
-                radio.addEventListener('change', updatePrice);
-            });
-        }
+    // Добавляем обработчики на выбор способа оплаты
+    if (paymentRadios.length > 0) {
+        paymentRadios.forEach(radio => {
+            radio.addEventListener('change', updatePrice);
+        });
+    }
 
-        validateOrderForm();
+    validateOrderForm();
+});
+
+// Основной обработчик отправки формы
+document.getElementById('orderForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    // Сброс ошибок
+    document.querySelectorAll('.order-form__input, .order-form__textarea').forEach(el => {
+        el.classList.remove('order-form__input--invalid');
     });
+    document.querySelectorAll('.order-form__validation-message').forEach(el => {
+        el.textContent = '';
+        el.style.display = 'none';
+    });
+    document.getElementById('form-errors').innerHTML = '';
 
-    // Основной обработчик отправки формы
-    document.getElementById('orderForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
+    const formData = new FormData(this);
 
-        // Сброс ошибок
-        document.querySelectorAll('.order-form__input, .order-form__textarea').forEach(el => {
-            el.classList.remove('order-form__input--invalid');
+    // Валидация телефона
+    const phone = phoneMask ? preparePhoneNumber(phoneMask.unmaskedValue) : null;
+    if (!phone) {
+        const phoneField = document.querySelector('#phone');
+        phoneField.classList.add('order-form__input--invalid');
+        document.getElementById('error_phone').textContent = 'Введите корректный номер';
+        document.getElementById('error_phone').style.display = 'block';
+        return;
+    }
+    formData.set('phone', phone);
+
+    // Валидация имени
+    const fullName = formData.get('full_name').trim();
+    if (fullName.length < 3) {
+        document.querySelector('#name').classList.add('order-form__input--invalid');
+        document.getElementById('error_full_name').textContent = 'Минимум 3 символа';
+        document.getElementById('error_full_name').style.display = 'block';
+        return;
+    }
+
+    // Кнопка отправки
+    const submitBtn = document.querySelector('.order-form__submit');
+    submitBtn.disabled = true;
+    submitBtn.classList.add('order-form__submit--loading');
+    submitBtn.innerHTML = 'Отправка...';
+
+    try {
+        const response = await fetch(this.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                'X-Requested-With': 'XMLHttpRequest'
+            }
         });
-        document.querySelectorAll('.order-form__validation-message').forEach(el => {
-            el.textContent = '';
-            el.style.display = 'none';
-        });
-        document.getElementById('form-errors').innerHTML = '';
-
-        const formData = new FormData(this);
-
-        // Валидация телефона
-        const phone = phoneMask ? preparePhoneNumber(phoneMask.unmaskedValue) : null;
-        if (!phone) {
-            const phoneField = document.querySelector('#phone');
-            phoneField.classList.add('order-form__input--invalid');
-            document.getElementById('error_phone').textContent = 'Введите корректный номер';
-            document.getElementById('error_phone').style.display = 'block';
-            return;
-        }
-        formData.set('phone', phone);
-
-        // Валидация имени
-        const fullName = formData.get('full_name').trim();
-        if (fullName.length < 3) {
-            document.querySelector('#name').classList.add('order-form__input--invalid');
-            document.getElementById('error_full_name').textContent = 'Минимум 3 символа';
-            document.getElementById('error_full_name').style.display = 'block';
-            return;
-        }
-
-        // Кнопка отправки
-        const submitBtn = document.querySelector('.order-form__submit');
-        submitBtn.disabled = true;
-        submitBtn.classList.add('order-form__submit--loading');
-        submitBtn.innerHTML = 'Отправка...';
-
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
+        const data = await response.json();
+        if (response.ok && data.success) {
+            this.reset();
+            if (phoneMask) phoneMask.updateValue();
+            localStorage.removeItem('selectedEquipment');
+            localStorage.removeItem('selectedServices');
+            localStorage.removeItem('selectedTVPackages');
+            window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
+        } else {
+            const errorList = document.createElement('ul');
+            errorList.className = 'errorlist';
+            (data.non_field_errors || []).forEach(err => {
+                const li = document.createElement('li');
+                li.textContent = err;
+                errorList.appendChild(li);
             });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                this.reset();
-                if (phoneMask) phoneMask.updateValue();
-                localStorage.removeItem('selectedEquipment');
-                localStorage.removeItem('selectedServices');
-                localStorage.removeItem('selectedTVPackages');
-                window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
-            } else {
-                const errorList = document.createElement('ul');
-                errorList.className = 'errorlist';
-                (data.non_field_errors || []).forEach(err => {
+            for (const [field, errors] of Object.entries(data.errors || {})) {
+                errors.forEach(err => {
                     const li = document.createElement('li');
                     li.textContent = err;
                     errorList.appendChild(li);
                 });
-                for (const [field, errors] of Object.entries(data.errors || {})) {
-                    errors.forEach(err => {
-                        const li = document.createElement('li');
-                        li.textContent = err;
-                        errorList.appendChild(li);
-                    });
-                }
-                document.getElementById('form-errors').appendChild(errorList);
-                document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
             }
-        } catch (error) {
-            console.error('Ошибка сети:', error);
-            document.getElementById('form-errors').innerHTML = '<ul class="errorlist"><li>Ошибка соединения. Попробуйте позже.</li></ul>';
+            document.getElementById('form-errors').appendChild(errorList);
             document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
-        } finally {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('order-form__submit--loading');
-            submitBtn.innerHTML = 'Отправить заявку';
         }
-    });
+    } catch (error) {
+        console.error('Ошибка сети:', error);
+        document.getElementById('form-errors').innerHTML = '<ul class="errorlist"><li>Ошибка соединения. Попробуйте позже.</li></ul>';
+        document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('order-form__submit--loading');
+        submitBtn.innerHTML = 'Отправить заявку';
+    }
+});
 </script>
 {% endblock %}

@@ -134,14 +134,12 @@ class Product(models.Model):
 
     def get_total_installment_price(self, months):
         if not self.installment_available:
-            return self.price
-        if months == 12:
-            return self.installment_12_months * 12
-        if months == 24:
-            return self.installment_24_months * 24
-        if months == 48:
-            return self.installment_24_months * 48
-        return self.price
+            return self.get_final_price()
+
+        price = self.get_installment_price(months)
+        if price is not None:
+            return price * months
+        return self.get_final_price()
 
     class Meta:
         verbose_name = "Товар"
