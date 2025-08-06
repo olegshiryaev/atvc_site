@@ -2084,7 +2084,7 @@ button.swiper-pagination-bullet {
 /* Тариф — описание */
 .tariff__desc {
     color: #666;
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     font-weight: 400;
     line-height: 20px;
     letter-spacing: 0.052px;
@@ -2758,9 +2758,9 @@ button.swiper-pagination-bullet {
 }
 
 .news-card__title {
-    font-weight: 700;
-    font-size: var(--font-size-md);
-    line-height: 1.4;
+    font-weight: 600;
+    font-size: var(--font-size-xl);
+    line-height: 25px;
     max-height: calc(1.4em * 2);
     overflow: hidden;
     display: -webkit-box;
@@ -2769,8 +2769,8 @@ button.swiper-pagination-bullet {
 }
 
 .news-card__excerpt {
-    font-size: 15px;
-    line-height: 1.6;
+    font-size: var(--font-size-base);
+    line-height: 20px;
     color: #4a4a4a;
     flex-grow: 1;
     max-height: calc(1.6em * 3);
@@ -2949,7 +2949,13 @@ button.swiper-pagination-bullet {
     }
 
     .news-card__title {
-        font-size: 18px;
+        font-size: var(--font-size-lg);
+        line-height: 20px;
+    }
+    
+    .news-card__excerpt {
+        font-size: var(--font-size-sm);
+        line-height: 17px;
     }
 
     .news-detail__title {
@@ -2967,7 +2973,7 @@ button.swiper-pagination-bullet {
     }
 
     .news-card__title {
-        font-size: 16px;
+        font-size: var(--font-size-md);
     }
 
     .news-detail__image {
@@ -4134,6 +4140,9 @@ button.swiper-pagination-bullet {
     width: 100%;
     height: 100%;
     z-index: 1050;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Фон модального окна и offcanvas */
@@ -4151,16 +4160,21 @@ button.swiper-pagination-bullet {
 /* Контент модального окна */
 .location-select-modal__dialog {
     position: relative;
-    max-width: 800px;
-    margin: 1.75rem auto;
+    width: 800px;
     z-index: 1051;
+    max-height: 95vh;
 }
 
 .location-select-modal__content {
     background: #fff;
-    border-radius: 12px;
+    border-radius: 15px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    padding: 1.5rem;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    height: 600px;
+    max-height: 600px;
 }
 
 /* Заголовок модального окна */
@@ -4168,14 +4182,14 @@ button.swiper-pagination-bullet {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 1rem;
 }
 
 .location-select-modal__title {
     font-size: 32px;
     font-weight: 700;
-    line-height: 40px;
-    letter-spacing: 0.3px;
+    font-style: normal;
+    line-height: 35px;
+    letter-spacing: -0.2px;
 }
 
 /* Поле поиска */
@@ -4192,7 +4206,7 @@ button.swiper-pagination-bullet {
     padding: 0.75rem 1rem;
     border: 1px solid var(--smoky-white-color);
     background-color: var(--smoky-white-color);
-    border-radius: 8px;
+    border-radius: 15px;
     font-size: 1rem;
     transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
@@ -4201,8 +4215,7 @@ button.swiper-pagination-bullet {
 .mobile-location-offcanvas .location-select-modal__search-input:focus {
     background-color: #fff;
     outline: none;
-    border-color: #86b7fe;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+    border-color: var(--main-color-on-hover);
 }
 
 /* Список автодополнения */
@@ -4300,14 +4313,15 @@ button.swiper-pagination-bullet {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 1.5rem 1.5rem;
     border-bottom: none;
 }
 
 .mobile-location-offcanvas__title {
-    font-size: 28px;
+    font-size: var(--font-size-xl);
     font-weight: 700;
-    line-height: 40px;
+    font-style: normal;
+    line-height: 25px;
     letter-spacing: 0.3px;
 }
 
@@ -4315,6 +4329,9 @@ button.swiper-pagination-bullet {
     padding: 1.5rem;
     height: calc(100% - 60px);
     overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 /* Popover подтверждения местоположения */
@@ -4520,8 +4537,8 @@ button.swiper-pagination-bullet {
     opacity: 0.7;
     z-index: 10;
     position: absolute;
-    top: 18px;
-    right: 26px;
+    top: 20px;
+    right: 15px;
     width: 40px;
     height: 40px;
 }
@@ -4532,7 +4549,7 @@ button.swiper-pagination-bullet {
 
 @media (max-width: 991.98px) {
     .btn-close {
-        top: 4px;
+        top: 10px;
         right: 6px;
         font-size: 16px;
     }
