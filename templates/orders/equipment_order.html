@@ -75,35 +75,54 @@
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Покупка</span>
-                                <span class="payment-method__price">{{ product.price|intcomma }} ₽</span>
+                                <span class="payment-method__price">{{ product.price|intcomma }} руб.</span>
                             </span>
                         </label>
-                        
+
+                        {% if product.installment_12_months %}
                         <label class="payment-method">
                             <input 
                                 type="radio" 
                                 name="equipment_payment" 
-                                value="installment_12"
+                                value="installment12"
                                 data-price="{{ product.installment_12_months }}"
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Рассрочка 12 месяцев</span>
-                                <span class="payment-method__price">{{ product.installment_12_months|intcomma }} ₽ в месяц</span>
+                                <span class="payment-method__price">{{ product.installment_12_months|intcomma }} руб./мес.</span>
                             </span>
                         </label>
-                        
+                        {% endif %}
+
+                        {% if product.installment_24_months %}
                         <label class="payment-method">
                             <input 
                                 type="radio" 
                                 name="equipment_payment" 
-                                value="installment_24"
+                                value="installment24"
                                 data-price="{{ product.installment_24_months }}"
                             >
                             <span class="payment-method__content">
                                 <span class="payment-method__title">Рассрочка 24 месяца</span>
-                                <span class="payment-method__price">{{ product.installment_24_months|intcomma }} ₽ в месяц</span>
+                                <span class="payment-method__price">{{ product.installment_24_months|intcomma }} руб./мес.</span>
                             </span>
                         </label>
+                        {% endif %}
+
+                        {% if product.installment_48_months %}
+                        <label class="payment-method">
+                            <input 
+                                type="radio" 
+                                name="equipment_payment" 
+                                value="installment48"
+                                data-price="{{ product.installment_48_months }}"
+                            >
+                            <span class="payment-method__content">
+                                <span class="payment-method__title">Рассрочка 48 месяцев</span>
+                                <span class="payment-method__price">{{ product.installment_48_months|intcomma }} руб./мес.</span>
+                            </span>
+                        </label>
+                        {% endif %}
                     </div>
                 </section>
                 {% endif %}
@@ -259,30 +278,26 @@
 
     // Функция обновления итогов (цена везде)
     function updateSummaryDisplay(price, paymentMethod = 'purchase') {
-        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + (paymentMethod === 'purchase' ? ' ₽' : ' ₽ в месяц');
-
-        // Обновляем только в блоках итогов, не трогая карточку товара
+        const isMonthly = paymentMethod !== 'purchase';
+        const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? ' в месяц' : '');
+        
+        // Обновляем отображение цены в блоке оборудования
         const mobileSummary = document.querySelector('.summary--mobile .summary__item-value');
-        if (mobileSummary) {
-            mobileSummary.textContent = formattedPrice;
-        }
-
+        if (mobileSummary) mobileSummary.textContent = formattedPrice;
         const desktopSummary = document.querySelector('.summary--desktop .summary__item-value');
-        if (desktopSummary) {
-            desktopSummary.textContent = formattedPrice;
-        }
+        if (desktopSummary) desktopSummary.textContent = formattedPrice;
 
-        // Обновляем итоговую стоимость
+        // Обновляем итоговую сумму
         const totalValueEls = document.querySelectorAll('.summary__total-value');
         totalValueEls.forEach(el => {
             el.textContent = formattedPrice;
         });
 
-        // Обновляем скрытые поля формы
+        // Обновляем скрытые поля
         document.getElementById('total_equipment_cost').value = price;
         document.getElementById('total_price').value = price;
-        
-        // Обновляем способ оплаты в скрытом поле
+
+        // Обновляем способ оплаты
         const equipmentPaymentOptions = {
             "{{ product.id }}": paymentMethod
         };
@@ -348,17 +363,19 @@
             variantPrices[{{ variant.id }}] = {
                 purchase: {{ variant.get_price }},
                 {% if product.installment_available %}
-                installment_12: {{ variant.get_installment_12_months_price }},
-                installment_24: {{ variant.get_installment_24_months_price }}
+                installment12: {{ variant.get_installment_12_months_price|default:product.installment_12_months }},
+                installment24: {{ variant.get_installment_24_months_price|default:product.installment_24_months }},
+                installment48: {{ variant.get_installment_48_months_price|default:product.installment_48_months }}
                 {% endif %}
             };
-        {% endfor %};
+        {% endfor %}
 
         const basePrice = {
             purchase: {{ product.price }},
             {% if product.installment_available %}
-            installment_12: {{ product.installment_12_months }},
-            installment_24: {{ product.installment_24_months }}
+            installment12: {{ product.installment_12_months }},
+            installment24: {{ product.installment_24_months }},
+            installment48: {{ product.installment_48_months }}
             {% endif %}
         };
 
@@ -369,11 +386,14 @@
             
             let price;
             if (selectedVariantId && variantPrices[selectedVariantId]) {
+                // Используем значения для выбранного варианта
                 price = variantPrices[selectedVariantId][selectedPayment] || variantPrices[selectedVariantId].purchase;
             } else {
+                // Используем базовые значения
                 price = basePrice[selectedPayment] || basePrice.purchase;
             }
             
+            console.log('Selected Payment:', selectedPayment, 'Price:', price); // Для отладки
             updateSummaryDisplay(price, selectedPayment);
         }
 

@@ -52,9 +52,11 @@ def order_create(request, locality_slug, slug):
                 payment_type = payment_options.get(str(product_id), 'purchase')
                 price = product.price  # Цена по умолчанию для покупки
                 if payment_type == 'installment12' and product.installment_12_months:
-                    price = int(product.installment_12_months)  # Преобразуем в int
+                    price = int(product.installment_12_months)
                 elif payment_type == 'installment24' and product.installment_24_months:
-                    price = int(product.installment_24_months)  # Преобразуем в int
+                    price = int(product.installment_24_months)
+                elif payment_type == 'installment48' and product.installment_48_months:
+                    price = int(product.installment_48_months)
                 OrderProduct.objects.create(
                     order=order,
                     product=product,
@@ -173,6 +175,8 @@ def submit_order(request, locality_slug):
                 total_price = product.get_total_installment_price(12)
             elif payment_type == 'installment24' and product.installment_24_months:
                 total_price = product.get_total_installment_price(24)
+            elif payment_type == 'installment48' and product.installment_48_months:
+                total_price = product.get_total_installment_price(48)
             else:
                 total_price = base_price  # Покупка — цена из варианта или продукта
 
@@ -560,6 +564,7 @@ class EquipmentOrderView(TemplateView):
 
         installment_12_total = product.get_total_installment_price(12) if product.installment_available else 0
         installment_24_total = product.get_total_installment_price(24) if product.installment_available else 0
+        installment_48_total = product.get_total_installment_price(48) if product.installment_available else 0
 
         context.update({
             'product': product,
@@ -569,6 +574,7 @@ class EquipmentOrderView(TemplateView):
             'initial_payment_options': {str(product.id): 'purchase'},
             'installment_12_total': installment_12_total,
             'installment_24_total': installment_24_total,
+            'installment_48_total': installment_48_total,
             'form': OrderForm(locality=locality)
         })
         return context
@@ -591,13 +597,15 @@ class EquipmentOrderView(TemplateView):
             payment_options = json.loads(form.cleaned_data.get("equipment_payment_options", "{}"))
             payment_type = payment_options.get(str(product.id), 'purchase')
 
-            # Обработка способа оплаты и добавление товара
-            if payment_type == 'installment12' and product.installment_12_months:
+            # Сопоставление типа оплаты с полем цены
+            if payment_type == 'installment_12' and product.installment_12_months:
                 price = product.installment_12_months
-            elif payment_type == 'installment24' and product.installment_24_months:
+            elif payment_type == 'installment_24' and product.installment_24_months:
                 price = product.installment_24_months
+            elif payment_type == 'installment_48' and product.installment_48_months:
+                price = product.installment_48_months
             else:
-                price = product.price
+                price = product.get_final_price()
 
             OrderProduct.objects.create(
                 order=order,

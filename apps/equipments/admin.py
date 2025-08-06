@@ -110,7 +110,7 @@ class ProductAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'category', 'price', 'installment_available', 'installment_12_months', 'installment_24_months', 'is_available'),
+            'fields': ('name', 'slug', 'category', 'price', 'installment_available', 'installment_12_months', 'installment_24_months', 'installment_48_months', 'is_available'),
             'description': "Основные параметры товара"
         }),
         ('Описание товара', {

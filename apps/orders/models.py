@@ -26,6 +26,7 @@ class OrderProduct(models.Model):
             ('purchase', 'Покупка'),
             ('installment12', 'Рассрочка на 12 месяцев'),
             ('installment24', 'Рассрочка на 24 месяцев'),
+            ('installment48', 'Рассрочка на 48 месяцев'),
         ],
         default='purchase'
     )
@@ -125,6 +126,7 @@ class Order(models.Model):
                 'variant': variant,
                 'installment_12_months': product.installment_12_months if product.installment_available else None,
                 'installment_24_months': product.installment_24_months if product.installment_available else None,
+                'installment_48_months': product.installment_48_months if product.installment_available else None,
                 'type': None,
                 'specifics': None
             }

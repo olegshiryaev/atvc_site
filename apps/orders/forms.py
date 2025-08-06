@@ -217,7 +217,7 @@ class OrderForm(forms.ModelForm):
                     f"ID продуктов в вариантах оплаты не соответствуют выбранному оборудованию: {invalid_ids}"
                 )
 
-            valid_payment_types = ['purchase', 'installment12', 'installment24']
+            valid_payment_types = ['purchase', 'installment12', 'installment24', 'installment48']
             for product_id, payment_type in payment_options.items():
                 if payment_type not in valid_payment_types:
                     logger.error(f"Недопустимый тип оплаты для продукта {product_id}: {payment_type}")
@@ -226,7 +226,7 @@ class OrderForm(forms.ModelForm):
                     )
                 try:
                     product = Product.objects.get(id=product_id)
-                    if payment_type in ['installment12', 'installment24'] and not product.installment_available:
+                    if payment_type in ['installment12', 'installment24', 'installment48'] and not product.installment_available:
                         logger.error(f"Рассрочка недоступна для продукта {product.name} (ID: {product_id})")
                         raise forms.ValidationError(
                             f"Рассрочка недоступна для продукта {product.name} (ID: {product_id})"
@@ -240,6 +240,11 @@ class OrderForm(forms.ModelForm):
                         logger.error(f"Рассрочка на 24 месяца не настроена для продукта {product.name} (ID: {product_id})")
                         raise forms.ValidationError(
                             f"Рассрочка на 24 месяца не настроена для продукта {product.name} (ID: {product_id})"
+                        )
+                    if payment_type == 'installment48' and not product.installment_48_months:
+                        logger.error(f"Рассрочка на 48 месяца не настроена для продукта {product.name} (ID: {product_id})")
+                        raise forms.ValidationError(
+                            f"Рассрочка на 48 месяца не настроена для продукта {product.name} (ID: {product_id})"
                         )
                 except Product.DoesNotExist:
                     logger.error(f"Продукт с ID {product_id} не существует")

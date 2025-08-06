@@ -15,6 +15,8 @@ class OrderProductInline(admin.TabularInline):
             return f"{obj.product.installment_12_months} руб./мес. (12 месяцев)"
         elif obj.payment_type == 'installment24' and obj.product.installment_24_months:
             return f"{obj.product.installment_24_months} руб./мес. (24 месяца)"
+        elif obj.payment_type == 'installment48' and obj.product.installment_48_months:
+            return f"{obj.product.installment_48_months} руб./мес. (48 месяца)"
         return f"{obj.price} руб."
     display_price.short_description = 'Цена'
 
@@ -98,7 +100,9 @@ class OrderProductAdmin(admin.ModelAdmin):
             return f"{obj.product.installment_12_months} руб./мес. (12 месяцев)"
         elif obj.payment_type == 'installment24' and obj.product.installment_24_months:
             return f"{obj.product.installment_24_months} руб./мес. (24 месяца)"
-        return f"{obj.price} руб. "
+        elif obj.payment_type == 'installment48' and obj.product.installment_48_months:
+            return f"{obj.product.installment_48_months} руб./мес. (48 месяцев)"
+        return f"{obj.price} руб."
     display_price.short_description = 'Цена'
 
     def get_queryset(self, request):

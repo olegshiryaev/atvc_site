@@ -63,6 +63,9 @@ class Product(models.Model):
     installment_24_months = models.PositiveIntegerField(
         "Ежемесячный платёж на 24 месяцев", blank=True, null=True
     )
+    installment_48_months = models.PositiveIntegerField(
+        "Ежемесячный платёж на 48 месяцев", blank=True, null=True
+    )
     category = models.ForeignKey(
         'Category',
         on_delete=models.SET_NULL,
@@ -80,6 +83,8 @@ class Product(models.Model):
     warranty = models.PositiveIntegerField("Гарантия (месяцев)", default=12)
     is_featured = models.BooleanField("Рекомендуемый товар", default=False)
     is_available = models.BooleanField("В наличии", default=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True, null=True)
 
     def __str__(self):
         return self.name or "Товар без названия"
@@ -97,8 +102,12 @@ class Product(models.Model):
 
     def clean(self):
         if self.installment_available:
-            if not self.installment_12_months or not self.installment_24_months:
-                raise ValidationError("Для рассрочки необходимо указать ежемесячные платежи.")
+            if not any([
+                self.installment_12_months,
+                self.installment_24_months,
+                self.installment_48_months,
+            ]):
+                raise ValidationError("Укажите хотя бы один вариант ежемесячного платежа (12, 24 или 48 месяцев), если доступна рассрочка.")
 
     def get_main_image(self):
         return self.images.filter(is_main=True).first()
@@ -110,7 +119,7 @@ class Product(models.Model):
         return self.price
     
     def get_final_price(self):
-        return self.discount_price if self.discount_price else self.price
+        return self.discount_price or self.price
 
     def get_installment_price(self, months):
         if not self.installment_available:
@@ -119,6 +128,8 @@ class Product(models.Model):
             return self.installment_12_months
         if months == 24:
             return self.installment_24_months
+        if months == 48:
+            return self.installment_48_months
         return None
 
     def get_total_installment_price(self, months):
@@ -128,6 +139,8 @@ class Product(models.Model):
             return self.installment_12_months * 12
         if months == 24:
             return self.installment_24_months * 24
+        if months == 48:
+            return self.installment_24_months * 48
         return self.price
 
     class Meta:
@@ -146,18 +159,20 @@ class ProductVariant(models.Model):
         "Цена", blank=True, null=True,
         help_text="Если не указано, используется цена из Product"
     )
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True, null=True)
 
     def __str__(self):
         return f"{self.product.name} ({self.get_color_display()})"
     
     def is_in_stock(self):
-        return self.stock > 0 or self.variants.filter(stock__gt=0).exists()
+        return self.stock > 0
     
     def get_price(self):
-        return self.price if self.price is not None else self.product.get_price()
+        return self.price if self.price is not None else self.product.get_final_price()
     
     def get_final_price(self):
-        return self.discount_price if self.discount_price else self.price
+        return self.price if self.price is not None else self.product.get_final_price()
     
     def save(self, *args, **kwargs):
         if self.price is None:
