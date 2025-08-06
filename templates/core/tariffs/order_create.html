@@ -142,7 +142,14 @@
                                                     <input class="form-check-input"
                                                         type="checkbox"
                                                         id="equipment-{{ product.id }}"
-                                                        onchange="toggleEquipmentSelection('{{ product.id }}', this.checked, {{ product.price }}, {{ product.installment_12_months|default:'null' }}, {{ product.installment_24_months|default:'null' }})">
+                                                        onchange="toggleEquipmentSelection(
+                                                            '{{ product.id }}', 
+                                                            this.checked, 
+                                                            {{ product.price }}, 
+                                                            {{ product.installment_12_months|default:'null' }}, 
+                                                            {{ product.installment_24_months|default:'null' }}, 
+                                                            {{ product.installment_48_months|default:'null' }}
+                                                        )">
                                                     <label class="form-check-label" for="equipment-{{ product.id }}"></label>
                                                 </div>
                                             </div>
@@ -170,23 +177,43 @@
                                                 </label>
                                             </div>
                                             {% if product.installment_available %}
+                                                {% if product.installment_12_months %}
                                                 <div class="equipment-payment-modal__option">
                                                     <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment12-{{ product.id }}" value="installment12">
                                                     <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product.id }}">
                                                         Рассрочка (на 12 мес.) - {{ product.installment_12_months }} ₽ в месяц
                                                     </label>
                                                 </div>
+                                                {% endif %}
+
+                                                {% if product.installment_24_months %}
                                                 <div class="equipment-payment-modal__option">
                                                     <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment24-{{ product.id }}" value="installment24">
                                                     <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product.id }}">
                                                         Рассрочка (на 24 мес.) - {{ product.installment_24_months }} ₽ в месяц
                                                     </label>
                                                 </div>
+                                                {% endif %}
+
+                                                {% if product.installment_48_months %}
+                                                    <div class="equipment-payment-modal__option">
+                                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment48-{{ product.id }}" value="installment48">
+                                                        <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-{{ product.id }}">
+                                                            Рассрочка (на 48 мес.) - {{ product.installment_48_months }} ₽ в месяц
+                                                        </label>
+                                                    </div>
+                                                {% endif %}
                                             {% endif %}
                                         </div>
                                         <div class="equipment-payment-modal__footer">
                                             <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close onclick="closeAndResetModal('{{ product.id }}')">Отмена</button>
-                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption('{{ product.id }}', {{ product.price }}, {{ product.installment_12_months|default:'null' }}, {{ product.installment_24_months|default:'null' }})">Применить</button>
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption(
+                                                '{{ product.id }}', 
+                                                {{ product.price }}, 
+                                                {{ product.installment_12_months|default:'null' }}, 
+                                                {{ product.installment_24_months|default:'null' }}, 
+                                                {{ product.installment_48_months|default:'null' }}
+                                            )">Применить</button>
                                         </div>
                                     </div>
                                 </div>
@@ -475,9 +502,15 @@
             return sum + (p.paymentType === 'purchase' ? p.price : 0);
         }, 0);
 
-        // Рассрочка: суммируем только ежемесячные платежи
+        // Рассрочка: суммируем все ежемесячные платежи (12, 24, 48)
         const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
-            return sum + (p.paymentType === 'installment12' || p.paymentType === 'installment24' ? p.price : 0);
+            return sum + (
+                p.paymentType === 'installment12' || 
+                p.paymentType === 'installment24' || 
+                p.paymentType === 'installment48'
+                    ? p.price 
+                    : 0
+            );
         }, 0);
 
         const connectionTotalPrice = selectedEquipmentPrice + connectionPrice;
@@ -493,13 +526,21 @@
         // Обработка строки "Рассрочка"
         if (installmentPrice > 0 && Object.keys(selectedEquipment).length > 0) {
             const installmentItems = Object.values(selectedEquipment).filter(p => 
-                p.paymentType === 'installment12' || p.paymentType === 'installment24'
+                p.paymentType === 'installment12' || 
+                p.paymentType === 'installment24' || 
+                p.paymentType === 'installment48'
             );
+
             let label = '';
             if (installmentItems.length === 1) {
-                label = installmentItems[0].paymentType === 'installment12' 
-                    ? 'Рассрочка (на 12 мес.)' 
-                    : 'Рассрочка (на 24 мес.)';
+                const type = installmentItems[0].paymentType;
+                if (type === 'installment12') {
+                    label = 'Рассрочка (на 12 мес.)';
+                } else if (type === 'installment24') {
+                    label = 'Рассрочка (на 24 мес.)';
+                } else if (type === 'installment48') {
+                    label = 'Рассрочка (на 48 мес.)';
+                }
             } else {
                 label = 'Рассрочка';
             }
@@ -511,11 +552,9 @@
                 el.style.display = 'flex';
             });
         } else {
-            // Надёжно скрываем ВСЕ экземпляры
             document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
                 el.style.display = 'none';
             });
-            // Опционально: сброс значения
             updateAll('.summary-installment-price', '0 ₽ в месяц');
         }
 
@@ -564,7 +603,7 @@
     }
 
     // Функции выбора
-    function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price) {
+    function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price, installment48Price) {
         const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
         const name = element.querySelector('.equipment__name').textContent.trim();
         const labelElement = document.getElementById(`label-${id}`);
@@ -699,13 +738,13 @@
         document.getElementById(`paymentOption-${selected.paymentType}-${productId}`).checked = true;
     }
 
-    function applyPaymentOption(productId, purchasePrice, installment12Price, installment24Price) {
+    function applyPaymentOption(productId, purchasePrice, installment12Price, installment24Price, installment48Price) {
         const selectedOption = document.querySelector(`input[name="paymentOption-${productId}"]:checked`)?.value || 'purchase';
         const labelElement = document.getElementById(`label-${productId}`);
         const priceElement = document.getElementById(`price-${productId}`);
         const checkbox = document.getElementById(`equipment-${productId}`);
         const element = document.querySelector(`.equipment__item[data-id="${productId}"]`);
-
+        
         let paymentType = 'purchase';
         let price = parseInt(purchasePrice);
         let labelText = 'Покупка';
@@ -718,6 +757,10 @@
             paymentType = 'installment24';
             price = parseInt(installment24Price);
             labelText = 'Рассрочка (на 24 мес.)';
+        } else if (selectedOption === 'installment48' && installment48Price !== null) {
+            paymentType = 'installment48';
+            price = parseInt(installment48Price);
+            labelText = 'Рассрочка (на 48 мес.)';
         }
 
         if (isNaN(price)) return;
