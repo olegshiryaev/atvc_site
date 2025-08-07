@@ -7,7 +7,7 @@
     {% include 'partials/page_header.html' with title=title %}
 
     <!-- Основная карточка товара -->
-    <section class="product-detail-block block">
+    <section class="product-detail-block block product-detail">
         <div class="row g-4">
             <!-- Галерея изображений -->
             <div class="col-md-6">
@@ -46,8 +46,10 @@
             <!-- Информация о товаре -->
             <div class="col-md-6">
                 <div class="h-100 d-flex flex-column p-4">
-                    <h2 class="product-card__title h4">{{ product.name }}</h2>
-                    <p class="product-card__desc">{{ product.short_description|default:"Краткое описание отсутствует" }}</p>
+                    <h2 class="product-card__title">{{ product.name }}</h2>
+                    {% if product.has_short_description %}
+                    <p class="product-card__desc">{{ product.short_description|safe }}</p>
+                    {% endif %}
                     {% if product.variants.exists %}
                         <div class="product-card__colors mb-3">
                             <h5 class="product-info__variant-title">Цвет</h5>
@@ -68,7 +70,7 @@
                     {% endif %}
                     {% if product.installment_available %}
                         <div class="product-card__payment-methods mb-3">
-                            <h5 class="product-info__variant-title">Способ оплаты</h5>
+                            <h5 class="product-info__variant-title">Выберите вариант оплаты</h5>
                             <div class="d-flex flex-wrap gap-2">
                                 <label class="payment-method">
                                     <input type="radio" name="payment_type" value="purchase" checked
@@ -108,14 +110,16 @@
                         </div>
                     {% endif %}
                     <div class="mt-auto">
-                        <div class="product-card__price mb-3">
-                            <span class="current-price">
-                                {{ product.variants.first.price|default:product.price|default:'N/A' }} ₽
-                            </span>
+                        <div class="product-card__footer">
+                            <div class="product-card__price">
+                                <span class="current-price">
+                                    {{ product.variants.first.price|default:product.price|default:'N/A' }} ₽
+                                </span>
+                            </div>
+                            <a href="{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}?variant_id={% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}&payment_type=purchase" class="product-card__btn btn" id="order-button">
+                                Заказать
+                            </a>
                         </div>
-                        <a href="{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}?variant_id={% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}&payment_type=purchase" class="product-card__btn btn w-100" id="order-button">
-                            Заказать
-                        </a>
                         {% if product.instruction %}
                             <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
                                 <i class="bi bi-download me-1"></i> Скачать инструкцию
@@ -196,7 +200,7 @@
                             <h6 class="product-card__title h6">{{ item.name }}</h6>
                             <div class="product-card__desc">{{ item.short_description|truncatewords:10|default_if_none:'' }}</div>
                         </a>
-                        <div class="product-card__bottom">
+                        <div class="product-card__footer">
                             <div class="product-card__price h5">{{ item.price }} ₽</div>
                             <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
                         </div>

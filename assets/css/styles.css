@@ -4976,6 +4976,7 @@ button.swiper-pagination-bullet {
 .product-card {
     display: flex;
     flex-direction: column;
+    padding: 18px;
     height: 100%;
     border: 1px solid var(--smoky-white-color);
     border-radius: 15px;
@@ -4992,7 +4993,6 @@ button.swiper-pagination-bullet {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
-    padding: 18px;
     color: #2d2d2d;
     text-decoration: none;
     transition: color 0.2s ease;
@@ -5071,8 +5071,7 @@ button.swiper-pagination-bullet {
 }
 
 /* Нижняя часть карточки */
-.product-card__bottom {
-    padding: 0 18px 18px;
+.product-card__footer {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -5117,9 +5116,31 @@ button.swiper-pagination-bullet {
     animation: spin 1s linear infinite;
 }
 
+.product-detail .product-card__title {
+    font-size: 40px;
+}
+
+.product-detail .product-card__desc {
+    font-size: var(--font-size-lg);
+    font-style: normal;
+    font-weight: 500;
+    line-height: 25px;
+}
+
+.product-detail .product-info__variant-title {
+    font-size: var(--font-size-base);
+    font-style: normal;
+    font-weight: 400;
+    line-height: 20px;
+}
+
+.product-detail .product-card__price {
+    font-size: 36px;
+}
+
 /* Мобильные устройства */
 @media (max-width: 768px) {
-    .product-card__wrapper {
+    .product-card {
         padding: 12px;
     }
 
@@ -5156,6 +5177,23 @@ button.swiper-pagination-bullet {
     .product-card {
         border-radius: 10px;
         border-width: 1px;
+    }
+    
+    .product-detail .product-card__title {
+        font-size: 28px;
+        letter-spacing: -0.6px;
+    }
+
+    .product-detail .product-card__desc {
+        font-size: 15px;
+        line-height: 20px;
+        letter-spacing: -0.15px;
+    }
+    
+    .product-detail .product-card__price {
+        font-size: 28px;
+        line-height: 30px;
+        letter-spacing: -0.56px;
     }
 }
 
@@ -5422,7 +5460,7 @@ button.swiper-pagination-bullet {
     .sortings__title {
         width: 100%;
     }
-    .product-card__wrapper {
+    .product-card {
         padding: 20px;
     }
     .product-card__img-wrap:before {
@@ -5442,7 +5480,7 @@ button.swiper-pagination-bullet {
     .sortings__title {
         font-size: 14px;
     }
-    .product-card__wrapper {
+    .product-card {
         padding: 19px;
     }
     .products-panel {
@@ -5541,6 +5579,14 @@ button.swiper-pagination-bullet {
     width: 100%;
     height: 100%;
     object-fit: contain;
+}
+
+.product-tabs {
+    max-width: 1000px;
+}
+
+.product-tabs .tab-content {
+    max-width: 1000px;
 }
 
 .product-tabs-wrapper {

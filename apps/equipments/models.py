@@ -123,6 +123,9 @@ class Product(models.Model):
     def has_description(self):
         return bool(self.description and strip_tags(self.description).strip())
     
+    def has_short_description(self):
+        return bool(self.short_description and strip_tags(self.short_description).strip())
+    
     def is_in_stock(self):
         return self.stock > 0
     
