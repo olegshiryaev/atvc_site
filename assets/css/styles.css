@@ -4993,6 +4993,7 @@ button.swiper-pagination-bullet {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    gap: 10px;
     color: #2d2d2d;
     text-decoration: none;
     transition: color 0.2s ease;
@@ -5062,7 +5063,7 @@ button.swiper-pagination-bullet {
     font-size: var(--font-size-base);
     line-height: 20px;
     color: #666;
-    margin: 0 0 6px;
+    margin: 0 0 10px;
     flex-grow: 1;
     overflow: hidden;
     display: -webkit-box;
