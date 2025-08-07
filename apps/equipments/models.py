@@ -8,6 +8,7 @@ from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelatio
 from django.contrib.contenttypes.models import ContentType
 from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
+from django.utils.html import strip_tags
 from pilkit.processors import Transpose
 
 
@@ -81,6 +82,13 @@ class Product(models.Model):
         blank=True
     )
     warranty = models.PositiveIntegerField("Гарантия (месяцев)", default=12)
+    instruction = models.FileField(
+        "Инструкция", 
+        upload_to='instructions/', 
+        blank=True, 
+        null=True,
+        help_text="PDF-файл с инструкцией к товару"
+    )
     is_featured = models.BooleanField("Рекомендуемый товар", default=False)
     is_available = models.BooleanField("В наличии", default=True)
     created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
@@ -111,6 +119,9 @@ class Product(models.Model):
 
     def get_main_image(self):
         return self.images.filter(is_main=True).first()
+    
+    def has_description(self):
+        return bool(self.description and strip_tags(self.description).strip())
     
     def is_in_stock(self):
         return self.stock > 0

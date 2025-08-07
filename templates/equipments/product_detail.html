@@ -116,35 +116,40 @@
                         <a href="{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}?variant_id={% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}&payment_type=purchase" class="product-card__btn btn w-100" id="order-button">
                             Заказать
                         </a>
-                        <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
-                            <i class="bi bi-download me-1"></i> Скачать инструкцию
-                        </a>
+                        {% if product.instruction %}
+                            <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
+                                <i class="bi bi-download me-1"></i> Скачать инструкцию
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Табы: Описание / Характеристики -->
+        {% if product.has_description or product.camera or product.router or product.smart_speaker or product.tvbox %}
         <div class="product-tabs mt-5">
             <div class="product-tabs-wrapper mb-3">
                 <ul class="nav nav-pills product-tabs-nav" id="productTabs" role="tablist">
+                    {% if product.has_description %}
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="description-tab" data-bs-toggle="pill" data-bs-target="#description" type="button" role="tab">Описание</button>
                     </li>
+                    {% endif %}
+                    {% if product.camera or product.router or product.smart_speaker or product.tvbox %}
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs" type="button" role="tab">Технические характеристики</button>
+                        <button class="nav-link {% if not product.has_description %}active{% endif %}" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs" type="button" role="tab">Технические характеристики</button>
                     </li>
+                    {% endif %}
                 </ul>
             </div>
             <div class="tab-content" id="productTabsContent">
+                {% if product.has_description %}
                 <div class="tab-pane fade show active" id="description" role="tabpanel">
-                    {% if product.description %}
-                        <p>{{ product.description }}</p>
-                    {% else %}
-                        <p class="text-muted">Описание отсутствует.</p>
-                    {% endif %}
+                    <p>{{ product.description|safe }}</p>
                 </div>
-                <div class="tab-pane fade" id="specs" role="tabpanel">
+                {% endif %}
+                <div class="tab-pane fade {% if not product.has_description %}show active{% endif %}" id="specs" role="tabpanel">
                     {% if product.camera %}
                         {% include "equipments/product/characteristics/camera.html" %}
                     {% elif product.router %}
@@ -159,6 +164,7 @@
                 </div>
             </div>
         </div>
+        {% endif %}
     </section>
 
     <!-- Вы недавно смотрели -->

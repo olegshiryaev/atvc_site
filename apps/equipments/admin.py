@@ -114,7 +114,7 @@ class ProductAdmin(admin.ModelAdmin):
             'description': "Основные параметры товара"
         }),
         ('Описание товара', {
-            'fields': ('short_description', 'description')
+            'fields': ('short_description', 'description', 'instruction')
         }),
         ('Услуги', {
             'fields': ('services',)
