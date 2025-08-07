@@ -35,13 +35,13 @@
                         </div>
                         <div class="tariff-info__price">
                             <div class="tariff-info__price-value">
-                                {{ tariff.get_actual_price }} ₽ в месяц
+                                {{ tariff.get_actual_price }} ₽/мес.
                             </div>
                             {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
                                 <div class="tariff-info__promo-note">
                                     <small class="text-muted">
                                         После {{ tariff.promo_months }} мес. — 
-                                        <strong>{{ tariff.price }} ₽ в месяц</strong>
+                                        <strong>{{ tariff.price }} ₽/мес.</strong>
                                     </small>
                                 </div>
                             {% endif %}
@@ -96,7 +96,7 @@
                                     <p class="tv-package__description">{{ package.description|safe }}</p>
                                 </div>
                                 <div class="tv-package__footer">
-                                    <div class="tv-package__price">{{ package.price }} ₽ в месяц</div>
+                                    <div class="tv-package__price">{{ package.price }} ₽/мес.</div>
                                 </div>
                             </article>
                             {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
@@ -134,7 +134,7 @@
                                         </div>
                                         <div class="equipment__footer">
                                             <div class="equipment__price-block" {% if product.installment_available %}data-installment-available="true"{% endif %}>
-                                                <div class="equipment__payment-label" id="label-{{ product.id }}">Покупка</div>
+                                                <div class="equipment__payment-label" id="label-{{ product.id }}">Полная стоимость</div>
                                                 <div class="equipment__price-value" id="price-{{ product.id }}">{{ product.price|floatformat:0|default:0|intcomma }} ₽</div>
                                             </div>
                                             <div class="equipment__switch-container">
@@ -173,7 +173,7 @@
                                             <div class="equipment-payment-modal__option">
                                                 <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-purchase-{{ product.id }}" value="purchase" checked>
                                                 <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-{{ product.id }}">
-                                                    Покупка - {{ product.price }} ₽
+                                                    Полная стоимость - {{ product.price }} ₽
                                                 </label>
                                             </div>
                                             {% if product.installment_available %}
@@ -181,7 +181,7 @@
                                                 <div class="equipment-payment-modal__option">
                                                     <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment12-{{ product.id }}" value="installment12">
                                                     <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product.id }}">
-                                                        Рассрочка (на 12 мес.) - {{ product.installment_12_months }} ₽ в месяц
+                                                        Рассрочка (на 12 мес.) - {{ product.installment_12_months }} ₽/мес.
                                                     </label>
                                                 </div>
                                                 {% endif %}
@@ -190,7 +190,7 @@
                                                 <div class="equipment-payment-modal__option">
                                                     <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment24-{{ product.id }}" value="installment24">
                                                     <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product.id }}">
-                                                        Рассрочка (на 24 мес.) - {{ product.installment_24_months }} ₽ в месяц
+                                                        Рассрочка (на 24 мес.) - {{ product.installment_24_months }} ₽/мес.
                                                     </label>
                                                 </div>
                                                 {% endif %}
@@ -199,7 +199,7 @@
                                                     <div class="equipment-payment-modal__option">
                                                         <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment48-{{ product.id }}" value="installment48">
                                                         <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-{{ product.id }}">
-                                                            Рассрочка (на 48 мес.) - {{ product.installment_48_months }} ₽ в месяц
+                                                            Рассрочка (на 48 мес.) - {{ product.installment_48_months }} ₽/мес.
                                                         </label>
                                                     </div>
                                                 {% endif %}
@@ -244,7 +244,7 @@
                                     </div>
                                     <p class="services__description">{{ service.description|safe }}</p>
                                     <div class="services__footer">
-                                        <div class="services__price">{{ service.price }} ₽ в месяц</div>
+                                        <div class="services__price">{{ service.price }} ₽/мес.</div>
                                     </div>
                                 </div>
                             </article>
@@ -261,9 +261,9 @@
                             <div class="summary__item">
                                 <span class="summary__item-name">{{ tariff.name }}</span>
                                 <span class="summary__item-value">
-                                    {{ tariff.get_actual_price|intcomma }} ₽ в месяц
+                                    {{ tariff.get_actual_price|intcomma }} ₽/мес.
                                     {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
-                                        <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽ в месяц)
+                                        <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽/мес.)
                                     {% endif %}
                                 </span>
                             </div>
@@ -309,11 +309,11 @@
                             </div>
                             <div class="summary__breakdown-item summary__breakdown-item--monthly-price">
                                 <span class="summary__breakdown-name">Абонентская плата</span>
-                                <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽ в месяц</span>
+                                <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽/мес.</span>
                             </div>
                             <div class="summary__breakdown-item summary__breakdown-item--installment summary-installment-breakdown" style="display: none;">
                                 <span class="summary__breakdown-name">Рассрочка</span>
-                                <span class="summary__breakdown-value summary-installment-price">0 ₽ в месяц</span>
+                                <span class="summary__breakdown-value summary-installment-price">0 ₽/мес.</span>
                             </div>
                             <div class="summary__breakdown-item summary__breakdown-item--connection-price">
                                 <span class="summary__breakdown-name">При подключении</span>
@@ -400,9 +400,9 @@
                         <div class="summary__item">
                             <span class="summary__item-name">{{ tariff.name }}</span>
                             <span class="summary__item-value">
-                                {{ tariff.get_actual_price|intcomma }} ₽ в месяц
+                                {{ tariff.get_actual_price|intcomma }} ₽/мес.
                                 {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
-                                    <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽ в месяц)
+                                    <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽/мес.)
                                 {% endif %}
                             </span>
                         </div>
@@ -448,11 +448,11 @@
                         </div>
                         <div class="summary__breakdown-item summary__breakdown-item--monthly-price">
                             <span class="summary__breakdown-name">Абонентская плата</span>
-                            <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽ в месяц</span>
+                            <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽/мес.</span>
                         </div>
                         <div class="summary__breakdown-item summary__breakdown-item--installment summary-installment-breakdown" style="display: none;">
                             <span class="summary__breakdown-name">Рассрочка</span>
-                            <span class="summary__breakdown-value summary-installment-price">0 ₽ в месяц</span>
+                            <span class="summary__breakdown-value summary-installment-price">0 ₽/мес.</span>
                         </div>
                         <div class="summary__breakdown-item summary__breakdown-item--connection-price">
                             <span class="summary__breakdown-name">При подключении</span>
@@ -518,7 +518,7 @@
 
         // Обновляем отображение
         updateAll('.summary-total-price', `${totalPrice.toLocaleString('ru-RU')} ₽`);
-        updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽ в месяц`);
+        updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽/мес.`);
         updateAll('.summary-connection-total-price', `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`);
         const connectionPriceText = connectionPrice === 0 ? 'Бесплатно' : `${connectionPrice.toLocaleString('ru-RU')} ₽`;
         updateAll('.summary-connection-price', connectionPriceText);
@@ -545,7 +545,7 @@
                 label = 'Рассрочка';
             }
 
-            updateAll('.summary-installment-price', `${installmentPrice.toLocaleString('ru-RU')} ₽ в месяц`);
+            updateAll('.summary-installment-price', `${installmentPrice.toLocaleString('ru-RU')} ₽/мес.`);
             document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
                 const nameEl = el.querySelector('.summary__breakdown-name');
                 if (nameEl) nameEl.textContent = `${label}`;
@@ -555,7 +555,7 @@
             document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
                 el.style.display = 'none';
             });
-            updateAll('.summary-installment-price', '0 ₽ в месяц');
+            updateAll('.summary-installment-price', '0 ₽/мес.');
         }
 
         // Обновляем скрытые поля
@@ -573,7 +573,7 @@
               Object.entries(selectedEquipment).map(([id, item]) => {
                   const priceDisplay = item.paymentType === 'purchase'
                       ? `${item.price.toLocaleString('ru-RU')} ₽`
-                      : `${item.price.toLocaleString('ru-RU')} ₽ в месяц`;
+                      : `${item.price.toLocaleString('ru-RU')} ₽/мес.`;
                   return `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${priceDisplay}</span></div>`;
               }).join('')
             : `<h5 class="summary__section-title">Оборудование</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
@@ -585,7 +585,7 @@
         const html = Object.keys(selectedServices).length > 0
             ? `<h5 class="summary__section-title">Дополнительные услуги</h5>` +
               Object.entries(selectedServices).map(([slug, item]) =>
-                  `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽ в месяц</span></div>`
+                  `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽/мес.</span></div>`
               ).join('')
             : `<h5 class="summary__section-title">Дополнительные услуги</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
         containers.forEach(container => { container.innerHTML = html; });
@@ -596,7 +596,7 @@
         const html = Object.keys(selectedTVPackages).length > 0
             ? `<h5 class="summary__section-title">Пакеты ТВ</h5>` +
               Object.entries(selectedTVPackages).map(([id, item]) =>
-                  `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽ в месяц</span></div>`
+                  `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽/мес.</span></div>`
               ).join('')
             : `<h5 class="summary__section-title">Пакеты ТВ</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
         containers.forEach(container => { container.innerHTML = html; });
@@ -623,10 +623,10 @@
             return;
         }
 
-        // Если включаем и рассрочка НЕ доступна — сразу выбираем "покупка"
+        // Если включаем и рассрочка НЕ доступна — сразу выбираем "полная стоимость"
         if (!installmentAvailable) {
             selectedEquipment[id] = { name, price: parseInt(purchasePrice), paymentType: 'purchase' };
-            labelElement.innerHTML = `Покупка`;
+            labelElement.innerHTML = `Полная стоимость`;
             priceElement.textContent = `${parseInt(purchasePrice).toLocaleString('ru-RU')} ₽`;
             element.classList.add('selected');
             updateEquipmentSummary();
@@ -747,7 +747,7 @@
         
         let paymentType = 'purchase';
         let price = parseInt(purchasePrice);
-        let labelText = 'Покупка';
+        let labelText = 'Полная стоимость';
 
         if (selectedOption === 'installment12' && installment12Price !== null) {
             paymentType = 'installment12';
@@ -773,7 +773,7 @@
 
         // Обновляем UI
         labelElement.innerHTML = `${labelText}`;
-        priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? '₽' : '₽ в месяц'}`;
+        priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? '₽' : '₽/мес.'}`;
 
         updateEquipmentSummary();
         calculateTotal();
@@ -844,12 +844,12 @@
 
                     if (paymentType === 'installment12') {
                         labelElement.innerHTML = `Рассрочка (на 12 мес.)`;
-                        priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽ в месяц`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽/мес.`;
                     } else if (paymentType === 'installment24') {
                         labelElement.innerHTML = `Рассрочка (на 24 мес.)`;
-                        priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽ в месяц`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽/мес.`;
                     } else {
-                        labelElement.innerHTML = `Покупка`;
+                        labelElement.innerHTML = `Полная стоимость`;
                         priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽`;
                     }
                 }
