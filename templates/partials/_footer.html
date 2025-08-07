@@ -41,18 +41,19 @@
     <div class="row g-4">
       <!-- Сервис и помощь -->
       <div class="col-12 col-md-6 col-lg-3">
-        <h6 class="text-uppercase fw-semibold">Сервис и помощь</h6>
+        <h6 class="text-uppercase fw-semibold">Информация</h6>
         <ul class="list-unstyled small">
-          <li><a href="{% url 'core:contacts' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Контакты</a></li>
-          <li><a href="https://archangelsk.rt.ru/payment" target="_blank" class="footer-link text-decoration-none">Способы оплаты</a></li>
-          {% comment %} <li><a href="#" class="footer-link text-decoration-none">Вопросы и ответы</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Техническая поддержка</a></li> {% endcomment %}
+            <li><a href="{% url 'core:about' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">О компании</a></li>
+            <li><a href="{% url 'core:contacts' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Контакты</a></li>
+            <li><a href="{% url 'news:news_list' locality_slug=locality.slug %}" class="footer-link text-decoration-none">Новости</a></li>
+            <li><a href="{% url 'core:company_detail' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Реквизиты и документы</a></li>
+            <li><a href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}" class="footer-link text-decoration-none">Политика конфиденциальности</a></li>
         </ul>
       </div>
 
     <!-- Услуги -->
     <div class="col-12 col-md-6 col-lg-3">
-        <h6 class="text-uppercase fw-semibold">Наши услуги</h6>
+        <h6 class="text-uppercase fw-semibold">Услуги</h6>
         <ul class="list-unstyled small">
             {% for service in available_services %}
             <li>
@@ -62,30 +63,22 @@
             </li>
             {% endfor %}
             <li><a href="{% url 'equipments:equipment_list' locality.slug %}" class="footer-link text-decoration-none">Оборудование</a></li>
-            {% comment %} <li><a href="#" class="footer-link text-decoration-none">Акции</a></li> {% endcomment %}
-            {% comment %} <li><a href="#" class="footer-link text-decoration-none">Подключение в частном секторе</a></li> {% endcomment %}
         </ul>
     </div>
 
       <!-- О компании -->
       <div class="col-12 col-md-6 col-lg-3">
-        <h6 class="text-uppercase fw-semibold">О компании</h6>
+        <h6 class="text-uppercase fw-semibold">Помощь</h6>
         <ul class="list-unstyled small">
-          <li><a href="{% url 'news:news_list' locality_slug=locality.slug %}" class="footer-link text-decoration-none">Новости</a></li>
-          {% comment %} <li><a href="#" class="footer-link text-decoration-none">Вакансии</a></li> {% endcomment %}
-          <li><a href="{% url 'core:company_detail' locality_slug=request.locality.slug %}" class="footer-link text-decoration-none">Реквизиты и документы</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Контакты</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Политика конфиденциальности</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Общая информация</a></li>
         </ul>
       </div>
 
       <!-- Другие разделы -->
       <div class="col-12 col-md-6 col-lg-3">
-        <h6 class="text-uppercase fw-semibold">Другие разделы</h6>
+        <h6 class="text-uppercase fw-semibold">Полезное</h6>
         <ul class="list-unstyled small">
-          <li><a href="#" class="footer-link text-decoration-none">Телегид</a></li>
-          <li><a href="#" class="footer-link text-decoration-none">Онлайн-общение</a></li>
+            <li><a href="https://archangelsk.rt.ru/payment" target="_blank" class="footer-link text-decoration-none">Способы оплаты</a></li>
+            <li><a href="#" class="footer-link text-decoration-none">Телегид</a></li>
         </ul>
       </div>
     </div>

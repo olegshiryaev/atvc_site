@@ -4111,6 +4111,13 @@ button.swiper-pagination-bullet {
     }
 }
 
+/* Стили для десктопного меню */
+.navbar-nav {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* Расстояние между ссылками */
+}
+
 /* Общие стили для модального окна и offcanvas */
 .location-select-modal,
 .mobile-location-offcanvas {
@@ -7188,14 +7195,19 @@ button.swiper-pagination-bullet {
 }
 
 /* Поповер */
+[x-cloak] {
+    display: none !important;
+}
+
 .nav-locality-popover {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  width: 320px;
-  z-index: 1050;
-  display: none;
-  margin-top: 10px;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: auto;
+    max-width: 100vw;
+    max-height: 100vh;
+    z-index: 1050;
+    display: none;
 }
 
 .nav-locality-popover[x-show] {
@@ -7203,12 +7215,14 @@ button.swiper-pagination-bullet {
 }
 
 .nav-locality-popover__content {
-  background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-  padding: 16px;
-  position: relative;
-  border: 1px solid #e0e0e0;
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    padding: 20px 30px;
+    border: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 }
 
 .nav-locality-popover__header {
@@ -7233,31 +7247,42 @@ button.swiper-pagination-bullet {
 }
 
 .nav-locality-popover__body {
-  text-align: center;
-  padding: 8px 0;
 }
 
 .nav-locality-popover__text {
-  font-size: 15px;
-  line-height: 1.4;
+  font-size: var(--font-size-md);
+  line-height: 25px;
+  font-weight: 500;
+  font-style: normal;
   color: #333;
   margin-bottom: 20px;
 }
 
+.nav-locality-popover__text span {
+    font-size: inherit;
+    font-weight: inherit;
+    line-height: inherit;
+}
+
 .nav-locality-popover__buttons {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 20px;
 }
 
 .nav-button {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid transparent;
+    padding: 0 22px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-width: 140px;
+    height: 40px;
 }
 
 .nav-button--primary {
@@ -7266,7 +7291,7 @@ button.swiper-pagination-bullet {
 }
 
 .nav-button--primary:hover {
-  background: #1a6de4;
+    background: var(--main-color-on-hover);
 }
 
 .nav-button--secondary {
@@ -7355,11 +7380,11 @@ button.swiper-pagination-bullet {
 }
 
 .loc-confirm-body {
-  text-align: center;
 }
 
 .loc-confirm-text {
-  font-size: 16px;
+  font-size: var(--font-size-md);
+  font-weight: 500;
   line-height: 1.4;
   color: #333;
   margin-bottom: 24px;
