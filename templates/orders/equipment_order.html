@@ -48,7 +48,7 @@
                                                     value="{{ variant.color }}"
                                                     data-variant-id="{{ variant.id }}"
                                                     data-color="{{ variant.color }}"
-                                                    {% if forloop.first %}checked{% endif %}
+                                                    {% if variant.id|stringformat:"s" == selected_variant_id %}checked{% endif %}
                                                     {% if variant.stock <= 0 %}disabled{% endif %}
                                                 >
                                                 <span class="circle" style="background-color: {{ variant.color }};"></span>
@@ -71,7 +71,7 @@
                                 type="radio" 
                                 name="equipment_payment" 
                                 value="purchase" 
-                                checked
+                                {% if selected_payment_type == 'purchase' %}checked{% endif %}
                                 data-price="{{ product.price }}"
                             >
                             <span class="payment-method__content">
@@ -86,6 +86,7 @@
                                 type="radio" 
                                 name="equipment_payment" 
                                 value="installment12"
+                                {% if selected_payment_type == 'installment12' %}checked{% endif %}
                                 data-price="{{ product.installment_12_months }}"
                             >
                             <span class="payment-method__content">
@@ -101,6 +102,7 @@
                                 type="radio" 
                                 name="equipment_payment" 
                                 value="installment24"
+                                {% if selected_payment_type == 'installment24' %}checked{% endif %}
                                 data-price="{{ product.installment_24_months }}"
                             >
                             <span class="payment-method__content">
@@ -116,6 +118,7 @@
                                 type="radio" 
                                 name="equipment_payment" 
                                 value="installment48"
+                                {% if selected_payment_type == 'installment48' %}checked{% endif %}
                                 data-price="{{ product.installment_48_months }}"
                             >
                             <span class="payment-method__content">
@@ -157,10 +160,10 @@
                         <!-- Скрытые поля -->
                         <input type="hidden" name="tariff_id" value="">
                         <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value='["{{ product.id }}"]'>
-                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{{ product.variants.first.id }}">
+                        <input type="hidden" name="variant_id" id="selected_variant_id" value="{% if selected_variant_id %}{{ selected_variant_id }}{% else %}{{ product.variants.first.id }}{% endif %}">
                         <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
                         <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
-                        <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value='{"{{ product.id }}": "purchase"}'>
+                        <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value='{"{{ product.id }}": "{{ selected_payment_type|default:'purchase' }}"}'>
                         <input type="hidden" id="total_equipment_cost" value="{{ product.price }}">
                         <input type="hidden" id="total_services_cost" value="0">
                         <input type="hidden" id="total_tv_packages_cost" value="0">
@@ -382,8 +385,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
     // Функция для обновления цены на основе выбранных вариантов
     function updatePrice() {
-        const selectedVariantId = document.querySelector('input[name="selected_variant_id"]:checked')?.value;
-        const selectedPayment = document.querySelector('input[name="equipment_payment"]:checked')?.value || 'purchase';
+        const selectedVariantId = document.querySelector('input[name="selected_variant_id"]:checked')?.dataset.variantId;
+        const selectedPayment = document.querySelector('input[name="equipment_payment"]:checked')?.value || "{{ selected_payment_type|default:'purchase' }}";
         
         let price;
         if (selectedVariantId && variantPrices[selectedVariantId]) {
@@ -393,16 +396,32 @@ window.addEventListener('DOMContentLoaded', () => {
         }
         
         updateSummaryDisplay(price, selectedPayment);
+        document.getElementById('selected_variant_id').value = selectedVariantId || '';
     }
 
     if (colorRadios.length > 0) {
-        const firstVariantId = colorRadios[0].value;
-        const initialPrice = variantPrices[firstVariantId]?.purchase || basePrice.purchase;
+        // Устанавливаем начальный variant_id и payment_type из контекста
+        const initialVariantId = "{{ selected_variant_id|default_if_none:'' }}";
+        const initialPaymentType = "{{ selected_payment_type|default:'purchase' }}";
+        let initialPrice, initialColor;
 
-        // Устанавливаем начальное изображение
-        updateProductImage(firstVariantId);
-        // Инициализируем цену
-        updateSummaryDisplay(initialPrice, 'purchase');
+        // Устанавливаем начальную радиокнопку оплаты
+        const initialPaymentRadio = document.querySelector(`input[name="equipment_payment"][value="${initialPaymentType}"]`);
+        if (initialPaymentRadio) {
+            initialPaymentRadio.checked = true;
+        }
+
+        if (initialVariantId && variantPrices[initialVariantId]) {
+            initialPrice = variantPrices[initialVariantId][initialPaymentType] || variantPrices[initialVariantId].purchase;
+            initialColor = document.querySelector(`input[name="selected_variant_id"][data-variant-id="${initialVariantId}"]`)?.value;
+        } else {
+            initialPrice = basePrice[initialPaymentType] || basePrice.purchase;
+            initialColor = colorRadios[0].value;
+        }
+
+        // Устанавливаем начальное изображение и цену
+        updateProductImage(initialColor);
+        updateSummaryDisplay(initialPrice, initialPaymentType);
 
         // Добавляем обработчики на выбор цвета
         colorRadios.forEach(radio => {
@@ -424,6 +443,8 @@ window.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Вызываем updatePrice для начальной инициализации
+    updatePrice();
     validateOrderForm();
 });
 

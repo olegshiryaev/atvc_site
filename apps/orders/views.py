@@ -561,6 +561,25 @@ class EquipmentOrderView(TemplateView):
         context = super().get_context_data(**kwargs)
         product = get_object_or_404(Product, pk=kwargs['product_id'])
         locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
+        
+        # Получаем variant_id и payment_type из параметров запроса
+        variant_id = self.request.GET.get('variant_id')
+        payment_type = self.request.GET.get('payment_type', 'purchase')
+        selected_variant = None
+        if variant_id:
+            selected_variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+
+        # Проверяем допустимость payment_type
+        valid_payment_types = ['purchase']
+        if product.installment_available:
+            if product.installment_12_months:
+                valid_payment_types.append('installment12')
+            if product.installment_24_months:
+                valid_payment_types.append('installment24')
+            if product.installment_48_months:
+                valid_payment_types.append('installment48')
+        if payment_type not in valid_payment_types:
+            payment_type = 'purchase'
 
         installment_12_total = product.get_total_installment_price(12) if product.installment_available else 0
         installment_24_total = product.get_total_installment_price(24) if product.installment_available else 0
@@ -571,11 +590,14 @@ class EquipmentOrderView(TemplateView):
             'locality': locality,
             'tariff': None,
             'initial_equipment': [str(product.id)],
-            'initial_payment_options': {str(product.id): 'purchase'},
+            'initial_payment_options': {str(product.id): payment_type},
             'installment_12_total': installment_12_total,
             'installment_24_total': installment_24_total,
             'installment_48_total': installment_48_total,
-            'form': OrderForm(locality=locality)
+            'form': OrderForm(locality=locality),
+            'selected_variant_id': variant_id,
+            'selected_variant': selected_variant,
+            'selected_payment_type': payment_type,
         })
         return context
 
@@ -597,29 +619,32 @@ class EquipmentOrderView(TemplateView):
             payment_options = json.loads(form.cleaned_data.get("equipment_payment_options", "{}"))
             payment_type = payment_options.get(str(product.id), 'purchase')
 
-            # Сопоставление типа оплаты с полем цены
-            if payment_type == 'installment_12' and product.installment_12_months:
+            # Используем variant_id из формы
+            variant_id = form.cleaned_data.get("variant_id")
+            price = product.get_final_price()
+            if variant_id:
+                variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+                price = variant.get_final_price()
+            if payment_type == 'installment12' and product.installment_12_months:
                 price = product.installment_12_months
-            elif payment_type == 'installment_24' and product.installment_24_months:
+            elif payment_type == 'installment24' and product.installment_24_months:
                 price = product.installment_24_months
-            elif payment_type == 'installment_48' and product.installment_48_months:
+            elif payment_type == 'installment48' and product.installment_48_months:
                 price = product.installment_48_months
-            else:
-                price = product.get_final_price()
 
             OrderProduct.objects.create(
                 order=order,
                 product=product,
                 price=price,
                 quantity=1,
-                payment_type=payment_type
+                payment_type=payment_type,
+                variant_id=variant_id
             )
 
             success_url = reverse('orders:order_success', kwargs={
                 'order_id': order.id
             })
 
-            # Ответ для AJAX
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     'success': True,
@@ -628,12 +653,10 @@ class EquipmentOrderView(TemplateView):
 
             return redirect('orders:order_success', order_id=order.id)
 
-        # Обработка ошибок (AJAX)
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             errors = {field: [str(e) for e in error_list] for field, error_list in form.errors.items()}
             return JsonResponse({'success': False, 'errors': errors}, status=400)
 
-        # Ошибки при обычном запросе
         context = self.get_context_data(**kwargs)
         context['form'] = form
         return self.render_to_response(context)

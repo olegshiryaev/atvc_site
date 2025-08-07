@@ -55,14 +55,55 @@
                                 {% for variant in product.variants.all %}
                                     <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}" title="{{ variant.get_color_display }}">
                                         <input type="radio" name="variant_id" value="{{ variant.id }}"
-                                                data-price="{{ variant.price|default:product.price }}"
-                                                data-color="{{ variant.color }}"
-                                                {% if forloop.first %}checked{% endif %}
-                                                {% if variant.stock <= 0 %}disabled{% endif %}
-                                                aria-label="Выбрать цвет {{ variant.get_color_display }}{% if variant.stock <= 0 %}, нет в наличии{% endif %}">
+                                               data-price="{{ variant.price|default:product.price }}"
+                                               data-color="{{ variant.color }}"
+                                               {% if forloop.first %}checked{% endif %}
+                                               {% if variant.stock <= 0 %}disabled{% endif %}
+                                               aria-label="Выбрать цвет {{ variant.get_color_display }}{% if variant.stock <= 0 %}, нет в наличии{% endif %}">
                                         <span class="circle" style="background-color: {{ variant.color|color_to_hex }};"></span>
                                     </label>
                                 {% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    {% if product.installment_available %}
+                        <div class="product-card__payment-methods mb-3">
+                            <h5 class="product-info__variant-title">Способ оплаты</h5>
+                            <div class="d-flex flex-wrap gap-2">
+                                <label class="payment-method">
+                                    <input type="radio" name="payment_type" value="purchase" checked
+                                           data-price="{{ product.variants.first.price|default:product.price }}">
+                                    <span class="payment-method__content">
+                                        <span class="payment-method__title">Полная стоимость</span>
+                                    </span>
+                                </label>
+                                {% if product.installment_12_months %}
+                                    <label class="payment-method">
+                                        <input type="radio" name="payment_type" value="installment12"
+                                               data-price="{{ product.installment_12_months }}">
+                                        <span class="payment-method__content">
+                                            <span class="payment-method__title">Рассрочка на 12 месяцев</span>
+                                        </span>
+                                    </label>
+                                {% endif %}
+                                {% if product.installment_24_months %}
+                                    <label class="payment-method">
+                                        <input type="radio" name="payment_type" value="installment24"
+                                               data-price="{{ product.installment_24_months }}">
+                                        <span class="payment-method__content">
+                                            <span class="payment-method__title">Рассрочка на 24 месяца</span>
+                                        </span>
+                                    </label>
+                                {% endif %}
+                                {% if product.installment_48_months %}
+                                    <label class="payment-method">
+                                        <input type="radio" name="payment_type" value="installment48"
+                                               data-price="{{ product.installment_48_months }}">
+                                        <span class="payment-method__content">
+                                            <span class="payment-method__title">Рассрочка на 48 месяцев</span>
+                                        </span>
+                                    </label>
+                                {% endif %}
                             </div>
                         </div>
                     {% endif %}
@@ -72,18 +113,9 @@
                                 {{ product.variants.first.price|default:product.price|default:'N/A' }} ₽
                             </span>
                         </div>
-                        <form method="post" action="{% url 'orders:add_to_cart' locality_slug=locality.slug %}" id="add-to-cart-form">
-                            {% csrf_token %}
-                            <input type="hidden" name="item_type" value="product">
-                            <input type="hidden" name="variant_id" id="selected_variant_id" value="{% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}">
-                            <div class="mb-3">
-                                <label for="quantity" class="form-label">Количество:</label>
-                                <input type="number" name="quantity" id="quantity" class="form-control w-25" min="1" max="{% if product.variants.exists %}{{ product.variants.first.stock }}{% else %}10{% endif %}" value="1">
-                            </div>
-                            <button class="product-card__btn btn w-100" type="submit" {% if product.variants.exists and not product.variants.all|length %}disabled{% endif %}>
-                                Добавить в корзину
-                            </button>
-                        </form>
+                        <a href="{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}?variant_id={% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}&payment_type=purchase" class="product-card__btn btn w-100" id="order-button">
+                            Заказать
+                        </a>
                         <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
                             <i class="bi bi-download me-1"></i> Скачать инструкцию
                         </a>
@@ -177,7 +209,7 @@
     {% endif %}
 </div>
 
-<!-- JavaScript для галереи и выбора цвета -->
+<!-- JavaScript для галереи, выбора цвета и способа оплаты -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Инициализация Swiper для галереи
@@ -208,35 +240,70 @@ document.addEventListener('DOMContentLoaded', function () {
         galleryMain.slideTo(targetIndex); // Переключаемся на нужный слайд
     }
 
-    // Обновление цены и variant_id при выборе цвета
+    // Обновление цены и ссылки кнопки "Заказать" при выборе цвета или способа оплаты
     const colorInputs = document.querySelectorAll('input[name="variant_id"]');
+    const paymentInputs = document.querySelectorAll('input[name="payment_type"]');
     const priceElement = document.querySelector('.current-price');
-    const variantIdInput = document.getElementById('selected_variant_id');
-    const addToCartButton = document.querySelector('.product-card__btn');
+    const orderButton = document.querySelector('#order-button');
+
+    // Объект цен для вариантов
+    const variantPrices = {
+        {% for variant in product.variants.all %}
+            "{{ variant.id }}": {
+                purchase: {{ variant.price|default:product.price }},
+                {% if product.installment_available %}
+                    installment12: {{ product.installment_12_months|default:0 }},
+                    installment24: {{ product.installment_24_months|default:0 }},
+                    installment48: {{ product.installment_48_months|default:0 }}
+                {% endif %}
+            },
+        {% endfor %}
+        "default": {
+            purchase: {{ product.price }},
+            {% if product.installment_available %}
+                installment12: {{ product.installment_12_months|default:0 }},
+                installment24: {{ product.installment_24_months|default:0 }},
+                installment48: {{ product.installment_48_months|default:0 }}
+            {% endif %}
+        }
+    };
+
+    function updatePriceAndLink() {
+        const selectedVariantId = document.querySelector('input[name="variant_id"]:checked')?.value || 'default';
+        const selectedPaymentType = document.querySelector('input[name="payment_type"]:checked')?.value || 'purchase';
+        const price = variantPrices[selectedVariantId][selectedPaymentType];
+        const isMonthly = selectedPaymentType !== 'purchase';
+        priceElement.textContent = price ? `${price} ₽${isMonthly ? '/мес.' : ''}` : '{{ product.price }} ₽';
+
+        // Обновление ссылки кнопки "Заказать"
+        const baseUrl = "{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}";
+        const params = new URLSearchParams();
+        if (selectedVariantId !== 'default') {
+            params.append('variant_id', selectedVariantId);
+        }
+        params.append('payment_type', selectedPaymentType);
+        orderButton.href = `${baseUrl}?${params.toString()}`;
+    }
 
     colorInputs.forEach(input => {
         input.addEventListener('change', function () {
-            const variantId = this.value;
-            variantIdInput.value = variantId;
-
-            // Обновление цены
-            const variantPrice = this.getAttribute('data-price');
-            priceElement.textContent = variantPrice ? `${variantPrice} ₽` : '{{ product.price }} ₽';
-
             // Навигация к изображению выбранного цвета
             const selectedColor = this.getAttribute('data-color');
             navigateToColorImage(selectedColor);
-
-            // Обновление кнопки "В корзину"
-            addToCartButton.disabled = this.disabled;
+            updatePriceAndLink();
         });
     });
 
-    // Инициализация первого выбранного цвета
-    const firstChecked = document.querySelector('input[name="variant_id"]:checked');
-    if (firstChecked) {
-        navigateToColorImage(firstChecked.getAttribute('data-color'));
+    paymentInputs.forEach(input => {
+        input.addEventListener('change', updatePriceAndLink);
+    });
+
+    // Инициализация первого выбранного цвета и способа оплаты
+    const firstCheckedColor = document.querySelector('input[name="variant_id"]:checked');
+    if (firstCheckedColor) {
+        navigateToColorImage(firstCheckedColor.getAttribute('data-color'));
     }
+    updatePriceAndLink();
 
     // Инициализация Swiper для недавно просмотренных
     const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
