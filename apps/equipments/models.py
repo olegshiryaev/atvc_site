@@ -138,15 +138,10 @@ class ProductVariant(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="variants", verbose_name="Товар"
     )
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
     sku = models.CharField("Артикул", max_length=50, unique=True, blank=True, null=True)
     stock = models.PositiveIntegerField("Остаток на складе", default=0)
     price = models.PositiveIntegerField("Цена", null=True)
 
-    def __str__(self):
-        return f"{self.product.name} ({self.color.name})"
 
     def get_final_price(self):
         """
@@ -160,26 +155,9 @@ class ProductVariant(models.Model):
         """
         return self.stock > 0
 
-    def clean(self):
-        """
-        Проверяет, что цена указана, и генерирует артикул, если он не задан.
-        """
-        if not self.price:
-            raise ValidationError("Цена обязательна для варианта товара.")
-        if not self.sku:
-            self.sku = f"{self.product.slug}-{self.color.slug}"
-        super().clean()
-
     class Meta:
         verbose_name = "Вариант товара"
         verbose_name_plural = "Варианты товаров"
-        constraints = [
-            models.UniqueConstraint(fields=["product", "color"], name="unique_product_color")
-        ]
-        indexes = [
-            models.Index(fields=['color']),
-            models.Index(fields=['stock']),
-        ]
 
 # Модель изображения
 class ProductImage(models.Model):
