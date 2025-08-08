@@ -5053,7 +5053,6 @@ button.swiper-pagination-bullet {
     font-size: var(--font-size-xl);
     font-weight: 600;
     line-height: 25px;
-    overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;

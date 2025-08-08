@@ -10,7 +10,120 @@ from imagekit.models import ProcessedImageField
 from imagekit.processors import ResizeToFit
 from django.utils.html import strip_tags
 from pilkit.processors import Transpose
+import uuid
 
+
+class BaseModel(models.Model):
+    slug = models.SlugField("URL", unique=True, blank=True)
+    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True, null=True)
+
+    def generate_unique_slug(self, base_field_value):
+        """
+        Генерирует уникальный slug на основе значения поля.
+        """
+        base_slug = slugify(base_field_value)
+        slug = base_slug
+        counter = 1
+        while self.__class__.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        return slug
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = self.generate_unique_slug(self.name)
+        super().save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+
+# Модель цвета
+class Color(BaseModel):
+    name = models.CharField("Название цвета", max_length=100, unique=True)
+    hex_code = models.CharField(
+        "HEX-код цвета", max_length=7, blank=True, null=True,
+        help_text="Например, #FFFFFF для белого"
+    )
+
+    def __str__(self):
+        return self.name
+
+    def clean(self):
+        """
+        Проверяет формат HEX-кода цвета.
+        """
+        import re
+        if self.hex_code and not re.match(r'^#[0-9A-Fa-f]{6}$', self.hex_code):
+            raise ValidationError("HEX-код должен быть в формате #RRGGBB, например #FFFFFF.")
+        super().clean()
+
+    class Meta:
+        verbose_name = "Цвет"
+        verbose_name_plural = "Цвета"
+        indexes = [
+            models.Index(fields=['slug']),
+        ]
+
+# Модель категории
+class Category(BaseModel):
+    name = models.CharField("Название", max_length=100)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+        indexes = [
+            models.Index(fields=['slug']),
+        ]
+
+
+# Модель товара
+class Product(BaseModel):
+    name = models.CharField("Название", max_length=255)
+    description = RichTextField("Описание", blank=True, null=True)
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        related_name="products",
+        blank=True,
+        null=True,
+        verbose_name="Категория"
+    )
+    warranty = models.PositiveIntegerField("Гарантия (месяцев)", default=12)
+    instruction = models.FileField(
+        "Инструкция", upload_to='instructions/', blank=True, null=True,
+        help_text="PDF-файл с инструкцией к товару"
+    )
+    is_featured = models.BooleanField(
+        "Рекомендуемый товар", default=False,
+        help_text="Отображать товар в разделе рекомендуемых"
+    )
+    is_available = models.BooleanField(
+        "Отображать в каталоге", default=True,
+        help_text="Если выключено, товар не отображается в списке товаров"
+    )
+
+    def __str__(self):
+        return self.name or "Товар без названия"
+
+    def is_in_stock(self):
+        """
+        Проверяет, есть ли товар в наличии на основе остатков вариантов.
+        """
+        return self.variants.filter(stock__gt=0).exists()
+
+    class Meta:
+        verbose_name = "Товар"
+        verbose_name_plural = "Товары"
+        indexes = [
+            models.Index(fields=['slug']),
+            models.Index(fields=['is_available']),
+            models.Index(fields=['created_at']),
+        ]
 
 COLOR_CHOICES = [
     ("white", "Белый"),
@@ -19,247 +132,102 @@ COLOR_CHOICES = [
     ("other", "Другой"),
 ]
 
-class Category(models.Model):
-    name = models.CharField("Название категории", max_length=100)
-    slug = models.SlugField("URL", unique=True, blank=True)
 
-    def __str__(self):
-        return self.name
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            base_slug = slugify(self.name)
-            slug = base_slug
-            counter = 1
-            while self.__class__.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug
-        super().save(*args, **kwargs)
-
-    class Meta:
-        verbose_name = "Категория"
-        verbose_name_plural = "Категории"
-
-
-class Product(models.Model):
-    name = models.CharField("Название", max_length=255)
-    slug = models.SlugField("URL", unique=True, blank=True)
-    short_description = RichTextField(
-        "Краткое описание", blank=True, null=True
-    )
-    description = RichTextField("Описание", blank=True, null=True)
-    price = models.PositiveIntegerField("Цена", blank=True, null=True)
-    discount_price = models.PositiveIntegerField("Акционная цена", blank=True, null=True)
-    sku = models.CharField(
-        "Артикул", max_length=50, blank=True, null=True
-    )
-    stock = models.PositiveIntegerField(
-        "Остаток на складе", default=0
-    )
-    installment_available = models.BooleanField("Доступна рассрочка", default=False)
-    installment_12_months = models.PositiveIntegerField(
-        "Ежемесячный платёж на 12 месяцев", blank=True, null=True
-    )
-    installment_24_months = models.PositiveIntegerField(
-        "Ежемесячный платёж на 24 месяцев", blank=True, null=True
-    )
-    installment_48_months = models.PositiveIntegerField(
-        "Ежемесячный платёж на 48 месяцев", blank=True, null=True
-    )
-    category = models.ForeignKey(
-        'Category',
-        on_delete=models.SET_NULL,
-        related_name="products",
-        blank=True,
-        null=True,
-        verbose_name="Категория"
-    )
-    services = models.ManyToManyField(
-        "core.Service",
-        related_name="products",
-        verbose_name="Услуги",
-        blank=True
-    )
-    warranty = models.PositiveIntegerField("Гарантия (месяцев)", default=12)
-    instruction = models.FileField(
-        "Инструкция", 
-        upload_to='instructions/', 
-        blank=True, 
-        null=True,
-        help_text="PDF-файл с инструкцией к товару"
-    )
-    is_featured = models.BooleanField("Рекомендуемый товар", default=False)
-    is_available = models.BooleanField("В наличии", default=True)
-    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
-    updated_at = models.DateTimeField("Дата обновления", auto_now=True, null=True)
-
-    def __str__(self):
-        return self.name or "Товар без названия"
-
-    def save(self, *args, **kwargs):
-        if not self.slug:
-            base_slug = slugify(self.name)
-            slug = base_slug
-            counter = 1
-            while self.__class__.objects.filter(slug=slug).exclude(pk=self.pk).exists():
-                slug = f"{base_slug}-{counter}"
-                counter += 1
-            self.slug = slug
-        super().save(*args, **kwargs)
-
-    def clean(self):
-        if self.installment_available:
-            if not any([
-                self.installment_12_months,
-                self.installment_24_months,
-                self.installment_48_months,
-            ]):
-                raise ValidationError("Укажите хотя бы один вариант ежемесячного платежа (12, 24 или 48 месяцев), если доступна рассрочка.")
-
-    def get_main_image(self):
-        return self.images.filter(is_main=True).first()
-    
-    def has_description(self):
-        return bool(self.description and strip_tags(self.description).strip())
-    
-    def has_short_description(self):
-        return bool(self.short_description and strip_tags(self.short_description).strip())
-    
-    def is_in_stock(self):
-        return self.stock > 0
-    
-    def get_price(self):
-        return self.price
-    
-    def get_final_price(self):
-        return self.discount_price or self.price
-
-    def get_installment_price(self, months):
-        if not self.installment_available:
-            return None
-        if months == 12:
-            return self.installment_12_months
-        if months == 24:
-            return self.installment_24_months
-        if months == 48:
-            return self.installment_48_months
-        return None
-
-    def get_total_installment_price(self, months):
-        if not self.installment_available:
-            return self.get_final_price()
-
-        price = self.get_installment_price(months)
-        if price is not None:
-            return price * months
-        return self.get_final_price()
-
-    class Meta:
-        verbose_name = "Товар"
-        verbose_name_plural = "Товары"
-
-
+# Модель варианта товара
 class ProductVariant(models.Model):
     product = models.ForeignKey(
         Product, on_delete=models.CASCADE, related_name="variants", verbose_name="Товар"
     )
-    color = models.CharField("Цвет", max_length=10, choices=COLOR_CHOICES)
-    sku = models.CharField("Артикул", max_length=50, blank=True, null=True)
-    stock = models.PositiveIntegerField("Остаток на складе", default=0)
-    price = models.PositiveIntegerField(
-        "Цена", blank=True, null=True,
-        help_text="Если не указано, используется цена из Product"
+    color = models.CharField(
+        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
     )
-    created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)
-    updated_at = models.DateTimeField("Дата обновления", auto_now=True, null=True)
+    sku = models.CharField("Артикул", max_length=50, unique=True, blank=True, null=True)
+    stock = models.PositiveIntegerField("Остаток на складе", default=0)
+    price = models.PositiveIntegerField("Цена", null=True)
 
     def __str__(self):
-        return f"{self.product.name} ({self.get_color_display()})"
-    
-    def is_in_stock(self):
-        return self.stock > 0
-    
-    def get_price(self):
-        return self.price if self.price is not None else self.product.get_final_price()
-    
+        return f"{self.product.name} ({self.color.name})"
+
     def get_final_price(self):
-        return self.price if self.price is not None else self.product.get_final_price()
-    
-    def save(self, *args, **kwargs):
-        if self.price is None:
-            self.price = self.product.price
-        super().save(*args, **kwargs)
+        """
+        Возвращает цену варианта.
+        """
+        return self.price
+
+    def is_in_stock(self):
+        """
+        Проверяет наличие варианта на складе.
+        """
+        return self.stock > 0
+
+    def clean(self):
+        """
+        Проверяет, что цена указана, и генерирует артикул, если он не задан.
+        """
+        if not self.price:
+            raise ValidationError("Цена обязательна для варианта товара.")
+        if not self.sku:
+            self.sku = f"{self.product.slug}-{self.color.slug}"
+        super().clean()
 
     class Meta:
         verbose_name = "Вариант товара"
         verbose_name_plural = "Варианты товаров"
         constraints = [
-            models.UniqueConstraint(
-                fields=["product", "color"],
-                name="unique_product_color"
-            )
+            models.UniqueConstraint(fields=["product", "color"], name="unique_product_color")
+        ]
+        indexes = [
+            models.Index(fields=['color']),
+            models.Index(fields=['stock']),
         ]
 
-
+# Модель изображения
 class ProductImage(models.Model):
-    product = models.ForeignKey(
-        Product, on_delete=models.CASCADE, related_name="images", verbose_name="Товар"
+    variant = models.ForeignKey(
+        ProductVariant, on_delete=models.CASCADE, related_name="images", verbose_name="Вариант товара",
+        null=True
     )
     image = ProcessedImageField(
         upload_to='product_images',
-        processors=[
-            Transpose(),  # Автоповорот по EXIF
-            ResizeToFit(800, 800)  # Сохраняет пропорции
-        ],
+        processors=[Transpose(), ResizeToFit(800, 800)],
         format='WEBP',
         options={'quality': 90},
         verbose_name="Изображение"
     )
     is_main = models.BooleanField("Основное изображение", default=False)
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
     order = models.PositiveIntegerField("Порядок", default=0)
 
     def __str__(self):
-        return f"Изображение для {self.product.name}"
-    
+        return f"Изображение для {self.variant}"
+
     def save(self, *args, **kwargs):
-        # Генерация имени файла перед сохранением (только для новых изображений)
+        """
+        Обновляет основное изображение и генерирует уникальное имя файла.
+        """
+        if self.is_main:
+            self.variant.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
         if self.image and not self.pk:
             self.image.name = self.generate_filename()
-        
-        # Обновление главного изображения
-        if self.is_main:
-            self.product.images.exclude(pk=self.pk).filter(is_main=True).update(is_main=False)
-        
         super().save(*args, **kwargs)
 
     def generate_filename(self):
-        """Генерирует уникальное имя файла в формате: `product_slug-123.webp`"""
+        """
+        Генерирует уникальное имя файла в формате: product_slug-uuid.webp
+        """
         ext = '.webp'
-        base_name = slugify(self.product.slug or self.product.name or 'product')
-        
-        # Уникальное имя: product_slug.webp, product_slug-1.webp и т.д.
-        filename = f"{base_name}{ext}"
-        counter = 1
-        
-        while ProductImage.objects.filter(image=f"product_images/{filename}").exists():
-            filename = f"{base_name}-{counter}{ext}"
-            counter += 1
-        
-        return filename  # Не добавляем 'product_images/' - это уже делает upload_to
+        base_name = slugify(self.variant.product.slug or self.variant.product.name or 'product')
+        unique_id = str(uuid.uuid4())[:8]
+        return f"{base_name}-{unique_id}{ext}"
 
     class Meta:
         ordering = ["order"]
-        verbose_name = "Изображение товара"
-        verbose_name_plural = "Изображения товаров"
+        verbose_name = "Изображение варианта"
+        verbose_name_plural = "Изображения вариантов"
         constraints = [
             models.UniqueConstraint(
-                fields=["product"],
+                fields=["variant"],
                 condition=models.Q(is_main=True),
-                name="unique_main_image_per_product"
+                name="unique_main_image_per_variant"
             )
         ]
 
@@ -357,10 +325,6 @@ class Camera(models.Model):
     )
 
     # ==== Характеристики камеры ====
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
-
     STANDARD_CHOICES = [
         ("ip", "IP"),
         ("analog", "Аналоговая"),
@@ -450,10 +414,6 @@ class Router(models.Model):
         "Частоты", max_length=10, choices=FREQUENCY_CHOICES, blank=True, null=True
     )
 
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
-
     dimensions = models.CharField(
         "Размер (ШхДхВ)", max_length=50, blank=True, null=True
     )
@@ -506,10 +466,6 @@ class TvBox(models.Model):
         Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox",
         verbose_name="Товар"
     )
-    color = models.CharField(
-        "Цвет", max_length=10, choices=COLOR_CHOICES, blank=True, null=True
-    )
-
     ethernet = models.CharField("Ethernet", max_length=50, blank=True, null=True)
     usb_count = models.PositiveIntegerField(
         "Количество USB-портов", blank=True, null=True
