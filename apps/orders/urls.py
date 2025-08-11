@@ -6,9 +6,9 @@ app_name = "orders"
 
 urlpatterns = [
     path("order/<slug:slug>/", views.order_create, name="order_create"),
-    path('order-equipment/<int:product_id>/', 
-         views.EquipmentOrderView.as_view(), 
-         name='equipment_order'),
+    path('order-equipment/<int:product_item_id>/',
+        views.EquipmentOrderView.as_view(),
+        name='equipment_order'),
     path("submit-order/", views.submit_order, name="submit_order"),
     path('cart/', views.CartView.as_view(), name='cart_view'),
     # path("cart/add/", views.add_to_cart, name="add_to_cart"),

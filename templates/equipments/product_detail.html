@@ -1,337 +1,268 @@
 {% extends 'base.html' %}
-{% load static url_tools color_tags %}
-{% block title %}{{ product.name }} — {{ block.super }}{% endblock %}
+{% load static %}
+{% block title %}{{ current_item }} — {{ block.super }}{% endblock %}
+
 {% block content %}
 <div class="container">
     <!-- Хлебные крошки -->
     {% include 'partials/page_header.html' with title=title %}
 
-    <!-- Основная карточка товара -->
-    <section class="product-detail-block block product-detail">
-        <div class="row g-4">
-            <!-- Галерея изображений -->
-            <div class="col-md-6">
-                <div class="product__gallery gallery">
-                    <div class="gallery__imgs swiper product-gallery-main">
+    <div class="product-detail-layout block product-detail">
+        <!-- Левая часть: изображение и характеристики -->
+        <main class="product-main">
+            <div class="product-images-and-info">
+                <!-- Галерея -->
+                <div class="product-gallery">
+                    <!-- Основное изображение -->
+                    <div class="product-gallery-main swiper">
                         <div class="swiper-wrapper">
-                            {% if product.images.exists %}
-                                {% for image in product.images.all %}
-                                    <div class="swiper-slide gallery__item" data-color="{{ image.color|default:'all' }}">
-                                        <img src="{{ image.image.url }}" alt="{{ product.name }} - {{ image.get_color_display|default:'Изображение' }}" class="gallery__item-img lazyloaded">
-                                    </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="swiper-slide gallery__item" data-color="all">
-                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="product-card__img img-fluid rounded">
+                            {% for image in current_item.images.all %}
+                                <div class="swiper-slide">
+                                    <img src="{{ image.image.url }}" alt="{{ current_item }}" class="gallery-image">
                                 </div>
-                            {% endif %}
+                            {% empty %}
+                                <div class="swiper-slide">
+                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="gallery-image">
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Кнопки навигации -->
+                        <div class="swiper-button-next"></div>
+                        <div class="swiper-button-prev"></div>
+                        <!-- Пагинация -->
+                        <div class="swiper-pagination"></div>
+                    </div>
+
+                    <!-- Миниатюры (под основным изображением) -->
+                    <div class="product-gallery-thumbs swiper">
+                        <div class="swiper-wrapper">
+                            {% for image in current_item.images.all %}
+                                <div class="swiper-slide thumb">
+                                    <img src="{{ image.image.url }}" alt="Миниатюра" class="thumb-image">
+                                </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    {% if product.images.exists %}
-                        <div class="gallery__bottom slider-navs">
-                            <div class="gallery__thumbs swiper product-gallery-thumbs">
-                                <div class="swiper-wrapper">
-                                    {% for image in product.images.all %}
-                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;" data-color="{{ image.color|default:'all' }}">
-                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img">
-                                        </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
+                </div>
+
+                <!-- Информация о товаре -->
+                <div class="product-info">
+                    {% if current_item.color %}
+                        <div class="product-color">
+                            <strong>Цвет:</strong> {{ current_item.color.name|lower }}
                         </div>
+                    {% endif %}
+
+                    <!-- Цветовые круги -->
+                    {% if items.count > 1 %}
+                        <div class="color-circles">
+                            {% for variant in items %}
+                                {% if variant.color %}
+                                    <a href="{% url 'equipments:product_detail' locality_slug=locality_slug slug=variant.slug %}"
+                                       class="color-circle {% if variant == current_item %}active{% endif %} {% if variant.in_stock <= 0 %}disabled{% endif %}"
+                                       title="{{ variant.color.name }}"
+                                       {% if variant == current_item %}aria-current="page"{% endif %}>
+                                        <span class="circle" style="background-color: {{ variant.color.hex_code|default:'#cccccc' }};"></span>
+                                    </a>
+                                {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Краткие характеристики -->
+                    {% if current_item.product.smart_speaker or current_item.product.camera or current_item.product.router or current_item.product.tvbox %}
+                        <div class="product-specs-short">
+                            {% if current_item.product.smart_speaker %}
+                                {% with s=current_item.product.smart_speaker %}
+                                    {% if s.voice_assistant %}
+                                        <div class="spec-item">
+                                            <strong>Помощник</strong>
+                                            <span>{{ s.voice_assistant }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if s.power_source %}
+                                        <div class="spec-item">
+                                            <strong>Питание</strong>
+                                            <span>{{ s.power_source }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                        <button type="button" class="link-more-specs" onclick="activateSpecsTab(event)">
+                            Все характеристики →
+                        </button>
                     {% endif %}
                 </div>
             </div>
 
-            <!-- Информация о товаре -->
-            <div class="col-md-6">
-                <div class="h-100 d-flex flex-column p-4">
-                    <h2 class="product-card__title">{{ product.name }}</h2>
-                    {% if product.has_short_description %}
-                    <p class="product-card__desc">{{ product.short_description|safe }}</p>
-                    {% endif %}
-                    {% if product.variants.exists %}
-                        <div class="product-card__colors mb-3">
-                            <h5 class="product-info__variant-title">Цвет</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                {% for variant in product.variants.all %}
-                                    <label class="color-circle {% if variant.stock <= 0 %}disabled{% endif %}" title="{{ variant.get_color_display }}">
-                                        <input type="radio" name="variant_id" value="{{ variant.id }}"
-                                               data-price="{{ variant.price|default:product.price }}"
-                                               data-color="{{ variant.color }}"
-                                               {% if forloop.first %}checked{% endif %}
-                                               {% if variant.stock <= 0 %}disabled{% endif %}
-                                               aria-label="Выбрать цвет {{ variant.get_color_display }}{% if variant.stock <= 0 %}, нет в наличии{% endif %}">
-                                        <span class="circle" style="background-color: {{ variant.color|color_to_hex }};"></span>
-                                    </label>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endif %}
-                    {% if product.installment_available %}
-                        <div class="product-card__payment-methods mb-3">
-                            <h5 class="product-info__variant-title">Выберите вариант оплаты</h5>
-                            <div class="d-flex flex-wrap gap-2">
-                                <label class="payment-method">
-                                    <input type="radio" name="payment_type" value="purchase" checked
-                                           data-price="{{ product.variants.first.price|default:product.price }}">
-                                    <span class="payment-method__content">
-                                        <span class="payment-method__title">Полная стоимость</span>
-                                    </span>
-                                </label>
-                                {% if product.installment_12_months %}
-                                    <label class="payment-method">
-                                        <input type="radio" name="payment_type" value="installment12"
-                                               data-price="{{ product.installment_12_months }}">
-                                        <span class="payment-method__content">
-                                            <span class="payment-method__title">Рассрочка на 12 месяцев</span>
-                                        </span>
-                                    </label>
-                                {% endif %}
-                                {% if product.installment_24_months %}
-                                    <label class="payment-method">
-                                        <input type="radio" name="payment_type" value="installment24"
-                                               data-price="{{ product.installment_24_months }}">
-                                        <span class="payment-method__content">
-                                            <span class="payment-method__title">Рассрочка на 24 месяца</span>
-                                        </span>
-                                    </label>
-                                {% endif %}
-                                {% if product.installment_48_months %}
-                                    <label class="payment-method">
-                                        <input type="radio" name="payment_type" value="installment48"
-                                               data-price="{{ product.installment_48_months }}">
-                                        <span class="payment-method__content">
-                                            <span class="payment-method__title">Рассрочка на 48 месяцев</span>
-                                        </span>
-                                    </label>
-                                {% endif %}
-                            </div>
-                        </div>
-                    {% endif %}
-                    <div class="mt-auto">
-                        <div class="product-card__footer">
-                            <div class="product-card__price">
-                                <span class="current-price">
-                                    {{ product.variants.first.price|default:product.price|default:'N/A' }} ₽
-                                </span>
-                            </div>
-                            <a href="{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}?variant_id={% if product.variants.exists %}{{ product.variants.first.id }}{% endif %}&payment_type=purchase" class="product-card__btn btn" id="order-button">
-                                Заказать
-                            </a>
-                        </div>
-                        {% if product.instruction %}
-                            <a href="{% url 'equipments:download_instruction' locality_slug=locality.slug slug=product.slug %}" class="text-decoration-none small mt-2 d-block text-center">
-                                <i class="bi bi-download me-1"></i> Скачать инструкцию
-                            </a>
+            <!-- Табы: Описание / Характеристики -->
+            <div class="product-tabs mt-5">
+                <div class="product-tabs-wrapper mb-3">
+                    <ul class="nav nav-pills" id="productTabs">
+                        <li>
+                            <button class="nav-link active" data-tab="description">Описание</button>
+                        </li>
+                        <li>
+                            <button class="nav-link" data-tab="specs">Характеристики</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="tab-content" id="productTabsContent">
+                    <!-- Описание -->
+                    <div class="tab-pane active" id="description">
+                        {{ current_item.product.description|safe }}
+                    </div>
+
+                    <!-- Характеристики -->
+                    <div class="tab-pane" id="specs">
+                        {% if current_item.product.smart_speaker %}
+                            {% include "equipments/product/characteristics/smart_speaker.html" with speaker=current_item.product.smart_speaker %}
+                        {% elif current_item.product.camera %}
+                            {% include "equipments/product/characteristics/camera.html" with camera=current_item.product.camera %}
+                        {% elif current_item.product.router %}
+                            {% include "equipments/product/characteristics/router.html" with router=current_item.product.router %}
+                        {% elif current_item.product.tvbox %}
+                            {% include "equipments/product/characteristics/tvbox.html" with tvbox=current_item.product.tvbox %}
+                        {% else %}
+                            <p class="text-muted">Характеристики недоступны.</p>
                         {% endif %}
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
 
-        <!-- Табы: Описание / Характеристики -->
-        {% if product.has_description or product.camera or product.router or product.smart_speaker or product.tvbox %}
-        <div class="product-tabs mt-5">
-            <div class="product-tabs-wrapper mb-3">
-                <ul class="nav nav-pills product-tabs-nav" id="productTabs" role="tablist">
-                    {% if product.has_description %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="description-tab" data-bs-toggle="pill" data-bs-target="#description" type="button" role="tab">Описание</button>
-                    </li>
-                    {% endif %}
-                    {% if product.camera or product.router or product.smart_speaker or product.tvbox %}
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link {% if not product.has_description %}active{% endif %}" id="specs-tab" data-bs-toggle="pill" data-bs-target="#specs" type="button" role="tab">Технические характеристики</button>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-            <div class="tab-content" id="productTabsContent">
-                {% if product.has_description %}
-                <div class="tab-pane fade show active" id="description" role="tabpanel">
-                    <p>{{ product.description|safe }}</p>
+        <!-- Правая панель: цена и кнопка -->
+        <aside class="product-sidebar" id="product-sidebar">
+            <div class="sidebar-content">
+                <!-- Блок выбора способа оплаты -->
+                <div class="payment-methods mt-3 border-top pt-3">
+                    <h6 class="mb-2">Выберите вариант оплаты</h6>
+                    <div class="payment-options">
+                        <!-- Полная оплата -->
+                        <label class="payment-option active">
+                            <input type="radio" name="payment_method" value="purchase" checked data-price="{{ current_item.get_final_price }}">
+                            <span class="payment-title">Полная стоимость</span>
+                            <span class="payment-price">{{ current_item.get_price_display }}</span>
+                        </label>
+
+                        <!-- Рассрочка 12 месяцев -->
+                        {% if current_item.installment_12_months %}
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="installment12" data-price="{{ current_item.installment_12_months }}">
+                                <span class="payment-title">Рассрочка на 12 месяцев</span>
+                                <span class="payment-price">{{ current_item.installment_12_months }} ₽/мес</span>
+                            </label>
+                        {% endif %}
+
+                        <!-- Рассрочка 24 месяца -->
+                        {% if current_item.installment_24_months %}
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="installment24" data-price="{{ current_item.installment_24_months }}">
+                                <span class="payment-title">Рассрочка на 24 месяца</span>
+                                <span class="payment-price">{{ current_item.installment_24_months }} ₽/мес</span>
+                            </label>
+                        {% endif %}
+
+                        <!-- Рассрочка 48 месяцев -->
+                        {% if current_item.installment_48_months %}
+                            <label class="payment-option">
+                                <input type="radio" name="payment_method" value="installment48" data-price="{{ current_item.installment_48_months }}">
+                                <span class="payment-title">Рассрочка на 48 месяцев</span>
+                                <span class="payment-price">{{ current_item.installment_48_months }} ₽/мес</span>
+                            </label>
+                        {% endif %}
+                    </div>
                 </div>
+                <div class="price-block">
+                    <!-- Динамическая цена -->
+                    <div class="current-price" id="current-price-display">
+                        {{ current_item.get_price_display }}
+                    </div>
+                    {% if current_item.old_price %}
+                        <div class="old-price">{{ current_item.old_price }} ₽</div>
+                    {% endif %}
+                </div>
+
+                <a href="{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}?payment_type=purchase"
+                   class="btn-order" id="order-button">
+                    Заказать
+                </a>
+                {% if current_item.product.instruction %}
+                    <a href="{% url 'equipments:download_instruction' locality_slug=locality_slug slug=current_item.product.slug %}"
+                       class="link-download">
+                        <i class="icon-download"></i> Скачать инструкцию
+                    </a>
                 {% endif %}
-                <div class="tab-pane fade {% if not product.has_description %}show active{% endif %}" id="specs" role="tabpanel">
-                    {% if product.camera %}
-                        {% include "equipments/product/characteristics/camera.html" %}
-                    {% elif product.router %}
-                        {% include "equipments/product/characteristics/router.html" %}
-                    {% elif product.smart_speaker %}
-                        {% include "equipments/product/characteristics/smart_speaker.html" %}
-                    {% elif product.tvbox %}
-                        {% include "equipments/product/characteristics/tvbox.html" %}
-                    {% else %}
-                        <p class="text-muted">Характеристики недоступны для данного товара.</p>
-                    {% endif %}
-                </div>
             </div>
-        </div>
-        {% endif %}
-    </section>
+        </aside>
+    </div>
 
-    <!-- Вы недавно смотрели -->
+    <!-- Недавно просмотренные -->
     {% if recently_viewed %}
-    <section class="products-slider-block block" data-block-slug="products-slider-block" data-block-appearance="">
-        <div class="products-slider-block__header">
-            <h2 class="products-slider-block__title block__title">Вы недавно смотрели</h2>
-        </div>
-        <div class="products-slider-block__wrapper">
-            <div class="swiper swiper-initialized swiper-horizontal">
+        <section class="recently-viewed">
+            <h2>Вы недавно смотрели</h2>
+            <div class="swiper">
                 <div class="swiper-wrapper">
                     {% for item in recently_viewed %}
-                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
-                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
-                            <div class="product-card__img-wrap{% if not item.get_main_image %} no-image{% endif %}">
-                                {% with main_image=item.get_main_image %}
-                                    {% if main_image %}
-                                        <img data-lazy-src="{{ main_image.image.url }}"  
-                                            alt="{{ item.name|default:'Товар' }}" 
-                                            class="product-card__img" 
-                                            src="{{ main_image.image.url }}">
-                                    {% else %}
-                                    <div class="product-card__placeholder">
-                                        <span class="product-card__no-image-label">Изображение отсутствует</span>
-                                    </div>
-                                    {% endif %}
-                                {% endwith %}
-                            </div>
-                            <h6 class="product-card__title h6">{{ item.name }}</h6>
-                            <div class="product-card__desc">{{ item.short_description|truncatewords:10|default_if_none:'' }}</div>
-                        </a>
-                        <div class="product-card__footer">
-                            <div class="product-card__price h5">{{ item.price }} ₽</div>
-                            <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                        <div class="swiper-slide">
+                            <a href="{% url 'equipments:product_detail' locality_slug=locality_slug slug=item.slug %}">
+                                <img src="{{ item.get_main_image.image.url }}" alt="{{ item }}">
+                                <h6>{{ item }}</h6>
+                                <div class="price">{{ item.get_price_display }}</div>
+                            </a>
                         </div>
-                    </li>
                     {% endfor %}
                 </div>
-                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
             </div>
-            <div class="products-slider-block__navs slider-navs">
-                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-disabled="true"></div>
-                <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0" role="button" aria-label="Go to slide 1" aria-current="true"></span><span class="swiper-pagination-bullet" tabindex="0" role="button" aria-label="Go to slide 2"></span></div>
-                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-disabled="false"></div>
-            </div>
-        </div>
-    </section>
+        </section>
     {% endif %}
 </div>
 
-<!-- JavaScript для галереи, выбора цвета и способа оплаты -->
+<!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // Инициализация Swiper для галереи
-    const galleryThumbs = new Swiper('.product-gallery-thumbs', {
-        spaceBetween: 10,
-        slidesPerView: 'auto',
-        freeMode: true,
-        watchSlidesProgress: true,
-    });
+    const tabButtons = document.querySelectorAll('[data-tab]');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const orderButton = document.getElementById('order-button');
+    const priceDisplay = document.getElementById('current-price-display');
 
-    const galleryMain = new Swiper('.product-gallery-main', {
-        spaceBetween: 10,
-        thumbs: {
-            swiper: galleryThumbs
-        }
-    });
+    // Обработка переключения табов
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function () {
+            tabButtons.forEach(b => b.classList.remove('active'));
+            tabPanes.forEach(p => p.classList.remove('active'));
 
-    // Навигация к изображению, соответствующему выбранному цвету
-    function navigateToColorImage(color) {
-        const slides = document.querySelectorAll('.gallery__item');
-        let targetIndex = 0; // По умолчанию первый слайд
-        slides.forEach((slide, index) => {
-            const slideColor = slide.getAttribute('data-color');
-            if (slideColor === color) {
-                targetIndex = index; // Находим первый слайд с соответствующим цветом
-            }
+            this.classList.add('active');
+            document.getElementById(this.dataset.tab).classList.add('active');
         });
-        galleryMain.slideTo(targetIndex); // Переключаемся на нужный слайд
-    }
+    });
 
-    // Обновление цены и ссылки кнопки "Заказать" при выборе цвета или способа оплаты
-    const colorInputs = document.querySelectorAll('input[name="variant_id"]');
-    const paymentInputs = document.querySelectorAll('input[name="payment_type"]');
-    const priceElement = document.querySelector('.current-price');
-    const orderButton = document.querySelector('#order-button');
-
-    // Объект цен для вариантов
-    const variantPrices = {
-        {% for variant in product.variants.all %}
-            "{{ variant.id }}": {
-                purchase: {{ variant.price|default:product.price }},
-                {% if product.installment_available %}
-                    installment12: {{ product.installment_12_months|default:0 }},
-                    installment24: {{ product.installment_24_months|default:0 }},
-                    installment48: {{ product.installment_48_months|default:0 }}
-                {% endif %}
-            },
-        {% endfor %}
-        "default": {
-            purchase: {{ product.price }},
-            {% if product.installment_available %}
-                installment12: {{ product.installment_12_months|default:0 }},
-                installment24: {{ product.installment_24_months|default:0 }},
-                installment48: {{ product.installment_48_months|default:0 }}
-            {% endif %}
-        }
+    window.activateSpecsTab = function(e) {
+        e.preventDefault();
+        const specsButton = document.querySelector('[data-tab="specs"]');
+        specsButton.click();
+        document.getElementById('specs').scrollIntoView({ behavior: 'smooth' });
     };
 
-    function updatePriceAndLink() {
-        const selectedVariantId = document.querySelector('input[name="variant_id"]:checked')?.value || 'default';
-        const selectedPaymentType = document.querySelector('input[name="payment_type"]:checked')?.value || 'purchase';
-        const price = variantPrices[selectedVariantId][selectedPaymentType];
-        const isMonthly = selectedPaymentType !== 'purchase';
-        priceElement.textContent = price ? `${price} ₽${isMonthly ? '/мес.' : ''}` : '{{ product.price }} ₽';
-
-        // Обновление ссылки кнопки "Заказать"
-        const baseUrl = "{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}";
-        const params = new URLSearchParams();
-        if (selectedVariantId !== 'default') {
-            params.append('variant_id', selectedVariantId);
-        }
-        params.append('payment_type', selectedPaymentType);
-        orderButton.href = `${baseUrl}?${params.toString()}`;
-    }
-
-    colorInputs.forEach(input => {
-        input.addEventListener('change', function () {
-            // Навигация к изображению выбранного цвета
-            const selectedColor = this.getAttribute('data-color');
-            navigateToColorImage(selectedColor);
-            updatePriceAndLink();
+    // Обработка выбора способа оплаты
+    paymentRadios.forEach(radio => {
+        radio.addEventListener('change', function () {
+            // Обновляем отображаемую цену
+            const price = this.dataset.price;
+            const isMonthly = this.value !== 'purchase';
+            priceDisplay.textContent = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
+            
+            // Обновляем URL кнопки "Заказать"
+            const baseUrl = "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
+            orderButton.href = `${baseUrl}?payment_type=${this.value}`;
+            
+            // Удаляем active класс у всех и добавляем к выбранному
+            paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
+            this.parentElement.classList.add('active');
         });
-    });
-
-    paymentInputs.forEach(input => {
-        input.addEventListener('change', updatePriceAndLink);
-    });
-
-    // Инициализация первого выбранного цвета и способа оплаты
-    const firstCheckedColor = document.querySelector('input[name="variant_id"]:checked');
-    if (firstCheckedColor) {
-        navigateToColorImage(firstCheckedColor.getAttribute('data-color'));
-    }
-    updatePriceAndLink();
-
-    // Инициализация Swiper для недавно просмотренных
-    const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
-        slidesPerView: 1,
-        spaceBetween: 16,
-        navigation: {
-            nextEl: '.products-slider-block .slider-navs__next',
-            prevEl: '.products-slider-block .slider-navs__prev',
-        },
-        pagination: {
-            el: '.products-slider-block .slider-navs__pag',
-            clickable: true,
-        },
-        breakpoints: {
-            576: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            992: { slidesPerView: 4 },
-        },
     });
 });
 </script>

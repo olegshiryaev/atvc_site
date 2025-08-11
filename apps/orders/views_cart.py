@@ -4,7 +4,7 @@ from django.contrib import messages
 import json
 
 from apps.core.models import AdditionalService, TVChannelPackage, Tariff
-from apps.equipments.models import Product, ProductVariant
+from apps.equipments.models import Product, ProductItem
 from apps.orders.cart import Cart
 from apps.orders.models import Order, OrderProduct
 
@@ -28,7 +28,7 @@ def add_product_to_cart(request, product_id):
     price = product.get_price()
 
     if variant_id and variant_id != 'null':
-        variant = get_object_or_404(ProductVariant, pk=variant_id, product=product)
+        variant = get_object_or_404(ProductItem, pk=variant_id, product=product)
         price = variant.get_price()
 
     cart.add_product(product.id, variant.id if variant else None, quantity, price)
@@ -64,7 +64,7 @@ def cart_view(request, locality_slug):
         product_id, variant_id = key.split(":")
         product = Product.objects.filter(pk=product_id).first()
         variant = (
-            ProductVariant.objects.filter(pk=variant_id).first()
+            ProductItem.objects.filter(pk=variant_id).first()
             if variant_id != "null"
             else None
         )

@@ -13,7 +13,7 @@ import os
 from urllib.parse import quote
 import logging
 
-from apps.equipments.models import Product
+from apps.equipments.models import Product, ProductItem
 from apps.orders.forms import OrderForm
 
 from .forms import (
@@ -76,39 +76,35 @@ def index(request, locality_slug):
         .order_by("name")
     )
 
-    # Преобразуем defaultdict в обычный dict
-    grouped_dict = dict(grouped_tariffs)
-
     # Первая услуга для активного таба
     first_service_slug = available_services[0].slug if available_services else ""
 
     # Новости и баннеры
-    latest_news = News.objects.filter(is_published=True, localities=locality).order_by(
-        "-created_at"
-    )
+    latest_news = News.objects.filter(is_published=True, localities=locality).order_by("-created_at")
     banners = Banner.objects.filter(is_active=True, localities=locality)
 
-    # Популярные продукты
-    # Проверяем, есть ли товары вообще
-    has_products = Product.objects.filter(is_available=True).exists()
+    # Есть ли товары в наличии?
+    has_products = ProductItem.objects.filter(product__is_available=True, in_stock__gt=0).exists()
 
-    # Получаем ID всех популярных продуктов
-    product_ids = list(
-        Product.objects.filter(is_available=True)
+    # Получаем ID всех популярных товарных позиций (по просмотрам)
+    item_ids = list(
+        ProductItem.objects.filter(
+            product__is_available=True,
+            in_stock__gt=0
+        )
         .annotate(view_count=Count("views"))
-        .order_by("-view_count")[:50]  # Берем топ-50 по просмотрам
+        .order_by("-view_count")[:50]
         .values_list('id', flat=True)
     )
 
     # Выбираем случайные 10 ID из топ-50
-    random_ids = random.sample(product_ids, min(10, len(product_ids)))
+    random_ids = random.sample(item_ids, min(10, len(item_ids)))
 
-    # Получаем полные объекты
-    popular_products = (
-        Product.objects.filter(id__in=random_ids)
-        .select_related("category")
+    # Получаем объекты
+    popular_items = (
+        ProductItem.objects.filter(id__in=random_ids)
+        .select_related("product__category", "color")
         .prefetch_related("images")
-        .order_by('?')  # Дополнительная случайность
     )
 
     # Инициализируем форму
@@ -122,7 +118,7 @@ def index(request, locality_slug):
         "locality": locality,
         "latest_news": latest_news,
         "banners": banners,
-        "popular_products": popular_products,
+        "popular_items": popular_items,
         "has_products": has_products,
         "form": form,
     }

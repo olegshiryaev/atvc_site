@@ -3,9 +3,9 @@ from django.urls import reverse
 
 from apps.cities.models import Locality
 from apps.core.models import AdditionalService, TVChannel, TVChannelPackage, Tariff
-from apps.equipments.models import Product, ProductVariant
+from apps.equipments.models import Product, ProductItem
 from apps.orders.forms import OrderForm
-from apps.orders.models import CartItem, Order, OrderProduct
+from apps.orders.models import Order, OrderProduct
 from django.views.generic import TemplateView
 from apps.orders.tasks import send_order_notification
 from django.http import HttpResponse, JsonResponse
@@ -160,8 +160,8 @@ def submit_order(request, locality_slug):
             variant_id = request.POST.get(f"variant_id")
             if variant_id:
                 try:
-                    variant = ProductVariant.objects.get(id=variant_id, product=product)
-                except ProductVariant.DoesNotExist:
+                    variant =ProductItem.objects.get(id=variant_id, product=product)
+                except ProductItem.DoesNotExist:
                     logger.warning(f"Variant {variant_id} не найден для продукта {product_id}, используется базовая цена")
             
             # Определяем базовую цену (из варианта или продукта)
@@ -238,7 +238,7 @@ def submit_order(request, locality_slug):
 
 #         if item_type == "product":
 #             variant_id = request.POST.get("variant_id")
-#             variant = get_object_or_404(ProductVariant, id=variant_id)
+#             variant = get_object_or_404(ProductItem, id=variant_id)
 #             product = variant.product
 #             price = variant.price if variant.price is not None else product.price or 0
 #             cart_key = f"variant_{variant_id}"
@@ -297,9 +297,9 @@ def cart_view(request, locality_slug):
     cart_items = {"products": [], "tariff": None, "services": [], "tv_packages": []}
     total_price = 0
 
-    # Товары (основное внимание на ProductVariant)
+    # Товары (основное внимание на ProductItem)
     for key, item in cart["products"].items():
-        variant = ProductVariant.objects.get(id=item["variant_id"])
+        variant = ProductItem.objects.get(id=item["variant_id"])
         product = variant.product
         item_total = item["quantity"] * item["price"]
         cart_items["products"].append({
@@ -559,99 +559,87 @@ class EquipmentOrderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        product = get_object_or_404(Product, pk=kwargs['product_id'])
-        locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
-        
-        # Получаем variant_id и payment_type из параметров запроса
-        variant_id = self.request.GET.get('variant_id')
-        payment_type = self.request.GET.get('payment_type', 'purchase')
-        selected_variant = None
-        if variant_id:
-            selected_variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
+        try:
+            product_item = get_object_or_404(ProductItem, pk=kwargs['product_item_id'], in_stock__gt=0)
+        except ProductItem.DoesNotExist:
+            logger.error(f"Товарная позиция ID={kwargs['product_item_id']} недоступна или отсутствует на складе")
+            return redirect('equipments:product_list', locality_slug=kwargs['locality_slug'])
 
-        # Проверяем допустимость payment_type
+        locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
+        payment_type = self.request.GET.get('payment_type', 'purchase')
+
         valid_payment_types = ['purchase']
-        if product.installment_available:
-            if product.installment_12_months:
+        if product_item.installment_available:
+            if product_item.installment_12_months:
                 valid_payment_types.append('installment12')
-            if product.installment_24_months:
+            if product_item.installment_24_months:
                 valid_payment_types.append('installment24')
-            if product.installment_48_months:
+            if product_item.installment_48_months:
                 valid_payment_types.append('installment48')
         if payment_type not in valid_payment_types:
             payment_type = 'purchase'
 
-        installment_12_total = product.get_total_installment_price(12) if product.installment_available else 0
-        installment_24_total = product.get_total_installment_price(24) if product.installment_available else 0
-        installment_48_total = product.get_total_installment_price(48) if product.installment_available else 0
-
         context.update({
-            'product': product,
+            'product_item': product_item,
+            'product': product_item.product,
             'locality': locality,
-            'tariff': None,
-            'initial_equipment': [str(product.id)],
-            'initial_payment_options': {str(product.id): payment_type},
-            'installment_12_total': installment_12_total,
-            'installment_24_total': installment_24_total,
-            'installment_48_total': installment_48_total,
-            'form': OrderForm(locality=locality),
-            'selected_variant_id': variant_id,
-            'selected_variant': selected_variant,
+            'installment_12_total': product_item.get_total_installment_price(12) if product_item.installment_available else 0,
+            'installment_24_total': product_item.get_total_installment_price(24) if product_item.installment_available else 0,
+            'installment_48_total': product_item.get_total_installment_price(48) if product_item.installment_available else 0,
+            'form': OrderForm(locality=locality, initial={
+                'product_item_id': product_item.id,
+                'payment_type': payment_type
+            }),
             'selected_payment_type': payment_type,
         })
         return context
 
     def post(self, request, *args, **kwargs):
         locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
-        product = get_object_or_404(Product, pk=kwargs['product_id'])
-
+        product_item = get_object_or_404(ProductItem, pk=kwargs['product_item_id'], in_stock__gt=0)
         form = OrderForm(request.POST, locality=locality)
 
         if form.is_valid():
-            order = form.save(commit=False)
-            order.locality = locality
+            try:
+                order = form.save(commit=False)
+                order.locality = locality
+                if not order.comment:
+                    order.comment = f"Заказ оборудования: {product_item.get_display_name()}"
+                order.save()
 
-            if not order.comment:
-                order.comment = "Заказ оборудования"
+                price = product_item.get_final_price()
+                payment_type = form.cleaned_data['payment_type']
+                if payment_type.startswith('installment'):
+                    months = int(payment_type.replace('installment', ''))
+                    installment_price = product_item.get_installment_price(months)
+                    price = installment_price if installment_price else price
 
-            order.save()
+                OrderProduct.objects.create(
+                    order=order,
+                    product_item=product_item,
+                    price=price,
+                    quantity=1,
+                    payment_type=payment_type
+                )
 
-            payment_options = json.loads(form.cleaned_data.get("equipment_payment_options", "{}"))
-            payment_type = payment_options.get(str(product.id), 'purchase')
-
-            # Используем variant_id из формы
-            variant_id = form.cleaned_data.get("variant_id")
-            price = product.get_final_price()
-            if variant_id:
-                variant = get_object_or_404(ProductVariant, id=variant_id, product=product)
-                price = variant.get_final_price()
-            if payment_type == 'installment12' and product.installment_12_months:
-                price = product.installment_12_months
-            elif payment_type == 'installment24' and product.installment_24_months:
-                price = product.installment_24_months
-            elif payment_type == 'installment48' and product.installment_48_months:
-                price = product.installment_48_months
-
-            OrderProduct.objects.create(
-                order=order,
-                product=product,
-                price=price,
-                quantity=1,
-                payment_type=payment_type,
-                variant_id=variant_id
-            )
-
-            success_url = reverse('orders:order_success', kwargs={
-                'order_id': order.id
-            })
-
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'redirect_url': success_url
+                logger.info(f"Создан заказ #{order.id} для {product_item.get_display_name()} (пользователь: {order.full_name})")
+                success_url = reverse('orders:order_success', kwargs={
+                    'locality_slug': locality.slug,
+                    'order_id': order.id
                 })
 
-            return redirect('orders:order_success', order_id=order.id)
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'redirect_url': success_url
+                    })
+
+                return redirect('orders:order_success', locality_slug=locality.slug, order_id=order.id)
+            except Exception as e:
+                logger.error(f"Ошибка создания заказа для product_item_id={kwargs['product_item_id']}: {str(e)}")
+                raise
+        else:
+            logger.warning(f"Ошибка валидации формы заказа: {form.errors}")
 
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             errors = {field: [str(e) for e in error_list] for field, error_list in form.errors.items()}

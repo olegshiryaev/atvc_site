@@ -6,23 +6,17 @@ from .models import Order, OrderProduct
 class OrderProductInline(admin.TabularInline):
     model = OrderProduct
     extra = 0
-    fields = ('product', 'quantity', 'price', 'payment_type', 'display_price')
-    readonly_fields = ('product', 'payment_type', 'display_price')
+    fields = ('product_item', 'quantity', 'price', 'payment_type', 'display_price')
+    readonly_fields = ('product_item', 'payment_type', 'display_price')
 
     def display_price(self, obj):
         """Отображение цены с учётом типа оплаты."""
-        if obj.payment_type == 'installment12' and obj.product.installment_12_months:
-            return f"{obj.product.installment_12_months} руб./мес. (12 месяцев)"
-        elif obj.payment_type == 'installment24' and obj.product.installment_24_months:
-            return f"{obj.product.installment_24_months} руб./мес. (24 месяца)"
-        elif obj.payment_type == 'installment48' and obj.product.installment_48_months:
-            return f"{obj.product.installment_48_months} руб./мес. (48 месяца)"
-        return f"{obj.price} руб."
+        return obj.get_display_price()
     display_price.short_description = 'Цена'
 
     def get_queryset(self, request):
-        """Оптимизация запроса для включения данных о продукте."""
-        return super().get_queryset(request).select_related('product')
+        """Оптимизация запроса для включения данных о товарной позиции."""
+        return super().get_queryset(request).select_related('product_item__product', 'product_item__color')
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -34,7 +28,8 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter = ('status', 'created_at', 'locality', 'tariff')
     search_fields = (
         'full_name', 'phone', 'email',
-        'order_products__product__name'  # Поиск по именам продуктов
+        'order_products__product_item__product__name',
+        'order_products__product_item__color__name'
     )
     date_hierarchy = 'created_at'
     actions = ['mark_as_processed', 'mark_as_completed']
@@ -56,9 +51,9 @@ class OrderAdmin(admin.ModelAdmin):
     tariff_link.short_description = 'Тариф'
 
     def products_count(self, obj):
-        """Отображение количества продуктов в заказе."""
+        """Отображение количества товарных позиций в заказе."""
         return obj.order_products.count()
-    products_count.short_description = 'Кол-во продуктов'
+    products_count.short_description = 'Кол-во позиций'
 
     def mark_as_processed(self, request, queryset):
         """Действие для массовой пометки заказов как 'в обработке'."""
@@ -74,14 +69,14 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         """Оптимизация запроса для включения связанных данных."""
-        return super().get_queryset(request).select_related('locality', 'tariff').prefetch_related('order_products__product')
+        return super().get_queryset(request).select_related('locality', 'tariff').prefetch_related('order_products__product_item__product', 'order_products__product_item__color')
 
 @admin.register(OrderProduct)
 class OrderProductAdmin(admin.ModelAdmin):
-    list_display = ('order_id', 'product_name', 'quantity', 'price', 'payment_type', 'display_price')
+    list_display = ('order_id', 'product_item_name', 'quantity', 'price', 'payment_type', 'display_price')
     list_filter = ('payment_type', 'order__status')
-    search_fields = ('product__name', 'order__full_name', 'order__phone')
-    readonly_fields = ('order', 'product', 'price', 'quantity', 'payment_type')
+    search_fields = ('product_item__product__name', 'product_item__color__name', 'order__full_name', 'order__phone')
+    readonly_fields = ('order', 'product_item', 'price', 'quantity', 'payment_type')
 
     def order_id(self, obj):
         """Отображение ID заказа со ссылкой на заказ."""
@@ -89,22 +84,16 @@ class OrderProductAdmin(admin.ModelAdmin):
         return format_html('<a href="{}">#{}</a>', url, obj.order.id)
     order_id.short_description = 'Заявка'
 
-    def product_name(self, obj):
-        """Отображение имени продукта."""
-        return obj.product.name
-    product_name.short_description = 'Продукт'
+    def product_item_name(self, obj):
+        """Отображение имени товарной позиции."""
+        return obj.product_item.get_display_name()
+    product_item_name.short_description = 'Товарная позиция'
 
     def display_price(self, obj):
         """Отображение цены с учётом типа оплаты."""
-        if obj.payment_type == 'installment12' and obj.product.installment_12_months:
-            return f"{obj.product.installment_12_months} руб./мес. (12 месяцев)"
-        elif obj.payment_type == 'installment24' and obj.product.installment_24_months:
-            return f"{obj.product.installment_24_months} руб./мес. (24 месяца)"
-        elif obj.payment_type == 'installment48' and obj.product.installment_48_months:
-            return f"{obj.product.installment_48_months} руб./мес. (48 месяцев)"
-        return f"{obj.price} руб."
+        return obj.get_display_price()
     display_price.short_description = 'Цена'
 
     def get_queryset(self, request):
         """Оптимизация запроса для включения связанных данных."""
-        return super().get_queryset(request).select_related('order', 'product')
+        return super().get_queryset(request).select_related('order', 'product_item__product', 'product_item__color')

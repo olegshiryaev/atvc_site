@@ -3,22 +3,32 @@ from django.conf import settings
 from django.contrib.sessions.models import Session
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from apps.equipments.models import Product, ProductVariant
+from django.forms import ValidationError
+from apps.equipments.models import Product, ProductItem
+from django.core.validators import MinValueValidator
 from apps.core.models import Locality, Tariff, TVChannelPackage, AdditionalService
 
 class OrderProduct(models.Model):
-    """Промежуточная модель для товаров в заказе"""
-    order = models.ForeignKey('Order', on_delete=models.CASCADE, related_name='order_products', verbose_name="Заявка")
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, verbose_name="Товар")
-    variant = models.ForeignKey(
-        ProductVariant, 
-        on_delete=models.SET_NULL, 
-        blank=True, 
-        null=True, 
-        verbose_name="Вариант товара"
+    order = models.ForeignKey(
+        'Order',
+        on_delete=models.CASCADE,
+        related_name='order_products',
+        verbose_name="Заявка"
     )
-    quantity = models.PositiveIntegerField("Количество", default=1)
-    price = models.PositiveIntegerField("Цена за единицу")
+    product_item = models.ForeignKey(
+        ProductItem,
+        on_delete=models.CASCADE,
+        verbose_name="Товарная позиция"
+    )
+    quantity = models.PositiveIntegerField(
+        "Количество",
+        default=1,
+        validators=[MinValueValidator(1)]
+    )
+    price = models.PositiveIntegerField(
+        "Цена за единицу",
+        validators=[MinValueValidator(0)]
+    )
     payment_type = models.CharField(
         "Тип оплаты",
         max_length=20,
@@ -30,18 +40,42 @@ class OrderProduct(models.Model):
         ],
         default='purchase'
     )
-    
+
     class Meta:
         verbose_name = "Товар в заявке"
         verbose_name_plural = "Товары в заявке"
-    
+        constraints = [
+            models.UniqueConstraint(
+                fields=['order', 'product_item'],
+                name='unique_order_product_item'
+            )
+        ]
+
     def __str__(self):
-        variant_str = f" ({self.variant.get_color_display()})" if self.variant else ""
-        return f"{self.product.name}{variant_str} x{self.quantity} в заявке #{self.order.id}"
+        return f"{self.product_item.get_display_name()} x{self.quantity} в заявке #{self.order.id}"
 
     def get_price(self):
         """Возвращает сохранённую цену за единицу на момент добавления в заявку"""
         return self.price
+
+    def get_total_price(self):
+        """Возвращает общую стоимость с учётом количества и типа оплаты"""
+        if self.payment_type.startswith('installment'):
+            months = int(self.payment_type.replace('installment', ''))
+            installment_price = self.product_item.get_installment_price(months)
+            return installment_price * self.quantity * months if installment_price else self.price * self.quantity
+        return self.price * self.quantity
+
+    def clean(self):
+        """Валидация типа оплаты относительно доступности рассрочки"""
+        if self.payment_type != 'purchase' and not self.product_item.installment_available:
+            raise ValidationError(f"Рассрочка недоступна для {self.product_item.get_display_name()}")
+        months = {'installment12': 12, 'installment24': 24, 'installment48': 48}
+        if self.payment_type in months:
+            installment_price = self.product_item.get_installment_price(months[self.payment_type])
+            if not installment_price:
+                raise ValidationError(f"Рассрочка на {months[self.payment_type]} месяцев не настроена")
+        super().clean()
 
 
 class Order(models.Model):
@@ -51,7 +85,6 @@ class Order(models.Model):
         ("completed", "Выполнена"),
     ]
 
-    # Связи с другими моделями
     locality = models.ForeignKey(
         Locality,
         on_delete=models.CASCADE,
@@ -66,12 +99,6 @@ class Order(models.Model):
         null=True, 
         blank=True
     )
-    products = models.ManyToManyField(
-        Product,
-        through=OrderProduct,
-        blank=True, 
-        verbose_name="Оборудование"
-    )
     services = models.ManyToManyField(
         AdditionalService, 
         blank=True, 
@@ -82,18 +109,13 @@ class Order(models.Model):
         verbose_name="Пакеты ТВ-каналов", 
         blank=True
     )
-    
-    # Информация о клиенте
+
     full_name = models.CharField("ФИО", max_length=255)
     phone = models.CharField("Телефон", max_length=20)
     email = models.EmailField("Email", blank=True, null=True)
-    
-    # Адрес
     street = models.CharField("Улица", max_length=255, blank=True, null=True)
     house = models.CharField("Дом", max_length=20, blank=True, null=True)
     apartment = models.CharField("Квартира", max_length=10, blank=True, null=True)
-    
-    # Дополнительная информация
     comment = models.TextField("Комментарий", blank=True, null=True)
     status = models.CharField(
         "Статус", 
@@ -101,84 +123,55 @@ class Order(models.Model):
         choices=STATUS_CHOICES, 
         default="new"
     )
-    
-    # Даты
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Дата создания",
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Дата обновления",
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
 
     def get_products_with_details(self):
-        """Возвращает продукты с их вариантами, типом оплаты и ценами рассрочки"""
+        """Возвращает товары с их позициями, типом оплаты и ценами рассрочки"""
         products = []
-        for order_product in self.order_products.select_related('product', 'variant').all():
-            product = order_product.product
-            variant = order_product.variant
+        for order_product in self.order_products.select_related('product_item__product', 'product_item__color').all():
+            product_item = order_product.product_item
+            product = product_item.product
             details = {
                 'quantity': order_product.quantity,
                 'price': order_product.price,
                 'payment_type': order_product.payment_type,
                 'product': product,
-                'variant': variant,
-                'installment_12_months': product.installment_12_months if product.installment_available else None,
-                'installment_24_months': product.installment_24_months if product.installment_available else None,
-                'installment_48_months': product.installment_48_months if product.installment_available else None,
+                'product_item': product_item,
+                'installment_12_months': product_item.installment_12_months if product_item.installment_available else None,
+                'installment_24_months': product_item.installment_24_months if product_item.installment_available else None,
+                'installment_48_months': product_item.installment_48_months if product_item.installment_available else None,
                 'type': None,
                 'specifics': None
             }
-            
-            # Проверяем тип продукта
+
             if hasattr(product, 'smart_speaker'):
-                details.update({
-                    'type': 'smart_speaker',
-                    'specifics': product.smart_speaker
-                })
+                details.update({'type': 'smart_speaker', 'specifics': product.smart_speaker})
             elif hasattr(product, 'camera'):
-                details.update({
-                    'type': 'camera',
-                    'specifics': product.camera
-                })
+                details.update({'type': 'camera', 'specifics': product.camera})
             elif hasattr(product, 'router'):
-                details.update({
-                    'type': 'router',
-                    'specifics': product.router
-                })
+                details.update({'type': 'router', 'specifics': product.router})
             elif hasattr(product, 'tvbox'):
-                details.update({
-                    'type': 'tvbox',
-                    'specifics': product.tvbox
-                })
-                
+                details.update({'type': 'tvbox', 'specifics': product.tvbox})
+
             products.append(details)
         return products
 
     def total_products_cost(self):
-        return sum(op.price * op.quantity for op in self.order_products.all())
+        """Возвращает общую стоимость товаров с учётом рассрочки"""
+        return sum(op.get_total_price() for op in self.order_products.all())
 
     def total_services_cost(self):
         return sum(s.price for s in self.services.all())
 
     def total_cost(self):
         total = 0
-        
-        # Тариф
         if self.tariff:
             total += self.tariff.get_actual_price()
-            total += self.tariff.connection_price  # Добавляем стоимость подключения
-        
-        # Оборудование
+            total += self.tariff.connection_price
         total += self.total_products_cost()
-        
-        # Доп. услуги
         total += self.total_services_cost()
-        
-        # ТВ-пакеты
         total += sum(p.price for p in self.tv_packages.all())
-        
         return total
 
     def mark_as_processed(self):
@@ -197,46 +190,3 @@ class Order(models.Model):
     def __str__(self):
         tariff_name = self.tariff.name if self.tariff else "не указан"
         return f"Заявка #{self.id} от {self.full_name} ({tariff_name})"
-    
-
-
-class Cart(models.Model):
-    """Модель корзины, привязанная к сессии"""
-    session = models.ForeignKey(Session, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def total_price(self):
-        return sum(item.total_price() for item in self.items.all())
-
-    def __str__(self):
-        return f"Корзина (сессия: {self.session.session_key})"
-
-class CartItem(models.Model):
-    """Элемент корзины (может быть тарифом, товаром, ТВ-пакетом или услугой)"""
-    PAYMENT_TYPES = [
-        ('purchase', 'Покупка'),
-        ('installment12', 'Рассрочка 12 мес'),
-        ('installment24', 'Рассрочка 24 мес'),
-    ]
-
-    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, related_name='items')
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
-    content_object = GenericForeignKey('content_type', 'object_id')
-    quantity = models.PositiveIntegerField(default=1)
-    payment_type = models.CharField(
-        max_length=20, 
-        choices=PAYMENT_TYPES, 
-        default='purchase'
-    )
-    price = models.PositiveIntegerField()
-
-    def total_price(self):
-        return self.price * self.quantity
-
-    def __str__(self):
-        return f"{self.content_object} x{self.quantity}"
-
-    class Meta:
-        unique_together = ('cart', 'content_type', 'object_id', 'payment_type')

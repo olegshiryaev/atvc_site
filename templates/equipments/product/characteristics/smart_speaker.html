@@ -1,4 +1,4 @@
-{% if product.smart_speaker %}
+{% if current_item.product.smart_speaker %}
 <div class="specs-row">
     <!-- Основные характеристики -->
     <div class="specs-column">
@@ -6,11 +6,11 @@
         <table class="specs-table">
             <tr>
                 <td><i class="bi bi-mic-fill specs-icon"></i>Голосовой помощник</td>
-                <td>{{ product.smart_speaker.voice_assistant|default:"—" }}</td>
+                <td>{{ current_item.product.smart_speaker.voice_assistant|default:"—" }}</td>
             </tr>
             <tr>
                 <td><i class="bi bi-plug-fill specs-icon"></i>Питание</td>
-                <td>{{ product.smart_speaker.power_source|default:"—" }}</td>
+                <td>{{ current_item.product.smart_speaker.power_source|default:"—" }}</td>
             </tr>
         </table>
     </div>
@@ -21,12 +21,12 @@
         <table class="specs-table">
             <tr>
                 <td><i class="bi bi-wifi specs-icon"></i>Беспроводное соединение</td>
-                <td>{{ product.smart_speaker.wireless_connection|default:"—" }}</td>
+                <td>{{ current_item.product.smart_speaker.wireless_connection|default:"—" }}</td>
             </tr>
-            {% if product.smart_speaker.wifi_standard %}
+            {% if current_item.product.smart_speaker.wifi_standard %}
             <tr>
                 <td><i class="bi bi-wifi specs-icon"></i>Стандарт Wi-Fi</td>
-                <td>{{ product.smart_speaker.wifi_standard }}</td>
+                <td>{{ current_item.product.smart_speaker.wifi_standard }}</td>
             </tr>
             {% endif %}
         </table>
@@ -38,22 +38,22 @@
     <div class="specs-column">
         <h3 class="specs-title">Аудио</h3>
         <table class="specs-table">
-            {% if product.smart_speaker.max_power %}
+            {% if current_item.product.smart_speaker.max_power %}
             <tr>
                 <td><i class="bi bi-speaker specs-icon"></i>Максимальная мощность</td>
-                <td>{{ product.smart_speaker.max_power }}</td>
+                <td>{{ current_item.product.smart_speaker.max_power }}</td>
             </tr>
             {% endif %}
-            {% if product.smart_speaker.frequency_range %}
+            {% if current_item.product.smart_speaker.frequency_range %}
             <tr>
                 <td><i class="bi bi-soundwave specs-icon"></i>Диапазон частот</td>
-                <td>{{ product.smart_speaker.frequency_range }}</td>
+                <td>{{ current_item.product.smart_speaker.frequency_range }}</td>
             </tr>
             {% endif %}
-            {% if product.smart_speaker.signal_noise_ratio %}
+            {% if current_item.product.smart_speaker.signal_noise_ratio %}
             <tr>
                 <td><i class="bi bi-volume-up specs-icon"></i>Соотношение сигнал/шум</td>
-                <td>{{ product.smart_speaker.signal_noise_ratio }}</td>
+                <td>{{ current_item.product.smart_speaker.signal_noise_ratio }}</td>
             </tr>
             {% endif %}
         </table>
@@ -63,16 +63,16 @@
     <div class="specs-column">
         <h3 class="specs-title">Физические характеристики</h3>
         <table class="specs-table">
-            {% if product.smart_speaker.dimensions %}
+            {% if current_item.product.smart_speaker.dimensions %}
             <tr>
                 <td><i class="bi bi-rulers specs-icon"></i>Габариты</td>
-                <td>{{ product.smart_speaker.dimensions }}</td>
+                <td>{{ current_item.product.smart_speaker.dimensions }}</td>
             </tr>
             {% endif %}
-            {% if product.smart_speaker.weight %}
+            {% if current_item.product.smart_speaker.weight %}
             <tr>
                 <td><i class="bi bi-box specs-icon"></i>Вес</td>
-                <td>{{ product.smart_speaker.weight }}</td>
+                <td>{{ current_item.product.smart_speaker.weight }}</td>
             </tr>
             {% endif %}
         </table>

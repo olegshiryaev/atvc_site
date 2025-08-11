@@ -74,7 +74,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
     "apps.cities.middleware.LocalityMiddleware",
-    "apps.orders.middleware.CartMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
