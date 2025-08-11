@@ -155,8 +155,7 @@ def submit_order(request, locality_slug):
                 price = product_item.installment_48_months
             OrderProduct.objects.create(
                 order=order,
-                product=product_item.product,
-                variant=product_item,
+                product_item=product_item,
                 price=price,
                 quantity=1,
                 payment_type=payment_type

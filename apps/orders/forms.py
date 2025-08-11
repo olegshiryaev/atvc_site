@@ -9,7 +9,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 class OrderForm(forms.ModelForm):
-    product_item_id = forms.CharField(widget=forms.HiddenInput(), required=True)
+    # Сделайте поля необязательными, добавьте dynamic required
+    product_item_id = forms.CharField(
+        widget=forms.HiddenInput(),
+        required=False  # Теперь не всегда требуется
+    )
     payment_type = forms.ChoiceField(
         choices=[
             ('purchase', 'Покупка'),
@@ -18,8 +22,9 @@ class OrderForm(forms.ModelForm):
             ('installment48', 'Рассрочка на 48 месяцев'),
         ],
         widget=forms.HiddenInput(),
-        required=True
+        required=False  # Теперь не всегда требуется
     )
+
     comment = forms.CharField(
         widget=forms.Textarea(attrs={
             'class': 'form-control',
@@ -30,55 +35,54 @@ class OrderForm(forms.ModelForm):
         label='Комментарий'
     )
 
+    # Добавьте поля, используемые в заказе тарифа
+    tariff_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+    selected_equipment_ids = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    equipment_payment_options = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    selected_service_slugs = forms.JSONField(widget=forms.HiddenInput(), required=False)
+    selected_tv_package_ids = forms.JSONField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Order
         fields = [
             "full_name", "phone", "street", "house", "apartment", "comment",
-            "product_item_id", "payment_type"
+            "product_item_id", "payment_type",
+            "tariff_id", "selected_equipment_ids", "equipment_payment_options",
+            "selected_service_slugs", "selected_tv_package_ids"
         ]
         widgets = {
-            "full_name": forms.TextInput(
-                attrs={
-                    "class": "connect-form__input",
-                    "placeholder": "Иванов Иван Иванович",
-                    "autocomplete": "name",
-                    "required": "required",
-                    "aria-describedby": "error_full_name",
-                }
-            ),
-            "phone": forms.TextInput(
-                attrs={
-                    "class": "connect-form__input",
-                    "placeholder": "+7 (___) ___-__-__",
-                    "autocomplete": "tel",
-                    "required": "required",
-                    "aria-describedby": "error_phone",
-                }
-            ),
-            "street": forms.TextInput(
-                attrs={
-                    "class": "connect-form__input",
-                    "placeholder": "ул. Ленина",
-                    "autocomplete": "address-line1",
-                    "aria-describedby": "error_street",
-                }
-            ),
-            "house": forms.TextInput(
-                attrs={
-                    "class": "connect-form__input",
-                    "placeholder": "1",
-                    "autocomplete": "address-line2",
-                    "aria-describedby": "error_house",
-                }
-            ),
-            "apartment": forms.TextInput(
-                attrs={
-                    "class": "connect-form__input",
-                    "placeholder": "1",
-                    "autocomplete": "address-line3",
-                    "aria-describedby": "error_apartment",
-                }
-            ),
+            "full_name": forms.TextInput(attrs={
+                "class": "connect-form__input",
+                "placeholder": "Иванов Иван Иванович",
+                "autocomplete": "name",
+                "required": "required",
+                "aria-describedby": "error_full_name",
+            }),
+            "phone": forms.TextInput(attrs={
+                "class": "connect-form__input",
+                "placeholder": "+7 (___) ___-__-__",
+                "autocomplete": "tel",
+                "required": "required",
+                "aria-describedby": "error_phone",
+            }),
+            "street": forms.TextInput(attrs={
+                "class": "connect-form__input",
+                "placeholder": "ул. Ленина",
+                "autocomplete": "address-line1",
+                "aria-describedby": "error_street",
+            }),
+            "house": forms.TextInput(attrs={
+                "class": "connect-form__input",
+                "placeholder": "1",
+                "autocomplete": "address-line2",
+                "aria-describedby": "error_house",
+            }),
+            "apartment": forms.TextInput(attrs={
+                "class": "connect-form__input",
+                "placeholder": "1",
+                "autocomplete": "address-line3",
+                "aria-describedby": "error_apartment",
+            }),
         }
         labels = {
             "full_name": "Имя",
@@ -96,6 +100,8 @@ class OrderForm(forms.ModelForm):
         self.fields["street"].required = False
         self.fields["house"].required = False
         self.fields["apartment"].required = False
+
+        # Валидатор для ФИО
         self.fields["full_name"].validators.append(
             RegexValidator(
                 regex=r"^[А-Яа-яЁёA-Za-z\s\.\-]+$",
@@ -123,40 +129,46 @@ class OrderForm(forms.ModelForm):
         return f"+7{cleaned_phone[1:]}"
 
     def clean_street(self):
-        street = self.cleaned_data.get("street") or ""
-        return street.strip()
+        return (self.cleaned_data.get("street") or "").strip()
 
     def clean_house(self):
-        house = self.cleaned_data.get("house") or ""
-        return house.strip()
+        return (self.cleaned_data.get("house") or "").strip()
 
     def clean_apartment(self):
-        apartment = self.cleaned_data.get("apartment") or ""
-        return apartment.strip()
+        return (self.cleaned_data.get("apartment") or "").strip()
 
     def clean_product_item_id(self):
         product_item_id = self.cleaned_data.get("product_item_id")
+        if not product_item_id:
+            return None  # Может быть None, если не используется
+
         try:
             product_item = ProductItem.objects.get(id=product_item_id, in_stock__gt=0)
-            logger.info(f"Проверена товарная позиция ID={product_item_id}")
             return product_item_id
         except ProductItem.DoesNotExist:
-            logger.warning(f"Товарная позиция ID={product_item_id} недоступна или отсутствует на складе")
             raise forms.ValidationError("Выбранная товарная позиция недоступна или отсутствует на складе")
 
     def clean_payment_type(self):
         payment_type = self.cleaned_data.get("payment_type")
         product_item_id = self.cleaned_data.get("product_item_id")
+
+        # Если нет product_item_id — значит, это не заказ одного товара
         if not product_item_id:
-            return payment_type
+            return payment_type  # Не проверяем
+
+        if not payment_type:
+            return 'purchase'  # Дефолт
+
         try:
             product_item = ProductItem.objects.get(id=product_item_id)
             if payment_type != 'purchase' and not product_item.installment_available:
                 raise forms.ValidationError("Рассрочка недоступна для выбранной товарной позиции")
-            months = {'installment12': 12, 'installment24': 24, 'installment48': 48}
-            if payment_type in months and not product_item.get_installment_price(months[payment_type]):
-                raise forms.ValidationError(f"Рассрочка на {months[payment_type]} месяцев не настроена")
+
+            months_map = {'installment12': 12, 'installment24': 24, 'installment48': 48}
+            if payment_type in months_map:
+                if not product_item.get_installment_price(months_map[payment_type]):
+                    raise forms.ValidationError(f"Рассрочка на {months_map[payment_type]} месяцев не настроена")
         except ProductItem.DoesNotExist:
-            logger.warning(f"Товарная позиция ID={product_item_id} не найдена при проверке payment_type")
             pass
+
         return payment_type
