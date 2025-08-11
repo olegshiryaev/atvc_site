@@ -116,7 +116,8 @@
                                 <div class="product-card__footer">
                                     <div class="product-card__price">{{ product.get_price_display }}</div>
                                     <button class="product-card__btn btn" 
-                                        onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product.id %}'">
+                                        Заказать
                                     </button>
                                 </div>
                             </li>
@@ -240,7 +241,8 @@
                             <div class="product-card__footer">
                                 <div class="product-card__price">{{ product.get_price_display }}</div>
                                 <button class="product-card__btn btn" 
-                                    onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=product.id %}'">Заказать
+                                        onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product.id %}'">
+                                    Заказать
                                 </button>
                             </div>
                         </li>

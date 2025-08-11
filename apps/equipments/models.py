@@ -104,6 +104,12 @@ class Product(BaseModel):
         null=True,
         verbose_name="Категория"
     )
+    services = models.ManyToManyField(
+        "core.Service",
+        related_name="products",
+        verbose_name="Услуги",
+        blank=True
+    )
     warranty = models.PositiveIntegerField(
         "Гарантия (месяцев)",
         blank=True,

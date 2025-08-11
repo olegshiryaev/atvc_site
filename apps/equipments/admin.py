@@ -234,7 +234,7 @@ class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('created_at', 'updated_at', 'view_count_link')
     fieldsets = (
         (None, {
-            'fields': ('name', 'slug', 'category', 'description')
+            'fields': ('name', 'slug', 'category', 'services', 'description')
         }),
         ('Дополнительно', {
             'fields': ('warranty', 'instruction', 'is_featured', 'is_available'),
