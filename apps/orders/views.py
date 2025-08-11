@@ -29,7 +29,7 @@ def order_create(request, locality_slug, slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
-    products = tariff.products.all().select_related('category')
+    products = tariff.products.all().select_related('product__category')  # Изменено на products (ProductItem)
     services = AdditionalService.objects.filter(service_types=tariff.service)
     tv_packages = tariff.tv_packages.all().prefetch_related('channels')
 
@@ -43,43 +43,38 @@ def order_create(request, locality_slug, slug):
             order.locality = locality
             order.save()
 
-            # Обработка продуктов
             equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
             payment_options = form.cleaned_data.get("equipment_payment_options", {})
             logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
             for product_id in equipment_ids:
-                product = get_object_or_404(Product, id=product_id)
+                product_item = get_object_or_404(ProductItem, id=product_id)
                 payment_type = payment_options.get(str(product_id), 'purchase')
-                price = product.price  # Цена по умолчанию для покупки
-                if payment_type == 'installment12' and product.installment_12_months:
-                    price = int(product.installment_12_months)
-                elif payment_type == 'installment24' and product.installment_24_months:
-                    price = int(product.installment_24_months)
-                elif payment_type == 'installment48' and product.installment_48_months:
-                    price = int(product.installment_48_months)
+                price = product_item.get_final_price()  # Цена по умолчанию для покупки
+                if payment_type == 'installment12' and product_item.installment_12_months:
+                    price = product_item.installment_12_months
+                elif payment_type == 'installment24' and product_item.installment_24_months:
+                    price = product_item.installment_24_months
+                elif payment_type == 'installment48' and product_item.installment_48_months:
+                    price = product_item.installment_48_months
                 OrderProduct.objects.create(
                     order=order,
-                    product=product,
+                    product=product_item.product,  # Сохраняем связь с Product
+                    variant=product_item,  # Сохраняем конкретную товарную позицию
                     price=price,
                     quantity=1,
                     payment_type=payment_type
                 )
 
-            # Обработка услуг
             service_slugs = form.cleaned_data.get("selected_service_slugs", [])
             if service_slugs:
                 order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
                 logger.debug(f"Добавлены услуги: {service_slugs}")
 
-            # Обработка ТВ-пакетов
             tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
             if tv_package_ids:
                 order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
 
-            # Логирование и уведомление
-            logger.info(
-                f"Заявка #{order.id} создана для {locality.name}, тариф: {tariff.name}"
-            )
+            logger.info(f"Заявка #{order.id} создана для {locality.name}, тариф: {tariff.name}")
             try:
                 admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
                 send_order_notification.delay(order.id, admin_url)
@@ -87,7 +82,6 @@ def order_create(request, locality_slug, slug):
             except Exception as e:
                 logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
 
-            # Если запрос AJAX, возвращаем JSON
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     "success": True,
@@ -95,7 +89,6 @@ def order_create(request, locality_slug, slug):
                     "order_id": order.id,
                     "locality_slug": locality_slug
                 })
-            # Иначе редирект
             return redirect("orders:order_success", pk=order.id)
         else:
             logger.warning(f"Ошибка валидации формы: {form.errors}")
@@ -131,7 +124,6 @@ def order_create(request, locality_slug, slug):
         },
     )
 
-
 @require_POST
 def submit_order(request, locality_slug):
     logger.debug(f"Полученные данные формы: {request.POST}")
@@ -147,62 +139,39 @@ def submit_order(request, locality_slug):
             order.tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True)
         order.save()
 
-        # Обработка продуктов
         equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
         payment_options = form.cleaned_data.get("equipment_payment_options", {})
         logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
 
         for product_id in equipment_ids:
-            product = get_object_or_404(Product, id=product_id)
-
-            # === ОБРАБОТКА ВАРИАНТА (цвета) ===
-            variant = None
-            variant_id = request.POST.get(f"variant_id")
-            if variant_id:
-                try:
-                    variant =ProductItem.objects.get(id=variant_id, product=product)
-                except ProductItem.DoesNotExist:
-                    logger.warning(f"Variant {variant_id} не найден для продукта {product_id}, используется базовая цена")
-            
-            # Определяем базовую цену (из варианта или продукта)
-            base_price = variant.get_price() if variant else product.get_price()
-
-            # Определяем тип оплаты
+            product_item = get_object_or_404(ProductItem, id=product_id)
             payment_type = payment_options.get(str(product_id), 'purchase')
-
-            # Рассчитываем итоговую цену в зависимости от типа оплаты
-            if payment_type == 'installment12' and product.installment_12_months:
-                total_price = product.get_total_installment_price(12)
-            elif payment_type == 'installment24' and product.installment_24_months:
-                total_price = product.get_total_installment_price(24)
-            elif payment_type == 'installment48' and product.installment_48_months:
-                total_price = product.get_total_installment_price(48)
-            else:
-                total_price = base_price  # Покупка — цена из варианта или продукта
-
-            # Создаём запись в заказе
+            price = product_item.get_final_price()
+            if payment_type == 'installment12' and product_item.installment_12_months:
+                price = product_item.installment_12_months
+            elif payment_type == 'installment24' and product_item.installment_24_months:
+                price = product_item.installment_24_months
+            elif payment_type == 'installment48' and product_item.installment_48_months:
+                price = product_item.installment_48_months
             OrderProduct.objects.create(
                 order=order,
-                product=product,
-                variant=variant,
-                price=total_price,
+                product=product_item.product,
+                variant=product_item,
+                price=price,
                 quantity=1,
                 payment_type=payment_type
             )
 
-        # Обработка услуг
         service_slugs = form.cleaned_data.get("selected_service_slugs", [])
         if service_slugs:
             order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
             logger.debug(f"Добавлены услуги: {service_slugs}")
 
-        # Обработка ТВ-пакетов
         tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
         if tv_package_ids:
             order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
             logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
 
-        # Логирование и уведомление
         logger.info(
             f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'не указан'}"
         )

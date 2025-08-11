@@ -4,10 +4,8 @@
 {% block content %}
 <div class="order-form">
     <div class="order-form__container container">
-        <!-- Макет -->
         <div class="order-form__layout">
             <div class="order-form__main">
-                <!-- Информация о тарифе -->
                 <section class="tariff-info">
                     <div class="tariff-info__content">
                         <div class="tariff-info__details">
@@ -48,7 +46,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- Пакеты ТВ-каналов -->
                 {% if tv_packages.exists %}
                 <section class="tv-packages">
                     <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
@@ -104,19 +101,18 @@
                     </div>
                 </section>
                 {% endif %}
-                <!-- Оборудование -->
                 {% if products.exists %}
                 <section class="equipment">
                     <h3 class="equipment__title">Добавить оборудование</h3>
                     <p class="equipment__description">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
                     <div class="equipment__list">
-                        {% for product in products %}
-                            <article class="equipment__item" data-id="{{ product.id }}" data-price="{{ product.price }}">
+                        {% for product_item in products %}
+                            <article class="equipment__item" data-id="{{ product_item.id }}" data-price="{{ product_item.price }}">
                                 <div class="equipment__content">
                                     <div class="equipment__header">
                                         <div class="equipment__image-container">
-                                            {% if product.get_main_image %}
-                                                <img src="{{ product.get_main_image.image.url }}" alt="{{ product.name }}" class="equipment__image">
+                                            {% if product_item.get_main_image %}
+                                                <img src="{{ product_item.get_main_image.image.url }}" alt="{{ product_item.get_display_name }}" class="equipment__image">
                                             {% else %}
                                                 <div class="equipment__image-placeholder" aria-hidden="true">
                                                     <svg class="equipment__image-icon" width="48" height="28" viewBox="0 0 48 28" fill="currentColor">
@@ -127,39 +123,39 @@
                                             {% endif %}
                                         </div>
                                         <div class="equipment__info-group">
-                                            <h5 class="equipment__name">{{ product.name }}</h5>
+                                            <h5 class="equipment__name">{{ product_item.get_display_name }}</h5>
                                         </div>
                                         <div class="equipment__footer">
-                                            <div class="equipment__price-block" {% if product.installment_available %}data-installment-available="true"{% endif %}>
-                                                <div class="equipment__payment-label" id="label-{{ product.id }}">Полная стоимость</div>
-                                                <div class="equipment__price-value" id="price-{{ product.id }}">{{ product.price|floatformat:0|default:0|intcomma }} ₽</div>
+                                            <div class="equipment__price-block" {% if product_item.installment_available %}data-installment-available="true"{% endif %}>
+                                                <div class="equipment__payment-label" id="label-{{ product_item.id }}">Полная стоимость</div>
+                                                <div class="equipment__price-value" id="price-{{ product_item.id }}">{{ product_item.get_price_display }}</div>
                                             </div>
                                             <div class="equipment__switch-container">
                                                 <div class="form-check form-switch mb-0">
                                                     <input class="form-check-input"
                                                         type="checkbox"
-                                                        id="equipment-{{ product.id }}"
+                                                        id="equipment-{{ product_item.id }}"
                                                         onchange="toggleEquipmentSelection(
-                                                            '{{ product.id }}', 
+                                                            '{{ product_item.id }}', 
                                                             this.checked, 
-                                                            {{ product.price }}, 
-                                                            {{ product.installment_12_months|default:'null' }}, 
-                                                            {{ product.installment_24_months|default:'null' }}, 
-                                                            {{ product.installment_48_months|default:'null' }}
+                                                            {{ product_item.price }}, 
+                                                            {{ product_item.installment_12_months|default:'null' }}, 
+                                                            {{ product_item.installment_24_months|default:'null' }}, 
+                                                            {{ product_item.installment_48_months|default:'null' }}
                                                         )">
-                                                    <label class="form-check-label" for="equipment-{{ product.id }}"></label>
+                                                    <label class="form-check-label" for="equipment-{{ product_item.id }}"></label>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </article>
-                            {% if product.installment_available %}
-                            <div class="equipment-payment-modal fade" id="installmentModal-{{ product.id }}" tabindex="-1" aria-labelledby="installmentModalLabel-{{ product.id }}" aria-hidden="true">
+                            {% if product_item.installment_available %}
+                            <div class="equipment-payment-modal fade" id="installmentModal-{{ product_item.id }}" tabindex="-1" aria-labelledby="installmentModalLabel-{{ product_item.id }}" aria-hidden="true">
                                 <div class="equipment-payment-modal__dialog">
                                     <div class="equipment-payment-modal__content">
                                         <div class="equipment-payment-modal__header">
-                                            <h5 class="equipment-payment-modal__title" id="installmentModalLabel-{{ product.id }}">{{ product.name }}</h5>
+                                            <h5 class="equipment-payment-modal__title" id="installmentModalLabel-{{ product_item.id }}">{{ product_item.get_display_name }}</h5>
                                             <button type="button" class="equipment-payment-modal__close" data-modal-close aria-label="Закрыть">
                                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                                     <path d="M18 6L6 18M6 6l12 12"/>
@@ -168,48 +164,46 @@
                                         </div>
                                         <div class="equipment-payment-modal__body">
                                             <div class="equipment-payment-modal__option">
-                                                <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-purchase-{{ product.id }}" value="purchase" checked>
-                                                <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-{{ product.id }}">
-                                                    Полная стоимость - {{ product.price }} ₽
+                                                <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-purchase-{{ product_item.id }}" value="purchase" checked>
+                                                <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-{{ product_item.id }}">
+                                                    Полная стоимость - {{ product_item.get_price_display }}
                                                 </label>
                                             </div>
-                                            {% if product.installment_available %}
-                                                {% if product.installment_12_months %}
+                                            {% if product_item.installment_available %}
+                                                {% if product_item.installment_12_months %}
                                                 <div class="equipment-payment-modal__option">
-                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment12-{{ product.id }}" value="installment12">
-                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product.id }}">
-                                                        Рассрочка (на 12 мес.) - {{ product.installment_12_months }} ₽/мес.
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment12-{{ product_item.id }}" value="installment12">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product_item.id }}">
+                                                        Рассрочка (на 12 мес.) - {{ product_item.installment_12_months|intcomma }} ₽/мес.
                                                     </label>
                                                 </div>
                                                 {% endif %}
-
-                                                {% if product.installment_24_months %}
+                                                {% if product_item.installment_24_months %}
                                                 <div class="equipment-payment-modal__option">
-                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment24-{{ product.id }}" value="installment24">
-                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product.id }}">
-                                                        Рассрочка (на 24 мес.) - {{ product.installment_24_months }} ₽/мес.
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment24-{{ product_item.id }}" value="installment24">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product_item.id }}">
+                                                        Рассрочка (на 24 мес.) - {{ product_item.installment_24_months|intcomma }} ₽/мес.
                                                     </label>
                                                 </div>
                                                 {% endif %}
-
-                                                {% if product.installment_48_months %}
-                                                    <div class="equipment-payment-modal__option">
-                                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product.id }}" id="paymentOption-installment48-{{ product.id }}" value="installment48">
-                                                        <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-{{ product.id }}">
-                                                            Рассрочка (на 48 мес.) - {{ product.installment_48_months }} ₽/мес.
-                                                        </label>
-                                                    </div>
+                                                {% if product_item.installment_48_months %}
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment48-{{ product_item.id }}" value="installment48">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-{{ product_item.id }}">
+                                                        Рассрочка (на 48 мес.) - {{ product_item.installment_48_months|intcomma }} ₽/мес.
+                                                    </label>
+                                                </div>
                                                 {% endif %}
                                             {% endif %}
                                         </div>
                                         <div class="equipment-payment-modal__footer">
-                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close onclick="closeAndResetModal('{{ product.id }}')">Отмена</button>
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close onclick="closeAndResetModal('{{ product_item.id }}')">Отмена</button>
                                             <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption(
-                                                '{{ product.id }}', 
-                                                {{ product.price }}, 
-                                                {{ product.installment_12_months|default:'null' }}, 
-                                                {{ product.installment_24_months|default:'null' }}, 
-                                                {{ product.installment_48_months|default:'null' }}
+                                                '{{ product_item.id }}', 
+                                                {{ product_item.price }}, 
+                                                {{ product_item.installment_12_months|default:'null' }}, 
+                                                {{ product_item.installment_24_months|default:'null' }}, 
+                                                {{ product_item.installment_48_months|default:'null' }}
                                             )">Применить</button>
                                         </div>
                                     </div>
@@ -220,7 +214,6 @@
                     </div>
                 </section>
                 {% endif %}
-                <!-- Дополнительные услуги -->
                 {% if services.exists %}
                 <section class="services">
                     <h3 class="services__title">Дополнительные услуги</h3>
@@ -249,7 +242,6 @@
                     </div>
                 </section>
                 {% endif %}
-                <!-- Блок итогов — мобильная версия -->
                 <aside class="summary summary--mobile">
                     <div class="summary__content">
                         <h3 class="summary__title">Заявка на подключение</h3>
@@ -322,7 +314,6 @@
                         </div>
                     </div>
                 </aside>
-                <!-- Форма заявки -->
                 <section class="order-form__section">
                     <h3 class="order-form__section-title">Оформление заявки</h3>
                     <noscript>
@@ -330,7 +321,6 @@
                     </noscript>
                     <form class="order-form__form" id="orderForm" method="post" action="{% url 'orders:submit_order' locality_slug=locality.slug %}">
                         {% csrf_token %}
-                        <!-- Скрытые поля -->
                         <input type="hidden" name="tariff_id" value="{{ tariff.id }}">
                         <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value="[]">
                         <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
@@ -340,7 +330,6 @@
                         <input type="hidden" id="total_services_cost" value="0">
                         <input type="hidden" id="total_tv_packages_cost" value="0">
                         <input type="hidden" id="total_price" value="0">
-                        <!-- Основные поля формы -->
                         <div class="order-form__fields">
                             <div class="order-form__field order-form__field--full-name">
                                 <label for="name" class="order-form__label">Ваше имя</label>
@@ -388,7 +377,6 @@
                     </form>
                 </section>
             </div>
-            <!-- Блок итогов — десктопная версия -->
             <aside class="summary summary--desktop">
                 <div class="summary__content">
                     <h3 class="summary__title">Заявка на подключение</h3>
@@ -468,11 +456,10 @@
 
 {% block extra_js %}
 <script>
-    // Универсальная функция обновления всех элементов по классу
     function updateAll(selector, text, property = 'textContent') {
         document.querySelectorAll(selector).forEach(el => {
             if (property.startsWith('style.')) {
-                const styleProp = property.slice(6); // 'style.display' → 'display'
+                const styleProp = property.slice(6);
                 el.style[styleProp] = text;
             } else {
                 el[property] = text;
@@ -480,7 +467,6 @@
         });
     }
 
-    // Переменные
     let selectedEquipment = {};
     let selectedServices = {};
     let selectedTVPackages = {};
@@ -488,18 +474,15 @@
     let totalTVPackagesPrice = 0;
     let pendingPaymentOptions = {};
 
-    // Подсчёт итогов
     function calculateTotal() {
         const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0;
         const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
         const monthlyPrice = tariffPrice + totalServicesPrice + totalTVPackagesPrice;
 
-        // Оборудование: суммируем только покупку (единоразово)
         const selectedEquipmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (p.paymentType === 'purchase' ? p.price : 0);
         }, 0);
 
-        // Рассрочка: суммируем все ежемесячные платежи (12, 24, 48)
         const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (
                 p.paymentType === 'installment12' || 
@@ -513,14 +496,12 @@
         const connectionTotalPrice = selectedEquipmentPrice + connectionPrice;
         const totalPrice = monthlyPrice + connectionTotalPrice + installmentPrice;
 
-        // Обновляем отображение
         updateAll('.summary-total-price', `${totalPrice.toLocaleString('ru-RU')} ₽`);
         updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽/мес.`);
         updateAll('.summary-connection-total-price', `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`);
         const connectionPriceText = connectionPrice === 0 ? 'Бесплатно' : `${connectionPrice.toLocaleString('ru-RU')} ₽`;
         updateAll('.summary-connection-price', connectionPriceText);
 
-        // Обработка строки "Рассрочка"
         if (installmentPrice > 0 && Object.keys(selectedEquipment).length > 0) {
             const installmentItems = Object.values(selectedEquipment).filter(p => 
                 p.paymentType === 'installment12' || 
@@ -555,14 +536,12 @@
             updateAll('.summary-installment-price', '0 ₽/мес.');
         }
 
-        // Обновляем скрытые поля
         document.getElementById('total_equipment_cost').value = selectedEquipmentPrice;
         document.getElementById('total_services_cost').value = totalServicesPrice;
         document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
         document.getElementById('total_price').value = totalPrice;
     }
 
-    // Обновление секций
     function updateEquipmentSummary() {
         const containers = document.querySelectorAll('#equipmentSummary');
         const html = Object.keys(selectedEquipment).length > 0
@@ -599,7 +578,6 @@
         containers.forEach(container => { container.innerHTML = html; });
     }
 
-    // Функции выбора
     function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price, installment48Price) {
         const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
         const name = element.querySelector('.equipment__name').textContent.trim();
@@ -607,10 +585,8 @@
         const priceElement = document.getElementById(`price-${id}`);
         const checkbox = document.getElementById(`equipment-${id}`);
 
-        // Проверяем, доступна ли рассрочка (по наличию атрибута или данных)
         const installmentAvailable = element.querySelector('.equipment__price-block')?.dataset.installmentAvailable === 'true';
 
-        // Если выключаем — просто удаляем
         if (!checked) {
             element.classList.remove('selected');
             delete selectedEquipment[id];
@@ -620,7 +596,6 @@
             return;
         }
 
-        // Если включаем и рассрочка НЕ доступна — сразу выбираем "полная стоимость"
         if (!installmentAvailable) {
             selectedEquipment[id] = { name, price: parseInt(purchasePrice), paymentType: 'purchase' };
             labelElement.innerHTML = `Полная стоимость`;
@@ -632,12 +607,11 @@
             return;
         }
 
-        // Если рассрочка доступна — открываем модальное окно
         const modal = document.getElementById(`installmentModal-${id}`);
         if (modal) {
-            openEquipmentModal(modal); // ← Используем правильную функцию
-            checkbox.checked = true; // Сохраняем состояние
-            element.classList.add('selected'); // Визуально подсвечиваем
+            openEquipmentModal(modal);
+            checkbox.checked = true;
+            element.classList.add('selected');
         } else {
             console.error(`Модальное окно для оборудования ${id} не найдено!`);
         }
@@ -685,7 +659,6 @@
         saveSelections();
     }
 
-    // Модальные окна
     function openEquipmentModal(modal) {
         if (typeof modal === 'string') modal = document.getElementById(`installmentModal-${modal}`);
         if (!modal) return;
@@ -693,46 +666,28 @@
         modal.classList.add('show');
         modal.style.display = 'flex';
 
-        // Получаем ID продукта из ID модального окна
         const modalId = modal.id;
         const productId = modalId.split('-').pop();
 
-        // Закрытие по клику на бэкдроп
         modal.addEventListener('click', function closeOnBackdrop(e) {
             if (e.target === modal) {
-                closeAndResetModal(productId); // ← сбрасываем выбор
+                closeAndResetModal(productId);
                 modal.removeEventListener('click', closeOnBackdrop);
             }
         });
 
-        // Закрытие по кнопкам с data-modal-close
         modal.querySelectorAll('[data-modal-close]').forEach(button => {
             button.addEventListener('click', () => {
-                closeAndResetModal(productId); // ← вместо closeEquipmentModal
+                closeAndResetModal(productId);
             });
         });
 
-        // Закрытие по Escape
         document.addEventListener('keydown', function closeOnEscape(e) {
             if (e.key === 'Escape') {
-                closeAndResetModal(productId); // ← сбрасываем выбор
+                closeAndResetModal(productId);
                 document.removeEventListener('keydown', closeOnEscape);
             }
         });
-    }
-
-    function openInstallmentModal(productId, purchasePrice, installment12Price, installment24Price, installmentAvailable) {
-        if (!installmentAvailable) {
-            const checkbox = document.getElementById(`equipment-${productId}`);
-            if (checkbox && !checkbox.checked) {
-                checkbox.checked = true;
-                toggleEquipmentSelection(productId, true, purchasePrice, null, null);
-            }
-            return;
-        }
-        openEquipmentModal(`installmentModal-${productId}`);
-        const selected = selectedEquipment[productId] || { paymentType: 'purchase' };
-        document.getElementById(`paymentOption-${selected.paymentType}-${productId}`).checked = true;
     }
 
     function applyPaymentOption(productId, purchasePrice, installment12Price, installment24Price, installment48Price) {
@@ -764,11 +719,9 @@
 
         const name = element.querySelector('.equipment__name').textContent.trim();
 
-        // Сохраняем выбор
         pendingPaymentOptions[productId] = { paymentType, price, name };
         selectedEquipment[productId] = { name, price, paymentType };
 
-        // Обновляем UI
         labelElement.innerHTML = `${labelText}`;
         priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? '₽' : '₽/мес.'}`;
 
@@ -776,7 +729,6 @@
         calculateTotal();
         saveSelections();
 
-        // Закрываем модальное окно
         closeEquipmentModal(document.getElementById(`installmentModal-${productId}`));
     }
 
@@ -784,7 +736,6 @@
         if (!modal) return;
         modal.classList.remove('show');
         modal.style.display = 'none';
-        // Удаляем обработчики событий, чтобы не накапливались
         modal.removeEventListener('click', () => {});
         document.removeEventListener('keydown', () => {});
     }
@@ -807,7 +758,6 @@
             element.classList.remove('selected');
         }
 
-        // Удаляем из выбранных, если не было подтверждения
         delete pendingPaymentOptions[productId];
         delete selectedEquipment[productId];
 
@@ -816,7 +766,6 @@
         saveSelections();
     }
 
-    // Сохранение и загрузка
     function saveSelections() {
         localStorage.setItem('selectedEquipment', JSON.stringify(selectedEquipment));
         localStorage.setItem('selectedServices', JSON.stringify(selectedServices));
@@ -844,6 +793,9 @@
                         priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽/мес.`;
                     } else if (paymentType === 'installment24') {
                         labelElement.innerHTML = `Рассрочка (на 24 мес.)`;
+                        priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽/мес.`;
+                    } else if (paymentType === 'installment48') {
+                        labelElement.innerHTML = `Рассрочка (на 48 мес.)`;
                         priceElement.textContent = `${price.toLocaleString('ru-RU')} ₽/мес.`;
                     } else {
                         labelElement.innerHTML = `Полная стоимость`;
@@ -876,7 +828,6 @@
         calculateTotal();
     }
 
-    // Валидация и отправка
     const phoneInput = document.querySelector('#orderForm [name="phone"]');
     let phoneMask = null;
     if (phoneInput) {

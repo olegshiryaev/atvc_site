@@ -17,6 +17,7 @@ from apps.cities.models import Locality
 from pytils.translit import slugify as pytils_slugify
 from django.db.models import Count, Q
 from apps.core.forms import DocumentForm
+from apps.equipments.models import ProductItem
 from .models import (
     AdditionalService,
     Application,
@@ -33,6 +34,9 @@ from .models import (
     Tariff,
     WorkSchedule,
 )
+import logging
+
+logger = logging.getLogger(__name__)
 
 class CustomBooleanWidget(BooleanWidget):
     TRUE_VALUES = ("1", "true", "yes", "on", "Истина")
@@ -168,7 +172,7 @@ class TVChannelAdmin(ImportExportModelAdmin):
 
 class TariffResource(resources.ModelResource):
     name = fields.Field(
-        column_name="Название",  # Используем перевод из модели
+        column_name="Название",
         attribute="name"
     )
     
@@ -233,10 +237,17 @@ class TariffResource(resources.ModelResource):
         column_name="Активен",
         attribute="is_active"
     )
+    
     slug = fields.Field(
         column_name="Слаг",
         attribute="slug",
         readonly=True
+    )
+    
+    products = fields.Field(
+        column_name="Оборудование",
+        attribute="products",
+        widget=ManyToManyWidget(ProductItem, field='article', separator=',')
     )
 
     class Meta:
@@ -255,7 +266,8 @@ class TariffResource(resources.ModelResource):
             'promo_months',
             'description',
             'slug',
-            'is_active'
+            'is_active',
+            'products'
         )
         export_order = (
             'name',
@@ -270,75 +282,85 @@ class TariffResource(resources.ModelResource):
             'promo_price',
             'promo_months',
             'description',
-            'is_active'
+            'is_active',
+            'products'
         )
         import_id_fields = ('slug',)
         skip_unchanged = True
         report_skipped = True
 
     def before_import_row(self, row, **kwargs):
-        """Генерируем уникальный slug перед импортом"""
+        """Генерируем уникальный slug и валидируем оборудование перед импортом"""
         if 'Название' in row:
             name = row['Название'].strip()
             if name:
                 base_slug = pytils_slugify(name)
                 row['slug'] = base_slug
-                
-                # Проверяем уникальность среди существующих и уже обработанных записей
                 counter = 1
                 while Tariff.objects.filter(slug=row['slug']).exists() or self.is_slug_in_import(row['slug'], kwargs):
                     row['slug'] = f"{base_slug}-{counter}"
                     counter += 1
 
+        if 'Оборудование' in row:
+            articles = row['Оборудование'].split(',')
+            for article in articles:
+                article = article.strip()
+                if article and not ProductItem.objects.filter(article=article).exists():
+                    logger.warning(f"Товар с артикулом {article} не найден при импорте тарифа {row.get('Название', '')}")
+                    raise ValueError(f"Товар с артикулом {article} не найден")
+
     def is_slug_in_import(self, slug, kwargs):
         """Проверяет, используется ли slug в других строках текущего импорта"""
-        # Получаем все уже обработанные строки
         existing_rows = kwargs.get('existing_rows', [])
         return any(r.get('slug') == slug for r in existing_rows)
-
 
 @admin.register(Tariff)
 class TariffAdmin(ImportExportModelAdmin):
     resource_class = TariffResource
-    # Отображение в списке
+
     list_display = (
-        'name', 
-        'service', 
+        'name',
+        'service',
         'display_price',
-        'priority', 
-        'is_active', 
-        'is_featured', 
+        'priority',
+        'is_active',
+        'is_featured',
         'is_promo',
         'get_channels_count',
         'get_hd_channels_count',
         'get_products_count',
         'technology_display',
         'localities_count',
-        'slug'
+        'slug',
     )
+
     list_filter = (
-        'is_active', 
-        'is_featured', 
+        'is_active',
+        'is_featured',
         'is_promo',
         'service',
         'technology',
-        'priority'
+        'priority',
     )
-    search_fields = ('name', 'description')
+
+    search_fields = ('name', 'description', 'slug')
     filter_horizontal = ('included_channels', 'localities', 'products')
-    readonly_fields = ('slug', 'get_channels_count', 'get_hd_channels_count')
+    readonly_fields = (
+        'slug',
+        'get_channels_count_display',
+        'get_hd_channels_count_display',
+    )
     list_per_page = 30
 
-    # Группировка полей в форме редактирования
     fieldsets = (
         ('Основная информация', {
             'fields': (
-                'name', 
+                'name',
                 'slug',
                 'priority',
                 'service',
                 'description',
-                'is_active'
+                'is_active',
             )
         }),
         ('Цены', {
@@ -348,15 +370,15 @@ class TariffAdmin(ImportExportModelAdmin):
                 'is_promo',
                 'promo_price',
                 'promo_months',
-                'is_featured'
+                'is_featured',
             )
         }),
         ('Характеристики', {
             'fields': (
                 'technology',
                 'speed',
-                'get_channels_count',
-                'get_hd_channels_count',
+                'get_channels_count_display',
+                'get_hd_channels_count_display',
             )
         }),
         ('Связи', {
@@ -370,26 +392,56 @@ class TariffAdmin(ImportExportModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        qs = qs.annotate(
+        return qs.annotate(
             _channels_count=Count('included_channels'),
-            _hd_channels_count=Count('included_channels', filter=Q(included_channels__is_hd=True)),
+            _hd_channels_count=Count(
+                'included_channels',
+                filter=Q(included_channels__is_hd=True)
+            ),
             _products_count=Count('products')
+        ).prefetch_related(
+            'included_channels',
+            'localities',
+            'products__product'
         )
-        return qs.prefetch_related('included_channels', 'localities', 'products')
-    
-    def get_ordering(self, request):
-        return ['-priority', 'name', 'price']
 
-    # Кастомные методы для отображения
+    # --- Методы для list_display и fieldsets ---
+
     def display_price(self, obj):
+        """Отображение цены с акцией (в списке)"""
         if obj.is_promo and obj.promo_price:
             return format_html(
-                '<span style="color: red; text-decoration: line-through;">{}₽</span> → <span style="color: green;">{}₽</span>',
+                '<span style="color: red; text-decoration: line-through;">{}₽</span> → '
+                '<strong style="color: green;">{}₽</strong>',
                 obj.price,
                 obj.promo_price
             )
         return f"{obj.price}₽"
     display_price.short_description = 'Цена'
+    display_price.admin_order_field = 'price'  # Сортируем по реальной цене
+
+    def get_channels_count(self, obj):
+        return obj._channels_count
+    get_channels_count.short_description = 'Всего каналов'
+    get_channels_count.admin_order_field = '_channels_count'
+
+    def get_hd_channels_count(self, obj):
+        return obj._hd_channels_count
+    get_hd_channels_count.short_description = 'HD каналов'
+    get_hd_channels_count.admin_order_field = '_hd_channels_count'
+
+    def get_products_count(self, obj):
+        count = obj.products.count()
+        if count:
+            return format_html(
+                '<a href="{}?tariffs__id__exact={}">{}</a>',
+                reverse('admin:equipments_productitem_changelist'),
+                obj.id,
+                count
+            )
+        return count
+    get_products_count.short_description = 'Оборудование'
+    get_products_count.admin_order_field = '_products_count'
 
     def technology_display(self, obj):
         return obj.get_technology_display()
@@ -399,76 +451,78 @@ class TariffAdmin(ImportExportModelAdmin):
         return obj.localities.count()
     localities_count.short_description = 'Локации'
 
-    def get_products_count(self, obj):
-        count = obj.products.count()
-        if count:
-            return format_html(
-                '<a href="{}?tariffs__id__exact={}">{}</a>',
-                reverse('admin:equipments_product_changelist'),
-                obj.id,
-                count
-            )
-        return count
-    get_products_count.short_description = 'Оборудование'
-    get_products_count.admin_order_field = '_products_count'
+    # --- Методы для формы редактирования (fieldsets) ---
 
-    def get_channels_count(self, obj):
-        return obj.included_channels.count()
-    get_channels_count.short_description = 'Всего каналов'
-    get_channels_count.admin_order_field = '_channels_count'
+    def get_channels_count_display(self, obj):
+        if obj is None:
+            return "-"
+        return obj._channels_count
+    get_channels_count_display.short_description = 'Всего каналов'
+    get_channels_count_display.admin_order_field = '_channels_count'
 
-    def get_hd_channels_count(self, obj):
-        return obj.included_channels.filter(is_hd=True).count()
-    get_hd_channels_count.short_description = 'HD каналов'
-    get_hd_channels_count.admin_order_field = '_hd_channels_count'
+    def get_hd_channels_count_display(self, obj):
+        if obj is None:
+            return "-"
+        return obj._hd_channels_count
+    get_hd_channels_count_display.short_description = 'HD каналов'
+    get_hd_channels_count_display.admin_order_field = '_hd_channels_count'
 
-    # Действия в админке
-    actions = ['activate_tariffs', 'deactivate_tariffs']
+    # --- Дополнительные действия ---
 
     def activate_tariffs(self, request, queryset):
         queryset.update(is_active=True)
+        logger.info(f"Активировано тарифов: {queryset.count()}")
     activate_tariffs.short_description = "Активировать выбранные тарифы"
 
     def deactivate_tariffs(self, request, queryset):
         queryset.update(is_active=False)
+        logger.info(f"Деактивировано тарифов: {queryset.count()}")
     deactivate_tariffs.short_description = "Деактивировать выбранные тарифы"
 
-    # Сохранение модели
+    # --- Сохранение ---
+
     def save_model(self, request, obj, form, change):
+        logger.info(f"Сохранение тарифа: {obj.name}, slug: {obj.slug}, изменен: {change}")
         if not obj.slug:
             obj.slug = pytils_slugify(obj.name)
         super().save_model(request, obj, form, change)
 
+    # --- Экспорт в CSV ---
+
     def export_as_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
         response["Content-Disposition"] = 'attachment; filename="tariffs.csv"'
-
         writer = csv.writer(response)
-        writer.writerow(["Название", "URL-адрес", "Тип", "Цена", "Скорость", "Города"])
+        writer.writerow([
+            "Название", "URL-адрес", "Тип", "Цена", "Скорость", 
+            "Каналы", "HD Каналы", "Города", "Оборудование"
+        ])
 
         for tariff in queryset:
-            localities = ", ".join(
-                [locality.name for locality in tariff.localities.all()]
-            )
-            writer.writerow(
-                [
-                    tariff.name,
-                    tariff.slug,
-                    tariff.get_service_display(),
-                    tariff.price,
-                    tariff.speed or "-",
-                    tariff.included_channels.count(),
-                    tariff.included_channels.filter(is_hd=True).count(),
-                    localities,
-                ]
-            )
+            localities = ", ".join([loc.name for loc in tariff.localities.all()])
+            products = ", ".join([pi.get_display_name() for pi in tariff.products.all()])
+            writer.writerow([
+                tariff.name,
+                tariff.slug,
+                tariff.get_service_display(),
+                tariff.get_actual_price(),
+                tariff.speed or "-",
+                tariff.included_channels.count(),
+                tariff.included_channels.filter(is_hd=True).count(),
+                localities,
+                products,
+            ])
+        logger.info(f"Экспортировано тарифов: {queryset.count()}")
         return response
 
     export_as_csv.short_description = "Экспорт в CSV"
 
-    class Media:
-        css = {"all": ("fontawesome/css/all.min.css",)}
+    # --- Media ---
 
+    class Media:
+        css = {
+            "all": ("fontawesome/css/all.min.css",)
+        }
 
 @admin.register(Equipment)
 class EquipmentAdmin(admin.ModelAdmin):

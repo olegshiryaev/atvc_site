@@ -234,7 +234,8 @@ class ProductItem(BaseModel):
         else:
             full_name = base_name
 
-        if self.color:
+        # Проверяем, является ли текущая товарная позиция единственной для продукта
+        if self.color and self.product.items.count() > 1:
             color_name = self.color.name.strip()
             color_name_lower = color_name[0].lower() + color_name[1:] if color_name else ""
             full_name += f", {color_name_lower}"

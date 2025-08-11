@@ -21,7 +21,7 @@ from django.contrib import messages
 from apps.cities.models import Locality
 from django.contrib.auth.models import User
 
-from apps.equipments.models import Product
+from apps.equipments.models import Product, ProductItem
 
 logger = logging.getLogger(__name__)
 
@@ -225,7 +225,7 @@ class Tariff(models.Model):
         related_name="tariffs",
     )
     products = models.ManyToManyField(
-        Product,
+        ProductItem,
         verbose_name="Оборудование для тарифа",
         related_name="tariffs",
         blank=True
