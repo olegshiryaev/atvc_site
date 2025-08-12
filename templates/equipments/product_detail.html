@@ -97,48 +97,53 @@
             </div>
 
             <!-- Табы: Описание / Характеристики -->
-            {% if product.has_description or product.camera or product.router or product.smart_speaker or product.tvbox %}
-            <div class="product-tabs mt-5">
-                <div class="product-tabs-wrapper mb-3">
-                    <ul class="nav nav-pills" id="productTabs">
-                        {% if product.has_description %}
-                        <li>
-                            <button class="nav-link active" data-tab="description">Описание</button>
-                        </li>
-                        {% endif %}
-                        {% if product.camera or product.router or product.smart_speaker or product.tvbox %}
-                        <li>
-                            <button class="nav-link" data-tab="specs">Характеристики</button>
-                        </li>
-                        {% endif %}
-                    </ul>
-                </div>
+            {% with product=current_item.product %}
+                {% if product.has_description or product.smart_speaker or product.camera or product.router or product.tvbox %}
+                    <div class="product-tabs mt-5">
+                        <div class="product-tabs-wrapper mb-3">
+                            <ul class="nav nav-pills" id="productTabs">
+                                {% if product.has_description %}
+                                    <li>
+                                        <button class="nav-link {% if not product.smart_speaker and not product.camera and not product.router and not product.tvbox %}active{% endif %}"
+                                                data-tab="description">Описание</button>
+                                    </li>
+                                {% endif %}
+                                {% if product.smart_speaker or product.camera or product.router or product.tvbox %}
+                                    <li>
+                                        <button class="nav-link {% if not product.has_description %}active{% endif %}"
+                                                data-tab="specs">Характеристики</button>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
 
-                <div class="tab-content" id="productTabsContent">
-                    {% if product.has_description %}
-                    <!-- Описание -->
-                    <div class="tab-pane active" id="description">
-                        {{ current_item.product.description|safe }}
-                    </div>
-                    {% endif %}
+                        <div class="tab-content" id="productTabsContent">
+                            {% if product.has_description %}
+                                <div class="tab-pane {% if not product.smart_speaker and not product.camera and not product.router and not product.tvbox %}active{% endif %}"
+                                    id="description">
+                                    {{ product.description|safe }}
+                                </div>
+                            {% endif %}
 
-                    <!-- Характеристики -->
-                    <div class="tab-pane" id="specs">
-                        {% if current_item.product.smart_speaker %}
-                            {% include "equipments/product/characteristics/smart_speaker.html" with speaker=current_item.product.smart_speaker %}
-                        {% elif current_item.product.camera %}
-                            {% include "equipments/product/characteristics/camera.html" with camera=current_item.product.camera %}
-                        {% elif current_item.product.router %}
-                            {% include "equipments/product/characteristics/router.html" with router=current_item.product.router %}
-                        {% elif current_item.product.tvbox %}
-                            {% include "equipments/product/characteristics/tvbox.html" with tvbox=current_item.product.tvbox %}
-                        {% else %}
-                            <p class="text-muted">Характеристики недоступны.</p>
-                        {% endif %}
+                            {% if product.smart_speaker or product.camera or product.router or product.tvbox %}
+                                <div class="tab-pane {% if not product.has_description %}active{% endif %}" id="specs">
+                                    {% if product.smart_speaker %}
+                                        {% include "equipments/product/characteristics/smart_speaker.html" with speaker=product.smart_speaker %}
+                                    {% elif product.camera %}
+                                        {% include "equipments/product/characteristics/camera.html" with camera=product.camera %}
+                                    {% elif product.router %}
+                                        {% include "equipments/product/characteristics/router.html" with router=product.router %}
+                                    {% elif product.tvbox %}
+                                        {% include "equipments/product/characteristics/tvbox.html" with tvbox=product.tvbox %}
+                                    {% else %}
+                                        <p class="text-muted">Характеристики недоступны.</p>
+                                    {% endif %}
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-            </div>
-            {% endif %}
+                {% endif %}
+            {% endwith %}
         </main>
 
         <!-- Правая панель: цена и кнопка -->
