@@ -100,7 +100,7 @@
             <div class="product-tabs mt-5">
                 <div class="product-tabs-wrapper mb-3">
                     <ul class="nav nav-pills" id="productTabs">
-                        {% if current_item.product.description|striptags|trim %}
+                        {% if product.has_description or product.camera or product.router or product.smart_speaker or product.tvbox %}
                             <li>
                                 <button class="nav-link active" data-tab="description">Описание</button>
                             </li>

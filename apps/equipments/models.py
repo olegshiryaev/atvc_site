@@ -144,6 +144,9 @@ class Product(BaseModel):
             return "ТВ-приставка"
         return None
     
+    def has_description(self):
+        return bool(self.description and strip_tags(self.description).strip())
+    
     def clean(self):
         if self.instruction:
             ext = os.path.splitext(self.instruction.name)[1].lower()
