@@ -138,6 +138,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
         </main>
 
         <!-- Правая панель: цена и кнопка -->
@@ -208,23 +209,50 @@
 
     <!-- Недавно просмотренные -->
     {% if recently_viewed %}
-        <section class="recently-viewed">
-            <h2>Вы недавно смотрели</h2>
-            <div class="swiper">
+    <section class="products-slider-block block" data-block-slug="products-slider-block" data-block-appearance="">
+        <div class="products-slider-block__header">
+            <h2 class="products-slider-block__title block__title">Вы недавно смотрели</h2>
+        </div>
+        <div class="products-slider-block__wrapper">
+            <div class="swiper swiper-initialized swiper-horizontal">
                 <div class="swiper-wrapper">
                     {% for item in recently_viewed %}
-                        <div class="swiper-slide">
-                            <a href="{% url 'equipments:product_detail' locality_slug=locality_slug slug=item.slug %}">
-                                <img src="{{ item.get_main_image.image.url }}" alt="{{ item }}">
-                                <h6>{{ item }}</h6>
-                                <div class="price">{{ item.get_price_display }}</div>
-                            </a>
+                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
+                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
+                            <div class="product-card__img-wrap{% if not item.get_main_image %} no-image{% endif %}">
+                                {% with main_image=item.get_main_image %}
+                                    {% if main_image %}
+                                        <img data-lazy-src="{{ main_image.image.url }}"  
+                                            alt="{{ item.name|default:'Товар' }}" 
+                                            class="product-card__img" 
+                                            src="{{ main_image.image.url }}">
+                                    {% else %}
+                                    <div class="product-card__placeholder">
+                                        <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                    </div>
+                                    {% endif %}
+                                {% endwith %}
+                            </div>
+                            <h6 class="product-card__title h6">{{ item }}</h6>
+                        </a>
+                        <div class="product-card__footer">
+                            <div class="product-card__price h5">{{ item.get_price_display }}</div>
+                            <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
                         </div>
+                    </li>
                     {% endfor %}
                 </div>
+                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
             </div>
-        </section>
+            <div class="products-slider-block__navs slider-navs">
+                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-disabled="true"></div>
+                <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0" role="button" aria-label="Go to slide 1" aria-current="true"></span><span class="swiper-pagination-bullet" tabindex="0" role="button" aria-label="Go to slide 2"></span></div>
+                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-disabled="false"></div>
+            </div>
+        </div>
+    </section>
     {% endif %}
+
 </div>
 
 <!-- JavaScript -->
@@ -235,6 +263,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
     const orderButton = document.getElementById('order-button');
     const priceDisplay = document.getElementById('current-price-display');
+
+     // Инициализация Swiper для недавно просмотренных
+    const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
+        slidesPerView: 1,
+        spaceBetween: 16,
+        navigation: {
+            nextEl: '.products-slider-block .slider-navs__next',
+            prevEl: '.products-slider-block .slider-navs__prev',
+        },
+        pagination: {
+            el: '.products-slider-block .slider-navs__pag',
+            clickable: true,
+        },
+        breakpoints: {
+            576: { slidesPerView: 2 },
+            768: { slidesPerView: 3 },
+            992: { slidesPerView: 4 },
+        },
+    });
 
     // Обработка переключения табов
     tabButtons.forEach(button => {
