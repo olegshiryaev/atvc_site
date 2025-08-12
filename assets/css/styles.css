@@ -8840,8 +8840,7 @@ button.swiper-pagination-bullet {
 
 /* Описание */
 .tv-tariff-card__description {
-    font-size: 0.875rem;
-    color: var(--muted-color);
+    font-size: var(--font-size-sm);
     margin: 0 0 16px 0;
     line-height: 1.5;
 }
@@ -8880,7 +8879,7 @@ button.swiper-pagination-bullet {
 
 .tv-packages__description {
     font-size: var(--font-size-sm);
-    color: var(--muted-color);
+    color: var(--color-text-muted);
     margin-bottom: var(--spacing-md);
 }
 
@@ -8986,7 +8985,6 @@ button.swiper-pagination-bullet {
 /* Описание пакета и цена */
 .tv-package__description {
     font-size: var(--font-size-sm);
-    color: var(--muted-color);
 }
 
 .tv-package__footer {
@@ -9369,7 +9367,7 @@ button.swiper-pagination-bullet {
 /* Описание услуги и цена */
 .services__description {
     font-size: var(--font-size-sm);
-    color: var(--muted-color);
+    color: var(--color-text-muted);
 }
 
 .services__footer {
