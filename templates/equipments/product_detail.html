@@ -12,37 +12,36 @@
         <main class="product-main">
             <div class="product-images-and-info">
                 <!-- Галерея -->
-                <div class="product-gallery">
+                <div class="product__gallery gallery">
                     <!-- Основное изображение -->
-                    <div class="product-gallery-main swiper">
+                    <div class="gallery__imgs swiper product-gallery-main">
                         <div class="swiper-wrapper">
-                            {% for image in current_item.images.all %}
-                                <div class="swiper-slide">
-                                    <img src="{{ image.image.url }}" alt="{{ current_item }}" class="gallery-image">
+                            {% if product.images.exists %}
+                                {% for image in current_item.images.all %}
+                                    <div class="swiper-slide gallery__item">
+                                        <img src="{{ image.image.url }}" alt="{{ current_item }}" class="gallery__item-img lazyloaded">
+                                    </div>
+                               {% endfor %}
+                            {% else %}
+                                    <div class="swiper-slide gallery__item" data-color="all">
+                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="product-card__img img-fluid rounded">
                                 </div>
-                            {% empty %}
-                                <div class="swiper-slide">
-                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="gallery-image">
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <!-- Кнопки навигации -->
-                        <div class="swiper-button-next"></div>
-                        <div class="swiper-button-prev"></div>
-                        <!-- Пагинация -->
-                        <div class="swiper-pagination"></div>
-                    </div>
-
-                    <!-- Миниатюры (под основным изображением) -->
-                    <div class="product-gallery-thumbs swiper">
-                        <div class="swiper-wrapper">
-                            {% for image in current_item.images.all %}
-                                <div class="swiper-slide thumb">
-                                    <img src="{{ image.image.url }}" alt="Миниатюра" class="thumb-image">
-                                </div>
-                            {% endfor %}
+                            {% endif %}
                         </div>
                     </div>
+                    {% if product.images.exists %}
+                        <div class="gallery__bottom slider-navs">
+                            <div class="gallery__thumbs swiper product-gallery-thumbs">
+                                <div class="swiper-wrapper">
+                                    {% for image in current_item.images.all %}
+                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;" data-color="{{ image.color|default:'all' }}">
+                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img">
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
                 </div>
 
                 <!-- Информация о товаре -->
