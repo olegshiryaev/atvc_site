@@ -347,24 +347,25 @@ def services(request, service_slug, locality_slug):
         )
     )
 
-    # Собираем уникальные ТВ-пакеты, связанные с тарифами
     tv_package_ids = tariffs.values_list('tv_packages', flat=True).distinct()
     tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids).prefetch_related('channels')
 
-    products = Product.objects.filter(
-        is_available=True, services=service
-    ).prefetch_related("images", "services")
+    # === КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: работаем с ProductItem ===
+    product_items = ProductItem.objects.filter(
+        product__is_available=True,
+        product__services=service,
+    ).select_related('product', 'color').prefetch_related('images')
 
     try:
-        tv_box_product = Product.objects.filter(
-            services=service,
-            name__contains="Smart-TV приставка Wink Box Mini",
-            is_available=True
-        ).select_related('tvbox').prefetch_related('images').get()
-    except Product.DoesNotExist:
-        tv_box_product = None
+        # Для TV Box — ищем конкретный продукт, но возвращаем его ProductItem
+        tv_box_item = ProductItem.objects.filter(
+            product__services=service,
+            product__name__contains="Smart-TV приставка Wink Box Mini",
+            product__is_available=True,
+        ).select_related('product', 'color').prefetch_related('images').first()
+    except ProductItem.DoesNotExist:
+        tv_box_item = None
 
-    # Формируем breadcrumbs
     breadcrumbs = [
         {"title": "Главная", "url": "core:home"},
         {
@@ -380,11 +381,11 @@ def services(request, service_slug, locality_slug):
         "displayed_tariffs": tariffs,
         "locality": locality,
         "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
-        "products": products,
+        "product_items": product_items,           # ← Передаём ProductItem
         "breadcrumbs": breadcrumbs,
         "title": title,
         "tv_packages": tv_packages,
-        "tv_box_product": tv_box_product,
+        "tv_box_product": tv_box_item,            # ← Теперь это ProductItem
     }
 
     return render(request, "core/services.html", context)
