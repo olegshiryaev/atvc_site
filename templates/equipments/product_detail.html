@@ -262,21 +262,6 @@
 <!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    // === Инициализация галереи товара (основное изображение + миниатюры) ===
-    const galleryThumbs = new Swiper('.product-gallery-thumbs', {
-        spaceBetween: 10,
-        slidesPerView: 'auto',
-        freeMode: true,
-        watchSlidesProgress: true,
-    });
-
-    const galleryMain = new Swiper('.product-gallery-main', {
-        spaceBetween: 10,
-        thumbs: {
-            swiper: galleryThumbs,
-        }
-    });
-
     // === Инициализация слайдера "Недавно просмотренные" ===
     const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
         slidesPerView: 1,
