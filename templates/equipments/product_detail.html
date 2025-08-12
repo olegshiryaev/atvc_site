@@ -265,23 +265,16 @@ document.addEventListener('DOMContentLoaded', function () {
     // === Инициализация галереи товара (основное изображение + миниатюры) ===
     const galleryThumbs = new Swiper('.product-gallery-thumbs', {
         spaceBetween: 10,
-        slidesPerView: 4,
+        slidesPerView: 'auto',
         freeMode: true,
         watchSlidesProgress: true,
-        watchOverflow: true, // отключает инициализацию, если слайдов недостаточно
     });
 
     const galleryMain = new Swiper('.product-gallery-main', {
         spaceBetween: 10,
-        navigation: {
-            nextEl: '.swiper-button-next',
-            prevEl: '.swiper-button-prev',
-        },
         thumbs: {
             swiper: galleryThumbs,
-        },
-        watchOverflow: true,
-        loop: false,
+        }
     });
 
     // === Инициализация слайдера "Недавно просмотренные" ===
