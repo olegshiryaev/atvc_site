@@ -9,7 +9,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 class OrderForm(forms.ModelForm):
-    # Сделайте поля необязательными, добавьте dynamic required
+    
+    """
+    Универсальная форма для оформления заявок.
+    
+    Используется в двух сценариях:
+    1. Заказ тарифа с оборудованием, ТВ-пакетами и услугами.
+       - Используются: tariff_id, selected_equipment_ids, equipment_payment_options и др.
+    2. Заказ отдельного оборудования.
+       - Используются: product_item_id, payment_type.
+       - Остальные поля игнорируются.
+    """
+    
     product_item_id = forms.CharField(
         widget=forms.HiddenInput(),
         required=False  # Теперь не всегда требуется

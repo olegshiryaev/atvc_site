@@ -238,6 +238,14 @@ class Tariff(models.Model):
     )
     is_active = models.BooleanField("Активен", default=True)
 
+    def clean(self):
+        super().clean()
+        if self.is_promo and self.promo_price and self.price:
+            if self.promo_price >= self.price:
+                raise ValidationError("Промо-цена должна быть меньше обычной цены")
+        if self.is_promo and not (self.promo_price and self.promo_months):
+            raise ValidationError("Для акции нужно указать промо-цену и количество месяцев")
+
     def save(self, *args, **kwargs):
         if not self.slug:
             base_slug = pytils_slugify(self.name)
@@ -278,6 +286,22 @@ class Tariff(models.Model):
     def total_hd_channels(self):
         """Количество HD-каналов"""
         return self.included_channels.filter(is_hd=True).count()
+    
+    def channel_count_display(self):
+        """
+        Возвращает количество включённых каналов с правильным склонением.
+        Пример: 1 канал, 2 канала, 5 каналов.
+        """
+        total = self.total_channels
+
+        if total % 10 == 1 and total % 100 != 11:
+            channel_word = "канал"
+        elif total % 10 in [2, 3, 4] and total % 100 not in [12, 13, 14]:
+            channel_word = "канала"
+        else:
+            channel_word = "каналов"
+
+        return f"{total} {channel_word}"
 
     def __str__(self):
         return self.name

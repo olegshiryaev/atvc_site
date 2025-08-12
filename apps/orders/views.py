@@ -29,6 +29,13 @@ def order_create(request, locality_slug, slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
+    # Получаем все активные TV-тарифы, доступные в этом населённом пункте
+    tv_tariffs = Tariff.objects.filter(
+        service__name="Телевидение",
+        is_active=True,
+        localities=locality
+    ).prefetch_related('products', 'included_channels')
+
     products = tariff.products.all().select_related('product__category')  # Изменено на products (ProductItem)
     services = AdditionalService.objects.filter(service_types=tariff.service)
     tv_packages = tariff.tv_packages.all().prefetch_related('channels')
@@ -115,6 +122,7 @@ def order_create(request, locality_slug, slug):
                 {"title": "Заявка на подключение", "url": None},
             ],
             "tariff": tariff,
+            "tv_tariffs": tv_tariffs,
             "products": products,
             "services": services,
             "tv_packages": tv_packages,

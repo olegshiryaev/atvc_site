@@ -46,6 +46,68 @@
                         </div>
                     </div>
                 </section>
+
+                {% if tv_tariffs.exists %}
+                <section class="tv-tariff-section">
+                    <h3 class="tv-tariff-section__title">Добавить телевидение</h3>
+                    <p class="tv-tariff-section__description">Выберите тариф на телевидение — он будет подключён вместе с интернетом</p>
+                    
+                    <div class="tv-tariff-grid">
+                        {% for tv_tariff in tv_tariffs %}
+                            <article class="tv-tariff-card" data-id="{{ tv_tariff.id }}">
+                                <div class="tv-tariff-card__header">
+                                    <div class="tv-tariff-card__content-left">
+                                        <!-- Информация -->
+                                        <div class="tv-tariff-card__info">
+                                            <h5 class="tv-tariff-card__name">{{ tv_tariff.name }}</h5>
+                                            <div class="tv-tariff-card__meta">
+                                                <div class="tv-tariff-card__channels">
+                                                    <i class="bi bi-tv"></i> {{ tv_tariff.channel_count_display }}
+                                                </div>
+                                                <a href="#"
+                                                    data-bs-toggle="modal"
+                                                    data-bs-target="#channelsModal-tariff-{{tv_tariff.id }}"
+                                                    class="tv-tariff-card__channels-link"
+                                                    aria-label="Посмотреть каналы тарифа {{ tv_tariff.name }}">
+                                                    Список каналов
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Переключатель -->
+                                    <div class="tv-tariff-card__switch">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="tv-tariff-checkbox-{{ tv_tariff.id }}"
+                                                onclick="selectTVTariff({{ tv_tariff.id }}, {{ tv_tariff.get_actual_price }}, '{{ tv_tariff.name|escapejs }}')">
+                                            <label class="tv-tariff-card__label" for="tv-tariff-checkbox-{{ tv_tariff.id }}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Описание -->
+                                <p class="tv-tariff-card__description">
+                                    {{ tv_tariff.description|truncatewords:15|safe }}
+                                </p>
+
+                                <!-- Цена -->
+                                <div class="tv-tariff-card__footer">
+                                    <div class="tv-tariff-card__price">
+                                        {{ tv_tariff.get_actual_price }} ₽/мес.
+                                        {% if tv_tariff.is_promo and tv_tariff.promo_months %}
+                                            <small>({{ tv_tariff.promo_months }} мес. по акции)</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </article>
+                            {% include 'core/partials/channels_modal.html' with object=tv_tariff channels=tv_tariff.included_channels.all category_choices=TVChannel.CATEGORY_CHOICES modal_type="tariff" %}
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
                 {% if tv_packages.exists %}
                 <section class="tv-packages">
                     <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
@@ -69,7 +131,7 @@
                                                 <h5 class="tv-package__name">{{ package.name }}</h5>
                                                 <div class="tv-package__meta">
                                                     <div class="tv-package__channels">
-                                                        {{ package.channel_count_display }}
+                                                        <i class="bi bi-tv"></i> {{ package.channel_count_display }}
                                                     </div>
                                                     <a href="#"
                                                        data-bs-toggle="modal"

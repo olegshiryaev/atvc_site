@@ -8700,6 +8700,170 @@ button.swiper-pagination-bullet {
     }
 }
 
+/* === Блок TV-тарифов === */
+
+.tv-tariff-section {
+    margin-bottom: var(--spacing-lg);
+    border-top: 1px solid var(--border-color);
+    padding-top: var(--spacing-lg);
+    animation: fadeIn 0.3s ease-in;
+}
+
+.tv-tariff-section__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-color);
+    margin-bottom: 12px;
+}
+
+.tv-tariff-section__description {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--spacing-md);
+}
+
+/* Сетка карточек */
+.tv-tariff-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    align-items: stretch;
+}
+
+/* Карточка тарифа */
+.tv-tariff-card {
+    border: 1px solid var(--smoky-white-color);
+    background-color: var(--background-color);
+    padding: var(--spacing-md);
+    border-radius: 15px;
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Заголовок карточки */
+.tv-tariff-card__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.tv-tariff-card__content-left {
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    flex-grow: 1;
+    min-width: 0;
+}
+
+/* Изображение */
+.tv-tariff-card__image-container {
+    width: 124px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #f3f4f6;
+}
+
+.tv-tariff-card__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.tv-tariff-card__image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    font-size: 0.75rem;
+    background-color: #e5e7eb;
+}
+
+/* Информация */
+.tv-tariff-card__info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.tv-tariff-card__name {
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 200px;
+}
+
+.tv-tariff-card__meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+    font-size: var(--font-size-sm);
+}
+
+.tv-tariff-card__channels {
+    white-space: nowrap;
+}
+
+.tv-tariff-card__channels i {
+    font-size: 0.875em;
+    opacity: 0.7;
+}
+
+.tv-tariff-card__channels-link {
+    color: var(--main-color);
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+/* Переключатель */
+.tv-tariff-card__switch {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.tv-tariff-card__label {
+    cursor: pointer;
+}
+
+/* Описание */
+.tv-tariff-card__description {
+    font-size: 0.875rem;
+    color: var(--muted-color);
+    margin: 0 0 16px 0;
+    line-height: 1.5;
+}
+
+/* Футер (цена) */
+.tv-tariff-card__footer {
+    margin-top: auto;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.tv-tariff-card__price {
+    font-size: var(--font-size-base);
+    font-weight: 600;
+}
+
+.tv-tariff-card__price small {
+    font-size: 0.875em;
+    color: var(--muted-color);
+    margin-left: 4px;
+}
+
 /* Основной контейнер пакетов ТВ */
 .tv-packages {
     margin-bottom: var(--spacing-lg);
@@ -8780,7 +8944,6 @@ button.swiper-pagination-bullet {
     flex-direction: column;
     gap: var(--spacing-xs);
     font-size: var(--font-size-sm);
-    color: var(--muted-color);
 }
 
 .tv-package__channels {
@@ -8861,7 +9024,7 @@ button.swiper-pagination-bullet {
 
 .equipment__description {
     font-size: var(--font-size-sm);
-    color: var(--muted-color);
+    color: var(--color-text-muted);
     margin-bottom: var(--spacing-md);
 }
 
@@ -9533,6 +9696,10 @@ button.swiper-pagination-bullet {
     
     /* Дополнительные услуги: при ширине до 1024px показываем по одному в ряду */
     .services__list {
+        grid-template-columns: 1fr;
+    }
+
+    .tv-tariff-grid {
         grid-template-columns: 1fr;
     }
     
