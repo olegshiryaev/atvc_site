@@ -100,23 +100,25 @@
             <div class="product-tabs mt-5">
                 <div class="product-tabs-wrapper mb-3">
                     <ul class="nav nav-pills" id="productTabs">
+                        {% if current_item.product.description|striptags|trim %}
+                            <li>
+                                <button class="nav-link active" data-tab="description">Описание</button>
+                            </li>
+                        {% endif %}
                         <li>
-                            <button class="nav-link active" data-tab="description">Описание</button>
-                        </li>
-                        <li>
-                            <button class="nav-link" data-tab="specs">Характеристики</button>
+                            <button class="nav-link {% if not current_item.product.description|striptags|trim %}active{% endif %}" data-tab="specs">Характеристики</button>
                         </li>
                     </ul>
                 </div>
 
                 <div class="tab-content" id="productTabsContent">
-                    <!-- Описание -->
-                    <div class="tab-pane active" id="description">
-                        {{ current_item.product.description|safe }}
-                    </div>
+                    {% if current_item.product.description|striptags|trim %}
+                        <div class="tab-pane active" id="description">
+                            {{ current_item.product.description|safe }}
+                        </div>
+                    {% endif %}
 
-                    <!-- Характеристики -->
-                    <div class="tab-pane" id="specs">
+                    <div class="tab-pane {% if not current_item.product.description|striptags|trim %}active{% endif %}" id="specs">
                         {% if current_item.product.smart_speaker %}
                             {% include "equipments/product/characteristics/smart_speaker.html" with speaker=current_item.product.smart_speaker %}
                         {% elif current_item.product.camera %}
