@@ -16,7 +16,7 @@
                     <!-- Основное изображение -->
                     <div class="gallery__imgs swiper product-gallery-main">
                         <div class="swiper-wrapper">
-                            {% if product.images.exists %}
+                            {% if current_item.images.exists %}
                                 {% for image in current_item.images.all %}
                                     <div class="swiper-slide gallery__item">
                                         <img src="{{ image.image.url }}" alt="{{ current_item }}" class="gallery__item-img lazyloaded">
@@ -29,7 +29,7 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% if product.images.exists %}
+                    {% if current_item.images.exists %}
                         <div class="gallery__bottom slider-navs">
                             <div class="gallery__thumbs swiper product-gallery-thumbs">
                                 <div class="swiper-wrapper">
@@ -262,13 +262,29 @@
 <!-- JavaScript -->
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const tabButtons = document.querySelectorAll('[data-tab]');
-    const tabPanes = document.querySelectorAll('.tab-pane');
-    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
-    const orderButton = document.getElementById('order-button');
-    const priceDisplay = document.getElementById('current-price-display');
+    // === Инициализация галереи товара (основное изображение + миниатюры) ===
+    const galleryThumbs = new Swiper('.product-gallery-thumbs', {
+        spaceBetween: 10,
+        slidesPerView: 4,
+        freeMode: true,
+        watchSlidesProgress: true,
+        watchOverflow: true, // отключает инициализацию, если слайдов недостаточно
+    });
 
-     // Инициализация Swiper для недавно просмотренных
+    const galleryMain = new Swiper('.product-gallery-main', {
+        spaceBetween: 10,
+        navigation: {
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
+        },
+        thumbs: {
+            swiper: galleryThumbs,
+        },
+        watchOverflow: true,
+        loop: false,
+    });
+
+    // === Инициализация слайдера "Недавно просмотренные" ===
     const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
         slidesPerView: 1,
         spaceBetween: 16,
@@ -281,13 +297,16 @@ document.addEventListener('DOMContentLoaded', function () {
             clickable: true,
         },
         breakpoints: {
-            576: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            992: { slidesPerView: 4 },
+            576: { slidesPerView: 2, spaceBetween: 16 },
+            768: { slidesPerView: 3, spaceBetween: 20 },
+            992: { slidesPerView: 4, spaceBetween: 24 },
         },
     });
 
-    // Обработка переключения табов
+    // === Переключение табов (Описание / Характеристики) ===
+    const tabButtons = document.querySelectorAll('[data-tab]');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
     tabButtons.forEach(button => {
         button.addEventListener('click', function () {
             tabButtons.forEach(b => b.classList.remove('active'));
@@ -298,30 +317,50 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Функция для перехода на вкладку "Характеристики"
     window.activateSpecsTab = function(e) {
         e.preventDefault();
         const specsButton = document.querySelector('[data-tab="specs"]');
-        specsButton.click();
-        document.getElementById('specs').scrollIntoView({ behavior: 'smooth' });
+        if (specsButton) {
+            specsButton.click();
+            document.getElementById('specs').scrollIntoView({ behavior: 'smooth' });
+        }
     };
 
-    // Обработка выбора способа оплаты
+    // === Обработка выбора способа оплаты (покупка / рассрочка) ===
+    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+    const orderButton = document.getElementById('order-button');
+    const priceDisplay = document.getElementById('current-price-display');
+
     paymentRadios.forEach(radio => {
         radio.addEventListener('change', function () {
-            // Обновляем отображаемую цену
-            const price = this.dataset.price;
+            const price = parseFloat(this.dataset.price);
             const isMonthly = this.value !== 'purchase';
-            priceDisplay.textContent = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
-            
-            // Обновляем URL кнопки "Заказать"
+
+            // Форматируем цену: 1 299 ₽
+            const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
+
+            // Обновляем отображение цены
+            priceDisplay.textContent = formattedPrice;
+
+            // Обновляем ссылку кнопки "Заказать"
             const baseUrl = "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
             orderButton.href = `${baseUrl}?payment_type=${this.value}`;
-            
-            // Удаляем active класс у всех и добавляем к выбранному
+
+            // Обновляем визуальное выделение
             paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
             this.parentElement.classList.add('active');
         });
     });
+
+    // === Инициализация: установка активного радио и отображения цены ===
+    const initialRadio = document.querySelector('input[name="payment_method"]:checked');
+    if (initialRadio) {
+        const initialPrice = parseFloat(initialRadio.dataset.price);
+        const isMonthly = initialRadio.value !== 'purchase';
+        const formattedPrice = new Intl.NumberFormat('ru-RU').format(initialPrice) + ' ₽' + (isMonthly ? '/мес.' : '');
+        priceDisplay.textContent = formattedPrice;
+    }
 });
 </script>
 {% endblock %}
