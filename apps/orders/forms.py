@@ -53,6 +53,7 @@ class OrderForm(forms.ModelForm):
         widgets = {
             "full_name": forms.TextInput(attrs={
                 "class": "connect-form__input",
+                "id": "name",
                 "placeholder": "Иванов Иван Иванович",
                 "autocomplete": "name",
                 "required": "required",
@@ -60,6 +61,7 @@ class OrderForm(forms.ModelForm):
             }),
             "phone": forms.TextInput(attrs={
                 "class": "connect-form__input",
+                "id": "phone",
                 "placeholder": "+7 (___) ___-__-__",
                 "autocomplete": "tel",
                 "required": "required",
@@ -67,21 +69,30 @@ class OrderForm(forms.ModelForm):
             }),
             "street": forms.TextInput(attrs={
                 "class": "connect-form__input",
+                "id": "street",
                 "placeholder": "ул. Ленина",
                 "autocomplete": "address-line1",
                 "aria-describedby": "error_street",
             }),
             "house": forms.TextInput(attrs={
                 "class": "connect-form__input",
+                "id": "house",
                 "placeholder": "1",
                 "autocomplete": "address-line2",
                 "aria-describedby": "error_house",
             }),
             "apartment": forms.TextInput(attrs={
                 "class": "connect-form__input",
+                "id": "apartment",
                 "placeholder": "1",
                 "autocomplete": "address-line3",
                 "aria-describedby": "error_apartment",
+            }),
+            "comment": forms.Textarea(attrs={
+                "class": "order-form__textarea",
+                "id": "comments",
+                "rows": "2",
+                "placeholder": "Ваш комментарий (необязательно)",
             }),
         }
         labels = {

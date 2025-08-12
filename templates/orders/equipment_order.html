@@ -42,75 +42,94 @@
                                         <span>{{ product_item.color.name }}</span>
                                     </div>
                                 {% endif %}
-                                <!-- Способы оплаты -->
-                                {% if product_item.installment_available %}
-                                    <div class="product-info__payment-selection">
-                                        <h5 class="product-info__variant-title">Способ оплаты</h5>
-                                        <div class="payment-methods__options">
-                                            <label class="payment-method">
-                                                <input 
-                                                    type="radio" 
-                                                    name="payment_type" 
-                                                    value="purchase" 
-                                                    {% if selected_payment_type == 'purchase' %}checked{% endif %}
-                                                    data-price="{{ product_item.get_final_price }}"
-                                                >
-                                                <span class="payment-method__content">
-                                                    <span class="payment-method__title">Полная стоимость</span>
-                                                    <span class="payment-method__price">{{ product_item.get_final_price|intcomma }} ₽</span>
-                                                </span>
-                                            </label>
-                                            {% if product_item.installment_12_months %}
-                                                <label class="payment-method">
-                                                    <input 
-                                                        type="radio" 
-                                                        name="payment_type" 
-                                                        value="installment12"
-                                                        {% if selected_payment_type == 'installment12' %}checked{% endif %}
-                                                        data-price="{{ product_item.installment_12_months }}"
-                                                    >
-                                                    <span class="payment-method__content">
-                                                        <span class="payment-method__title">Рассрочка на 12 месяцев</span>
-                                                        <span class="payment-method__price">{{ product_item.installment_12_months|intcomma }} ₽/мес.</span>
-                                                    </span>
-                                                </label>
-                                            {% endif %}
-                                            {% if product_item.installment_24_months %}
-                                                <label class="payment-method">
-                                                    <input 
-                                                        type="radio" 
-                                                        name="payment_type" 
-                                                        value="installment24"
-                                                        {% if selected_payment_type == 'installment24' %}checked{% endif %}
-                                                        data-price="{{ product_item.installment_24_months }}"
-                                                    >
-                                                    <span class="payment-method__content">
-                                                        <span class="payment-method__title">Рассрочка на 24 месяца</span>
-                                                        <span class="payment-method__price">{{ product_item.installment_24_months|intcomma }} ₽/мес.</span>
-                                                    </span>
-                                                </label>
-                                            {% endif %}
-                                            {% if product_item.installment_48_months %}
-                                                <label class="payment-method">
-                                                    <input 
-                                                        type="radio" 
-                                                        name="payment_type" 
-                                                        value="installment48"
-                                                        {% if selected_payment_type == 'installment48' %}checked{% endif %}
-                                                        data-price="{{ product_item.installment_48_months }}"
-                                                    >
-                                                    <span class="payment-method__content">
-                                                        <span class="payment-method__title">Рассрочка на 48 месяцев</span>
-                                                        <span class="payment-method__price">{{ product_item.installment_48_months|intcomma }} ₽/мес.</span>
-                                                    </span>
-                                                </label>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                {% endif %}
                             </div>
                         </div>
                     </section>
+                
+                    {% if product_item.installment_available %}
+                    <!-- Способ приобретения оборудования -->
+                    <section class="payment-methods">
+                        <h3 class="payment-methods__title">Выберите подходящий вариант оплаты</h3>
+                        <div class="payment-methods__options">
+                            <label class="payment-method">
+                                <input 
+                                    type="radio" 
+                                    name="payment_type" 
+                                    value="purchase" 
+                                    {% if selected_payment_type == 'purchase' %}checked{% endif %}
+                                    data-price="{{ product_item.get_final_price }}"
+                                >
+                                <span class="payment-method__content">
+                                    <span class="payment-method__title">Полная стоимость</span>
+                                    <span class="payment-method__price">{{ product_item.get_final_price|intcomma }} ₽</span>
+                                </span>
+                            </label>
+                            {% if product_item.installment_12_months %}
+                                <label class="payment-method">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_type" 
+                                        value="installment12"
+                                        {% if selected_payment_type == 'installment12' %}checked{% endif %}
+                                        data-price="{{ product_item.installment_12_months }}"
+                                    >
+                                    <span class="payment-method__content">
+                                        <span class="payment-method__title">Рассрочка на 12 месяцев</span>
+                                        <span class="payment-method__price">{{ product_item.installment_12_months|intcomma }} ₽/мес.</span>
+                                    </span>
+                                </label>
+                            {% endif %}
+                            {% if product_item.installment_24_months %}
+                                <label class="payment-method">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_type" 
+                                        value="installment24"
+                                        {% if selected_payment_type == 'installment24' %}checked{% endif %}
+                                        data-price="{{ product_item.installment_24_months }}"
+                                    >
+                                    <span class="payment-method__content">
+                                        <span class="payment-method__title">Рассрочка на 24 месяца</span>
+                                        <span class="payment-method__price">{{ product_item.installment_24_months|intcomma }} ₽/мес.</span>
+                                    </span>
+                                </label>
+                            {% endif %}
+                            {% if product_item.installment_48_months %}
+                                <label class="payment-method">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_type" 
+                                        value="installment48"
+                                        {% if selected_payment_type == 'installment48' %}checked{% endif %}
+                                        data-price="{{ product_item.installment_48_months }}"
+                                    >
+                                    <span class="payment-method__content">
+                                        <span class="payment-method__title">Рассрочка на 48 месяцев</span>
+                                        <span class="payment-method__price">{{ product_item.installment_48_months|intcomma }} ₽/мес.</span>
+                                    </span>
+                                </label>
+                            {% endif %}
+                        </div>         
+                    </section>
+                    {% endif %}
+
+                    <!-- Блок итогов (на мобильных — между товаром и формой) -->
+                    <aside class="summary summary--mobile">
+                        <div class="summary__content">
+                            <h3 class="summary__title">Заявка на оборудование</h3>
+                            <div class="summary__section" id="equipmentSummaryMobile">
+                                <h5 class="summary__section-title">Оборудование</h5>
+                                <div class="summary__item">
+                                    <span class="summary__item-name">{{ product_item.get_display_name }}</span>
+                                    <span class="summary__item-value" id="summary-price-mobile">{{ product_item.get_price_display }}</span>
+                                </div>
+                            </div>
+                            <div class="summary__total">
+                                <h5 class="summary__total-title">Итого к оплате</h5>
+                                <h5 class="summary__total-value" id="summary-total-mobile">{{ product_item.get_price_display }}</h5>
+                            </div>
+                        </div>
+                    </aside>
 
                     <!-- Форма заявки -->
                     <section class="order-form__section">
@@ -120,22 +139,83 @@
                         </noscript>
                         <form class="order-form__form" id="orderForm" method="post" action="{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product_item.id %}">
                             {% csrf_token %}
-                            <!-- Поля формы -->
-                            {{ form.as_p }}
-                            <!-- Ошибки формы -->
-                            <div id="form-errors" class="error-container">
-                                {% if form.errors %}
-                                    <ul class="errorlist">
-                                        {% for field in form %}
-                                            {% for error in field.errors %}
-                                                <li>{{ field.label }}: {{ error }}</li>
+                            <div class="order-form__fields">
+                                <!-- Имя -->
+                                <div class="order-form__field order-form__field--full-name">
+                                    <label for="id_full_name" class="order-form__label">Ваше имя</label>
+                                    {{ form.full_name }}
+                                    <div id="error_full_name" class="order-form__validation-message">
+                                        {% if form.full_name.errors %}{{ form.full_name.errors.0 }}{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Телефон -->
+                                <div class="order-form__field order-form__field--phone">
+                                    <label for="id_phone" class="order-form__label">Номер телефона</label>
+                                    {{ form.phone }}
+                                    <div id="error_phone" class="order-form__validation-message">
+                                        {% if form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Второй ряд: Улица, Дом, Квартира -->
+                                <div class="order-form__row--address">
+                                    <!-- Улица -->
+                                    <div class="order-form__field order-form__field--street">
+                                        <label for="id_street" class="order-form__label">Улица</label>
+                                        {{ form.street }}
+                                        <div id="error_street" class="order-form__validation-message">
+                                            {% if form.street.errors %}{{ form.street.errors.0 }}{% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Дом -->
+                                    <div class="order-form__field order-form__field--house">
+                                        <label for="id_house" class="order-form__label">Дом</label>
+                                        {{ form.house }}
+                                        <div id="error_house" class="order-form__validation-message">
+                                            {% if form.house.errors %}{{ form.house.errors.0 }}{% endif %}
+                                        </div>
+                                    </div>
+
+                                    <!-- Квартира -->
+                                    <div class="order-form__field order-form__field--apartment">
+                                        <label for="id_apartment" class="order-form__label">Квартира</label>
+                                        {{ form.apartment }}
+                                        <div id="error_apartment" class="order-form__validation-message">
+                                            {% if form.apartment.errors %}{{ form.apartment.errors.0 }}{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Комментарий -->
+                                <div class="order-form__field order-form__field--comments">
+                                    <label for="id_comment" class="order-form__label">Комментарий (необязательно)</label>
+                                    {{ form.comment }}
+                                    <div id="error_comment" class="order-form__validation-message">
+                                        {% if form.comment.errors %}{{ form.comment.errors.0 }}{% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Скрытые поля (не отображаем) -->
+                                {{ form.product_item_id }}
+                                {{ form.payment_type }}
+                                {{ form.tariff_id }}
+                                {{ form.selected_equipment_ids }}
+                                {{ form.equipment_payment_options }}
+                                {{ form.selected_service_slugs }}
+                                {{ form.selected_tv_package_ids }}
+
+                                <!-- Общие ошибки формы -->
+                                <div id="form-errors" class="error-container">
+                                    {% if form.non_field_errors %}
+                                        <ul class="errorlist">
+                                            {% for error in form.non_field_errors %}
+                                                <li>{{ error }}</li>
                                             {% endfor %}
-                                        {% endfor %}
-                                        {% for error in form.non_field_errors %}
-                                            <li>{{ error }}</li>
-                                        {% endfor %}
-                                    </ul>
-                                {% endif %}
+                                        </ul>
+                                    {% endif %}
+                                </div>
                             </div>
                             <!-- Согласие и кнопка -->
                             <div class="order-form__field order-form__field--actions">
@@ -227,14 +307,19 @@ document.addEventListener('DOMContentLoaded', () => {
         const isMonthly = selectedPayment !== 'purchase';
         const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
 
+        // Обновляем отображение цены
         priceDisplay.textContent = formattedPrice;
         summaryPrice.textContent = formattedPrice;
         summaryTotal.textContent = formattedPrice;
 
-        // Обновляем поле формы payment_type
+        // 🔥 Обновляем мобильную версию итогов
+        document.querySelector('#summary-price-mobile').textContent = formattedPrice;
+        document.querySelector('#summary-total-mobile').textContent = formattedPrice;
+
+        // Обновляем поле формы
         document.querySelector('#orderForm [name="payment_type"]').value = selectedPayment;
 
-        // Удаляем active класс у всех и добавляем к выбранному
+        // Активация выбранного способа оплаты
         paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
         document.querySelector(`input[name="payment_type"][value="${selectedPayment}"]`).parentElement.classList.add('active');
     }
