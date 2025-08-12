@@ -77,11 +77,11 @@
                                 <div class="sortings__item-label">Цене ↓</div>
                             </label>
 
-                            <label class="sortings__item sortings__item_discount sortings__item_desc">
+                            {% comment %} <label class="sortings__item sortings__item_discount sortings__item_desc">
                                 <input class="sortings__item-value" type="radio" name="sort_by" value="discount"
                                     {% if sort_by == "discount" %}checked{% endif %}>
                                 <div class="sortings__item-label">Со скидкой</div>
-                            </label>
+                            </label> {% endcomment %}
                     </form>
                     <button class="products-panel__reset" data-products-full-reset="">Сбросить всё</button>
                 </div>
