@@ -70,7 +70,7 @@
                         </div>
                         <div class="tv-console__price-box tv-console__price-box--desktop">
                                             <button class="tv-console__buy-btn btn"
-                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=tv_box_product.product.id %}'">
+                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=tv_box_product.id %}'">
                                                 Заказать
                                             </button>
                             <div class="tv-console__price-info">
@@ -246,7 +246,7 @@
                                 <div class="product-card__footer">
                                     <div class="product-card__price h5">{{ item.get_price_display }}</div>
                                     <button class="product-card__btn btn"
-                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_id=item.product.id %}'">
+                                            onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=item.id %}'">
                                         Заказать
                                     </button>
                                 </div>
