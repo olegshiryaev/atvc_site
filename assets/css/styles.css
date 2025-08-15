@@ -8871,6 +8871,21 @@ button.swiper-pagination-bullet {
     animation: fadeIn 0.3s ease-in;
 }
 
+.tv-packages {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+.tv-packages[style*="display: none"] {
+    opacity: 0;
+}
+.tv-package {
+    transition: opacity 0.3s ease-in-out;
+    opacity: 1;
+}
+.tv-package[style*="display: none"] {
+    opacity: 0;
+}
+
 /* Заголовок и описание секции */
 .tv-packages__title {
     font-size: var(--font-size-lg);

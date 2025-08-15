@@ -31,45 +31,52 @@ def order_create(request, locality_slug, slug):
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
-    # Определяем, является ли текущий тариф интернет-тарифом через slug
     is_internet_tariff = tariff.service.slug == "internet"
+    is_tv_tariff = tariff.service.slug == "tv"
 
-    # Получаем все активные TV-тарифы, доступные в этом населённом пункте
     tv_tariffs = Tariff.objects.none()
+    tv_packages = TVChannelPackage.objects.none()
+
     if is_internet_tariff:
         tv_tariffs = Tariff.objects.filter(
             service__slug="tv",
             is_active=True,
             localities=locality
         ).prefetch_related('products', 'included_channels')
+        tv_packages = TVChannelPackage.objects.filter(
+            tariffs__in=tv_tariffs
+        ).prefetch_related('channels', 'tariffs').distinct()
+    elif is_tv_tariff:
+        tv_tariffs = Tariff.objects.filter(id=tariff.id)
+        tv_packages = tariff.tv_packages.all().prefetch_related('channels', 'tariffs')
+        if not tv_packages.exists():
+            logger.info(f"Для ТВ-тарифа {tariff.slug} нет связанных пакетов")
+    else:
+        logger.warning(f"Неизвестный тип услуги для тарифа {tariff.slug}")
+
+    logger.debug(f"Количество ТВ-тарифов: {tv_tariffs.count()}, ТВ-пакетов: {tv_packages.count()}")
 
     products = tariff.products.all().select_related('product__category')
     services = AdditionalService.objects.filter(service_types=tariff.service).distinct()
-    tv_packages = tariff.tv_packages.all().prefetch_related('channels')
 
     if request.method == "POST":
         form = OrderForm(request.POST, locality=locality)
         if form.is_valid():
             logger.debug(f"Очищенные данные формы: {form.cleaned_data}")
 
-            # Создаём заявку
             order = form.save(commit=False)
             order.locality = locality
-            order.save()  # Сохраняем, чтобы получить ID
+            order.save()
 
-            # === ОБРАБОТКА ТАРИФОВ ===
             tariff_ids = form.cleaned_data.get("tariff_ids", [])
             if not tariff_ids:
-                tariff_ids = [tariff.id]  # Добавляем основной тариф
+                tariff_ids = [tariff.id]
             else:
-                # Гарантируем, что основной интернет-тариф включён
-                if tariff.id not in tariff_ids:
-                    tariff_ids.append(tariff.id)
+                tariff_ids = list(set(tariff_ids + [tariff.id]))
+                logger.debug(f"Обработанные tariff_ids: {tariff_ids}")
 
-            # Получаем выбранные тарифы
             selected_tariffs = Tariff.objects.filter(id__in=tariff_ids, is_active=True)
 
-            # Валидация: нельзя выбрать два тарифа на одну услугу
             service_ids = list(selected_tariffs.values_list('service__id', flat=True))
             if len(service_ids) != len(set(service_ids)):
                 form.add_error(None, "Нельзя выбрать более одного тарифа на одну услугу.")
@@ -81,13 +88,15 @@ def order_create(request, locality_slug, slug):
                     "services": services,
                     "tv_packages": tv_packages,
                     "locality": locality,
+                    "is_tv_tariff": is_tv_tariff,
+                    "is_internet_tariff": is_internet_tariff,
+                    "no_tv_packages": not tv_packages.exists(),
                 })
 
-            # Сохраняем тарифы
             order.tariffs.set(selected_tariffs)
-            logger.debug(f"Добавлены тарифы: {[t.id for t in selected_tariffs]}")
+            total_connection_price = sum(t.connection_price for t in selected_tariffs)
+            logger.debug(f"Добавлены тарифы: {[t.id for t in selected_tariffs]}, общая стоимость подключения: {total_connection_price}")
 
-            # === ОБРАБОТКА ОБОРУДОВАНИЯ ===
             equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
             payment_options = form.cleaned_data.get("equipment_payment_options", {})
 
@@ -111,16 +120,13 @@ def order_create(request, locality_slug, slug):
                     payment_type=payment_type
                 )
 
-            # === ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ УСЛУГ ===
             service_slugs = form.cleaned_data.get("selected_service_slugs", [])
             if service_slugs:
                 order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
                 logger.debug(f"Добавлены услуги: {service_slugs}")
 
-            # === ОБРАБОТКА ТВ-ПАКЕТОВ ===
             tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
             if tv_package_ids:
-                # Проверяем, что есть TV-тариф
                 if not order.tariffs.filter(service__slug="tv").exists():
                     form.add_error(None, "Пакеты ТВ-каналов можно выбрать только при наличии тарифа на телевидение.")
                     return render(request, "core/tariffs/order_create.html", {
@@ -131,19 +137,38 @@ def order_create(request, locality_slug, slug):
                         "services": services,
                         "tv_packages": tv_packages,
                         "locality": locality,
+                        "is_tv_tariff": is_tv_tariff,
+                        "is_internet_tariff": is_internet_tariff,
+                        "no_tv_packages": not tv_packages.exists(),
                     })
-                order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
-                logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
+                tv_tariff = order.tariffs.filter(service__slug="tv").first()
+                if tv_tariff:
+                    valid_packages = tv_tariff.tv_packages.filter(id__in=tv_package_ids)
+                    if valid_packages.count() != len(tv_package_ids):
+                        form.add_error(None, "Некоторые ТВ-пакеты не совместимы с выбранным ТВ-тарифом.")
+                        logger.warning(f"Несовместимые ТВ-пакеты: {set(tv_package_ids) - set(valid_packages.values_list('id', flat=True))}")
+                        return render(request, "core/tariffs/order_create.html", {
+                            "form": form,
+                            "tariff": tariff,
+                            "tv_tariffs": tv_tariffs,
+                            "products": products,
+                            "services": services,
+                            "tv_packages": tv_packages,
+                            "locality": locality,
+                            "is_tv_tariff": is_tv_tariff,
+                            "is_internet_tariff": is_internet_tariff,
+                            "no_tv_packages": not tv_packages.exists(),
+                        })
+                    order.tv_packages.set(valid_packages)
+                    logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
 
-            # === ОТПРАВКА УВЕДОМЛЕНИЯ ===
-            logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {[t.name for t in order.tariffs.all()]}")
+            logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {[t.name for t in order.tariffs.all()]}, общая стоимость подключения: {total_connection_price}")
             try:
                 admin_url = request.build_absolute_uri(reverse('admin:orders_order_change', args=[order.id]))
-                # send_order_notification.delay(order.id, admin_url)  # Раскомментируйте, если используете Celery
+                # send_order_notification.delay(order.id, admin_url)
             except Exception as e:
                 logger.error(f"Ошибка при формировании ссылки админки: {str(e)}")
 
-            # === ОТВЕТ ===
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     "success": True,
@@ -185,6 +210,9 @@ def order_create(request, locality_slug, slug):
             "CATEGORY_CHOICES": TVChannel.CATEGORY_CHOICES,
             "form": form,
             "locality": locality,
+            "is_tv_tariff": is_tv_tariff,
+            "is_internet_tariff": is_internet_tariff,
+            "no_tv_packages": not tv_packages.exists(),
         },
     )
 
