@@ -5050,7 +5050,7 @@ button.swiper-pagination-bullet {
 /* Название и описание */
 .product-card__title {
     margin: 0 0 10px;
-    font-size: var(--font-size-xl);
+    font-size: var(--font-size-lg);
     font-weight: 600;
     line-height: 25px;
     display: -webkit-box;
