@@ -226,25 +226,54 @@ def submit_order(request, locality_slug):
         logger.debug(f"Очищенные данные: {form.cleaned_data}")
         order = form.save(commit=False)
         order.locality = locality
+        order.save()  # Сохраняем, чтобы можно было работать с M2M
+
+        # === Обработка тарифов ===
+        tariff_ids_to_add = []
+
+        # 1. Основной tariff_id (если есть)
         tariff_id = form.cleaned_data.get("tariff_id")
         if tariff_id:
-            order.tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True)
-        order.save()
+            tariff_ids_to_add.append(tariff_id)
 
-        equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
-        payment_options = form.cleaned_data.get("equipment_payment_options", {})
+        # 2. Дополнительные тарифы из tariff_ids (например, интернет + ТВ)
+        additional_tariff_ids = form.cleaned_data.get("tariff_ids")
+        if isinstance(additional_tariff_ids, list):
+            tariff_ids_to_add.extend(additional_tariff_ids)
+
+        # Убираем дубликаты
+        tariff_ids_to_add = list(set(tariff_ids_to_add))
+
+        # Фильтруем только активные тарифы
+        tariffs = Tariff.objects.filter(id__in=tariff_ids_to_add, is_active=True)
+        if tariffs.exists():
+            order.tariffs.add(*tariffs)
+            logger.debug(f"Добавлены тарифы: {list(tariffs.values_list('name', flat=True))}")
+        else:
+            logger.debug("Ни один тариф не был добавлен (не найдены или неактивны)")
+
+        # === Обработка оборудования ===
+        equipment_ids = form.cleaned_data.get("selected_equipment_ids")
+        if not isinstance(equipment_ids, list):
+            equipment_ids = []
+        payment_options = form.cleaned_data.get("equipment_payment_options") or {}
+        if not isinstance(payment_options, dict):
+            payment_options = {}
+
         logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
 
         for product_id in equipment_ids:
             product_item = get_object_or_404(ProductItem, id=product_id)
             payment_type = payment_options.get(str(product_id), 'purchase')
             price = product_item.get_final_price()
+
             if payment_type == 'installment12' and product_item.installment_12_months:
                 price = product_item.installment_12_months
             elif payment_type == 'installment24' and product_item.installment_24_months:
                 price = product_item.installment_24_months
             elif payment_type == 'installment48' and product_item.installment_48_months:
                 price = product_item.installment_48_months
+
             OrderProduct.objects.create(
                 order=order,
                 product_item=product_item,
@@ -253,19 +282,31 @@ def submit_order(request, locality_slug):
                 payment_type=payment_type
             )
 
-        service_slugs = form.cleaned_data.get("selected_service_slugs", [])
-        if service_slugs:
-            order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
-            logger.debug(f"Добавлены услуги: {service_slugs}")
+        # === Дополнительные услуги ===
+        service_slugs = form.cleaned_data.get("selected_service_slugs")
+        if isinstance(service_slugs, list):
+            services = AdditionalService.objects.filter(slug__in=service_slugs)
+            if services.exists():
+                order.services.set(services)
+                logger.debug(f"Добавлены услуги: {list(services.values_list('name', flat=True))}")
 
-        tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
-        if tv_package_ids:
-            order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
-            logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
+        # === ТВ-пакеты ===
+        tv_package_ids = form.cleaned_data.get("selected_tv_package_ids")
+        if isinstance(tv_package_ids, list):
+            tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids)
+            if tv_packages.exists():
+                order.tv_packages.set(tv_packages)
+                logger.debug(f"Добавлены ТВ-пакеты: {list(tv_packages.values_list('name', flat=True))}")
+
+        # === Логирование (с несколькими тарифами) ===
+        tariff_names = ", ".join(t.name for t in order.tariffs.all())
+        tariff_display = tariff_names if tariff_names else "не указаны"
 
         logger.info(
-            f"Заявка #{order.id} создана для {locality.name}, тариф: {order.tariff.name if order.tariff else 'не указан'}"
+            f"Заявка #{order.id} создана для {locality.name}, тарифы: {tariff_display}"
         )
+
+        # === Уведомление ===
         try:
             admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
             send_order_notification.delay(order.id, admin_url)

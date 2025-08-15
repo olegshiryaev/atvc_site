@@ -178,6 +178,14 @@ class ProductItem(BaseModel):
         related_name="items",
         verbose_name="Товар",
     )
+    display_name = models.CharField(
+        "Отображаемое название",
+        max_length=300,
+        default="",  # временный дефолт, будет пересчитан в миграции
+        blank=False,
+        null=False,
+        help_text="Название, под которым товарная позиция отображается на сайте. Можно редактировать."
+    )
     color = models.ForeignKey(
         Color,
         on_delete=models.SET_NULL,
@@ -222,31 +230,15 @@ class ProductItem(BaseModel):
     )
 
     def save(self, *args, **kwargs):
-        if not self.slug:
-            # Генерируем slug на основе товара + цвета
-            base_value = f"{self.product.name} {self.color.name}" if self.color else self.product.name
-            self.slug = self.generate_unique_slug(base_value)
+        if not self.slug and self.display_name:
+            self.slug = self.generate_unique_slug(self.display_name)
         super().save(*args, **kwargs)
 
     def get_display_name(self):
-        base_name = self.product.name
-        product_type = self.product.get_display_type()
-
-        if product_type:
-            full_name = f"{product_type} {base_name}"
-        else:
-            full_name = base_name
-
-        # Проверяем, является ли текущая товарная позиция единственной для продукта
-        if self.color and self.product.items.count() > 1:
-            color_name = self.color.name.strip()
-            color_name_lower = color_name[0].lower() + color_name[1:] if color_name else ""
-            full_name += f", {color_name_lower}"
-
-        return full_name
+        return self.display_name
 
     def __str__(self):
-        return self.get_display_name()
+        return self.display_name
 
     def get_final_price(self):
         """

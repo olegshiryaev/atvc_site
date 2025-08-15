@@ -9,10 +9,12 @@ class ProductItemInline(admin.TabularInline):
     model = ProductItem
     extra = 1
     fields = (
-        'admin_image_preview', 'color', 'price', 'old_price', 'in_stock', 
-        'article', 'slug', 'installment_badge'
+        'display_name', 'admin_image_preview', 'color', 'price', 'old_price',
+        'in_stock', 'article', 'slug', 'installment_badge'
     )
-    readonly_fields = ('admin_image_preview', 'slug', 'installment_badge')
+    readonly_fields = (
+        'admin_image_preview', 'slug', 'installment_badge'
+    )
     autocomplete_fields = ('color',)
     show_change_link = True
 
@@ -38,6 +40,9 @@ class ProductItemInline(admin.TabularInline):
             parts.append(f"48м: {intcomma(obj.installment_48_months)}")
         return format_html('<br>'.join(parts))
     installment_badge.short_description = "Рассрочка"
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('color')
 
 
 class ProductImageInline(admin.TabularInline):
@@ -137,17 +142,21 @@ class TvBoxInline(admin.StackedInline):
 @admin.register(ProductItem)
 class ProductItemAdmin(admin.ModelAdmin):
     list_display = (
-        'product_link', 'color', 'price_display', 'old_price', 
+        'product_link', 'display_name', 'color', 'price_display', 'old_price', 
         'in_stock', 'is_in_stock', 'images_count', 'installment_badge'
     )
     list_filter = ('color', 'in_stock', 'product__category', 'installment_available')
-    search_fields = ('product__name', 'article', 'color__name')
+    search_fields = ('product__name', 'article', 'color__name', 'display_name')  # + display_name
     autocomplete_fields = ('product', 'color')
     readonly_fields = ('slug', 'get_main_image_preview')
-    
+    prepopulated_fields = {'slug': ('display_name',)}  # ← теперь slug из display_name
+
     fieldsets = (
         (None, {
-            'fields': ('product', 'color', 'price', 'old_price', 'in_stock', 'article', 'slug')
+            'fields': (
+                'product', 'display_name', 'color', 'price', 'old_price', 
+                'in_stock', 'article', 'slug'
+            )
         }),
         ('Изображение', {
             'fields': ('get_main_image_preview',)
@@ -170,6 +179,11 @@ class ProductItemAdmin(admin.ModelAdmin):
         url = reverse('admin:equipments_product_change', args=[obj.product.pk])
         return format_html('<a href="{}">{}</a>', url, obj.product.name)
     product_link.short_description = "Товар"
+
+    def display_name(self, obj):
+        return obj.display_name
+    display_name.short_description = "Название на сайте"
+    display_name.admin_order_field = 'display_name'
 
     def price_display(self, obj):
         return f"{intcomma(obj.price)} ₽"
@@ -196,7 +210,6 @@ class ProductItemAdmin(admin.ModelAdmin):
     get_main_image_preview.short_description = "Основное изображение"
     get_main_image_preview.allow_tags = True
 
-    # === НОВОЕ: Отображение рассрочки в списке ===
     def installment_badge(self, obj):
         if not obj.installment_available:
             return format_html('<span style="color: #999; font-size: 0.9em;">—</span>')
