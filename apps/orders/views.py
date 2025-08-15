@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
@@ -26,69 +27,123 @@ logger = logging.getLogger('orders')
 
 def order_create(request, locality_slug, slug):
     logger.debug(f"Получен запрос: {request.method}, URL: {request.path}, POST: {dict(request.POST)}")
+    
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     tariff = get_object_or_404(Tariff, slug=slug, is_active=True)
 
-    # Получаем все активные TV-тарифы, доступные в этом населённом пункте
-    tv_tariffs = Tariff.objects.filter(
-        service__name="Телевидение",
-        is_active=True,
-        localities=locality
-    ).prefetch_related('products', 'included_channels')
+    # Определяем, является ли текущий тариф интернет-тарифом через slug
+    is_internet_tariff = tariff.service.slug == "internet"
 
-    products = tariff.products.all().select_related('product__category')  # Изменено на products (ProductItem)
-    services = AdditionalService.objects.filter(service_types=tariff.service)
+    # Получаем все активные TV-тарифы, доступные в этом населённом пункте
+    tv_tariffs = Tariff.objects.none()
+    if is_internet_tariff:
+        tv_tariffs = Tariff.objects.filter(
+            service__slug="tv",
+            is_active=True,
+            localities=locality
+        ).prefetch_related('products', 'included_channels')
+
+    products = tariff.products.all().select_related('product__category')
+    services = AdditionalService.objects.filter(service_types=tariff.service).distinct()
     tv_packages = tariff.tv_packages.all().prefetch_related('channels')
 
     if request.method == "POST":
         form = OrderForm(request.POST, locality=locality)
-        logger.debug(f"Полученные данные формы: {dict(request.POST)}")
         if form.is_valid():
-            logger.debug(f"Очищенные данные: {form.cleaned_data}")
-            order = form.save(commit=False)
-            order.tariff = tariff
-            order.locality = locality
-            order.save()
+            logger.debug(f"Очищенные данные формы: {form.cleaned_data}")
 
+            # Создаём заявку
+            order = form.save(commit=False)
+            order.locality = locality
+            order.save()  # Сохраняем, чтобы получить ID
+
+            # === ОБРАБОТКА ТАРИФОВ ===
+            tariff_ids = form.cleaned_data.get("tariff_ids", [])
+            if not tariff_ids:
+                tariff_ids = [tariff.id]  # Добавляем основной тариф
+            else:
+                # Гарантируем, что основной интернет-тариф включён
+                if tariff.id not in tariff_ids:
+                    tariff_ids.append(tariff.id)
+
+            # Получаем выбранные тарифы
+            selected_tariffs = Tariff.objects.filter(id__in=tariff_ids, is_active=True)
+
+            # Валидация: нельзя выбрать два тарифа на одну услугу
+            service_ids = list(selected_tariffs.values_list('service__id', flat=True))
+            if len(service_ids) != len(set(service_ids)):
+                form.add_error(None, "Нельзя выбрать более одного тарифа на одну услугу.")
+                return render(request, "core/tariffs/order_create.html", {
+                    "form": form,
+                    "tariff": tariff,
+                    "tv_tariffs": tv_tariffs,
+                    "products": products,
+                    "services": services,
+                    "tv_packages": tv_packages,
+                    "locality": locality,
+                })
+
+            # Сохраняем тарифы
+            order.tariffs.set(selected_tariffs)
+            logger.debug(f"Добавлены тарифы: {[t.id for t in selected_tariffs]}")
+
+            # === ОБРАБОТКА ОБОРУДОВАНИЯ ===
             equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
             payment_options = form.cleaned_data.get("equipment_payment_options", {})
-            logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
+
             for product_id in equipment_ids:
                 product_item = get_object_or_404(ProductItem, id=product_id)
                 payment_type = payment_options.get(str(product_id), 'purchase')
-                price = product_item.get_final_price()  # Цена по умолчанию для покупки
+                price = product_item.get_final_price()
+
                 if payment_type == 'installment12' and product_item.installment_12_months:
                     price = product_item.installment_12_months
                 elif payment_type == 'installment24' and product_item.installment_24_months:
                     price = product_item.installment_24_months
                 elif payment_type == 'installment48' and product_item.installment_48_months:
                     price = product_item.installment_48_months
+
                 OrderProduct.objects.create(
                     order=order,
-                    product=product_item.product,  # Сохраняем связь с Product
-                    variant=product_item,  # Сохраняем конкретную товарную позицию
+                    product_item=product_item,
                     price=price,
                     quantity=1,
                     payment_type=payment_type
                 )
 
+            # === ОБРАБОТКА ДОПОЛНИТЕЛЬНЫХ УСЛУГ ===
             service_slugs = form.cleaned_data.get("selected_service_slugs", [])
             if service_slugs:
                 order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
                 logger.debug(f"Добавлены услуги: {service_slugs}")
 
+            # === ОБРАБОТКА ТВ-ПАКЕТОВ ===
             tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
             if tv_package_ids:
+                # Проверяем, что есть TV-тариф
+                if not order.tariffs.filter(service__slug="tv").exists():
+                    form.add_error(None, "Пакеты ТВ-каналов можно выбрать только при наличии тарифа на телевидение.")
+                    return render(request, "core/tariffs/order_create.html", {
+                        "form": form,
+                        "tariff": tariff,
+                        "tv_tariffs": tv_tariffs,
+                        "products": products,
+                        "services": services,
+                        "tv_packages": tv_packages,
+                        "locality": locality,
+                    })
                 order.tv_packages.set(TVChannelPackage.objects.filter(id__in=tv_package_ids))
+                logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
 
-            logger.info(f"Заявка #{order.id} создана для {locality.name}, тариф: {tariff.name}")
+            # === ОТПРАВКА УВЕДОМЛЕНИЯ ===
+            logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {[t.name for t in order.tariffs.all()]}")
             try:
-                admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
-                send_order_notification.delay(order.id, admin_url)
-                logger.info(f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь")
+                admin_url = request.build_absolute_uri(reverse('admin:orders_order_change', args=[order.id]))
+                # send_order_notification.delay(order.id, admin_url)  # Раскомментируйте, если используете Celery
             except Exception as e:
-                logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
+                logger.error(f"Ошибка при формировании ссылки админки: {str(e)}")
 
+            # === ОТВЕТ ===
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     "success": True,
@@ -96,7 +151,8 @@ def order_create(request, locality_slug, slug):
                     "order_id": order.id,
                     "locality_slug": locality_slug
                 })
-            return redirect("orders:order_success", pk=order.id)
+            return redirect("orders:order_success", pk=order.id, locality_slug=locality_slug)
+
         else:
             logger.warning(f"Ошибка валидации формы: {form.errors}")
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
@@ -115,7 +171,7 @@ def order_create(request, locality_slug, slug):
         request,
         "core/tariffs/order_create.html",
         {
-            "title": f"Заявка на подключение",
+            "title": "Заявка на подключение",
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},
                 {"title": tariff.service.name, "url": None},

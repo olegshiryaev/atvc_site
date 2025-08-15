@@ -22,10 +22,10 @@ class OrderProductInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderProductInline]
     list_display = (
-        'id', 'full_name', 'phone', 'locality_link', 'tariff_link',
+        'id', 'full_name', 'phone', 'locality_link', 'tariffs_display',
         'status', 'total_cost', 'created_at', 'products_count'
     )
-    list_filter = ('status', 'created_at', 'locality', 'tariff')
+    list_filter = ('status', 'created_at', 'locality', 'tariffs')  # ✅ Исправлено: 'tariffs' вместо 'tariff'
     search_fields = (
         'full_name', 'phone', 'email',
         'order_products__product_item__product__name',
@@ -35,41 +35,39 @@ class OrderAdmin(admin.ModelAdmin):
     actions = ['mark_as_processed', 'mark_as_completed']
 
     def locality_link(self, obj):
-        """Отображение ссылки на страницу админки населённого пункта."""
         if obj.locality:
             url = reverse('admin:cities_locality_change', args=[obj.locality.id])
             return format_html('<a href="{}">{}</a>', url, obj.locality.name)
         return '-'
     locality_link.short_description = 'Населенный пункт'
 
-    def tariff_link(self, obj):
-        """Отображение ссылки на страницу админки тарифа."""
-        if obj.tariff:
-            url = reverse('admin:core_tariff_change', args=[obj.tariff.id])
-            return format_html('<a href="{}">{}</a>', url, obj.tariff.name)
+    def tariffs_display(self, obj):
+        """Отображает список тарифов через запятую с ссылками в админке."""
+        if obj.tariffs.exists():
+            tariff_links = []
+            for tariff in obj.tariffs.all():
+                url = reverse('admin:core_tariff_change', args=[tariff.id])
+                tariff_links.append(format_html('<a href="{}">{}</a>', url, tariff.name))
+            return format_html(', '.join(tariff_links))
         return '-'
-    tariff_link.short_description = 'Тариф'
+    tariffs_display.short_description = 'Тарифы'
 
     def products_count(self, obj):
-        """Отображение количества товарных позиций в заказе."""
         return obj.order_products.count()
     products_count.short_description = 'Кол-во позиций'
 
     def mark_as_processed(self, request, queryset):
-        """Действие для массовой пометки заказов как 'в обработке'."""
         updated = queryset.update(status='processed')
         self.message_user(request, f"{updated} заявок отмечено как 'В обработке'.")
     mark_as_processed.short_description = 'Отметить как в обработке'
 
     def mark_as_completed(self, request, queryset):
-        """Действие для массовой пометки заказов как 'выполнено'."""
         updated = queryset.update(status='completed')
         self.message_user(request, f"{updated} заявок отмечено как 'Выполнена'.")
     mark_as_completed.short_description = 'Отметить как выполненные'
 
     def get_queryset(self, request):
-        """Оптимизация запроса для включения связанных данных."""
-        return super().get_queryset(request).select_related('locality', 'tariff').prefetch_related('order_products__product_item__product', 'order_products__product_item__color')
+        return super().get_queryset(request).select_related('locality').prefetch_related('tariffs', 'order_products__product_item__product', 'order_products__product_item__color')
 
 @admin.register(OrderProduct)
 class OrderProductAdmin(admin.ModelAdmin):

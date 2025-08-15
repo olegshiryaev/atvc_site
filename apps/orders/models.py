@@ -92,11 +92,10 @@ class Order(models.Model):
         null=True,
         verbose_name="Населенный пункт",
     )
-    tariff = models.ForeignKey(
-        Tariff, 
-        on_delete=models.SET_NULL, 
-        verbose_name="Тариф", 
-        null=True, 
+    tariffs = models.ManyToManyField(
+        Tariff,
+        verbose_name="Тарифы",
+        related_name="orders",
         blank=True
     )
     services = models.ManyToManyField(
@@ -156,6 +155,14 @@ class Order(models.Model):
 
             products.append(details)
         return products
+    
+    def get_tariff_display(self):
+        """
+        Возвращает строку с названиями тарифов через ' + '
+        Пример: "Интернет 100 Мбит + ТВ Премиум"
+        """
+        names = self.tariffs.values_list('name', flat=True)
+        return " + ".join(names) if names else "не указаны"
 
     def total_products_cost(self):
         """Возвращает общую стоимость товаров с учётом рассрочки"""
@@ -165,13 +172,26 @@ class Order(models.Model):
         return sum(s.price for s in self.services.all())
 
     def total_cost(self):
+        """
+        Возвращает общую стоимость заявки: 
+        сумма абонплаты и подключения по всем тарифам + оборудование + услуги + ТВ-пакеты.
+        """
         total = 0
-        if self.tariff:
-            total += self.tariff.get_actual_price()
-            total += self.tariff.connection_price
+
+        # Суммируем по всем выбранным тарифам
+        for tariff in self.tariffs.all():
+            total += tariff.get_actual_price()     # абонентская плата
+            total += tariff.connection_price       # подключение
+
+        # Добавляем стоимость оборудования
         total += self.total_products_cost()
+
+        # Добавляем стоимость дополнительных услуг
         total += self.total_services_cost()
+
+        # Добавляем стоимость ТВ-пакетов
         total += sum(p.price for p in self.tv_packages.all())
+
         return total
 
     def mark_as_processed(self):
@@ -188,5 +208,9 @@ class Order(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        tariff_name = self.tariff.name if self.tariff else "не указан"
-        return f"Заявка #{self.id} от {self.full_name} ({tariff_name})"
+        tariff_names = ", ".join(t.name for t in self.tariffs.all()[:2])
+        if self.tariffs.count() > 2:
+            tariff_names += f" + {self.tariffs.count() - 2} др."
+        if not tariff_names:
+            tariff_names = "не указаны"
+        return f"Заявка #{self.id} от {self.full_name} ({tariff_names})"

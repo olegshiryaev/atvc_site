@@ -9,10 +9,9 @@ import logging
 logger = logging.getLogger(__name__)
 
 class OrderForm(forms.ModelForm):
-    
     """
     Универсальная форма для оформления заявок.
-    
+
     Используется в двух сценариях:
     1. Заказ тарифа с оборудованием, ТВ-пакетами и услугами.
        - Используются: tariff_id, selected_equipment_ids, equipment_payment_options и др.
@@ -20,7 +19,7 @@ class OrderForm(forms.ModelForm):
        - Используются: product_item_id, payment_type.
        - Остальные поля игнорируются.
     """
-    
+
     product_item_id = forms.CharField(
         widget=forms.HiddenInput(),
         required=False  # Теперь не всегда требуется
@@ -46,12 +45,18 @@ class OrderForm(forms.ModelForm):
         label='Комментарий'
     )
 
-    # Добавьте поля, используемые в заказе тарифа
+    # Поля для заказа тарифа
     tariff_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
     selected_equipment_ids = forms.JSONField(widget=forms.HiddenInput(), required=False)
     equipment_payment_options = forms.JSONField(widget=forms.HiddenInput(), required=False)
     selected_service_slugs = forms.JSONField(widget=forms.HiddenInput(), required=False)
     selected_tv_package_ids = forms.JSONField(widget=forms.HiddenInput(), required=False)
+
+    # 🔥 Новое поле: список ID выбранных тарифов (интернет + TV)
+    tariff_ids = forms.JSONField(
+        widget=forms.HiddenInput(),
+        required=False
+    )
 
     class Meta:
         model = Order
@@ -59,7 +64,8 @@ class OrderForm(forms.ModelForm):
             "full_name", "phone", "street", "house", "apartment", "comment",
             "product_item_id", "payment_type",
             "tariff_id", "selected_equipment_ids", "equipment_payment_options",
-            "selected_service_slugs", "selected_tv_package_ids"
+            "selected_service_slugs", "selected_tv_package_ids",
+            "tariff_ids",  # ✅ Добавлено в форму
         ]
         widgets = {
             "full_name": forms.TextInput(attrs={
@@ -162,7 +168,7 @@ class OrderForm(forms.ModelForm):
     def clean_product_item_id(self):
         product_item_id = self.cleaned_data.get("product_item_id")
         if not product_item_id:
-            return None  # Может быть None, если не используется
+            return None
 
         try:
             product_item = ProductItem.objects.get(id=product_item_id, in_stock__gt=0)
@@ -174,12 +180,11 @@ class OrderForm(forms.ModelForm):
         payment_type = self.cleaned_data.get("payment_type")
         product_item_id = self.cleaned_data.get("product_item_id")
 
-        # Если нет product_item_id — значит, это не заказ одного товара
         if not product_item_id:
-            return payment_type  # Не проверяем
+            return payment_type
 
         if not payment_type:
-            return 'purchase'  # Дефолт
+            return 'purchase'
 
         try:
             product_item = ProductItem.objects.get(id=product_item_id)
@@ -194,3 +199,12 @@ class OrderForm(forms.ModelForm):
             pass
 
         return payment_type
+
+    def clean_tariff_ids(self):
+        """Валидация списка ID тарифов"""
+        tariff_ids = self.cleaned_data.get("tariff_ids")
+        if not tariff_ids:
+            return [self.initial.get("tariff_id")]  # fallback — основной тариф
+        if not isinstance(tariff_ids, list):
+            raise forms.ValidationError("tariff_ids должен быть списком")
+        return tariff_ids
