@@ -6854,7 +6854,7 @@ button.swiper-pagination-bullet {
 }
 
 .tv-package-card__title {
-    font-size: 1.4rem;
+    font-size: var(--font-size-xl);
     font-weight: 600;
     line-height: 32px;
     letter-spacing: -0.16px;
@@ -8832,6 +8832,7 @@ button.swiper-pagination-bullet {
 /* Описание */
 .tv-tariff-card__description {
     font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
     margin: 0 0 16px 0;
     line-height: 1.5;
 }
@@ -8991,6 +8992,7 @@ button.swiper-pagination-bullet {
 /* Описание пакета и цена */
 .tv-package__description {
     font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 }
 
 .tv-package__footer {
