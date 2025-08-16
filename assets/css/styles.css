@@ -236,7 +236,6 @@ a[href]:hover:not(.btn) {
 }
 
 input:not([type="checkbox"], [type="radio"], [type="submit"]),
-textarea,
 select,
 .select2 {
     box-sizing: border-box;
@@ -8701,10 +8700,8 @@ button.swiper-pagination-bullet {
 }
 
 .tv-tariff-section__title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    color: var(--text-color);
-    margin-bottom: 12px;
+    font-size: var(--font-size-lg);
+    margin-bottom: var(--spacing-md);
 }
 
 .tv-tariff-section__description {
@@ -9855,11 +9852,7 @@ button.swiper-pagination-bullet {
 
 /* Контрольная точка для малых мобильных устройств */
 @media (max-width: 480px) {
-    /* Уменьшаем размеры текста и отступов */
-    .order-form__section-title {
-        font-size: var(--font-size-base);
-    }
-    
+    /* Уменьшаем размеры текста и отступов */    
     .order-form__input,
     .order-form__textarea {
         padding: var(--spacing-xs) var(--spacing-sm);
@@ -9878,10 +9871,6 @@ button.swiper-pagination-bullet {
     /* Итоги: уменьшаем отступы */
     .summary {
         padding: var(--spacing-md);
-    }
-    
-    .summary__title {
-        font-size: var(--font-size-base);
     }
     
     .summary__section-title,

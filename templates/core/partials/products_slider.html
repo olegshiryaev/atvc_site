@@ -17,9 +17,9 @@
                 {% for product in popular_items %}
                 <li class="product-card products-slider-block__item swiper-slide" 
                     data-product-id="{{ product.id }}"
-                    data-product-title="{{ product.product.name }} ({{ product.color.name|default:'Без цвета' }})"
+                    data-product-title="{{ product }} ({{ product.color.name|default:'Без цвета' }})"
                     data-product-price="{{ product.get_final_price|default_if_none:'' }}"
-                    aria-label="Товар {{ product.product.name }}">
+                    aria-label="Товар {{ product }}">
                     <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
                         <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
                             {% with main_image=product.get_main_image %}

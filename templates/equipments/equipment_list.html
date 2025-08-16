@@ -96,7 +96,7 @@
                                         {% with main_image=product.get_main_image %}
                                             {% if main_image %}
                                                 <img data-lazy-src="{{ main_image.image.url }}"  
-                                                    alt="{{ product.name|default:'Товар' }}" 
+                                                    alt="{{ product|default:'Товар' }}" 
                                                     class="product-card__img" 
                                                     src="{{ main_image.image.url }}">
                                             {% else %}
@@ -213,7 +213,7 @@
                         {% for product in popular_products %}
                         <li class="product-card products-slider-block__item swiper-slide"
                             data-product-id="{{ product.id }}"
-                            data-product-title="{{ product.name }}" 
+                            data-product-title="{{ product }}" 
                             data-product-price="{{ product.price|default_if_none:'' }}">
                             <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
                                 <!-- Изображение -->
@@ -221,7 +221,7 @@
                                     {% with main_image=product.get_main_image %}
                                         {% if main_image %}
                                             <img data-lazy-src="{{ main_image.image.url }}"  
-                                                alt="{{ product.name|default:'Товар' }}" 
+                                                alt="{{ product|default:'Товар' }}" 
                                                 class="product-card__img" 
                                                 src="{{ main_image.image.url }}">
                                         {% else %}
