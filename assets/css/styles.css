@@ -6863,7 +6863,7 @@ button.swiper-pagination-bullet {
 
 .tv-package-card__desc {
     color: #666;
-    font-size: 0.9rem;
+    font-size: var(--font-size-base);
     font-weight: 400;
     line-height: 20px;
     letter-spacing: 0.052px;
@@ -6897,8 +6897,12 @@ button.swiper-pagination-bullet {
 
 .tv-package-card__price {
     font-variant-numeric: tabular-nums;
-    font-size: 1.6rem;
+    font-size: var(--font-size-xxxl);
     font-weight: 500;
+    color: #1a1a1a;
+    line-height: 24px;
+    letter-spacing: 0;
+    white-space: nowrap;
 }
 
 .tv-package-card__btn {
