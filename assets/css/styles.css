@@ -6814,7 +6814,7 @@ button.swiper-pagination-bullet {
     position: relative;
     display: flex;
     flex-direction: column;
-    height: 400px; /* Фиксированная высота для всех карточек */
+    height: 430px;
     padding: 20px;
     box-shadow: var(--shadow-card);
 }
@@ -6884,7 +6884,7 @@ button.swiper-pagination-bullet {
 .tv-package-card__channels-link {
     color: var(--main-color);
     text-decoration: none;
-    font-size: 0.85rem;
+    font-size: var(--font-size-sm);
     font-weight: 500;
 }
 
