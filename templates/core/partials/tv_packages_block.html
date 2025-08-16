@@ -25,7 +25,7 @@
                             </div>
                             <h6 class="tv-package-card__title">{{ package.name }}</h6>
                             <div class="tv-package-card__desc">
-                                <span>{{ package.description|default_if_none:''|truncatewords:20 }}</span>
+                                <span>{{ package.description|safe|default_if_none:''|truncatewords:20 }}</span>
                             </div>
                             <div class="tv-package-card__stats">
                                 <span>{{ package.channel_count_display }}</span>
