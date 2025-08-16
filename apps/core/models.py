@@ -178,10 +178,9 @@ class TVChannel(models.Model):
 
 class Tariff(models.Model):
     """Модель для хранения информации о тарифах"""
-    TECHNOLOGY_CHOICES = [
-        ("fttx", "FTTx"),
-        ("pon", "PON"),
-    ]
+    class Technology(models.TextChoices):
+        FTTX = "fttx", "FTTx"
+        PON = "pon", "PON"
 
     name = models.CharField("Название", max_length=100)
     service = models.ForeignKey(
@@ -193,7 +192,7 @@ class Tariff(models.Model):
     technology = models.CharField(
         "Технология подключения",
         max_length=20,
-        choices=TECHNOLOGY_CHOICES,
+        choices=Technology.choices,
         blank=True,
         null=True
     )
@@ -208,7 +207,7 @@ class Tariff(models.Model):
     )
     price = models.IntegerField("Цена (руб/мес)", validators=[MinValueValidator(0)])
     connection_price = models.PositiveIntegerField(
-        "Стоимость подключения (₽)", default=200
+        "Стоимость подключения (₽)", default=0
     )
     is_featured = models.BooleanField("Хит", default=False)
     is_promo = models.BooleanField("Акция", default=False)
@@ -240,30 +239,29 @@ class Tariff(models.Model):
 
     def clean(self):
         super().clean()
-        if self.is_promo and self.promo_price and self.price:
-            if self.promo_price >= self.price:
-                raise ValidationError("Промо-цена должна быть меньше обычной цены")
-        if self.is_promo and not (self.promo_price and self.promo_months):
-            raise ValidationError("Для акции нужно указать промо-цену и количество месяцев")
+        if self.is_promo:
+            if not (self.promo_price and self.promo_months):
+                raise ValidationError("Для акции нужно указать промо-цену и количество месяцев.")
+            if self.promo_price and self.price and self.promo_price >= self.price:
+                raise ValidationError("Промо-цена должна быть меньше обычной цены.")
+        else:
+            self.promo_price = None
+            self.promo_months = None
 
     def save(self, *args, **kwargs):
+        # Если slug не задан, генерируем его из названия
         if not self.slug:
-            base_slug = pytils_slugify(self.name)
-            self.slug = base_slug
-            
-            # Проверяем уникальность и добавляем суффикс если нужно
-            counter = 1
-            while Tariff.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-                self.slug = f"{base_slug}-{counter}"
-                counter += 1
-        else:
-            # Если slug задан вручную, тоже проверяем уникальность
-            base_slug = self.slug
-            counter = 1
-            while Tariff.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
-                self.slug = f"{base_slug}-{counter}"
-                counter += 1
-                
+            self.slug = pytils_slugify(self.name)
+
+        # Проверяем уникальность слага и при необходимости добавляем суффикс
+        original_slug = self.slug
+        counter = 1
+        
+        # Ищем другие объекты с таким же слагом
+        while Tariff.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
+            self.slug = f'{original_slug}-{counter}'
+            counter += 1
+
         super().save(*args, **kwargs)
 
     def get_actual_price(self):

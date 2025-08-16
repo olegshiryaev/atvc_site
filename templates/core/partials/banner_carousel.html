@@ -1,0 +1,59 @@
+{% load static image_tags %}
+{% if banners %}
+<section class="mainbanner-block block">
+    <div class="mainbanner-block__container">
+        <div id="mainbannerCarousel"
+             class="mainbanner-block__carousel carousel slide carousel-fade"
+             data-bs-ride="carousel"
+             data-bs-interval="5000"
+             data-bs-pause="hover"
+             role="region"
+             aria-label="Рекламная карусель">
+            <div class="carousel-inner">
+                {% for banner in banners %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="mainbanner-block__slide">
+                        {% if banner.background_image %}
+                        <img src="{{ banner.background_image.url }}"
+                            alt="{{ banner.background_image_alt|default:'Баннер' }}"
+                            class="mainbanner-block__image">
+                        {% else %}
+                        <div class="mainbanner-block__fallback-bg" aria-hidden="true"></div>
+                        {% endif %}
+                        <div class="mainbanner-block__content container">
+                            <div class="row align-items-center">
+                                <div class="col-12 col-md-8">
+                                    {% if banner.get_badge %}
+                                    <span class="mainbanner-block__badge bg-{{ banner.get_badge_color }}">
+                                        {{ banner.get_badge }}
+                                    </span>
+                                    {% endif %}
+                                    <h2 class="mainbanner-block__title">{{ banner.title|default:'Без заголовка' }}</h2>
+                                    <p class="mainbanner-block__description">{{ banner.description|default:'' }}</p>
+                                    {% if banner.link and banner.button_text %}
+                                    <a href="{{ banner.link }}" class="mainbanner-block__button btn">
+                                        {{ banner.button_text }}
+                                    </a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% if banners|length > 1 %}
+            <div class="carousel-indicators mainbanner-block__indicators">
+                {% for banner in banners %}
+                <button type="button"
+                        data-bs-target="#mainbannerCarousel"
+                        data-bs-slide-to="{{ forloop.counter0 }}"
+                        {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                        aria-label="Перейти к баннеру {{ banner.title|default:'№'|add:forloop.counter }}"></button>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endif %}

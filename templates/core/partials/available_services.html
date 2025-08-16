@@ -1,0 +1,26 @@
+{% if available_services %}
+<section id="available-services" class="available-services-block block">
+    <h2 class="available-services-block__title block__title">
+        Услуги АТК, которые можно подключить в {{ locality.name_prepositional }}
+    </h2>
+    <div class="available-services-block__wrapper">
+        {% for service in available_services %}
+            <div class="service-card__item item"
+                 {% if service.background_image %}
+                     style="background-image: url('{{ service.background_image.url|default_if_none:'' }}');"
+                 {% endif %}>
+                <div class="service-card__content">
+                    <h3 class="service-card__title">{{ service.name }}</h3>
+                    <p class="service-card__subtitle">{{ service.description|default:""|truncatewords:20 }}</p>
+                    <a href="{% url 'core:services' locality_slug=locality.slug service_slug=service.slug %}"
+                       class="service-card__btn btn"
+                       role="button"
+                       aria-label="Подробнее об услуге {{ service.name }}">
+                        Подробнее
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}

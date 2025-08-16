@@ -10,10 +10,10 @@ class ProductItemInline(admin.TabularInline):
     extra = 1
     fields = (
         'display_name', 'admin_image_preview', 'color', 'price', 'old_price',
-        'in_stock', 'article', 'slug', 'installment_badge'
+        'in_stock', 'article', 'installment_badge'
     )
     readonly_fields = (
-        'admin_image_preview', 'slug', 'installment_badge'
+        'admin_image_preview', 'installment_badge'
     )
     autocomplete_fields = ('color',)
     show_change_link = True
@@ -149,7 +149,6 @@ class ProductItemAdmin(admin.ModelAdmin):
     search_fields = ('product__name', 'article', 'color__name', 'display_name')  # + display_name
     autocomplete_fields = ('product', 'color')
     readonly_fields = ('slug', 'get_main_image_preview')
-    prepopulated_fields = {'slug': ('display_name',)}  # ← теперь slug из display_name
 
     fieldsets = (
         (None, {

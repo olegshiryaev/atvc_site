@@ -1,0 +1,1327 @@
+{% extends "base.html" %}
+{% load static %}
+{% load humanize %}
+{% block content %}
+<div class="order-form">
+    <div class="order-form__container container">
+        <div class="order-form__layout">
+            <div class="order-form__main">
+                <section class="tariff-info">
+                    <div class="tariff-info__content">
+                        <div class="tariff-info__details">
+                            <h3 class="tariff-info__title">{{ tariff.name }}</h3>
+                            {% if tariff.description %}
+                                <p class="tariff-info__description">{{ tariff.description|safe }}</p>
+                            {% endif %}
+                            <div class="tariff-info__included">
+                                <h4 class="tariff-info__included-title">В тариф включено:</h4>
+                                <div class="tariff-info__badges">
+                                    {% if tariff.speed %}
+                                        <span class="tariff-info__badge tariff-info__badge--speed">
+                                            <i class="bi bi-wifi"></i>
+                                            Скорость: {{ tariff.speed }} Мбит/с
+                                        </span>
+                                    {% endif %}
+                                    {% if tariff.total_channels %}
+                                        <span class="tariff-info__badge tariff-info__badge--tv">
+                                            <i class="bi bi-tv"></i>
+                                            {{ tariff.total_channels }} ТВ-каналов
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tariff-info__price">
+                            <div class="tariff-info__price-value">
+                                {{ tariff.get_actual_price }} ₽/мес.
+                            </div>
+                            {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
+                                <div class="tariff-info__promo-note">
+                                    <small class="text-muted">
+                                        После {{ tariff.promo_months }} мес. — 
+                                        <strong>{{ tariff.price }} ₽/мес.</strong>
+                                    </small>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                {% if is_internet_tariff %}
+                <section class="tv-tariff-section">
+                    <h3 class="tv-tariff-section__title">Добавить телевидение</h3>
+                    <p class="tv-tariff-section__description">Выберите тариф на телевидение — он будет подключён вместе с интернетом</p>
+                    
+                    <div class="tv-tariff-grid">
+                        {% for tv_tariff in tv_tariffs %}
+                            <article class="tv-tariff-card" data-id="{{ tv_tariff.id }}">
+                                <div class="tv-tariff-card__header">
+                                    <div class="tv-tariff-card__content-left">
+                                        <div class="tv-tariff-card__info">
+                                            <h5 class="tv-tariff-card__name">{{ tv_tariff.name }}</h5>
+                                            <div class="tv-tariff-card__meta">
+                                                <div class="tv-tariff-card__channels">
+                                                    <i class="bi bi-tv"></i> {{ tv_tariff.channel_count_display }}
+                                                </div>
+                                                <a href="#"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#channelsModal-tariff-{{ tv_tariff.id }}"
+                                                class="tv-tariff-card__channels-link"
+                                                aria-label="Посмотреть каналы тарифа {{ tv_tariff.name }}">
+                                                    Список каналов
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="tv-tariff-card__switch">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="tv-tariff-checkbox-{{ tv_tariff.id }}"
+                                                onchange="selectTVTariff(this, '{{ tv_tariff.id }}', {{ tv_tariff.get_actual_price }}, '{{ tv_tariff.name|escapejs }}', {{ tv_tariff.price }}, {{ tv_tariff.is_promo|yesno:'true,false' }}, {{ tv_tariff.promo_months|default:0 }}, {{ tv_tariff.connection_price }})">
+                                            <label class="tv-tariff-card__label" for="tv-tariff-checkbox-{{ tv_tariff.id }}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="tv-tariff-card__description">
+                                    {{ tv_tariff.description|truncatewords:15|safe }}
+                                </p>
+                                <div class="tv-tariff-card__footer">
+                                    <div class="tv-tariff-card__price">
+                                        {{ tv_tariff.get_actual_price }} ₽/мес.
+                                        {% if tv_tariff.is_promo and tv_tariff.promo_months %}
+                                            <small>({{ tv_tariff.promo_months }} мес. по акции)</small>
+                                        {% endif %}
+                                        {% if tv_tariff.connection_price > 0 %}
+                                            <br><small>Подключение: {{ tv_tariff.connection_price }} ₽</small>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </article>
+                            {% include 'core/partials/channels_modal.html' with object=tv_tariff channels=tv_tariff.included_channels.all category_choices=TVChannel.CATEGORY_CHOICES modal_type="tariff" %}
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+
+                <section class="tv-packages" id="tv-packages-section" {% if not is_tv_tariff %}style="display: none; opacity: 0;" aria-hidden="true"{% else %}style="opacity: 1;" aria-hidden="false"{% endif %}>
+                    <h3 class="tv-packages__title">Добавить пакеты каналов</h3>
+                    <p class="tv-packages__description">Добавьте расширенные пакеты каналов к вашему телевидению.</p>
+                    {% if tv_packages.exists %}
+                    <div class="tv-packages__list">
+                        {% for package in tv_packages %}
+                            <article class="tv-package" data-id="{{ package.id }}" data-tariff-ids="{% for t in package.tariffs.all %}{{ t.id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                <div class="tv-package__content">
+                                    <div class="tv-package__header">
+                                        <div class="tv-package__content-left">
+                                            <div class="tv-package__image-container">
+                                                {% if package.image %}
+                                                    <img src="{{ package.image.url }}" alt="Изображение пакета {{ package.name }}" class="tv-package__image">
+                                                {% else %}
+                                                    <div class="tv-package__image-placeholder" aria-hidden="true">
+                                                        <span>Нет изображения</span>
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                            <div class="tv-package__info">
+                                                <h5 class="tv-package__name">{{ package.name }}</h5>
+                                                <div class="tv-package__meta">
+                                                    <div class="tv-package__channels">
+                                                        <i class="bi bi-tv"></i> {{ package.channel_count_display }}
+                                                    </div>
+                                                    <a href="#"
+                                                       data-bs-toggle="modal"
+                                                       data-bs-target="#channelsModal-package-{{ package.id }}"
+                                                       class="tv-package__channels-link"
+                                                       aria-label="Посмотреть каналы пакета {{ package.name }}">
+                                                        Список каналов
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="tv-package__switch-container">
+                                            <div class="form-check form-switch mb-0">
+                                                <input class="form-check-input" type="checkbox"
+                                                       id="package-{{ package.id }}"
+                                                       onclick="updateTVPackage('{{ package.id }}', {{ package.price }})">
+                                                <label class="tv-package__label" for="package-{{ package.id }}"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="tv-package__description">{{ package.description|safe }}</p>
+                                </div>
+                                <div class="tv-package__footer">
+                                    <div class="tv-package__price">{{ package.price }} ₽/мес.</div>
+                                </div>
+                            </article>
+                            {% include 'core/partials/channels_modal.html' with object=package channels=package.channels.all modal_type="package" %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="tv-packages__empty">Нет доступных пакетов для этого тарифа.</p>
+                    {% endif %}
+                </section>
+
+                {% if products.exists %}
+                <section class="equipment">
+                    <h3 class="equipment__title">Добавить оборудование</h3>
+                    <p class="equipment__description">Оборудование приобретается при подключении и не входит в абонентскую плату.</p>
+                    <div class="equipment__list">
+                        {% for product_item in products %}
+                            <article class="equipment__item" data-id="{{ product_item.id }}" data-price="{{ product_item.price }}">
+                                <div class="equipment__content">
+                                    <div class="equipment__header">
+                                        <div class="equipment__image-container">
+                                            {% if product_item.get_main_image %}
+                                                <img src="{{ product_item.get_main_image.image.url }}" alt="{{ product_item.get_display_name }}" class="equipment__image">
+                                            {% else %}
+                                                <div class="equipment__image-placeholder" aria-hidden="true">
+                                                    <svg class="equipment__image-icon" width="48" height="28" viewBox="0 0 48 28" fill="currentColor">
+                                                        <rect x="2" y="2" width="44" height="24" rx="4" fill="#e5e7eb"/>
+                                                        <path d="M8 10h8v8H8zm14 0h8v8h-8zm14 0h8v8h-8z" fill="#9ca3af"/>
+                                                    </svg>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="equipment__info-group">
+                                            <h5 class="equipment__name">{{ product_item.get_display_name }}</h5>
+                                        </div>
+                                        <div class="equipment__footer">
+                                            <div class="equipment__price-block" {% if product_item.installment_available %}data-installment-available="true"{% endif %}>
+                                                <div class="equipment__payment-label" id="label-{{ product_item.id }}">Полная стоимость</div>
+                                                <div class="equipment__price-value" id="price-{{ product_item.id }}">{{ product_item.get_price_display }}</div>
+                                            </div>
+                                            <div class="equipment__switch-container">
+                                                <div class="form-check form-switch mb-0">
+                                                    <input class="form-check-input"
+                                                        type="checkbox"
+                                                        id="equipment-{{ product_item.id }}"
+                                                        onchange="toggleEquipmentSelection(
+                                                            '{{ product_item.id }}', 
+                                                            this.checked, 
+                                                            {{ product_item.price }}, 
+                                                            {{ product_item.installment_12_months|default:'null' }}, 
+                                                            {{ product_item.installment_24_months|default:'null' }}, 
+                                                            {{ product_item.installment_48_months|default:'null' }}
+                                                        )">
+                                                    <label class="form-check-label" for="equipment-{{ product_item.id }}"></label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                            {% if product_item.installment_available %}
+                            <div class="equipment-payment-modal fade" id="installmentModal-{{ product_item.id }}" tabindex="-1" aria-labelledby="installmentModalLabel-{{ product_item.id }}">
+                                <div class="equipment-payment-modal__dialog">
+                                    <div class="equipment-payment-modal__content">
+                                        <div class="equipment-payment-modal__header">
+                                            <h5 class="equipment-payment-modal__title" id="installmentModalLabel-{{ product_item.id }}">{{ product_item.get_display_name }}</h5>
+                                            <button type="button" class="equipment-payment-modal__close" data-modal-close aria-label="Закрыть">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                    <path d="M18 6L6 18M6 6l12 12"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                        <div class="equipment-payment-modal__body">
+                                            <div class="equipment-payment-modal__option">
+                                                <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-purchase-{{ product_item.id }}" value="purchase" checked>
+                                                <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-{{ product_item.id }}">
+                                                    Полная стоимость - {{ product_item.get_price_display }}
+                                                </label>
+                                            </div>
+                                            {% if product_item.installment_available %}
+                                                {% if product_item.installment_12_months %}
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment12-{{ product_item.id }}" value="installment12">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-{{ product_item.id }}">
+                                                        Рассрочка (на 12 мес.) - {{ product_item.installment_12_months|intcomma }} ₽/мес.
+                                                    </label>
+                                                </div>
+                                                {% endif %}
+                                                {% if product_item.installment_24_months %}
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment24-{{ product_item.id }}" value="installment24">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-{{ product_item.id }}">
+                                                        Рассрочка (на 24 мес.) - {{ product_item.installment_24_months|intcomma }} ₽/мес.
+                                                    </label>
+                                                </div>
+                                                {% endif %}
+                                                {% if product_item.installment_48_months %}
+                                                <div class="equipment-payment-modal__option">
+                                                    <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-{{ product_item.id }}" id="paymentOption-installment48-{{ product_item.id }}" value="installment48">
+                                                    <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-{{ product_item.id }}">
+                                                        Рассрочка (на 48 мес.) - {{ product_item.installment_48_months|intcomma }} ₽/мес.
+                                                    </label>
+                                                </div>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                        <div class="equipment-payment-modal__footer">
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close onclick="closeAndResetModal('{{ product_item.id }}')">Отмена</button>
+                                            <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption(
+                                                '{{ product_item.id }}', 
+                                                {{ product_item.price }}, 
+                                                {{ product_item.installment_12_months|default:'null' }}, 
+                                                {{ product_item.installment_24_months|default:'null' }}, 
+                                                {{ product_item.installment_48_months|default:'null' }}
+                                            )">Применить</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                {% if services.exists %}
+                <section class="services">
+                    <h3 class="services__title">Дополнительные услуги</h3>
+                    <p class="services__description">Выберите дополнительные услуги, которые будут подключены вместе с вашим тарифом.</p>
+                    <div class="services__list">
+                        {% for service in services %}
+                            <article class="services__item">
+                                <div class="services__content">
+                                    <div class="services__header">
+                                        <h5 class="services__name">{{ service.name }}</h5>
+                                        <div class="services__switch">
+                                            <div class="form-check form-switch">
+                                                <input class="form-check-input" type="checkbox" id="service-{{ service.slug }}"
+                                                    onclick="updateService('{{ service.slug }}', {{ service.price }})">
+                                                <label class="services__label" for="{{ service.slug }}"></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <p class="services__description">{{ service.description|safe }}</p>
+                                    <div class="services__footer">
+                                        <div class="services__price">{{ service.price }} ₽/мес.</div>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+                <aside class="summary summary--mobile">
+                    <div class="summary__content">
+                        <h3 class="summary__title">Заявка на подключение</h3>
+                        <div class="summary__section">
+                            <h5 class="summary__section-title">Тариф</h5>
+                            <div class="summary__item">
+                                <span class="summary__item-name">{{ tariff.name }}</span>
+                                <span class="summary__item-value">
+                                    {{ tariff.get_actual_price|intcomma }} ₽/мес.
+                                    {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
+                                        <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽/мес.)
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        {% if not is_tv_tariff and tv_tariffs.exists %}
+                        <div class="summary__section" id="tvTariffSummary">
+                            <h5 class="summary__section-title">Телевидение</h5>
+                            <div class="summary__item summary__item--empty">Не выбрано</div>
+                        </div>
+                        {% endif %}
+                        {% if products.exists %}
+                        <div class="summary__section" id="equipmentSummary">
+                            <h5 class="summary__section-title">Оборудование</h5>
+                            <div class="summary__item summary__item--empty">Не выбрано</div>
+                        </div>
+                        {% endif %}
+                        {% if services.exists %}
+                        <div class="summary__section" id="servicesSummary">
+                            <h5 class="summary__section-title">Дополнительные услуги</h5>
+                            <div class="summary__item summary__item--empty">Не выбрано</div>
+                        </div>
+                        {% endif %}
+                        {% if tv_packages.exists %}
+                        <div class="summary__section" id="tvPackagesSummary">
+                            <h5 class="summary__section-title">Пакеты ТВ</h5>
+                            <div class="summary__item summary__item--empty">Не выбрано</div>
+                        </div>
+                        {% endif %}
+                        <div class="summary__section">
+                            <div class="summary__item">
+                                <span class="summary__item-name"><strong>Подключение</strong></span>
+                                <span class="summary__item-value summary-connection-price">
+                                    {% if tariff.connection_price == 0 %}
+                                        Бесплатно
+                                    {% else %}
+                                        {{ tariff.connection_price|intcomma }} ₽
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        <hr class="summary__divider">
+                        <div class="summary__total">
+                            <h5 class="summary__total-title">Итого к оплате</h5>
+                            <h5 class="summary__total-value summary-total-price">{{ tariff.get_actual_price|add:tariff.connection_price|intcomma }} ₽</h5>
+                        </div>
+                        <div class="summary__breakdown">
+                            <div class="summary__breakdown-item">
+                                <span class="summary__breakdown-name">Из них</span>
+                            </div>
+                            <div class="summary__breakdown-item summary__breakdown-item--monthly-price">
+                                <span class="summary__breakdown-name">Абонентская плата</span>
+                                <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽/мес.</span>
+                            </div>
+                            <div class="summary__breakdown-item summary__breakdown-item--installment summary-installment-breakdown" style="display: none;">
+                                <span class="summary__breakdown-name">Рассрочка</span>
+                                <span class="summary__breakdown-value summary-installment-price">0 ₽/мес.</span>
+                            </div>
+                            <div class="summary__breakdown-item summary__breakdown-item--connection-price">
+                                <span class="summary__breakdown-name">При подключении</span>
+                                <span class="summary__breakdown-value summary-connection-total-price">{{ tariff.connection_price|intcomma }} ₽</span>
+                            </div>
+                        </div>
+                        <div class="summary__info">
+                            <small>Абонентская плата и рассрочка взимаются ежемесячно с момента активации тарифа. Оборудование и подключение оплачиваются единоразово при подключении.</small>
+                        </div>
+                    </div>
+                </aside>
+                <section class="order-form__section">
+                    <h3 class="order-form__section-title">Оформление заявки</h3>
+                    <noscript>
+                        <div class="alert alert-danger">Для корректной работы формы требуется включённый JavaScript.</div>
+                    </noscript>
+                    <form class="order-form__form" id="orderForm" method="post" action=".">
+                        {% csrf_token %}
+                        <input type="hidden" name="tariff_ids" id="selected_tariff_ids" value="[{{ tariff.id }}]">
+                        <input type="hidden" name="selected_equipment_ids" id="selected_equipment_ids" value="[]">
+                        <input type="hidden" name="selected_service_slugs" id="selected_service_slugs" value="[]">
+                        <input type="hidden" name="selected_tv_package_ids" id="selected_tv_package_ids" value="[]">
+                        <input type="hidden" name="equipment_payment_options" id="equipment_payment_options" value="{}">
+                        <input type="hidden" name="product_item_id" value="">
+                        <input type="hidden" name="payment_type" value="">
+                        <input type="hidden" id="total_equipment_cost" value="0">
+                        <input type="hidden" id="total_services_cost" value="0">
+                        <input type="hidden" id="total_tv_packages_cost" value="0">
+                        <input type="hidden" id="total_price" value="0">
+                        <div class="order-form__fields">
+                            <div class="order-form__field order-form__field--full-name">
+                                <label for="name" class="order-form__label">Ваше имя</label>
+                                <input type="text" name="full_name" class="order-form__input" id="name" required placeholder="Введите ваше имя">
+                                <div id="error_full_name" class="order-form__validation-message"></div>
+                            </div>
+                            <div class="order-form__field order-form__field--phone">
+                                <label for="phone" class="order-form__label">Номер телефона</label>
+                                <input type="tel" name="phone" class="order-form__input" id="phone" required placeholder="+7 (___) ___-__-__">
+                                <div id="error_phone" class="order-form__validation-message"></div>
+                            </div>
+                            <div class="order-form__row--address">
+                                <div class="order-form__field order-form__field--street">
+                                    <label for="street" class="order-form__label">Улица</label>
+                                    <input type="text" name="street" class="order-form__input" id="street" placeholder="Введите улицу">
+                                    <div id="error_street" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--house">
+                                    <label for="house" class="order-form__label">Дом</label>
+                                    <input type="text" name="house" class="order-form__input" id="house" placeholder="Введите номер дома">
+                                    <div id="error_house" class="order-form__validation-message"></div>
+                                </div>
+                                <div class="order-form__field order-form__field--apartment">
+                                    <label for="apartment" class="order-form__label">Квартира</label>
+                                    <input type="text" name="apartment" class="order-form__input" id="apartment" placeholder="Введите номер квартиры">
+                                    <div id="error_apartment" class="order-form__validation-message"></div>
+                                </div>
+                            </div>
+                            <div class="order-form__field order-form__field--comments">
+                                <label for="comments" class="order-form__label">Комментарий (необязательно)</label>
+                                <textarea name="comment" class="order-form__textarea" id="comments" rows="2" placeholder="Введите ваш комментарий"></textarea>
+                                <div id="error_comment" class="order-form__validation-message"></div>
+                            </div>
+                            <div id="form-errors" class="error-container"></div>
+                            <div class="order-form__field order-form__field--actions">
+                                <small class="order-form__consent-text">
+                                    Нажимая кнопку «Отправить заявку», вы соглашаетесь с 
+                                    <a target="_blank" class="order-form__link" href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}" rel="noopener noreferrer">
+                                        Условиями обработки персональных данных
+                                    </a>
+                                </small>
+                                <button type="submit" class="order-form__submit" disabled aria-label="Отправить заявку на подключение">Отправить заявку</button>
+                            </div>
+                        </div>
+                    </form>
+                </section>
+            </div>
+            <aside class="summary summary--desktop">
+                <div class="summary__content">
+                    <h3 class="summary__title">Заявка на подключение</h3>
+                    <div class="summary__section">
+                        <h5 class="summary__section-title">Тариф</h5>
+                        <div class="summary__item">
+                            <span class="summary__item-name">{{ tariff.name }}</span>
+                            <span class="summary__item-value">
+                                {{ tariff.get_actual_price|intcomma }} ₽/мес.
+                                {% if tariff.is_promo and tariff.promo_price and tariff.promo_months %}
+                                    <br>(в течение {{ tariff.promo_months }} мес., затем — {{ tariff.price }} ₽/мес.)
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% if not is_tv_tariff and tv_tariffs.exists %}
+                    <div class="summary__section" id="tvTariffSummary">
+                        <h5 class="summary__section-title">Телевидение</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    {% endif %}
+                    {% if products.exists %}
+                    <div class="summary__section" id="equipmentSummary">
+                        <h5 class="summary__section-title">Оборудование</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    {% endif %}
+                    {% if services.exists %}
+                    <div class="summary__section" id="servicesSummary">
+                        <h5 class="summary__section-title">Дополнительные услуги</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    {% endif %}
+                    {% if tv_packages.exists %}
+                    <div class="summary__section" id="tvPackagesSummary">
+                        <h5 class="summary__section-title">Пакеты ТВ</h5>
+                        <div class="summary__item summary__item--empty">Не выбрано</div>
+                    </div>
+                    {% endif %}
+                    <div class="summary__section">
+                        <div class="summary__item">
+                            <span class="summary__item-name"><strong>Подключение</strong></span>
+                            <span class="summary__item-value summary-connection-price">
+                                {% if tariff.connection_price == 0 %}
+                                    Бесплатно
+                                {% else %}
+                                    {{ tariff.connection_price|intcomma }} ₽
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <hr class="summary__divider">
+                    <div class="summary__total">
+                        <h5 class="summary__total-title">Итого к оплате</h5>
+                        <h5 class="summary__total-value summary-total-price">{{ tariff.get_actual_price|add:tariff.connection_price|intcomma }} ₽</h5>
+                    </div>
+                    <div class="summary__breakdown">
+                        <div class="summary__breakdown-item">
+                            <span class="summary__breakdown-name">Из них</span>
+                        </div>
+                        <div class="summary__breakdown-item summary__breakdown-item--monthly-price">
+                            <span class="summary__breakdown-name">Абонентская плата</span>
+                            <span class="summary__breakdown-value summary-monthly-price">{{ tariff.get_actual_price|intcomma }} ₽/мес.</span>
+                        </div>
+                        <div class="summary__breakdown-item summary__breakdown-item--installment summary-installment-breakdown" style="display: none;">
+                            <span class="summary__breakdown-name">Рассрочка</span>
+                            <span class="summary__breakdown-value summary-installment-price">0 ₽/мес.</span>
+                        </div>
+                        <div class="summary__breakdown-item summary__breakdown-item--connection-price">
+                            <span class="summary__breakdown-name">При подключении</span>
+                            <span class="summary__breakdown-value summary-connection-total-price">{{ tariff.connection_price|intcomma }} ₽</span>
+                        </div>
+                    </div>
+                    <div class="summary__info">
+                        <small>Абонентская плата и рассрочка взимаются ежемесячно с момента активации тарифа. Оборудование и подключение оплачиваются единоразово при подключении.</small>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function updateAll(selector, text, property = 'textContent') {
+        document.querySelectorAll(selector).forEach(el => {
+            if (property.startsWith('style.')) {
+                const styleProp = property.slice(6);
+                el.style[styleProp] = text;
+            } else {
+                el[property] = text;
+            }
+        });
+    }
+
+    let selectedEquipment = {};
+    let selectedServices = {};
+    let selectedTVPackages = {};
+    let selectedTVTariff = null;
+    let totalServicesPrice = 0;
+    let totalTVPackagesPrice = 0;
+    let pendingPaymentOptions = {};
+    const internetTariffId = {{ tariff.id }};
+    const isTvTariff = {{ is_tv_tariff|yesno:"true,false" }};
+    let originalEquipmentHTML = '';
+
+    // НОВОЕ: Функция для экранирования HTML (защита от XSS)
+    function escapeHtml(str) {
+        const div = document.createElement('div');
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    // НОВОЕ: Кэш для оборудования по тарифу (оптимизация)
+    const equipmentCache = {};
+
+    function calculateTotal() {
+        const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0;
+        const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
+        
+        // Учитываем стоимость ТВ-тарифа и его подключения только для интернет-тарифов
+        const tvTariffPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.actual_price : 0);
+        const tvConnectionPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.connection_price : 0);
+
+        const monthlyPrice = tariffPrice + tvTariffPrice + totalServicesPrice + totalTVPackagesPrice;
+        const connectionTotalPrice = connectionPrice + tvConnectionPrice + Object.values(selectedEquipment).reduce((sum, p) => {
+            return sum + (p.paymentType === 'purchase' ? p.price : 0);
+        }, 0);
+
+        const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
+            return sum + (
+                p.paymentType === 'installment12' ||
+                p.paymentType === 'installment24' ||
+                p.paymentType === 'installment48'
+                    ? p.price
+                    : 0
+            );
+        }, 0);
+
+        const totalPrice = monthlyPrice + connectionTotalPrice;
+
+        console.debug(`Расчёт итога: tariffPrice=${tariffPrice}, tvTariffPrice=${tvTariffPrice}, tvConnectionPrice=${tvConnectionPrice}, totalServicesPrice=${totalServicesPrice}, totalTVPackagesPrice=${totalTVPackagesPrice}, connectionPrice=${connectionPrice}, connectionTotalPrice=${connectionTotalPrice}, totalPrice=${totalPrice}`);
+
+        updateAll('.summary-total-price', `${totalPrice.toLocaleString('ru-RU')} ₽`);
+        updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽/мес.`);
+        updateAll('.summary-connection-total-price', `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`);
+        const connectionPriceText = connectionTotalPrice === 0 ? 'Бесплатно' : `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`;
+        updateAll('.summary-connection-price', connectionPriceText);
+
+        if (installmentPrice > 0 && Object.keys(selectedEquipment).length > 0) {
+            const installmentItems = Object.values(selectedEquipment).filter(p =>
+                p.paymentType === 'installment12' ||
+                p.paymentType === 'installment24' ||
+                p.paymentType === 'installment48'
+            );
+
+            let label = '';
+            if (installmentItems.length === 1) {
+                const type = installmentItems[0].paymentType;
+                if (type === 'installment12') {
+                    label = 'Рассрочка (на 12 мес.)';
+                } else if (type === 'installment24') {
+                    label = 'Рассрочка (на 24 мес.)';
+                } else if (type === 'installment48') {
+                    label = 'Рассрочка (на 48 мес.)';
+                }
+            } else {
+                label = 'Рассрочка';
+            }
+
+            updateAll('.summary-installment-price', `${installmentPrice.toLocaleString('ru-RU')} ₽/мес.`);
+            document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
+                const nameEl = el.querySelector('.summary__breakdown-name');
+                if (nameEl) nameEl.textContent = `${label}`;
+                el.style.display = 'flex';
+            });
+        } else {
+            document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
+                el.style.display = 'none';
+            });
+            updateAll('.summary-installment-price', '0 ₽/мес.');
+        }
+
+        document.getElementById('total_equipment_cost').value = Object.values(selectedEquipment).reduce((sum, p) => sum + (p.paymentType === 'purchase' ? p.price : 0), 0);
+        document.getElementById('total_services_cost').value = totalServicesPrice;
+        document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
+        document.getElementById('total_price').value = totalPrice;
+    }
+
+    function updateEquipmentSummary() {
+        const containers = document.querySelectorAll('#equipmentSummary');
+        const html = Object.keys(selectedEquipment).length > 0
+            ? `<h5 class="summary__section-title">Оборудование</h5>` +
+            Object.entries(selectedEquipment).map(([id, item]) => {
+                const priceDisplay = item.paymentType === 'purchase'
+                    ? `${item.price.toLocaleString('ru-RU')} ₽`
+                    : `${item.price.toLocaleString('ru-RU')} ₽/мес.`;
+                return `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${priceDisplay}</span></div>`;
+            }).join('')
+            : `<h5 class="summary__section-title">Оборудование</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        containers.forEach(container => { container.innerHTML = html; });
+    }
+
+    function updateServicesSummary() {
+        const containers = document.querySelectorAll('#servicesSummary');
+        const html = Object.keys(selectedServices).length > 0
+            ? `<h5 class="summary__section-title">Дополнительные услуги</h5>` +
+            Object.entries(selectedServices).map(([slug, item]) =>
+                `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽/мес.</span></div>`
+            ).join('')
+            : `<h5 class="summary__section-title">Дополнительные услуги</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        containers.forEach(container => { container.innerHTML = html; });
+    }
+
+    function updateTVPackageSummary() {
+        const containers = document.querySelectorAll('#tvPackagesSummary');
+        const html = Object.keys(selectedTVPackages).length > 0
+            ? `<h5 class="summary__section-title">Пакеты ТВ</h5>` +
+            Object.entries(selectedTVPackages).map(([id, item]) =>
+                `<div class="summary__item"><span class="summary__item-name">${item.name}</span><span class="summary__item-value">${item.price.toLocaleString('ru-RU')} ₽/мес.</span></div>`
+            ).join('')
+            : `<h5 class="summary__section-title">Пакеты ТВ</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        containers.forEach(container => { container.innerHTML = html; });
+    }
+
+    function updateTVTariffSummary() {
+        if (isTvTariff) return; // Не отображаем секцию "Телевидение" для ТВ-тарифа
+        const containers = document.querySelectorAll('#tvTariffSummary');
+        let html = '';
+        if (selectedTVTariff) {
+            html = `
+                <h5 class="summary__section-title">Телевидение</h5>
+                <div class="summary__item">
+                    <span class="summary__item-name">${selectedTVTariff.name}</span>
+                    <span class="summary__item-value">
+                        ${selectedTVTariff.actual_price.toLocaleString('ru-RU')} ₽/мес.
+                        ${selectedTVTariff.is_promo ? `<br>(в течение ${selectedTVTariff.promo_months} мес., затем — ${selectedTVTariff.original_price.toLocaleString('ru-RU')} ₽/мес.)` : ''}
+                    </span>
+                </div>
+            `;
+        } else {
+            html = `<h5 class="summary__section-title">Телевидение</h5><div class="summary__item summary__item--empty">Не выбрано</div>`;
+        }
+        containers.forEach(container => { container.innerHTML = html; });
+    }
+
+    function filterTVPackages() {
+        const tvPackages = document.querySelectorAll('.tv-package');
+        let hasCompatiblePackages = false;
+
+        tvPackages.forEach(package => {
+            const tariffIds = package.dataset.tariffIds ? package.dataset.tariffIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id)) : [];
+            if (!tariffIds.length) {
+                console.warn(`Пакет ${package.dataset.id} не имеет связанных тарифов`);
+            }
+            const isCompatible = selectedTVTariff && tariffIds.includes(parseInt(selectedTVTariff.id, 10));
+            package.style.display = isCompatible ? 'block' : 'none';
+            package.style.opacity = isCompatible ? '1' : '0';
+            package.setAttribute('aria-hidden', isCompatible ? 'false' : 'true');
+            if (isCompatible) {
+                hasCompatiblePackages = true;
+            }
+            if (!isCompatible) {
+                const checkbox = package.querySelector('input[type="checkbox"]');
+                if (checkbox && checkbox.checked) {
+                    checkbox.checked = false;
+                    delete selectedTVPackages[package.dataset.id];
+                }
+            }
+        });
+
+        const tvPackagesSection = document.getElementById('tv-packages-section');
+        if (tvPackagesSection) {
+            tvPackagesSection.style.display = hasCompatiblePackages || isTvTariff ? 'block' : 'none';
+            tvPackagesSection.style.opacity = hasCompatiblePackages || isTvTariff ? '1' : '0';
+            tvPackagesSection.setAttribute('aria-hidden', hasCompatiblePackages || isTvTariff ? 'false' : 'true');
+            if (!hasCompatiblePackages && !isTvTariff) {
+                selectedTVPackages = {};
+                totalTVPackagesPrice = 0;
+                updateTVPackageSummary();
+            }
+        }
+    }
+
+    function selectTVTariff(checkbox, id, actual_price, name, original_price, is_promo, promo_months, connection_price) {
+        if (isTvTariff) return;
+        if (!checkbox.checked) {
+            if (selectedTVTariff && selectedTVTariff.id === id) {
+                selectedTVTariff = null;
+            }
+        } else {
+            document.querySelectorAll('.tv-tariff-card input[type="checkbox"]').forEach(cb => {
+                if (cb.id !== checkbox.id) {
+                    cb.checked = false;
+                }
+            });
+            selectedTVTariff = {
+                id,
+                actual_price: parseInt(actual_price),
+                name,
+                original_price: parseInt(original_price),
+                is_promo: is_promo,
+                promo_months: parseInt(promo_months),
+                connection_price: parseInt(connection_price)
+            };
+        }
+
+        updateTVTariffSummary();
+        filterTVPackages();
+        calculateTotal();
+        updateEquipmentList(selectedTVTariff ? selectedTVTariff.id : null);  // НОВОЕ: Вызов обновления оборудования
+    }
+
+    function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price, installment48Price) {
+        const element = document.querySelector(`.equipment__item[data-id="${id}"]`);
+        const name = element.querySelector('.equipment__name').textContent.trim();
+        const labelElement = document.getElementById(`label-${id}`);
+        const priceElement = document.getElementById(`price-${id}`);
+        const checkbox = document.getElementById(`equipment-${id}`);
+
+        const installmentAvailable = element.querySelector('.equipment__price-block')?.dataset.installmentAvailable === 'true';
+
+        if (!checked) {
+            element.classList.remove('selected');
+            delete selectedEquipment[id];
+            delete pendingPaymentOptions[id];
+            updateEquipmentSummary();
+            calculateTotal();
+            return;
+        }
+
+        if (!installmentAvailable) {
+            selectedEquipment[id] = { name, price: parseInt(purchasePrice), paymentType: 'purchase' };
+            pendingPaymentOptions[id] = { name, price: parseInt(purchasePrice), paymentType: 'purchase' };
+            labelElement.innerHTML = `Полная стоимость`;
+            priceElement.textContent = `${parseInt(purchasePrice).toLocaleString('ru-RU')} ₽`;
+            element.classList.add('selected');
+            updateEquipmentSummary();
+            calculateTotal();
+            return;
+        }
+
+        const modal = document.getElementById(`installmentModal-${id}`);
+        if (modal) {
+            openEquipmentModal(modal);
+            checkbox.checked = true;
+            element.classList.add('selected');
+        } else {
+            console.error(`Модальное окно для оборудования ${id} не найдено!`);
+        }
+    }
+
+    function updateService(serviceSlug, price) {
+        const checkbox = document.getElementById(`service-${serviceSlug}`);
+        if (!checkbox) {
+            console.error(`Чекбокс service-${serviceSlug} не найден`);
+            return;
+        }
+
+        const serviceItem = checkbox.closest('.services__item');
+        const serviceName = serviceItem?.querySelector('.services__name')?.textContent.trim() || `Услуга ${serviceSlug}`;
+
+        if (checkbox.checked) {
+            selectedServices[serviceSlug] = { 
+                name: serviceName, 
+                price: parseInt(price) 
+            };
+        } else {
+            delete selectedServices[serviceSlug];
+        }
+
+        totalServicesPrice = Object.values(selectedServices).reduce((sum, s) => sum + s.price, 0);
+        updateServicesSummary();
+        calculateTotal();
+    }
+
+    function updateTVPackage(packageId, price) {
+        if (!selectedTVTariff && !isTvTariff) {
+            console.warn('Нельзя выбрать ТВ-пакет без выбранного ТВ-тарифа');
+            const checkbox = document.getElementById(`package-${packageId}`);
+            if (checkbox) checkbox.checked = false;
+            return;
+        }
+
+        const packageElement = document.querySelector(`.tv-package[data-id="${packageId}"]`);
+        const tariffIds = packageElement.dataset.tariffIds ? packageElement.dataset.tariffIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id)) : [];
+        const currentTariffId = isTvTariff ? {{ tariff.id }} : (selectedTVTariff ? selectedTVTariff.id : null);
+        if (!tariffIds.includes(parseInt(currentTariffId, 10))) {
+            console.warn(`Пакет ${packageId} не совместим с тарифом ${currentTariffId}`);
+            const checkbox = document.getElementById(`package-${packageId}`);
+            if (checkbox) checkbox.checked = false;
+            return;
+        }
+
+        const checkbox = document.getElementById(`package-${packageId}`);
+        const tvPackage = checkbox.closest('.tv-package');
+        const name = tvPackage.querySelector('.tv-package__name')?.textContent.trim() || 'Пакет каналов';
+
+        if (checkbox.checked) {
+            selectedTVPackages[packageId] = { name, price: parseInt(price) };
+        } else {
+            delete selectedTVPackages[packageId];
+        }
+
+        totalTVPackagesPrice = Object.values(selectedTVPackages).reduce((sum, p) => sum + p.price, 0);
+        updateTVPackageSummary();
+        calculateTotal();
+    }
+
+    function openEquipmentModal(modal) {
+        if (typeof modal === 'string') modal = document.getElementById(`installmentModal-${modal}`);
+        if (!modal) return;
+
+        modal.classList.add('show');
+        modal.style.display = 'flex';
+        modal.removeAttribute('aria-hidden');
+
+        const modalId = modal.id;
+        const productId = modalId.split('-').pop();
+
+        modal.addEventListener('click', function closeOnBackdrop(e) {
+            if (e.target === modal) {
+                closeAndResetModal(productId);
+                modal.removeEventListener('click', closeOnBackdrop);
+            }
+        });
+
+        modal.querySelectorAll('[data-modal-close]').forEach(button => {
+            button.addEventListener('click', () => {
+                closeAndResetModal(productId);
+            });
+        });
+
+        document.addEventListener('keydown', function closeOnEscape(e) {
+            if (e.key === 'Escape') {
+                closeAndResetModal(productId);
+                document.removeEventListener('keydown', closeOnEscape);
+            }
+        });
+    }
+
+    function applyPaymentOption(productId, purchasePrice, installment12Price, installment24Price, installment48Price) {
+        const selectedOption = document.querySelector(`input[name="paymentOption-${productId}"]:checked`)?.value || 'purchase';
+        const labelElement = document.getElementById(`label-${productId}`);
+        const priceElement = document.getElementById(`price-${productId}`);
+        const checkbox = document.getElementById(`equipment-${productId}`);
+        const element = document.querySelector(`.equipment__item[data-id="${productId}"]`);
+        
+        let paymentType = 'purchase';
+        let price = parseInt(purchasePrice);
+        let labelText = 'Полная стоимость';
+
+        if (isNaN(price)) {
+            console.error(`Ошибка: purchasePrice для productId ${productId} некорректен: ${purchasePrice}`);
+            return;
+        }
+
+        if (selectedOption === 'installment12' && installment12Price !== null && !isNaN(parseInt(installment12Price))) {
+            paymentType = 'installment12';
+            price = parseInt(installment12Price);
+            labelText = 'Рассрочка (на 12 мес.)';
+        } else if (selectedOption === 'installment24' && installment24Price !== null && !isNaN(parseInt(installment24Price))) {
+            paymentType = 'installment24';
+            price = parseInt(installment24Price);
+            labelText = 'Рассрочка (на 24 мес.)';
+        } else if (selectedOption === 'installment48' && installment48Price !== null && !isNaN(parseInt(installment48Price))) {
+            paymentType = 'installment48';
+            price = parseInt(installment48Price);
+            labelText = 'Рассрочка (на 48 мес.)';
+        }
+
+        const name = element.querySelector('.equipment__name').textContent.trim();
+
+        console.debug(`Применение для productId ${productId}: paymentType=${paymentType}, price=${price}, name=${name}`);
+
+        pendingPaymentOptions[productId] = { paymentType, price, name };
+        selectedEquipment[productId] = { name, price, paymentType };
+
+        labelElement.innerHTML = `${labelText}`;
+        priceElement.textContent = `${price.toLocaleString('ru-RU')} ${paymentType === 'purchase' ? '₽' : '₽/мес.'}`;
+
+        updateEquipmentSummary();
+        calculateTotal();
+        closeEquipmentModal(document.getElementById(`installmentModal-${productId}`));
+        if (checkbox) {
+            checkbox.focus();
+        }
+    }
+
+    function closeEquipmentModal(modal) {
+        if (!modal) return;
+        modal.classList.remove('show');
+        modal.style.display = 'none';
+        modal.removeEventListener('click', () => {});
+        document.removeEventListener('keydown', () => {});
+    }
+
+    function closeAndResetModal(productId) {
+        const modal = document.getElementById(`installmentModal-${productId}`);
+        const checkbox = document.getElementById(`equipment-${productId}`);
+        const element = document.querySelector(`.equipment__item[data-id="${productId}"]`);
+
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+
+        if (!pendingPaymentOptions[productId]) {
+            if (checkbox) {
+                checkbox.checked = false;
+            }
+            if (element) {
+                element.classList.remove('selected');
+            }
+            delete selectedEquipment[productId];
+        }
+
+        delete pendingPaymentOptions[productId];
+
+        updateEquipmentSummary();
+        calculateTotal();
+    }
+
+    function syncFormFields() {
+        const equipmentIds = Object.keys(selectedEquipment).filter(id => {
+            const checkbox = document.getElementById(`equipment-${id}`);
+            return checkbox && checkbox.checked;
+        });
+        const paymentOptions = Object.fromEntries(
+            equipmentIds.map(id => [id, selectedEquipment[id].paymentType || 'purchase'])
+        );
+
+        document.getElementById('selected_equipment_ids').value = JSON.stringify(equipmentIds);
+        document.getElementById('equipment_payment_options').value = JSON.stringify(paymentOptions);
+        document.getElementById('selected_service_slugs').value = JSON.stringify(Object.keys(selectedServices));
+        document.getElementById('selected_tv_package_ids').value = JSON.stringify(Object.keys(selectedTVPackages));
+        const tariffIds = [internetTariffId];
+        if (selectedTVTariff && !isTvTariff) {
+            tariffIds.push(selectedTVTariff.id);
+        }
+        document.getElementById('selected_tariff_ids').value = JSON.stringify(tariffIds);
+    }
+
+    // НОВОЕ: Добавляем функцию updateEquipmentList здесь, перед обработчиками событий
+    async function updateEquipmentList(tvTariffId = null) {
+        const equipmentSection = document.querySelector('.equipment__list');
+        const equipmentTitle = document.querySelector('.equipment__title');
+        const equipmentDescription = document.querySelector('.equipment__description');
+        const loadingSpinner = document.createElement('div');
+        loadingSpinner.className = 'loading-spinner';
+        loadingSpinner.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Загрузка...</span></div>';
+
+        // Показываем лоадер
+        equipmentSection.innerHTML = '';
+        equipmentSection.appendChild(loadingSpinner);
+        equipmentTitle.textContent = 'Загрузка оборудования...';
+        equipmentDescription.style.display = 'none';
+
+        try {
+            // Всегда загружаем оборудование для интернет-тарифа
+            let equipmentList = [];
+            const internetTariffId = {{ tariff.id }};
+            if (!equipmentCache[internetTariffId]) {
+                const internetUrl = `/{{ locality.slug|escapejs }}/tariff/${internetTariffId}/equipment/`;
+                const internetResponse = await fetch(internetUrl, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!internetResponse.ok) {
+                    throw new Error(`Ошибка загрузки оборудования для интернета: ${internetResponse.status}`);
+                }
+                const internetData = await internetResponse.json();
+                if (!internetData.success || !Array.isArray(internetData.equipment)) {
+                    throw new Error(internetData.error || 'Ошибка данных для интернета');
+                }
+                equipmentCache[internetTariffId] = internetData.equipment;
+            }
+            equipmentList = [...equipmentCache[internetTariffId]];
+
+            // Если выбран ТВ-тариф, добавляем его оборудование
+            if (tvTariffId) {
+                if (!equipmentCache[tvTariffId]) {
+                    const tvUrl = `/{{ locality.slug|escapejs }}/tariff/${tvTariffId}/equipment/`;
+                    const tvResponse = await fetch(tvUrl, {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    if (!tvResponse.ok) {
+                        throw new Error(`Ошибка загрузки оборудования для ТВ: ${tvResponse.status}`);
+                    }
+                    const tvData = await tvResponse.json();
+                    if (!tvData.success || !Array.isArray(tvData.equipment)) {
+                        throw new Error(tvData.error || 'Ошибка данных для ТВ');
+                    }
+                    equipmentCache[tvTariffId] = tvData.equipment;
+                }
+                equipmentList = [...equipmentList, ...equipmentCache[tvTariffId]];
+            }
+
+            // Удаляем дубликаты по ID (используем Map)
+            const uniqueEquipmentMap = new Map();
+            equipmentList.forEach(item => {
+                if (!uniqueEquipmentMap.has(item.id)) {
+                    uniqueEquipmentMap.set(item.id, item);
+                }
+            });
+            equipmentList = Array.from(uniqueEquipmentMap.values());
+
+            // Очищаем выбранное оборудование
+            selectedEquipment = {};
+            updateEquipmentSummary();
+            calculateTotal();
+
+            // Генерируем HTML для объединённого списка
+            let newEquipmentHTML = '';
+            equipmentList.forEach(item => {
+                const hasImage = item.has_image;
+                const imageUrl = item.image_url || '';
+                const installmentAvailable = item.installment_available;
+                const installment12 = item.installment_prices.installment12 || null;
+                const installment24 = item.installment_prices.installment24 || null;
+                const installment48 = item.installment_prices.installment48 || null;
+                const escapedName = escapeHtml(item.name);
+
+                newEquipmentHTML += `
+                    <article class="equipment__item" data-id="${item.id}" data-price="${item.price}">
+                        <div class="equipment__content">
+                            <div class="equipment__header">
+                                <div class="equipment__image-container">
+                                    ${hasImage ? `<img src="${imageUrl}" alt="${escapedName}" class="equipment__image">` : `
+                                        <div class="equipment__image-placeholder" aria-hidden="true">
+                                            <svg class="equipment__image-icon" width="48" height="28" viewBox="0 0 48 28" fill="currentColor">
+                                                <rect x="2" y="2" width="44" height="24" rx="4" fill="#e5e7eb"/>
+                                                <path d="M8 10h8v8H8zm14 0h8v8h-8zm14 0h8v8h-8z" fill="#9ca3af"/>
+                                            </svg>
+                                        </div>
+                                    `}
+                                </div>
+                                <div class="equipment__info-group">
+                                    <h5 class="equipment__name">${escapedName}</h5>
+                                </div>
+                                <div class="equipment__footer">
+                                    <div class="equipment__price-block" ${installmentAvailable ? 'data-installment-available="true"' : ''}>
+                                        <div class="equipment__payment-label" id="label-${item.id}">Полная стоимость</div>
+                                        <div class="equipment__price-value" id="price-${item.id}">${item.price.toLocaleString('ru-RU')} ₽</div>
+                                    </div>
+                                    <div class="equipment__switch-container">
+                                        <div class="form-check form-switch mb-0">
+                                            <input class="form-check-input"
+                                                type="checkbox"
+                                                id="equipment-${item.id}"
+                                                onchange="toggleEquipmentSelection(
+                                                    '${item.id}', 
+                                                    this.checked, 
+                                                    ${item.price}, 
+                                                    ${installment12}, 
+                                                    ${installment24}, 
+                                                    ${installment48}
+                                                )">
+                                            <label class="form-check-label" for="equipment-${item.id}"></label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                    ${installmentAvailable ? `
+                    <div class="equipment-payment-modal fade" id="installmentModal-${item.id}" tabindex="-1" aria-labelledby="installmentModalLabel-${item.id}">
+                        <div class="equipment-payment-modal__dialog">
+                            <div class="equipment-payment-modal__content">
+                                <div class="equipment-payment-modal__header">
+                                    <h5 class="equipment-payment-modal__title" id="installmentModalLabel-${item.id}">${escapedName}</h5>
+                                    <button type="button" class="equipment-payment-modal__close" data-modal-close aria-label="Закрыть">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M18 6L6 18M6 6l12 12"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div class="equipment-payment-modal__body">
+                                    <div class="equipment-payment-modal__option">
+                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-${item.id}" id="paymentOption-purchase-${item.id}" value="purchase" checked>
+                                        <label class="equipment-payment-modal__option-label" for="paymentOption-purchase-${item.id}">
+                                            Полная стоимость - ${item.price.toLocaleString('ru-RU')} ₽
+                                        </label>
+                                    </div>
+                                    ${installment12 ? `
+                                    <div class="equipment-payment-modal__option">
+                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-${item.id}" id="paymentOption-installment12-${item.id}" value="installment12">
+                                        <label class="equipment-payment-modal__option-label" for="paymentOption-installment12-${item.id}">
+                                            Рассрочка (на 12 мес.) - ${installment12.toLocaleString('ru-RU')} ₽/мес.
+                                        </label>
+                                    </div>` : ''}
+                                    ${installment24 ? `
+                                    <div class="equipment-payment-modal__option">
+                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-${item.id}" id="paymentOption-installment24-${item.id}" value="installment24">
+                                        <label class="equipment-payment-modal__option-label" for="paymentOption-installment24-${item.id}">
+                                            Рассрочка (на 24 мес.) - ${installment24.toLocaleString('ru-RU')} ₽/мес.
+                                        </label>
+                                    </div>` : ''}
+                                    ${installment48 ? `
+                                    <div class="equipment-payment-modal__option">
+                                        <input class="equipment-payment-modal__option-radio" type="radio" name="paymentOption-${item.id}" id="paymentOption-installment48-${item.id}" value="installment48">
+                                        <label class="equipment-payment-modal__option-label" for="paymentOption-installment48-${item.id}">
+                                            Рассрочка (на 48 мес.) - ${installment48.toLocaleString('ru-RU')} ₽/мес.
+                                        </label>
+                                    </div>` : ''}
+                                </div>
+                                <div class="equipment-payment-modal__footer">
+                                    <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--secondary" data-modal-close onclick="closeAndResetModal('${item.id}')">Отмена</button>
+                                    <button type="button" class="equipment-payment-modal__button equipment-payment-modal__button--primary" onclick="applyPaymentOption(
+                                        '${item.id}', 
+                                        ${item.price}, 
+                                        ${installment12}, 
+                                        ${installment24}, 
+                                        ${installment48}
+                                    )">Применить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>` : ''}
+                `;
+            });
+
+            equipmentSection.innerHTML = newEquipmentHTML;
+            equipmentTitle.textContent = 'Добавить оборудование'; // ИЗМЕНЕНИЕ: Оставляем заголовок неизменным
+            equipmentDescription.style.display = 'block';
+
+        } catch (error) {
+            console.error('Ошибка обновления оборудования:', error);
+            equipmentSection.innerHTML = '<p class="text-danger">Не удалось загрузить оборудование. Попробуйте обновить страницу.</p>';
+            equipmentTitle.textContent = 'Добавить оборудование';
+            equipmentDescription.style.display = 'block';
+        }
+    }
+
+    const phoneInput = document.querySelector('#orderForm [name="phone"]');
+    let phoneMask = null;
+    if (phoneInput) {
+        phoneMask = IMask(phoneInput, {
+            mask: '+{7}(000)000-00-00',
+            lazy: false,
+            placeholderChar: '_'
+        });
+    }
+
+    function validateOrderForm() {
+        const fullNameValid = document.querySelector('#orderForm [name="full_name"]').value.trim().length >= 3;
+        const phoneValid = phoneMask && preparePhoneNumber(phoneMask.unmaskedValue) !== null;
+        document.querySelector('#orderForm .order-form__submit').disabled = !(fullNameValid && phoneValid);
+    }
+
+    document.querySelectorAll('#orderForm [name="full_name"], #orderForm [name="phone"]').forEach(input => {
+        input.addEventListener('input', validateOrderForm);
+    });
+
+    function preparePhoneNumber(phoneValue) {
+        const digits = phoneValue.replace(/\D/g, '');
+        if (digits.length === 11 && (digits.startsWith('7') || digits.startsWith('8'))) {
+            return '+7' + digits.substring(1);
+        }
+        return null;
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        document.querySelectorAll('#orderForm .order-form__input, #orderForm .order-form__textarea').forEach(el => el.classList.remove('order-form__input--invalid'));
+        document.querySelectorAll('#orderForm .order-form__validation-message').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+        const errorContainer = document.querySelector('#form-errors');
+        errorContainer.innerHTML = '';
+
+        syncFormFields();
+
+        const formData = new FormData(this);
+        if (phoneMask) {
+            const phone = preparePhoneNumber(phoneMask.unmaskedValue);
+            if (!phone) {
+                document.querySelector('#orderForm [name="phone"]').classList.add('order-form__input--invalid');
+                document.querySelector('#error_phone').textContent = 'Введите номер телефона в формате +7 (XXX) XXX-XX-XX';
+                document.querySelector('#error_phone').style.display = 'block';
+                return;
+            }
+            formData.set('phone', phone);
+        }
+
+        const submitBtn = document.querySelector('#orderForm .order-form__submit');
+        try {
+            submitBtn.disabled = true;
+            submitBtn.classList.add('order-form__submit--loading');
+            submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
+
+            const response = await fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            const data = await response.json();
+            if (response.ok && data.success) {
+                this.reset();
+                if (phoneMask) phoneMask.updateValue();
+                window.location.href = `/${data.locality_slug}/order-success/${data.order_id}/`;
+            } else {
+                const errorList = document.createElement('ul');
+                errorList.className = 'errorlist';
+                Object.entries(data.errors || {}).forEach(([field, errors]) => {
+                    errors.forEach(error => {
+                        const li = document.createElement('li');
+                        li.textContent = `${field}: ${error}`;
+                        errorList.appendChild(li);
+                    });
+                });
+                errorContainer.appendChild(errorList);
+                errorContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        } catch (error) {
+            errorContainer.innerHTML = '<ul class="errorlist"><li>Ошибка при отправке. Попробуйте позже.</li></ul>';
+            errorContainer.scrollIntoView({ behavior: 'smooth' });
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('order-form__submit--loading');
+            submitBtn.innerHTML = 'Отправить заявку';
+        }
+    });
+
+    function openModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+            modal.removeAttribute('aria-hidden');
+            modal.querySelector('[data-modal-close]')?.addEventListener('click', () => {
+                modal.classList.remove('show');
+                modal.style.display = 'none';
+            });
+            modal.addEventListener('click', function closeOnBackdrop(e) {
+                if (e.target === modal) {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    modal.removeEventListener('click', closeOnBackdrop);
+                }
+            });
+            document.addEventListener('keydown', function closeOnEscape(e) {
+                if (e.key === 'Escape') {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    document.removeEventListener('keydown', closeOnEscape);
+                }
+            });
+        }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        originalEquipmentHTML = document.querySelector('.equipment__list').innerHTML;
+        validateOrderForm();
+        calculateTotal();
+        if (isTvTariff) {
+            selectedTVTariff = {
+                id: {{ tariff.id }},
+                actual_price: {{ tariff.get_actual_price }},
+                name: '{{ tariff.name|escapejs }}',
+                original_price: {{ tariff.price }},
+                is_promo: {{ tariff.is_promo|yesno:"true,false" }},
+                promo_months: {{ tariff.promo_months|default:0 }}
+            };
+            document.getElementById('selected_tariff_ids').value = JSON.stringify([{{ tariff.id }}]);
+            filterTVPackages();
+            calculateTotal();
+            updateEquipmentList({{ tariff.id }});
+        }
+    });
+</script>
+{% endblock %}

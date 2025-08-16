@@ -5,6 +5,7 @@ from .views import (
     b2b_internet_view,
     company_detail,
     feedback_form,
+    get_tariff_equipment,
     index,
     office_list,
     services,
@@ -17,6 +18,7 @@ app_name = "core"
 urlpatterns = [
     path("", index, name="home"),
     path("tariffs/<slug:slug>/", TariffDetailView.as_view(), name="tariff_detail"),
+    path('tariff/<int:tariff_id>/equipment/', get_tariff_equipment, name='get_tariff_equipment'),
     path("about/", about_company, name="about"),
     path("contacts/", office_list, name="contacts"),
     path("rekvizity-i-dokumenty/", company_detail, name="company_detail"),

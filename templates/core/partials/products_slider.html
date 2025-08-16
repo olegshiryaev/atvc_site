@@ -1,0 +1,84 @@
+{% load static image_tags %}
+{% if has_products %}
+<section id="shop" class="products-slider-block block" data-block-slug="products-slider-block" data-swiper='{
+    "slidesPerView": 1,
+    "spaceBetween": 20,
+    "breakpoints": {
+        "640": {"slidesPerView": 2, "spaceBetween": 20},
+        "1024": {"slidesPerView": 4, "spaceBetween": 30}
+    }
+}'>
+    <div class="products-slider-block__header">
+        <h2 class="products-slider-block__title block__title">Оборудование</h2>
+    </div>
+    <div class="products-slider-block__wrapper">
+        <div class="swiper">
+            <div class="swiper-wrapper">
+                {% for product in popular_items %}
+                <li class="product-card products-slider-block__item swiper-slide" 
+                    data-product-id="{{ product.id }}"
+                    data-product-title="{{ product.product.name }} ({{ product.color.name|default:'Без цвета' }})"
+                    data-product-price="{{ product.get_final_price|default_if_none:'' }}"
+                    aria-label="Товар {{ product.product.name }}">
+                    <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product.slug %}" class="product-card__wrapper">
+                        <div class="product-card__img-wrap{% if not product.get_main_image %} no-image{% endif %}">
+                            {% with main_image=product.get_main_image %}
+                                {% if main_image %}
+                                    <img src="{{ main_image.image.url }}"
+                                         alt="{{ product }}"
+                                         class="product-card__img"
+                                         loading="lazy">
+                                {% else %}
+                                    <div class="product-card__placeholder">
+                                        <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                    </div>
+                                {% endif %}
+                            {% endwith %}
+                        </div>
+                        <h6 class="product-card__title">{{ product }}</h6>
+                    </a>
+                    <div class="product-card__footer">
+                        <div class="product-card__price">{{ product.get_price_display }}</div>
+                        <button class="product-card__btn btn" 
+                                onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product.id %}'">
+                            Заказать
+                        </button>
+                    </div>
+                </li>
+                {% empty %}
+                <li class="product-card products-slider-block__item swiper-slide">
+                    <div class="product-card__wrapper">
+                        <p>Популярные товары отсутствуют.</p>
+                    </div>
+                </li>
+                {% endfor %}
+            </div>
+            <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
+        </div>
+        <div class="products-slider-block__navs slider-navs">
+            <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд" aria-controls="products-slider">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 19L8 12L15 5"></path>
+                </svg>
+            </button>
+            <div class="slider-navs__pag"></div>
+            <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд" aria-controls="products-slider">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 19L8 12L15 5"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+</section>
+{% else %}
+<section id="shop" class="products-slider-block block" data-block-slug="products-slider-block">
+    <div class="products-slider-block__header">
+        <h2 class="products-slider-block__title block__title">Оборудование</h2>
+    </div>
+    <div class="products-slider-block__wrapper">
+        <div class="no-products-message">
+            <p>Каталог оборудования временно недоступен. Мы работаем над его обновлением!</p>
+        </div>
+    </div>
+</section>
+{% endif %}

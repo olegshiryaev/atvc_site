@@ -1,6 +1,7 @@
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import resolve, reverse_lazy, reverse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import JsonResponse, FileResponse
 from django.views.generic import CreateView, DetailView
@@ -12,6 +13,7 @@ from django.contrib import messages
 import os
 from urllib.parse import quote
 import logging
+import json
 
 from apps.equipments.models import Product, ProductItem
 from apps.orders.forms import OrderForm
@@ -406,3 +408,43 @@ def static_page_view(request, slug, locality_slug):
     }
 
     return render(request, "core/static_page.html", context)
+
+
+@require_http_methods(["GET"])
+def get_tariff_equipment(request, locality_slug, tariff_id):
+    """
+    API-эндпоинт для получения оборудования по ID тарифа.
+    """
+    try:
+        # Опционально: проверяем, что тариф доступен в указанной локали
+        locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+        tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True, localities=locality)
+        
+        equipment_data = []
+        for product_item in tariff.products.all().select_related('product__category'):
+            price = product_item.get_final_price()
+            installment_data = {}
+            if product_item.installment_available:
+                if product_item.installment_12_months:
+                    installment_data['installment12'] = product_item.installment_12_months
+                if product_item.installment_24_months:
+                    installment_data['installment24'] = product_item.installment_24_months
+                if product_item.installment_48_months:
+                    installment_data['installment48'] = product_item.installment_48_months
+
+            image_url = product_item.get_main_image().image.url if product_item.get_main_image() else None
+
+            equipment_data.append({
+                'id': product_item.id,
+                'name': product_item.get_display_name(),
+                'price': price,
+                'installment_available': product_item.installment_available,
+                'installment_prices': installment_data,
+                'image_url': image_url,
+                'has_image': bool(image_url)
+            })
+        return JsonResponse({'success': True, 'equipment': equipment_data})
+    except Tariff.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Тариф не найден или недоступен в этом регионе'}, status=404)
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

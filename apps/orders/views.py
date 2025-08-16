@@ -80,7 +80,7 @@ def order_create(request, locality_slug, slug):
             service_ids = list(selected_tariffs.values_list('service__id', flat=True))
             if len(service_ids) != len(set(service_ids)):
                 form.add_error(None, "Нельзя выбрать более одного тарифа на одну услугу.")
-                return render(request, "core/tariffs/order_create.html", {
+                return render(request, "orders/order_create.html", {
                     "form": form,
                     "tariff": tariff,
                     "tv_tariffs": tv_tariffs,
@@ -129,7 +129,7 @@ def order_create(request, locality_slug, slug):
             if tv_package_ids:
                 if not order.tariffs.filter(service__slug="tv").exists():
                     form.add_error(None, "Пакеты ТВ-каналов можно выбрать только при наличии тарифа на телевидение.")
-                    return render(request, "core/tariffs/order_create.html", {
+                    return render(request, "orders/order_create.html", {
                         "form": form,
                         "tariff": tariff,
                         "tv_tariffs": tv_tariffs,
@@ -147,7 +147,7 @@ def order_create(request, locality_slug, slug):
                     if valid_packages.count() != len(tv_package_ids):
                         form.add_error(None, "Некоторые ТВ-пакеты не совместимы с выбранным ТВ-тарифом.")
                         logger.warning(f"Несовместимые ТВ-пакеты: {set(tv_package_ids) - set(valid_packages.values_list('id', flat=True))}")
-                        return render(request, "core/tariffs/order_create.html", {
+                        return render(request, "orders/order_create.html", {
                             "form": form,
                             "tariff": tariff,
                             "tv_tariffs": tv_tariffs,
@@ -194,7 +194,7 @@ def order_create(request, locality_slug, slug):
 
     return render(
         request,
-        "core/tariffs/order_create.html",
+        "orders/order_create.html",
         {
             "title": "Заявка на подключение",
             "breadcrumbs": [
@@ -333,7 +333,7 @@ def submit_order(request, locality_slug):
 
 def order_success(request, locality_slug, order_id):
     order = get_object_or_404(Order, id=order_id)
-    return render(request, "core/order_success.html", {"order": order, "locality_slug": locality_slug})
+    return render(request, "orders/order_success.html", {"order": order, "locality_slug": locality_slug})
 
 def tariff_detail(request, locality_slug, tariff_id):
     tariff = get_object_or_404(Tariff, id=tariff_id)

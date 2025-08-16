@@ -16,29 +16,33 @@
                     <!-- Основное изображение -->
                     <div class="gallery__imgs swiper product-gallery-main">
                         <div class="swiper-wrapper">
-                            {% if current_item.images.exists %}
+                            {% if current_item.has_images %}
                                 {% for image in current_item.images.all %}
-                                    <div class="swiper-slide gallery__item">
-                                        <img src="{{ image.image.url }}" alt="{{ current_item }}" class="gallery__item-img lazyloaded">
+                                    <div class="swiper-slide gallery__item" role="group" aria-label="Изображение {{ forloop.counter }} из {{ current_item.images.count }}">
+                                        <img src="{{ image.image.url }}" alt="{{ current_item }} - изображение {{ forloop.counter }}" class="gallery__item-img" loading="lazy">
                                     </div>
-                               {% endfor %}
+                                {% endfor %}
                             {% else %}
-                                    <div class="swiper-slide gallery__item" data-color="all">
-                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="product-card__img img-fluid rounded">
+                                <div class="swiper-slide gallery__item" data-color="all" role="group" aria-label="Изображение по умолчанию">
+                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="gallery__item-img" loading="lazy">
                                 </div>
                             {% endif %}
                         </div>
+                        <div class="swiper-button-prev"></div>
+                        <div class="swiper-button-next"></div>
+                        <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
                     </div>
-                    {% if current_item.images.exists %}
+                    {% if current_item.has_images %}
                         <div class="gallery__bottom slider-navs">
                             <div class="gallery__thumbs swiper product-gallery-thumbs">
                                 <div class="swiper-wrapper">
                                     {% for image in current_item.images.all %}
-                                        <div class="swiper-slide gallery__thumbs-item" style="margin-right: 20px;" data-color="{{ image.color|default:'all' }}">
-                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img">
+                                        <div class="swiper-slide gallery__thumbs-item" data-color="{{ image.color|default:'all' }}" role="button" aria-label="Выбрать изображение {{ forloop.counter }}">
+                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img" loading="lazy">
                                         </div>
                                     {% endfor %}
                                 </div>
+                                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
                             </div>
                         </div>
                     {% endif %}
@@ -241,7 +245,10 @@
                         </a>
                         <div class="product-card__footer">
                             <div class="product-card__price h5">{{ item.get_price_display }}</div>
-                            <div class="product-card__btn btn" data-add-product-cart="">В корзину</div>
+                                <button class="product-card__btn btn" 
+                                    onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=item.id %}'">
+                                Заказать
+                            </button>
                         </div>
                     </li>
                     {% endfor %}
@@ -261,84 +268,154 @@
 
 <!-- JavaScript -->
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // === Инициализация слайдера "Недавно просмотренные" ===
-    const recentlyViewedSwiper = new Swiper('.products-slider-block .swiper', {
-        slidesPerView: 1,
-        spaceBetween: 16,
-        navigation: {
-            nextEl: '.products-slider-block .slider-navs__next',
-            prevEl: '.products-slider-block .slider-navs__prev',
-        },
-        pagination: {
-            el: '.products-slider-block .slider-navs__pag',
-            clickable: true,
-        },
-        breakpoints: {
-            576: { slidesPerView: 2, spaceBetween: 16 },
-            768: { slidesPerView: 3, spaceBetween: 20 },
-            992: { slidesPerView: 4, spaceBetween: 24 },
-        },
-    });
+(function () {
+    const initProductPage = () => {
+        // Функция для инициализации Swiper
+        const initSwiper = () => {
+            const galleryThumbs = document.querySelector('.product-gallery-thumbs');
+            const galleryMain = document.querySelector('.product-gallery-main');
 
-    // === Переключение табов (Описание / Характеристики) ===
-    const tabButtons = document.querySelectorAll('[data-tab]');
-    const tabPanes = document.querySelectorAll('.tab-pane');
+            if (!galleryMain || !galleryThumbs) {
+                console.warn('Галерея Swiper не инициализирована: элементы не найдены');
+                return;
+            }
 
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function () {
-            tabButtons.forEach(b => b.classList.remove('active'));
-            tabPanes.forEach(p => p.classList.remove('active'));
+            const thumbsSwiper = new Swiper(galleryThumbs, {
+                spaceBetween: 10,
+                slidesPerView: 4,
+                freeMode: true,
+                watchSlidesProgress: true,
+                breakpoints: {
+                    600: {
+                        slidesPerView: 3,
+                    },
+                    400: {
+                        slidesPerView: 2,
+                    },
+                },
+            });
 
-            this.classList.add('active');
-            document.getElementById(this.dataset.tab).classList.add('active');
+            new Swiper(galleryMain, {
+                spaceBetween: 10,
+                slidesPerView: 1,
+                thumbs: {
+                    swiper: thumbsSwiper,
+                },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                on: {
+                    init: function () {
+                        console.log('Swiper галереи инициализирован');
+                        // Исправляем размеры слайдов после инициализации
+                        this.slides.forEach(slide => {
+                            slide.style.width = '100%';
+                        });
+                    },
+                    slideChange: function () {
+                        console.log('Переключен слайд:', this.activeIndex);
+                    },
+                    imagesReady: function () {
+                        console.log('Все изображения в Swiper загружены');
+                        this.update(); // Пересчитываем размеры
+                    },
+                },
+            });
+        };
+
+        // Ожидаем загрузки всех изображений
+        const images = document.querySelectorAll('.gallery__item-img, .gallery__thumbs-img');
+        let loadedImages = 0;
+
+        if (images.length === 0) {
+            initSwiper();
+            return;
+        }
+
+        images.forEach(img => {
+            if (img.complete) {
+                loadedImages++;
+                if (loadedImages === images.length) {
+                    initSwiper();
+                }
+            } else {
+                img.addEventListener('load', () => {
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        initSwiper();
+                    }
+                });
+                img.addEventListener('error', () => {
+                    console.warn(`Ошибка загрузки изображения: ${img.src}`);
+                    loadedImages++;
+                    if (loadedImages === images.length) {
+                        initSwiper();
+                    }
+                });
+            }
         });
-    });
 
-    // Функция для перехода на вкладку "Характеристики"
-    window.activateSpecsTab = function(e) {
-        e.preventDefault();
-        const specsButton = document.querySelector('[data-tab="specs"]');
-        if (specsButton) {
-            specsButton.click();
-            document.getElementById('specs').scrollIntoView({ behavior: 'smooth' });
+        // Инициализация слайдера "Недавно просмотренные"
+        const recentlyViewedSwiperEl = document.querySelector('.products-slider-block .swiper');
+        if (recentlyViewedSwiperEl) {
+            new Swiper(recentlyViewedSwiperEl, {
+                slidesPerView: 1,
+                spaceBetween: 16,
+                navigation: {
+                    nextEl: '.products-slider-block .slider-navs__next',
+                    prevEl: '.products-slider-block .slider-navs__prev',
+                },
+                pagination: {
+                    el: '.products-slider-block .slider-navs__pag',
+                    clickable: true,
+                },
+                breakpoints: {
+                    576: { slidesPerView: 2, spaceBetween: 16 },
+                    768: { slidesPerView: 3, spaceBetween: 20 },
+                    992: { slidesPerView: 4, spaceBetween: 24 },
+                },
+            });
+        }
+
+        // Переключение табов
+        const tabButtons = document.querySelectorAll('[data-tab]');
+        if (tabButtons.length) {
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(button.dataset.tab).classList.add('active');
+                });
+            });
+        }
+
+        // Переключение способа оплаты
+        const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
+        const orderButton = document.getElementById('order-button');
+        const priceDisplay = document.getElementById('current-price-display');
+        if (orderButton && priceDisplay) {
+            const baseUrl = orderButton.dataset.baseUrl || "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
+            paymentRadios.forEach(radio => {
+                radio.addEventListener('change', () => {
+                    const price = parseFloat(radio.dataset.price);
+                    const isMonthly = radio.value !== 'purchase';
+                    const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
+                    priceDisplay.style.opacity = '0';
+                    setTimeout(() => {
+                        priceDisplay.textContent = formattedPrice;
+                        priceDisplay.style.opacity = '1';
+                    }, 300);
+                    orderButton.href = `${baseUrl}?payment_type=${radio.value}`;
+                    paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
+                    radio.parentElement.classList.add('active');
+                });
+            });
         }
     };
 
-    // === Обработка выбора способа оплаты (покупка / рассрочка) ===
-    const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
-    const orderButton = document.getElementById('order-button');
-    const priceDisplay = document.getElementById('current-price-display');
-
-    paymentRadios.forEach(radio => {
-        radio.addEventListener('change', function () {
-            const price = parseFloat(this.dataset.price);
-            const isMonthly = this.value !== 'purchase';
-
-            // Форматируем цену: 1 299 ₽
-            const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
-
-            // Обновляем отображение цены
-            priceDisplay.textContent = formattedPrice;
-
-            // Обновляем ссылку кнопки "Заказать"
-            const baseUrl = "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
-            orderButton.href = `${baseUrl}?payment_type=${this.value}`;
-
-            // Обновляем визуальное выделение
-            paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
-            this.parentElement.classList.add('active');
-        });
-    });
-
-    // === Инициализация: установка активного радио и отображения цены ===
-    const initialRadio = document.querySelector('input[name="payment_method"]:checked');
-    if (initialRadio) {
-        const initialPrice = parseFloat(initialRadio.dataset.price);
-        const isMonthly = initialRadio.value !== 'purchase';
-        const formattedPrice = new Intl.NumberFormat('ru-RU').format(initialPrice) + ' ₽' + (isMonthly ? '/мес.' : '');
-        priceDisplay.textContent = formattedPrice;
-    }
-});
+    document.addEventListener('DOMContentLoaded', initProductPage);
+})();
 </script>
 {% endblock %}

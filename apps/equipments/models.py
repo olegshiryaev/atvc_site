@@ -285,6 +285,9 @@ class ProductItem(BaseModel):
         """
         main_image = self.images.filter(is_main=True).first()
         return main_image if main_image else self.images.first()
+    
+    def has_images(self):
+        return self.images.exists()
 
     def clean(self):
         if not self.price:

@@ -9,18 +9,17 @@ import re
 
 
 def news_list(request, locality_slug):
-    locality = get_object_or_404(Locality, slug=locality_slug)
-    news_list = News.objects.filter(localities=locality, is_published=True).order_by(
-        "-created_at"
-    )
-    paginator = Paginator(news_list, 6)
+    """Отображает список новостей для указанного населённого пункта."""
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
+    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at").select_related('image').prefetch_related('localities')
+    paginator = Paginator(news_qs, 6)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
     return render(
         request,
         "news/news_list.html",
         {
-            "news_list": page_obj,
+            "page_obj": page_obj,  # Унифицировано название
             "locality": locality,
             "has_more_news": page_obj.has_next(),
             "title": "Новости",
@@ -33,28 +32,25 @@ def news_list(request, locality_slug):
 
 
 def load_more_news(request, locality_slug):
-    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
-        return JsonResponse({"error": "Invalid request"}, status=400)
+    """Загружает дополнительные новости через AJAX."""
+    if not request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return JsonResponse({"error": "Требуется AJAX-запрос"}, status=400)
 
-    locality = get_object_or_404(Locality, slug=locality_slug)
+    locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     page = int(request.GET.get("page", 2))
-    news_per_page = 3
+    news_per_page = 6  # Унифицировано с news_list
 
-    news_list = News.objects.filter(localities=locality, is_published=True).order_by(
-        "-created_at"
-    )
-
-    paginator = Paginator(news_list, news_per_page)
+    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at").select_related('image').prefetch_related('localities')
+    paginator = Paginator(news_qs, news_per_page)
 
     try:
         page_obj = paginator.page(page)
     except EmptyPage:
         return JsonResponse({"has_more_news": False, "html": ""})
 
-    # Рендерим список карточек новостей
     html = render_to_string(
         "news/partials/news_card_list.html",
-        {"news_list": page_obj, "locality": locality},
+        {"page_obj": page_obj, "locality": locality},
         request=request,
     )
 
@@ -62,21 +58,19 @@ def load_more_news(request, locality_slug):
 
 
 def news_detail(request, locality_slug, news_slug):
+    """Отображает детальную страницу новости."""
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     news_item = get_object_or_404(
-        News, slug=news_slug, localities=locality, is_published=True
+        News.objects.published().filter(localities=locality, slug=news_slug).select_related('image').prefetch_related('localities')
     )
 
-    # Увеличиваем счётчик просмотров
-    News.objects.filter(pk=news_item.pk).update(views_count=F("views_count") + 1)
+    # Увеличиваем счётчик просмотров через метод модели
+    news_item.increment_views()
 
-    # Получаем другие новости из той же локальности
-    other_news = News.objects.filter(
-        localities=locality,
-        is_published=True
-    ).exclude(
-        id=news_item.id
-    ).order_by('-created_at')[:3]
+    # Получаем другие новости
+    other_news = News.objects.published().filter(
+        localities=locality
+    ).exclude(id=news_item.id).order_by('-created_at')[:3].select_related('image').prefetch_related('localities')
 
     return render(
         request,
@@ -88,7 +82,7 @@ def news_detail(request, locality_slug, news_slug):
             "title": news_item.title,
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},
-                {"title": "Новости", "url": "news:news_list"},
+                {"title": "Новости", "url": reverse("news:news_list", kwargs={"locality_slug": locality_slug})},
                 {"title": news_item.title, "url": None},
             ],
         },
@@ -96,10 +90,12 @@ def news_detail(request, locality_slug, news_slug):
 
 
 def news_widget(request, locality_slug):
+    """Отображает виджет последних новостей."""
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    latest_news = News.objects.filter(is_published=True, localiies=locality).order_by(
+    latest_news = News.objects.published().filter(localities=locality).order_by(
         "-created_at"
-    )
+    ).select_related('image').prefetch_related('localities')[:3]  # Ограничение для виджета
+
     return render(
         request,
         "news/partials/news_widget.html",
