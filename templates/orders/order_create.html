@@ -571,11 +571,21 @@
         const tvTariffPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.actual_price : 0);
         const tvConnectionPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.connection_price : 0);
 
-        const monthlyPrice = tariffPrice + tvTariffPrice + totalServicesPrice + totalTVPackagesPrice;
-        const connectionTotalPrice = connectionPrice + tvConnectionPrice + Object.values(selectedEquipment).reduce((sum, p) => {
+        // ИСПРАВЛЕНИЕ: Стоимость подключения только для тарифов
+        const tariffConnectionPrice = connectionPrice + tvConnectionPrice;
+
+        // Месячная стоимость: тарифы + услуги + ТВ-пакеты + рассрочка оборудования
+        let monthlyPrice = tariffPrice + tvTariffPrice + totalServicesPrice + totalTVPackagesPrice;
+
+        // Стоимость оборудования за полную стоимость
+        const equipmentPurchasePrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (p.paymentType === 'purchase' ? p.price : 0);
         }, 0);
 
+        // ИСПРАВЛЕНИЕ: connectionTotalPrice включает стоимость подключения тарифов + полную стоимость оборудования
+        const connectionTotalPrice = tariffConnectionPrice + equipmentPurchasePrice;
+
+        // Рассрочка оборудования
         const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (
                 p.paymentType === 'installment12' ||
@@ -586,16 +596,22 @@
             );
         }, 0);
 
+        // Добавляем рассрочку к месячной стоимости
+        monthlyPrice += installmentPrice;
+
+        // Общая стоимость (месячная + единовременная)
         const totalPrice = monthlyPrice + connectionTotalPrice;
 
-        console.debug(`Расчёт итога: tariffPrice=${tariffPrice}, tvTariffPrice=${tvTariffPrice}, tvConnectionPrice=${tvConnectionPrice}, totalServicesPrice=${totalServicesPrice}, totalTVPackagesPrice=${totalTVPackagesPrice}, connectionPrice=${connectionPrice}, connectionTotalPrice=${connectionTotalPrice}, totalPrice=${totalPrice}`);
+        console.debug(`Расчёт итога: tariffPrice=${tariffPrice}, tvTariffPrice=${tvTariffPrice}, tvConnectionPrice=${tvConnectionPrice}, totalServicesPrice=${totalServicesPrice}, totalTVPackagesPrice=${totalTVPackagesPrice}, tariffConnectionPrice=${tariffConnectionPrice}, equipmentPurchasePrice=${equipmentPurchasePrice}, connectionTotalPrice=${connectionTotalPrice}, installmentPrice=${installmentPrice}, monthlyPrice=${monthlyPrice}, totalPrice=${totalPrice}`);
 
+        // Обновляем DOM
         updateAll('.summary-total-price', `${totalPrice.toLocaleString('ru-RU')} ₽`);
         updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽/мес.`);
         updateAll('.summary-connection-total-price', `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`);
-        const connectionPriceText = connectionTotalPrice === 0 ? 'Бесплатно' : `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`;
+        const connectionPriceText = tariffConnectionPrice === 0 ? 'Бесплатно' : `${tariffConnectionPrice.toLocaleString('ru-RU')} ₽`;
         updateAll('.summary-connection-price', connectionPriceText);
 
+        // Обработка рассрочки
         if (installmentPrice > 0 && Object.keys(selectedEquipment).length > 0) {
             const installmentItems = Object.values(selectedEquipment).filter(p =>
                 p.paymentType === 'installment12' ||
@@ -630,7 +646,8 @@
             updateAll('.summary-installment-price', '0 ₽/мес.');
         }
 
-        document.getElementById('total_equipment_cost').value = Object.values(selectedEquipment).reduce((sum, p) => sum + (p.paymentType === 'purchase' ? p.price : 0), 0);
+        // Обновляем скрытые поля формы
+        document.getElementById('total_equipment_cost').value = equipmentPurchasePrice;
         document.getElementById('total_services_cost').value = totalServicesPrice;
         document.getElementById('total_tv_packages_cost').value = totalTVPackagesPrice;
         document.getElementById('total_price').value = totalPrice;
