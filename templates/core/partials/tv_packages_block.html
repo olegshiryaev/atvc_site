@@ -28,7 +28,7 @@
                                 <span>{{ package.description|safe|default_if_none:''|truncatewords:20 }}</span>
                             </div>
                             <div class="tv-package-card__stats">
-                                <span>{{ package.channel_count_display }}</span>
+                                <span><i class="bi bi-tv"></i> {{ package.channel_count_display }}</span>
                                 <a href="#channelsModal-package-{{ package.id }}"
                                    data-bs-toggle="modal"
                                    data-bs-target="#channelsModal-package-{{ package.id }}"
