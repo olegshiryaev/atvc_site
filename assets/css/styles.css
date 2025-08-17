@@ -10129,7 +10129,7 @@ button.swiper-pagination-bullet {
 
 .btn-order:hover {
     background: var(--color-navy-blue);
-    color: white;
+    color: white !important;
 }
 
 .link-download {
