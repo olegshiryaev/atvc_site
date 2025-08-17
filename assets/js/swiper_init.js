@@ -16,24 +16,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevEl = container.querySelector('.slider-navs__prev');
         const paginationEl = container.querySelector('.slider-navs__pag');
 
+        if (!swiperContainer) return; // Пропускаем, если .swiper не найден
+
         new Swiper(swiperContainer, {
             ...config,
             navigation: {
                 nextEl,
                 prevEl,
+                disabledClass: 'slider-navs__btn--disabled', // Добавляем класс для неактивных кнопок
             },
             pagination: {
                 el: paginationEl,
                 clickable: true,
+                bulletClass: 'slider-navs__bullet',
+                bulletActiveClass: 'slider-navs__bullet--active',
             },
             lazy: {
                 loadPrevNext: true,
+                loadPrevNextAmount: 2,
+                elementClass: 'swiper-lazy',
+                preloaderClass: 'swiper-lazy-preloader',
             },
             a11y: {
                 prevSlideMessage: 'Предыдущий слайд',
                 nextSlideMessage: 'Следующий слайд',
                 paginationBulletMessage: 'Перейти к слайду {{index}}',
             },
+            watchOverflow: true, // Отключает навигацию, если слайдов мало
             on: {
                 init: function () {
                     container.classList.add('swiper-ready');
@@ -46,6 +55,8 @@ document.addEventListener('DOMContentLoaded', () => {
     function initOrUpdateSwipers() {
         document.querySelectorAll('.tariff-swiper').forEach((el) => {
             const wrapper = el.closest('.tariff-swiper-wrapper');
+            if (!wrapper) return;
+
             if (!el.swiper) {
                 new Swiper(el, {
                     slidesPerView: 1,
@@ -55,10 +66,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     pagination: {
                         el: wrapper.querySelector('.slider-navs__pag'),
                         clickable: true,
+                        bulletClass: 'slider-navs__bullet',
+                        bulletActiveClass: 'slider-navs__bullet--active',
                     },
                     navigation: {
                         nextEl: wrapper.querySelector('.slider-navs__next'),
                         prevEl: wrapper.querySelector('.slider-navs__prev'),
+                        disabledClass: 'slider-navs__btn--disabled',
                     },
                     breakpoints: {
                         576: { slidesPerView: 1.2 },
@@ -79,6 +93,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     initOrUpdateSwipers();
+
+    // Обновление Swiper при переключении табов
     document.querySelectorAll('[data-bs-toggle="tab"]').forEach(btn => {
         btn.addEventListener('shown.bs.tab', () => {
             setTimeout(initOrUpdateSwipers, 50);
@@ -109,6 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }, 200));
 
+    // Обновление Swiper после HTMX
     document.addEventListener('htmx:afterSwap', () => {
         initOrUpdateSwipers();
     });

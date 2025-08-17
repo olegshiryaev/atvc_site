@@ -9889,15 +9889,22 @@ button.swiper-pagination-bullet {
 }
 
 .product-color {
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-base);
+    line-height: 1.4;
     color: #555;
+}
+
+.product-color__name {
+    color: var(--color-rich-black);
+    font-weight: 600;
+    margin-right: 4px;
 }
 
 /* Стили для выбора цвета в виде кружков */
 .color-circles {
     display: flex;
     gap: 8px;
-    margin: 12px 0;
+    margin: 16px 0;
     flex-wrap: wrap;
 }
 
@@ -9943,8 +9950,9 @@ button.swiper-pagination-bullet {
 
 .product-specs-title {
     margin-top: 1rem;
-    font-size: 1rem;
-    color: #333;
+    font-size: var(--font-size-base);
+    color: var(--color-rich-black);
+    font-weight: 600;
 }
 
 /* Краткие характеристики */
@@ -9958,31 +9966,43 @@ button.swiper-pagination-bullet {
     width: 100%;
 }
 
+/* Элемент характеристики */
 .spec-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 6px;
     width: 100%;
-    /* Важно: не ограничивать overflow */
     overflow: visible;
+    font-size: var(--font-size-sm);
+    line-height: 1.4;
 }
 
-.spec-item strong {
-    color: #666;
+/* Название характеристики */
+.spec-item__name {
+    color: var(--color-text-muted);
     min-width: 90px;
     flex-shrink: 0;
-    font-weight: 600;
+    font-weight: 500;
 }
 
+/* Значение характеристики */
+.spec-item__value {
+    color: var(--color-rich-black);
+    text-align: right;
+    min-width: 70px;
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+/* Точки-разделители (улучшенная версия) */
 .spec-dots {
     flex: 1;
     margin: 0 8px;
     position: relative;
     height: 1.2em;
-    /* Гарантируем, что контейнер видим */
     overflow: visible;
-    min-width: 20px; /* Защита от исчезновения */
+    min-width: 20px;
 }
 
 .spec-dots::after {
@@ -10001,28 +10021,16 @@ button.swiper-pagination-bullet {
     );
 }
 
-.spec-item span {
-    color: #333;
-    text-align: right;
-    min-width: 70px;
-    flex-shrink: 0;
-    white-space: nowrap;
-}
-
-.spec-item:last-child {
-    margin-bottom: 0;
-}
-
 /* Адаптив */
 @media (max-width: 600px) {
-    .spec-item strong {
-    min-width: 70px;
+    .spec-item__name {
+        min-width: 70px;
     }
     .spec-dots {
-    margin: 0 4px;
+        margin: 0 4px;
     }
-    .spec-item span {
-    min-width: 50px;
+    .spec-item__value {
+        min-width: 50px;
     }
 }
 
@@ -10031,7 +10039,7 @@ button.swiper-pagination-bullet {
     background: none;
     border: none;
     color: var(--main-color);
-    font-size: var(--font-size-sm);
+    font-size: var(--font-size-base);
     cursor: pointer;
     padding: 0;
     margin: 0.5rem 0;

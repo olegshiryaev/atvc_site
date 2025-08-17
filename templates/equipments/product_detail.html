@@ -55,7 +55,7 @@
                 <div class="product-info">
                     {% if current_item.color %}
                         <div class="product-color">
-                            <strong>Цвет:</strong> {{ current_item.color.name|lower }}
+                            <span class="product-color__name">Цвет:</span> {{ current_item.color.name|lower }}
                         </div>
                     {% endif %}
 
@@ -84,16 +84,30 @@
                                 {% with s=current_item.product.smart_speaker %}
                                     {% if s.voice_assistant %}
                                         <div class="spec-item">
-                                            <strong>Голосовой помощник</strong>
+                                            <span class="spec-item__name spec-item__name--gray">Голосовой помощник</span>
                                             <span class="spec-dots"></span>
-                                            <span>{{ s.voice_assistant }}</span>
+                                            <span class="spec-item__value spec-item__value--black">{{ s.voice_assistant }}</span>
                                         </div>
                                     {% endif %}
                                     {% if s.power_source %}
                                         <div class="spec-item">
-                                            <strong>Питание</strong>
+                                            <span class="spec-item__name spec-item__name--gray">Тип питания</span>
                                             <span class="spec-dots"></span>
-                                            <span>{{ s.power_source }}</span>
+                                            <span class="spec-item__value spec-item__value--black">{{ s.power_source }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if s.wireless_connection %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Беспроводное соединение</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ s.wireless_connection }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if s.max_power %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Максимальная мощность</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ s.max_power }}</span>
                                         </div>
                                     {% endif %}
                                 {% endwith %}
@@ -203,7 +217,7 @@
                 </div>
 
                 <a href="{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}?payment_type=purchase"
-                   class="btn-order btn" id="order-button">
+                   class="btn-order" id="order-button">
                     Заказать
                 </a>
                 {% if current_item.product.instruction %}
