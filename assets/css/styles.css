@@ -10117,7 +10117,7 @@ button.swiper-pagination-bullet {
 }
 
 .btn-order {
-    background: #0066cc;
+    background: var(--color-ocean-blue);
     color: white;
     text-align: center;
     padding: 14px 20px;
@@ -10128,7 +10128,8 @@ button.swiper-pagination-bullet {
 }
 
 .btn-order:hover {
-    background: #0055aa;
+    background: var(--color-navy-blue);
+    color: white;
 }
 
 .link-download {
