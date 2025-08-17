@@ -2,21 +2,60 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <title>Новая заявка #{{ order.id }}</title>
     <style>
-        body { font-family: Arial, sans-serif; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; }
-        h2 { color: #005555; }
-        .field { margin: 10px 0; }
-        .label { font-weight: bold; }
-        .link { color: #005555; text-decoration: none; }
+        body { font-family: Arial, sans-serif; color: #333; background: #f9f9f9; }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        h2 { color: #0056b3; margin-top: 0; }
+        .field { margin: 8px 0; font-size: 14px; }
+        .label { font-weight: bold; color: #222; }
         .section { margin: 20px 0; }
-        .section-title { font-weight: bold; font-size: 16px; margin-bottom: 10px; }
-        .item { margin-left: 20px; margin-bottom: 5px; }
+        .section-title {
+            font-weight: bold;
+            font-size: 16px;
+            color: #0056b3;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
+        }
+        .item {
+            margin-left: 20px;
+            margin-bottom: 6px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+        .item small {
+            color: #666;
+            font-style: italic;
+        }
+        .link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: #0056b3;
+            color: white !important;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .link:hover {
+            background: #004085;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Новая заявка #{{ order.id }}</h2>
+        <h2>Новая заявка с сайта №{{ order.id }}</h2>
+
         <div class="field">
             <span class="label">Статус:</span> {{ order.get_status_display }}
         </div>
@@ -33,62 +72,67 @@
             <span class="label">Email:</span> {{ order.email|default:"Не указан" }}
         </div>
         <div class="field">
-            <span class="label">Тариф:</span> {{ order.tariff.name|default:"Не указан" }}
+            <span class="label">Тарифы:</span> {{ order.get_tariff_display }}
         </div>
         <div class="field">
-            <span class="label">Населенный пункт:</span> {{ order.locality.name }}
+            <span class="label">Населённый пункт:</span> {{ order.locality.name }}
         </div>
         <div class="field">
             <span class="label">Адрес:</span> 
             {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
         </div>
+
         <div class="section">
-            <div class="section-title">Оборудование:</div>
-            {% for product in order.get_products_with_details %}
+            <div class="section-title">Оборудование</div>
+            {% for item in order.get_products_with_details %}
                 <div class="item">
-                    {{ product.product.name }} ({{ product.quantity }} шт.) - 
-                    {% if product.payment_type == 'purchase' %}
-                        {{ product.price }} руб.
-                    {% elif product.payment_type == 'installment12' and product.installment_12_months %}
-                        {{ product.price }} руб. (рассрочка на 12 мес. по {{ product.installment_12_months }} руб./мес.)
-                    {% elif product.payment_type == 'installment24' and product.installment_24_months %}
-                        {{ product.price }} руб. (рассрочка на 24 мес. по {{ product.installment_24_months }} руб./мес.)
-                    {% elif product.payment_type == 'installment48' and product.installment_48_months %}
-                        {{ product.price }} руб. (рассрочка на 48 мес. по {{ product.installment_48_months }} руб./мес.)
+                    <strong>{{ item.product.name }}</strong> — 
+                    {% if item.payment_type == 'purchase' %}
+                        {{ item.price }} ₽
+                    {% elif item.payment_type == 'installment12' and item.installment_12_months %}
+                        {{ item.price }} ₽ (рассрочка 12 мес. по {{ item.installment_12_months }} ₽/мес)
+                    {% elif item.payment_type == 'installment24' and item.installment_24_months %}
+                        {{ item.price }} ₽ (рассрочка 24 мес. по {{ item.installment_24_months }} ₽/мес)
+                    {% elif item.payment_type == 'installment48' and item.installment_48_months %}
+                        {{ item.price }} ₽ (рассрочка 48 мес. по {{ item.installment_48_months }} ₽/мес)
                     {% else %}
-                        {{ product.price }} руб.
+                        {{ item.price }} ₽
                     {% endif %}
-                    {% if product.variant %}<br>Вариант: {{ product.variant.name }}{% endif %}
+                    <br>
+                    <small>Цвет: {{ item.product_item.color.name }}, Артикул: {{ item.product_item.sku }}</small>
                 </div>
             {% empty %}
                 <div class="item">Оборудование не выбрано</div>
             {% endfor %}
         </div>
+
         <div class="section">
-            <div class="section-title">Дополнительные услуги:</div>
+            <div class="section-title">Дополнительные услуги</div>
             {% for service in order.services.all %}
-                <div class="item">{{ service.name }} - {{ service.price }} руб.</div>
+                <div class="item">{{ service.name }} — {{ service.price }} ₽</div>
             {% empty %}
                 <div class="item">Услуги не выбраны</div>
             {% endfor %}
         </div>
+
         <div class="section">
-            <div class="section-title">Пакеты ТВ-каналов:</div>
+            <div class="section-title">Пакеты ТВ-каналов</div>
             {% for package in order.tv_packages.all %}
-                <div class="item">{{ package.name }} - {{ package.price }} руб.</div>
+                <div class="item">{{ package.name }} — {{ package.price }} ₽</div>
             {% empty %}
                 <div class="item">Пакеты ТВ не выбраны</div>
             {% endfor %}
         </div>
+
         <div class="field">
-            <span class="label">Общая стоимость:</span> {{ order.total_cost }} руб.
+            <span class="label">Общая стоимость:</span> <strong>{{ order.total_cost }} ₽</strong>
         </div>
+
         <div class="field">
-            <span class="label">Комментарий:</span> {{ order.comment|default_if_none:"Не указан" }}
+            <span class="label">Комментарий:</span> {{ order.comment|default:"Не указан" }}
         </div>
-        <div class="field">
-            <a class="link" href="{{ admin_url }}">Посмотреть в админ-панели</a>
-        </div>
+
+        <a href="{{ admin_url }}" class="link">Посмотреть в админ-панели</a>
     </div>
 </body>
 </html>

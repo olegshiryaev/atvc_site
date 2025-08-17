@@ -164,7 +164,7 @@ def order_create(request, locality_slug, slug):
             logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {[t.name for t in order.tariffs.all()]}, общая стоимость подключения: {total_connection_price}")
             try:
                 admin_url = request.build_absolute_uri(reverse('admin:orders_order_change', args=[order.id]))
-                # send_order_notification.delay(order.id, admin_url)
+                send_order_notification.delay(order.id, admin_url)
             except Exception as e:
                 logger.error(f"Ошибка при формировании ссылки админки: {str(e)}")
 
@@ -354,9 +354,13 @@ class EquipmentOrderView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         try:
-            product_item = get_object_or_404(ProductItem, pk=kwargs['product_item_id'], in_stock__gt=0)
+            product_item = get_object_or_404(
+                ProductItem,
+                pk=kwargs['product_item_id'],
+                in_stock__gt=0
+            )
         except ProductItem.DoesNotExist:
-            logger.error(f"Товарная позиция ID={kwargs['product_item_id']} недоступна или отсутствует на складе")
+            logger.error(f"Товарная позиция ID={kwargs['product_item_id']} недоступна или нет на складе")
             return redirect('equipments:product_list', locality_slug=kwargs['locality_slug'])
 
         locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
@@ -370,6 +374,7 @@ class EquipmentOrderView(TemplateView):
                 valid_payment_types.append('installment24')
             if product_item.installment_48_months:
                 valid_payment_types.append('installment48')
+
         if payment_type not in valid_payment_types:
             payment_type = 'purchase'
 
@@ -416,6 +421,18 @@ class EquipmentOrderView(TemplateView):
                 )
 
                 logger.info(f"Создан заказ #{order.id} для {product_item.get_display_name()} (пользователь: {order.full_name})")
+
+                # --- Отправка уведомления ---
+                try:
+                    admin_url = request.build_absolute_uri(
+                        reverse('admin:orders_order_change', args=[order.id])
+                    )
+                    send_order_notification.delay(order.id, admin_url)
+                    logger.info(f"Задача отправки уведомления добавлена для заказа #{order.id}")
+                except Exception as e:
+                    logger.error(f"Ошибка при отправке уведомления для заказа #{order.id}: {str(e)}")
+                # ----------------------------
+
                 success_url = reverse('orders:order_success', kwargs={
                     'locality_slug': locality.slug,
                     'order_id': order.id
@@ -428,9 +445,11 @@ class EquipmentOrderView(TemplateView):
                     })
 
                 return redirect('orders:order_success', locality_slug=locality.slug, order_id=order.id)
+
             except Exception as e:
                 logger.error(f"Ошибка создания заказа для product_item_id={kwargs['product_item_id']}: {str(e)}")
                 raise
+
         else:
             logger.warning(f"Ошибка валидации формы заказа: {form.errors}")
 

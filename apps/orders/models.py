@@ -171,7 +171,7 @@ class Order(models.Model):
         Пример: "Интернет 100 Мбит + ТВ Премиум"
         """
         names = self.tariffs.values_list('name', flat=True)
-        return " + ".join(names) if names else "не указаны"
+        return " + ".join(names) if names else "Не указаны"
 
     def total_products_cost(self):
         """Возвращает общую стоимость товаров с учётом рассрочки"""

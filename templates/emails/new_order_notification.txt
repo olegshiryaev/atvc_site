@@ -1,48 +1,48 @@
-Новая заявка #{{ order.id }}
+Новая заявка с сайта №{{ order.id }}
 
 Дата создания: {{ order.created_at|date:"d.m.Y H:i" }}
 ФИО: {{ order.full_name }}
 Телефон: {{ order.phone }}
 Email: {{ order.email|default:"Не указан" }}
-Тариф: {{ order.tariff.name|default:"Без тарифа" }}
+Тарифы: {{ order.get_tariff_display }}
 Населенный пункт: {{ order.locality.name }}
 Адрес: {{ order.street|default:"" }} {{ order.house|default:"" }}{% if order.apartment %}, кв. {{ order.apartment }}{% endif %}
 Статус: {{ order.get_status_display }}
 
 Оборудование:
-{% for product in order.get_products_with_details %}
-- {{ product.product.name }} ({{ product.quantity }} шт.) - 
-  {% if product.payment_type == 'purchase' %}
-    {{ product.price }} руб.
-  {% elif product.payment_type == 'installment12' and product.product.installment_12_months %}
-    {{ product.price }} руб. (рассрочка на 12 мес. по {{ product.product.installment_12_months }} руб./мес.)
-  {% elif product.payment_type == 'installment24' and product.product.installment_24_months %}
-    {{ product.price }} руб. (рассрочка на 24 мес. по {{ product.product.installment_24_months }} руб./мес.)
-  {% elif product.payment_type == 'installment48' and product.product.installment_48_months %}
-    {{ product.price }} руб. (рассрочка на 48 мес. по {{ product.product.installment_48_months }} руб./мес.)
+{% for item in order.get_products_with_details %}
+- {{ item.product.name }} — 
+  {% if item.payment_type == 'purchase' %}
+    {{ item.price }} ₽
+  {% elif item.payment_type == 'installment12' and item.installment_12_months %}
+    {{ item.price }} ₽ (рассрочка 12 мес. по {{ item.installment_12_months }} ₽/мес)
+  {% elif item.payment_type == 'installment24' and item.installment_24_months %}
+    {{ item.price }} ₽ (рассрочка 24 мес. по {{ item.installment_24_months }} ₽/мес)
+  {% elif item.payment_type == 'installment48' and item.installment_48_months %}
+    {{ item.price }} ₽ (рассрочка 48 мес. по {{ item.installment_48_months }} ₽/мес)
   {% else %}
-    {{ product.price }} руб.
+    {{ item.price }} ₽
   {% endif %}
-{% if product.variant %} (Вариант: {{ product.variant.name }}){% endif %}
+  (Цвет: {{ item.product_item.color.name }}, Артикул: {{ item.product_item.sku }})
 {% empty %}
 - Оборудование не выбрано
 {% endfor %}
 
 Дополнительные услуги:
 {% for service in order.services.all %}
-- {{ service.name }} - {{ service.price }} руб.
+- {{ service.name }} — {{ service.price }} ₽
 {% empty %}
 - Услуги не выбраны
 {% endfor %}
 
 Пакеты ТВ-каналов:
 {% for package in order.tv_packages.all %}
-- {{ package.name }} - {{ package.price }} руб.
+- {{ package.name }} — {{ package.price }} ₽
 {% empty %}
 - Пакеты ТВ не выбраны
 {% endfor %}
 
-Общая стоимость: {{ order.total_cost }} руб.
+Общая стоимость: {{ order.total_cost }} ₽
 
 Комментарий: {{ order.comment|default:"Не указан" }}
 
