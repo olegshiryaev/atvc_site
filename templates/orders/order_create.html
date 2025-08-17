@@ -566,26 +566,26 @@
     function calculateTotal() {
         const tariffPrice = parseInt('{{ tariff.get_actual_price }}') || 0;
         const connectionPrice = parseInt('{{ tariff.connection_price }}') || 0;
-        
+
         // Учитываем стоимость ТВ-тарифа и его подключения только для интернет-тарифов
         const tvTariffPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.actual_price : 0);
         const tvConnectionPrice = isTvTariff ? 0 : (selectedTVTariff ? selectedTVTariff.connection_price : 0);
 
-        // ИСПРАВЛЕНИЕ: Стоимость подключения только для тарифов
+        // Стоимость подключения: тариф + ТВ-подключение
         const tariffConnectionPrice = connectionPrice + tvConnectionPrice;
 
-        // Месячная стоимость: тарифы + услуги + ТВ-пакеты + рассрочка оборудования
-        let monthlyPrice = tariffPrice + tvTariffPrice + totalServicesPrice + totalTVPackagesPrice;
+        // 🔹 Абонентская плата (только подписка: тарифы + услуги + ТВ-пакеты)
+        const subscriptionPrice = tariffPrice + tvTariffPrice + totalServicesPrice + totalTVPackagesPrice;
 
-        // Стоимость оборудования за полную стоимость
+        // Стоимость оборудования (полная оплата)
         const equipmentPurchasePrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (p.paymentType === 'purchase' ? p.price : 0);
         }, 0);
 
-        // ИСПРАВЛЕНИЕ: connectionTotalPrice включает стоимость подключения тарифов + полную стоимость оборудования
+        // Стоимость подключения: тарифы + полная оплата оборудования
         const connectionTotalPrice = tariffConnectionPrice + equipmentPurchasePrice;
 
-        // Рассрочка оборудования
+        // 🔹 Рассрочка оборудования (ежемесячный платёж)
         const installmentPrice = Object.values(selectedEquipment).reduce((sum, p) => {
             return sum + (
                 p.paymentType === 'installment12' ||
@@ -596,47 +596,39 @@
             );
         }, 0);
 
-        // Добавляем рассрочку к месячной стоимости
-        monthlyPrice += installmentPrice;
+        // 🔹 Общая ежемесячная стоимость (для "Итого")
+        const monthlyPrice = subscriptionPrice + installmentPrice;
 
-        // Общая стоимость (месячная + единовременная)
+        // 🔹 Общая сумма к оплате (единовременно + первый месяц)
         const totalPrice = monthlyPrice + connectionTotalPrice;
 
-        console.debug(`Расчёт итога: tariffPrice=${tariffPrice}, tvTariffPrice=${tvTariffPrice}, tvConnectionPrice=${tvConnectionPrice}, totalServicesPrice=${totalServicesPrice}, totalTVPackagesPrice=${totalTVPackagesPrice}, tariffConnectionPrice=${tariffConnectionPrice}, equipmentPurchasePrice=${equipmentPurchasePrice}, connectionTotalPrice=${connectionTotalPrice}, installmentPrice=${installmentPrice}, monthlyPrice=${monthlyPrice}, totalPrice=${totalPrice}`);
+        console.debug(`Расчёт итога: subscriptionPrice=${subscriptionPrice}, installmentPrice=${installmentPrice}, connectionTotalPrice=${connectionTotalPrice}, monthlyPrice=${monthlyPrice}, totalPrice=${totalPrice}`);
 
-        // Обновляем DOM
+        // ✅ Обновляем DOM корректно
         updateAll('.summary-total-price', `${totalPrice.toLocaleString('ru-RU')} ₽`);
-        updateAll('.summary-monthly-price', `${monthlyPrice.toLocaleString('ru-RU')} ₽/мес.`);
         updateAll('.summary-connection-total-price', `${connectionTotalPrice.toLocaleString('ru-RU')} ₽`);
-        const connectionPriceText = tariffConnectionPrice === 0 ? 'Бесплатно' : `${tariffConnectionPrice.toLocaleString('ru-RU')} ₽`;
-        updateAll('.summary-connection-price', connectionPriceText);
 
-        // Обработка рассрочки
+        // 🔹 Только абонентская плата (без рассрочки!)
+        updateAll('.summary-monthly-price', `${subscriptionPrice.toLocaleString('ru-RU')} ₽/мес.`);
+
+        // 🔹 Отображаем рассрочку отдельно
         if (installmentPrice > 0 && Object.keys(selectedEquipment).length > 0) {
             const installmentItems = Object.values(selectedEquipment).filter(p =>
                 p.paymentType === 'installment12' ||
                 p.paymentType === 'installment24' ||
                 p.paymentType === 'installment48'
             );
-
-            let label = '';
+            let label = 'Рассрочка';
             if (installmentItems.length === 1) {
                 const type = installmentItems[0].paymentType;
-                if (type === 'installment12') {
-                    label = 'Рассрочка (на 12 мес.)';
-                } else if (type === 'installment24') {
-                    label = 'Рассрочка (на 24 мес.)';
-                } else if (type === 'installment48') {
-                    label = 'Рассрочка (на 48 мес.)';
-                }
-            } else {
-                label = 'Рассрочка';
+                if (type === 'installment12') label = 'Рассрочка (на 12 мес.)';
+                else if (type === 'installment24') label = 'Рассрочка (на 24 мес.)';
+                else if (type === 'installment48') label = 'Рассрочка (на 48 мес.)';
             }
-
             updateAll('.summary-installment-price', `${installmentPrice.toLocaleString('ru-RU')} ₽/мес.`);
             document.querySelectorAll('.summary-installment-breakdown').forEach(el => {
                 const nameEl = el.querySelector('.summary__breakdown-name');
-                if (nameEl) nameEl.textContent = `${label}`;
+                if (nameEl) nameEl.textContent = label;
                 el.style.display = 'flex';
             });
         } else {
@@ -645,6 +637,10 @@
             });
             updateAll('.summary-installment-price', '0 ₽/мес.');
         }
+
+        // Обновляем текст подключения
+        const connectionPriceText = tariffConnectionPrice === 0 ? 'Бесплатно' : `${tariffConnectionPrice.toLocaleString('ru-RU')} ₽`;
+        updateAll('.summary-connection-price', connectionPriceText);
 
         // Обновляем скрытые поля формы
         document.getElementById('total_equipment_cost').value = equipmentPurchasePrice;
