@@ -6,7 +6,7 @@ from .models import Order, OrderProduct
 class OrderProductInline(admin.TabularInline):
     model = OrderProduct
     extra = 0
-    fields = ('product_item', 'quantity', 'price', 'payment_type', 'display_price')
+    fields = ('product_item', 'price', 'payment_type', 'display_price')
     readonly_fields = ('product_item', 'payment_type', 'display_price')
 
     def display_price(self, obj):
@@ -22,10 +22,17 @@ class OrderProductInline(admin.TabularInline):
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderProductInline]
     list_display = (
-        'id', 'full_name', 'phone', 'locality_link', 'tariffs_display',
-        'status', 'total_cost', 'created_at', 'products_count'
+        'number',
+        'full_name',
+        'phone',
+        'locality_link',
+        'tariffs_display',
+        'status',
+        'total_cost_display',
+        'created_at',
+        'products_count'
     )
-    list_filter = ('status', 'created_at', 'locality', 'tariffs')  # ✅ Исправлено: 'tariffs' вместо 'tariff'
+    list_filter = ('status', 'created_at', 'locality', 'tariffs')
     search_fields = (
         'full_name', 'phone', 'email',
         'order_products__product_item__product__name',
@@ -33,6 +40,17 @@ class OrderAdmin(admin.ModelAdmin):
     )
     date_hierarchy = 'created_at'
     actions = ['mark_as_processed', 'mark_as_completed']
+
+    # --- Кастомные отображения ---
+    def number(self, obj):
+        return obj.id
+    number.short_description = '№'
+    number.admin_order_field = 'id'
+
+    def total_cost_display(self, obj):
+        cost = obj.total_cost()
+        return f"{cost:,.0f} ₽".replace(',', ' ')
+    total_cost_display.short_description = 'Итого'
 
     def locality_link(self, obj):
         if obj.locality:
@@ -42,12 +60,13 @@ class OrderAdmin(admin.ModelAdmin):
     locality_link.short_description = 'Населенный пункт'
 
     def tariffs_display(self, obj):
-        """Отображает список тарифов через запятую с ссылками в админке."""
         if obj.tariffs.exists():
-            tariff_links = []
-            for tariff in obj.tariffs.all():
-                url = reverse('admin:core_tariff_change', args=[tariff.id])
-                tariff_links.append(format_html('<a href="{}">{}</a>', url, tariff.name))
+            tariff_links = [
+                format_html('<a href="{}">{}</a>', 
+                            reverse('admin:core_tariff_change', args=[tariff.id]), 
+                            tariff.name)
+                for tariff in obj.tariffs.all()
+            ]
             return format_html(', '.join(tariff_links))
         return '-'
     tariffs_display.short_description = 'Тарифы'
@@ -67,14 +86,18 @@ class OrderAdmin(admin.ModelAdmin):
     mark_as_completed.short_description = 'Отметить как выполненные'
 
     def get_queryset(self, request):
-        return super().get_queryset(request).select_related('locality').prefetch_related('tariffs', 'order_products__product_item__product', 'order_products__product_item__color')
+        return super().get_queryset(request).select_related('locality').prefetch_related(
+            'tariffs', 
+            'order_products__product_item__product', 
+            'order_products__product_item__color'
+        )
 
 @admin.register(OrderProduct)
 class OrderProductAdmin(admin.ModelAdmin):
-    list_display = ('order_id', 'product_item_name', 'quantity', 'price', 'payment_type', 'display_price')
+    list_display = ('order_id', 'product_item_name', 'price', 'payment_type', 'display_price')
     list_filter = ('payment_type', 'order__status')
     search_fields = ('product_item__product__name', 'product_item__color__name', 'order__full_name', 'order__phone')
-    readonly_fields = ('order', 'product_item', 'price', 'quantity', 'payment_type')
+    readonly_fields = ('order', 'product_item', 'price', 'payment_type')
 
     def order_id(self, obj):
         """Отображение ID заказа со ссылкой на заказ."""

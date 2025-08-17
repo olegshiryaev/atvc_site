@@ -116,7 +116,6 @@ def order_create(request, locality_slug, slug):
                     order=order,
                     product_item=product_item,
                     price=price,
-                    quantity=1,
                     payment_type=payment_type
                 )
 
@@ -278,7 +277,6 @@ def submit_order(request, locality_slug):
                 order=order,
                 product_item=product_item,
                 price=price,
-                quantity=1,
                 payment_type=payment_type
             )
 
@@ -414,7 +412,6 @@ class EquipmentOrderView(TemplateView):
                     order=order,
                     product_item=product_item,
                     price=price,
-                    quantity=1,
                     payment_type=payment_type
                 )
 

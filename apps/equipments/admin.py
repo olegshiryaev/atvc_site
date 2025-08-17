@@ -381,9 +381,3 @@ class ColorAdmin(admin.ModelAdmin):
         count = ProductItem.objects.filter(color=obj).count()
         return format_html('<span style="color: #0066cc;">{}</span>', count)
     product_count.short_description = "Товары"
-
-
-# Кастомизация заголовка
-admin.site.site_header = "Админка Оборудования"
-admin.site.site_title = "Оборудование"
-admin.site.index_title = "Добро пожаловать в админку"

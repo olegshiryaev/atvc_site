@@ -20,13 +20,9 @@ class OrderProduct(models.Model):
         on_delete=models.CASCADE,
         verbose_name="Товарная позиция"
     )
-    quantity = models.PositiveIntegerField(
-        "Количество",
-        default=1,
-        validators=[MinValueValidator(1)]
-    )
     price = models.PositiveIntegerField(
         "Цена за единицу",
+        default=0,
         validators=[MinValueValidator(0)]
     )
     payment_type = models.CharField(
@@ -52,19 +48,33 @@ class OrderProduct(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.product_item.get_display_name()} x{self.quantity} в заявке #{self.order.id}"
+        return f"{self.product_item.get_display_name()} в заявке #{self.order.id}"
 
     def get_price(self):
         """Возвращает сохранённую цену за единицу на момент добавления в заявку"""
         return self.price
 
     def get_total_price(self):
-        """Возвращает общую стоимость с учётом количества и типа оплаты"""
+        """Возвращает общую стоимость с учётом типа оплаты"""
         if self.payment_type.startswith('installment'):
             months = int(self.payment_type.replace('installment', ''))
             installment_price = self.product_item.get_installment_price(months)
-            return installment_price * self.quantity * months if installment_price else self.price * self.quantity
-        return self.price * self.quantity
+            if installment_price:
+                return installment_price * months
+        # Возвращаем price, но если он None — используем 0
+        return self.price or 0
+    
+    def get_display_price(self):
+        total = self.get_total_price()  # уже не None
+        try:
+            formatted = f"{total:,.0f}".replace(',', ' ')
+        except (TypeError, ValueError):
+            formatted = "0"
+
+        if self.payment_type.startswith('installment'):
+            months = int(self.payment_type.replace('installment', ''))
+            return f"{formatted} ₽ (рассрочка {months} мес.)"
+        return f"{formatted} ₽"
 
     def clean(self):
         """Валидация типа оплаты относительно доступности рассрочки"""
@@ -94,7 +104,7 @@ class Order(models.Model):
     )
     tariffs = models.ManyToManyField(
         Tariff,
-        verbose_name="Тарифы",
+        verbose_name="Тарифы в заявке",
         related_name="orders",
         blank=True
     )
@@ -132,7 +142,6 @@ class Order(models.Model):
             product_item = order_product.product_item
             product = product_item.product
             details = {
-                'quantity': order_product.quantity,
                 'price': order_product.price,
                 'payment_type': order_product.payment_type,
                 'product': product,

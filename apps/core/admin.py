@@ -38,6 +38,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Кастомизация заголовка админки
+admin.site.site_header = "Админ-панель управления сайтом"
+admin.site.site_title = "Пенль управления сайтом"
+admin.site.index_title = "Добро пожаловать в панель управления сайтом"
+
 class CustomBooleanWidget(BooleanWidget):
     TRUE_VALUES = ("1", "true", "yes", "on", "Истина")
     FALSE_VALUES = ("0", "false", "no", "off", "Ложь")
