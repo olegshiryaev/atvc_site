@@ -13,37 +13,40 @@
             <div class="product-images-and-info">
                 <!-- Галерея -->
                 <div class="product__gallery gallery">
-                    <!-- Основное изображение -->
-                    <div class="gallery__imgs swiper product-gallery-main">
-                        <div class="swiper-wrapper">
-                            {% if current_item.has_images %}
+                    {% if current_item.has_images and current_item.images.all|length > 1 %}
+                        <!-- СЛУЧАЙ: 2+ ИЗОБРАЖЕНИЯ → Swiper с миниатюрами -->
+                        <div class="gallery__imgs swiper product-gallery-main">
+                            <div class="swiper-wrapper">
                                 {% for image in current_item.images.all %}
                                     <div class="swiper-slide gallery__item" role="group" aria-label="Изображение {{ forloop.counter }} из {{ current_item.images.count }}">
                                         <img src="{{ image.image.url }}" alt="{{ current_item }} - изображение {{ forloop.counter }}" class="gallery__item-img" loading="lazy">
                                     </div>
                                 {% endfor %}
-                            {% else %}
-                                <div class="swiper-slide gallery__item" data-color="all" role="group" aria-label="Изображение по умолчанию">
-                                    <img src="{% static 'images/no-image.png' %}" alt="Нет изображения" class="gallery__item-img" loading="lazy">
-                                </div>
-                            {% endif %}
+                            </div>
+                            <div class="swiper-button-prev"></div>
+                            <div class="swiper-button-next"></div>
+                            <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
                         </div>
-                        <div class="swiper-button-prev"></div>
-                        <div class="swiper-button-next"></div>
-                        <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
-                    </div>
-                    {% if current_item.has_images %}
+
                         <div class="gallery__bottom slider-navs">
                             <div class="gallery__thumbs swiper product-gallery-thumbs">
                                 <div class="swiper-wrapper">
                                     {% for image in current_item.images.all %}
                                         <div class="swiper-slide gallery__thumbs-item" data-color="{{ image.color|default:'all' }}" role="button" aria-label="Выбрать изображение {{ forloop.counter }}">
-                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img" loading="lazy">
+                                            <img src="{{ image.image.url }}" alt="Миниатюра {{ forloop.counter }}" class="gallery__thumbs-img" loading="eager">
                                         </div>
                                     {% endfor %}
                                 </div>
                                 <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
                             </div>
+                        </div>
+                    {% else %}
+                        <!-- СЛУЧАЙ: 0 или 1 ИЗОБРАЖЕНИЕ → Просто изображение без Swiper -->
+                        <div class="gallery__single-img">
+                            <img src="{% if current_item.has_images and current_item.images.first %}{{ current_item.images.first.image.url }}{% else %}{% static 'images/no-image.png' %}{% endif %}"
+                                 alt="{% if current_item.has_images %}{{ current_item }}{% else %}Нет изображения{% endif %}"
+                                 class="gallery__item-img"
+                                 loading="lazy">
                         </div>
                     {% endif %}
                 </div>
@@ -62,9 +65,9 @@
                             {% for variant in items %}
                                 {% if variant.color %}
                                     <a href="{% url 'equipments:product_detail' locality_slug=locality_slug slug=variant.slug %}"
-                                       class="color-circle {% if variant == current_item %}active{% endif %} {% if variant.in_stock <= 0 %}disabled{% endif %}"
-                                       title="{{ variant.color.name }}"
-                                       {% if variant == current_item %}aria-current="page"{% endif %}>
+                                    class="color-circle {% if variant == current_item %}active{% endif %} {% if variant.in_stock <= 0 %}disabled{% endif %}"
+                                    title="{{ variant.color.name }}"
+                                    {% if variant == current_item %}aria-current="page"{% endif %}>
                                         <span class="circle" style="background-color: {{ variant.color.hex_code|default:'#cccccc' }};"></span>
                                     </a>
                                 {% endif %}
@@ -74,18 +77,22 @@
 
                     <!-- Краткие характеристики -->
                     {% if current_item.product.smart_speaker or current_item.product.camera or current_item.product.router or current_item.product.tvbox %}
+                        <h6 class="product-specs-title">Характеристики:</h6>
+                        <!-- Краткие характеристики -->
                         <div class="product-specs-short">
                             {% if current_item.product.smart_speaker %}
                                 {% with s=current_item.product.smart_speaker %}
                                     {% if s.voice_assistant %}
                                         <div class="spec-item">
-                                            <strong>Помощник</strong>
+                                            <strong>Голосовой помощник</strong>
+                                            <span class="spec-dots"></span>
                                             <span>{{ s.voice_assistant }}</span>
                                         </div>
                                     {% endif %}
                                     {% if s.power_source %}
                                         <div class="spec-item">
                                             <strong>Питание</strong>
+                                            <span class="spec-dots"></span>
                                             <span>{{ s.power_source }}</span>
                                         </div>
                                     {% endif %}
@@ -107,8 +114,7 @@
                             <ul class="nav nav-pills" id="productTabs">
                                 {% if product.has_description %}
                                     <li>
-                                        <button class="nav-link {% if not product.smart_speaker and not product.camera and not product.router and not product.tvbox %}active{% endif %}"
-                                                data-tab="description">Описание</button>
+                                        <button class="nav-link active" data-tab="description">Описание</button>
                                     </li>
                                 {% endif %}
                                 {% if product.smart_speaker or product.camera or product.router or product.tvbox %}
@@ -122,8 +128,7 @@
 
                         <div class="tab-content" id="productTabsContent">
                             {% if product.has_description %}
-                                <div class="tab-pane {% if not product.smart_speaker and not product.camera and not product.router and not product.tvbox %}active{% endif %}"
-                                    id="description">
+                                <div class="tab-pane active" id="description">
                                     {{ product.description|safe }}
                                 </div>
                             {% endif %}
@@ -163,7 +168,6 @@
                             <span class="payment-price">{{ current_item.get_price_display }}</span>
                         </label>
 
-                        <!-- Рассрочка 12 месяцев -->
                         {% if current_item.installment_12_months %}
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="installment12" data-price="{{ current_item.installment_12_months }}">
@@ -172,7 +176,6 @@
                             </label>
                         {% endif %}
 
-                        <!-- Рассрочка 24 месяца -->
                         {% if current_item.installment_24_months %}
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="installment24" data-price="{{ current_item.installment_24_months }}">
@@ -181,7 +184,6 @@
                             </label>
                         {% endif %}
 
-                        <!-- Рассрочка 48 месяцев -->
                         {% if current_item.installment_48_months %}
                             <label class="payment-option">
                                 <input type="radio" name="payment_method" value="installment48" data-price="{{ current_item.installment_48_months }}">
@@ -192,7 +194,6 @@
                     </div>
                 </div>
                 <div class="price-block">
-                    <!-- Динамическая цена -->
                     <div class="current-price" id="current-price-display">
                         {{ current_item.get_price_display }}
                     </div>
@@ -217,149 +218,149 @@
 
     <!-- Недавно просмотренные -->
     {% if recently_viewed %}
-    <section class="products-slider-block block" data-block-slug="products-slider-block" data-block-appearance="">
+    <section class="products-slider-block block">
         <div class="products-slider-block__header">
             <h2 class="products-slider-block__title block__title">Вы недавно смотрели</h2>
         </div>
         <div class="products-slider-block__wrapper">
-            <div class="swiper swiper-initialized swiper-horizontal">
+            <div class="swiper">
                 <div class="swiper-wrapper">
                     {% for item in recently_viewed %}
-                    <li class="product-card products-slider-block__item swiper-slide swiper-slide-active" data-product="{{ item.id }}" data-product-title="{{ item.name }}" data-product-price="{{ item.price }}" data-product-incatalog="1">
-                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
-                            <div class="product-card__img-wrap{% if not item.get_main_image %} no-image{% endif %}">
-                                {% with main_image=item.get_main_image %}
-                                    {% if main_image %}
-                                        <img data-lazy-src="{{ main_image.image.url }}"  
-                                            alt="{{ item.name|default:'Товар' }}" 
-                                            class="product-card__img" 
-                                            src="{{ main_image.image.url }}">
+                        <div class="product-card products-slider-block__item swiper-slide">
+                            <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=item.slug %}" class="product-card__wrapper">
+                                <div class="product-card__img-wrap{% if not item.get_main_image %} no-image{% endif %}">
+                                    {% if item.get_main_image %}
+                                        <img src="{{ item.get_main_image.image.url }}" alt="{{ item.name }}" class="product-card__img" loading="lazy">
                                     {% else %}
-                                    <div class="product-card__placeholder">
-                                        <span class="product-card__no-image-label">Изображение отсутствует</span>
-                                    </div>
+                                        <div class="product-card__placeholder">
+                                            <span class="product-card__no-image-label">Изображение отсутствует</span>
+                                        </div>
                                     {% endif %}
-                                {% endwith %}
+                                </div>
+                                <h6 class="product-card__title h6">{{ item }}</h6>
+                            </a>
+                            <div class="product-card__footer">
+                                <div class="product-card__price h5">{{ item.get_price_display }}</div>
+                                <button class="product-card__btn btn" onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=item.id %}'">
+                                    Заказать
+                                </button>
                             </div>
-                            <h6 class="product-card__title h6">{{ item }}</h6>
-                        </a>
-                        <div class="product-card__footer">
-                            <div class="product-card__price h5">{{ item.get_price_display }}</div>
-                                <button class="product-card__btn btn" 
-                                    onclick="window.location.href='{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=item.id %}'">
-                                Заказать
-                            </button>
                         </div>
-                    </li>
                     {% endfor %}
                 </div>
-                <span class="swiper-notification" aria-live="assertive" aria-atomic="true"></span>
-            </div>
-            <div class="products-slider-block__navs slider-navs">
-                <div class="slider-navs__prev swiper-button-disabled" tabindex="-1" role="button" aria-label="Previous slide" aria-disabled="true"></div>
-                <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"><span class="swiper-pagination-bullet swiper-pagination-bullet-active" tabindex="0" role="button" aria-label="Go to slide 1" aria-current="true"></span><span class="swiper-pagination-bullet" tabindex="0" role="button" aria-label="Go to slide 2"></span></div>
-                <div class="slider-navs__next" tabindex="0" role="button" aria-label="Next slide" aria-disabled="false"></div>
+                <div class="products-slider-block__navs slider-navs">
+                    <div class="slider-navs__prev"></div>
+                    <div class="slider-navs__pag"></div>
+                    <div class="slider-navs__next"></div>
+                </div>
             </div>
         </div>
     </section>
     {% endif %}
-
 </div>
 
 <!-- JavaScript -->
 <script>
 (function () {
     const initProductPage = () => {
-        // Функция для инициализации Swiper
-        const initSwiper = () => {
-            const galleryThumbs = document.querySelector('.product-gallery-thumbs');
-            const galleryMain = document.querySelector('.product-gallery-main');
+        // === Инициализация галереи (только если 2+ изображения) ===
+        const galleryMain = document.querySelector('.product-gallery-main');
+        const galleryThumbs = document.querySelector('.product-gallery-thumbs');
+        const images = document.querySelectorAll('.gallery__item-img, .gallery__thumbs-img');
 
-            if (!galleryMain || !galleryThumbs) {
-                console.warn('Галерея Swiper не инициализирована: элементы не найдены');
+        if (galleryMain && galleryThumbs) {
+            let loadedImages = 0;
+
+            const initSwipers = () => {
+                // Удаляем дублирующиеся элементы swiper-notification
+                const notifications = document.querySelectorAll('.swiper-notification');
+                notifications.forEach((n, i) => i > 0 && n.remove());
+
+                // Инициализация миниатюр
+                const thumbsSwiper = new Swiper(galleryThumbs, {
+                    spaceBetween: 8,
+                    slidesPerView: 'auto',
+                    freeMode: true,
+                    watchSlidesProgress: true,
+                    centerInsufficientSlides: true,
+                    breakpoints: {
+                        768: { slidesPerView: 'auto', spaceBetween: 8 },
+                        600: { slidesPerView: 'auto', spaceBetween: 6 },
+                        400: { slidesPerView: 'auto', spaceBetween: 6 },
+                        320: { slidesPerView: 'auto', spaceBetween: 4 }
+                    },
+                    on: {
+                        init: swiper => {
+                            console.log('Thumbs Swiper initialized');
+                            swiper.update();
+                        },
+                        resize: swiper => {
+                            console.log('Thumbs Swiper resized');
+                            swiper.update();
+                        }
+                    }
+                });
+
+                // Инициализация главного слайдера
+                const mainSwiper = new Swiper(galleryMain, {
+                    spaceBetween: 10,
+                    slidesPerView: 1,
+                    autoHeight: true,
+                    thumbs: { swiper: thumbsSwiper },
+                    navigation: {
+                        nextEl: '.swiper-button-next',
+                        prevEl: '.swiper-button-prev',
+                    },
+                    on: {
+                        init: swiper => {
+                            console.log('Main Swiper initialized');
+                            swiper.update();
+                        },
+                        imagesReady: () => console.log('Main Swiper: images loaded'),
+                        resize: swiper => {
+                            console.log('Main Swiper resized');
+                            swiper.update();
+                        }
+                    }
+                });
+            };
+
+            // Если нет изображений — инициализируем сразу
+            if (images.length === 0) {
+                initSwipers();
                 return;
             }
 
-            const thumbsSwiper = new Swiper(galleryThumbs, {
-                spaceBetween: 10,
-                slidesPerView: 4,
-                freeMode: true,
-                watchSlidesProgress: true,
-                breakpoints: {
-                    600: {
-                        slidesPerView: 3,
-                    },
-                    400: {
-                        slidesPerView: 2,
-                    },
-                },
+            // Подсчёт загруженных изображений
+            images.forEach(img => {
+                if (img.complete) {
+                    loadedImages++;
+                } else {
+                    img.addEventListener('load', () => {
+                        loadedImages++;
+                        if (loadedImages >= images.length) {
+                            initSwipers();
+                        }
+                    });
+                    img.addEventListener('error', () => {
+                        loadedImages++;
+                        if (loadedImages >= images.length) {
+                            initSwipers();
+                        }
+                    });
+                }
             });
 
-            new Swiper(galleryMain, {
-                spaceBetween: 10,
-                slidesPerView: 1,
-                thumbs: {
-                    swiper: thumbsSwiper,
-                },
-                navigation: {
-                    nextEl: '.swiper-button-next',
-                    prevEl: '.swiper-button-prev',
-                },
-                on: {
-                    init: function () {
-                        console.log('Swiper галереи инициализирован');
-                        // Исправляем размеры слайдов после инициализации
-                        this.slides.forEach(slide => {
-                            slide.style.width = '100%';
-                        });
-                    },
-                    slideChange: function () {
-                        console.log('Переключен слайд:', this.activeIndex);
-                    },
-                    imagesReady: function () {
-                        console.log('Все изображения в Swiper загружены');
-                        this.update(); // Пересчитываем размеры
-                    },
-                },
-            });
-        };
-
-        // Ожидаем загрузки всех изображений
-        const images = document.querySelectorAll('.gallery__item-img, .gallery__thumbs-img');
-        let loadedImages = 0;
-
-        if (images.length === 0) {
-            initSwiper();
-            return;
+            // Проверяем сразу, если все изображения уже загружены
+            if (loadedImages >= images.length) {
+                initSwipers();
+            }
         }
 
-        images.forEach(img => {
-            if (img.complete) {
-                loadedImages++;
-                if (loadedImages === images.length) {
-                    initSwiper();
-                }
-            } else {
-                img.addEventListener('load', () => {
-                    loadedImages++;
-                    if (loadedImages === images.length) {
-                        initSwiper();
-                    }
-                });
-                img.addEventListener('error', () => {
-                    console.warn(`Ошибка загрузки изображения: ${img.src}`);
-                    loadedImages++;
-                    if (loadedImages === images.length) {
-                        initSwiper();
-                    }
-                });
-            }
-        });
-
-        // Инициализация слайдера "Недавно просмотренные"
-        const recentlyViewedSwiperEl = document.querySelector('.products-slider-block .swiper');
-        if (recentlyViewedSwiperEl) {
-            new Swiper(recentlyViewedSwiperEl, {
+        // === Слайдер "Недавно просмотренные" ===
+        const recentSwiperEl = document.querySelector('.products-slider-block .swiper');
+        if (recentSwiperEl) {
+            new Swiper(recentSwiperEl, {
                 slidesPerView: 1,
                 spaceBetween: 16,
                 navigation: {
@@ -378,43 +379,80 @@
             });
         }
 
-        // Переключение табов
-        const tabButtons = document.querySelectorAll('[data-tab]');
-        if (tabButtons.length) {
-            tabButtons.forEach(button => {
-                button.addEventListener('click', () => {
-                    document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-                    button.classList.add('active');
-                    document.getElementById(button.dataset.tab).classList.add('active');
-                });
+        // === Переключение табов ===
+        document.querySelectorAll('[data-tab]').forEach(button => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                button.classList.add('active');
+                const targetTab = document.getElementById(button.dataset.tab);
+                if (targetTab) targetTab.classList.add('active');
             });
+        });
+
+        // Автоматическая активация первого таба при загрузке
+        const firstTabBtn = document.querySelector('#productTabs .nav-link');
+        if (firstTabBtn && !document.querySelector('#productTabs .nav-link.active')) {
+            firstTabBtn.classList.add('active');
+            const firstTab = document.getElementById(firstTabBtn.dataset.tab);
+            if (firstTab) firstTab.classList.add('active');
         }
 
-        // Переключение способа оплаты
+        // === Выбор способа оплаты ===
         const paymentRadios = document.querySelectorAll('input[name="payment_method"]');
         const orderButton = document.getElementById('order-button');
         const priceDisplay = document.getElementById('current-price-display');
-        if (orderButton && priceDisplay) {
-            const baseUrl = orderButton.dataset.baseUrl || "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
+
+        if (orderButton && priceDisplay && paymentRadios.length > 0) {
+            const baseUrl = orderButton.dataset.baseUrl ||
+                "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
+
+            const updatePriceAndButton = (radio) => {
+                const price = parseFloat(radio.dataset.price);
+                const isMonthly = radio.value !== 'purchase';
+                const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
+
+                priceDisplay.style.opacity = '0';
+                setTimeout(() => {
+                    priceDisplay.textContent = formattedPrice;
+                    priceDisplay.style.opacity = '1';
+                }, 300);
+
+                orderButton.href = `${baseUrl}?payment_type=${radio.value}`;
+                paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
+                radio.parentElement.classList.add('active');
+            };
+
+            // Инициализация активного радио
+            const activeRadio = document.querySelector('input[name="payment_method"]:checked');
+            if (activeRadio) {
+                updatePriceAndButton(activeRadio);
+            }
+
+            // Обработчики на изменение
             paymentRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
-                    const price = parseFloat(radio.dataset.price);
-                    const isMonthly = radio.value !== 'purchase';
-                    const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
-                    priceDisplay.style.opacity = '0';
-                    setTimeout(() => {
-                        priceDisplay.textContent = formattedPrice;
-                        priceDisplay.style.opacity = '1';
-                    }, 300);
-                    orderButton.href = `${baseUrl}?payment_type=${radio.value}`;
-                    paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
-                    radio.parentElement.classList.add('active');
+                    updatePriceAndButton(radio);
                 });
             });
         }
+
+        // === Функция для кнопки "Все характеристики" ===
+        window.activateSpecsTab = function(event) {
+            const specsTabBtn = document.querySelector('[data-tab="specs"]');
+            const specsTabPane = document.getElementById('specs');
+
+            if (specsTabBtn && specsTabPane) {
+                document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                specsTabBtn.classList.add('active');
+                specsTabPane.classList.add('active');
+                specsTabPane.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        };
     };
 
+    // Запуск при полной загрузке DOM
     document.addEventListener('DOMContentLoaded', initProductPage);
 })();
 </script>
