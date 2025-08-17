@@ -68,13 +68,13 @@
                             <label class="sortings__item sortings__item__price_asc sortings__item_asc">
                                 <input class="sortings__item-value" type="radio" name="sort_by" value="price_asc"
                                     {% if sort_by == "price_asc" %}checked{% endif %}>
-                                <div class="sortings__item-label">Цене ↑</div>
+                                <div class="sortings__item-label">По цене ↑</div>
                             </label>
 
                             <label class="sortings__item sortings__item__price sortings__item_desc">
                                 <input class="sortings__item-value" type="radio" name="sort_by" value="price_desc"
                                     {% if sort_by == "price_desc" %}checked{% endif %}>
-                                <div class="sortings__item-label">Цене ↓</div>
+                                <div class="sortings__item-label">По цене ↓</div>
                             </label>
 
                             {% comment %} <label class="sortings__item sortings__item_discount sortings__item_desc">
@@ -96,7 +96,7 @@
                                         {% with main_image=product.get_main_image %}
                                             {% if main_image %}
                                                 <img data-lazy-src="{{ main_image.image.url }}"  
-                                                    alt="{{ product|default:'Товар' }}" 
+                                                    alt="{{ product|default:'Изображение' }}" 
                                                     class="product-card__img" 
                                                     src="{{ main_image.image.url }}">
                                             {% else %}
@@ -221,7 +221,7 @@
                                     {% with main_image=product.get_main_image %}
                                         {% if main_image %}
                                             <img data-lazy-src="{{ main_image.image.url }}"  
-                                                alt="{{ product|default:'Товар' }}" 
+                                                alt="{{ product|default:'Изображение' }}" 
                                                 class="product-card__img" 
                                                 src="{{ main_image.image.url }}">
                                         {% else %}

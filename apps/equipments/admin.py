@@ -308,7 +308,7 @@ class ViewCountAdmin(admin.ModelAdmin):
     readonly_fields = ('item_link_full', 'user', 'session_key', 'ip_address', 'viewed_on')
 
     def item_link(self, obj):
-        url = reverse('admin:equipment_productitem_change', args=[obj.item.pk])
+        url = reverse('admin:equipments_productitem_change', args=[obj.item.pk])
         return format_html('<a href="{}">{}</a>', url, str(obj.item))
     item_link.short_description = "Товарная позиция"
     item_link.allow_tags = True

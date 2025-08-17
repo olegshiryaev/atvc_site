@@ -25,7 +25,7 @@
                             {% with main_image=product.get_main_image %}
                                 {% if main_image %}
                                     <img src="{{ main_image.image.url }}"
-                                         alt="{{ product }}"
+                                         alt="{{ product|default:'Изображение' }}"
                                          class="product-card__img"
                                          loading="lazy">
                                 {% else %}
