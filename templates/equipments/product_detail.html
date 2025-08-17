@@ -203,7 +203,7 @@
                 </div>
 
                 <a href="{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}?payment_type=purchase"
-                   class="btn-order" id="order-button">
+                   class="btn-order btn" id="order-button">
                     Заказать
                 </a>
                 {% if current_item.product.instruction %}
