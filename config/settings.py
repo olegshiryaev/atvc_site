@@ -343,6 +343,7 @@ LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
     "/media/",
     "/sitemap.xml",
     "/robots.txt",
+    "/wfhlthch/getstatus",
 ]
 
 SITE_NAME = "АТК"
