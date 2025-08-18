@@ -516,81 +516,51 @@ class Camera(models.Model):
 
 
 class Router(models.Model):
+    """
+    Модель для хранения характеристик роутеров.
+    Содержит информацию о скорости Wi-Fi, диапазонах, проводной скорости и стандарте Wi-Fi.
+    Связана с моделью Product через OneToOneField.
+    """
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, primary_key=True, related_name="router",
         verbose_name="Товар"
     )
 
-    # ==== Основные параметры ====
-    max_speed = models.PositiveIntegerField(
-        "Максимальная скорость (Мбит/с)", blank=True, null=True
-    )
-    supports_devices = models.PositiveIntegerField(
-        "Поддерживает устройств", blank=True, null=True
-    )
-    coverage_area = models.PositiveIntegerField(
-        "Площадь покрытия (кв. м)", blank=True, null=True
-    )
-
-    BAND_CHOICES = [
-        ("dual", "Двухдиапазонный"),
-        ("single", "Однодиапазонный"),
-        ("tri", "Трехдиапазонный"),
-    ]
-    bands = models.CharField(
-        "Количество диапазонов",
-        max_length=10,
-        choices=BAND_CHOICES,
+    max_wifi_speed_2_4 = models.PositiveIntegerField(
+        "Максимальная скорость Wi-Fi на частоте 2.4 ГГц (Мбит/с)",
         blank=True,
         null=True,
+        validators=[MinValueValidator(1, "Скорость должна быть не менее 1 Мбит/с")]
     )
-
-    FREQUENCY_CHOICES = [
-        ("2_4", "2.4 ГГц"),
-        ("5", "5 ГГц"),
-        ("2_4_and_5", "2.4 и 5 ГГц"),
-    ]
-    frequency = models.CharField(
-        "Частоты", max_length=10, choices=FREQUENCY_CHOICES, blank=True, null=True
-    )
-
-    dimensions = models.CharField(
-        "Размер (ШхДхВ)", max_length=50, blank=True, null=True
-    )
-    weight = models.PositiveIntegerField("Вес (г)", blank=True, null=True)
-    antennas_count = models.PositiveIntegerField("Антенны, шт", blank=True, null=True)
-    lan_ports = models.PositiveIntegerField("LAN порты", blank=True, null=True)
-    ram = models.PositiveIntegerField(
-        "Объем оперативной памяти (МБ)", blank=True, null=True
-    )
-    supports_ipv6 = models.BooleanField("Поддержка IPv6", default=False)
-    encryption = models.CharField("Шифрование", max_length=100, blank=True, null=True)
-
-    port_speed = models.PositiveIntegerField(
-        "Скорость портов (Мбит/с)", blank=True, null=True
-    )
-
-    # ==== Поля со свободным вводом ====
-    management = models.CharField(
-        "Управление",
-        max_length=255,
-        help_text="Например: Web-интерфейс, TR-069",
+    max_wifi_speed_5 = models.PositiveIntegerField(
+        "Максимальная скорость Wi-Fi на частоте 5 ГГц (Мбит/с)",
         blank=True,
         null=True,
+        validators=[MinValueValidator(1, "Скорость должна быть не менее 1 Мбит/с")]
     )
-    vpn_support = models.CharField(
-        "Поддержка VPN",
-        max_length=255,
-        help_text="Например: L2TP, OpenVPN клиент",
+    wifi_bands = models.CharField(
+        "Диапазоны Wi-Fi",
+        max_length=20,
+        choices=[
+            ("2_4", "2.4 ГГц"),
+            ("5", "5 ГГц"),
+            ("2_4_and_5", "2.4 и 5 ГГц"),
+        ],
+        blank=True,
+        null=True
+    )
+    wired_speed = models.PositiveIntegerField(
+        "Скорость передачи по проводному подключению (Мбит/с)",
         blank=True,
         null=True,
+        validators=[MinValueValidator(1, "Скорость должна быть не менее 1 Мбит/с")]
     )
-    wifi_standards = models.CharField(
-        "Стандарты Wi-Fi",
-        max_length=255,
-        help_text="Например: a (Wi-Fi 2), ac (Wi-Fi 5)",
+    wifi_standard = models.CharField(
+        "Стандарт Wi-Fi",
+        max_length=50,
+        help_text="Например: 4 (802.11n), 5 (802.11ac), 6 (802.11ax)",
         blank=True,
-        null=True,
+        null=True
     )
 
     def __str__(self):
@@ -599,6 +569,10 @@ class Router(models.Model):
     class Meta:
         verbose_name = "Роутер"
         verbose_name_plural = "Роутеры"
+        indexes = [
+            models.Index(fields=['wifi_bands'], name='equipments_router_bands_idx'),
+            models.Index(fields=['wifi_standard'], name='equipments_router_standard_idx'),
+        ]
 
 
 class TvBox(models.Model):
@@ -607,7 +581,7 @@ class TvBox(models.Model):
     Содержит информацию об операционной системе, разрешении, памяти, беспроводных соединениях и интерфейсах.
     Связана с моделью Product через OneToOneField.
     """
-    
+
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox",
         verbose_name="Товар"

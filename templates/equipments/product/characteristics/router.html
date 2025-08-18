@@ -1,80 +1,39 @@
-<!-- Роутер -->
-<div class="row">
-    <div class="col-md-6">
-        <h3 class="h5 mb-3">Основные</h3>
-        <table class="specs-table w-100">
+{% if router %}
+<div class="specs-row">
+    <!-- Wi-Fi -->
+    <div class="specs-column">
+        <h3 class="specs-title">Wi-Fi</h3>
+        <table class="specs-table">
             <tr>
-                <td>Модель</td>
-                <td>{{ product.name|default:"—" }}</td>
+                <td><i class="bi bi-wifi specs-icon"></i>Максимальная скорость Wi-Fi на 2.4 ГГц</td>
+                <td>{{ router.max_wifi_speed_2_4|default:"—" }} Мбит/с</td>
             </tr>
             <tr>
-                <td>Стандарт Wi-Fi</td>
-                <td>{{ product.router.wifi_standards|default:"—" }}</td>
+                <td><i class="bi bi-wifi specs-icon"></i>Максимальная скорость Wi-Fi на 5 ГГц</td>
+                <td>{{ router.max_wifi_speed_5|default:"—" }} Мбит/с</td>
             </tr>
             <tr>
-                <td>Диапазоны</td>
-                <td>{{ product.router.get_frequency_display|default:"—" }}</td>
+                <td><i class="bi bi-wifi specs-icon"></i>Диапазоны Wi-Fi</td>
+                <td>{{ router.get_wifi_bands_display|default:"—" }}</td>
             </tr>
             <tr>
-                <td>Максимальная скорость (Мбит/с)</td>
-                <td>{{ product.router.max_speed|default:"—" }}</td>
-            </tr>
-        </table>
-    </div>
-    
-    <div class="col-md-6">
-        <h3 class="h5 mb-3">Интерфейсы</h3>
-        <table class="specs-table w-100">
-            <tr>
-                <td>WAN порт</td>
-                <td>{{ product.router.wan_port|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>LAN порты</td>
-                <td>{{ product.router.lan_ports|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>USB</td>
-                <td>{{ product.router.usb_ports|default:"Нет" }}</td>
+                <td><i class="bi bi-wifi specs-icon"></i>Стандарт Wi-Fi</td>
+                <td>{{ router.wifi_standard|default:"—" }}</td>
             </tr>
         </table>
     </div>
-</div>
 
-<div class="row mt-4">
-    <div class="col-md-6">
-        <h3 class="h5 mb-3">Антенны</h3>
-        <table class="specs-table w-100">
+    <!-- Проводное подключение -->
+    <div class="specs-column">
+        <h3 class="specs-title">Проводное подключение</h3>
+        <table class="specs-table">
             <tr>
-                <td>Тип антенн</td>
-                <td>{{ product.router.antenna_type|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>Количество</td>
-                <td>{{ product.router.antenna_count|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>Усиление</td>
-                <td>{{ product.router.antenna_gain|default:"—" }}</td>
-            </tr>
-        </table>
-    </div>
-    
-    <div class="col-md-6">
-        <h3 class="h5 mb-3">Дополнительно</h3>
-        <table class="specs-table w-100">
-            <tr>
-                <td>Процессор</td>
-                <td>{{ product.router.cpu|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>Память</td>
-                <td>{{ product.router.memory|default:"—" }}</td>
-            </tr>
-            <tr>
-                <td>Габариты</td>
-                <td>{{ product.router.dimensions|default:"—" }}</td>
+                <td><i class="bi bi-ethernet specs-icon"></i>Скорость проводного подключения</td>
+                <td>{{ router.wired_speed|default:"—" }} Мбит/с</td>
             </tr>
         </table>
     </div>
 </div>
+{% else %}
+    <p class="no-specs">Характеристики роутера недоступны.</p>
+{% endif %}

@@ -100,27 +100,32 @@ class CameraInline(admin.StackedInline):
     )
 
 class RouterInline(admin.StackedInline):
+    """
+    Inline-форма для отображения характеристик роутера в админке.
+    Связана с моделью Router через OneToOneField.
+    """
     model = Router
     can_delete = False
+    extra = 0
     verbose_name = "Характеристики роутера"
+    verbose_name_plural = "Характеристики роутера"
+
     fieldsets = (
-        ("Скорость и покрытие", {
-            "fields": (("max_speed", "port_speed"), "coverage_area", "supports_devices")
-        }),
         ("Wi-Fi", {
-            "fields": (("bands", "frequency"), "wifi_standards", "supports_ipv6")
+            "fields": (
+                ("max_wifi_speed_2_4", "max_wifi_speed_5"),
+                "wifi_bands",
+                "wifi_standard"
+            )
         }),
-        ("Порты и память", {
-            "fields": (("lan_ports", "antennas_count"), "ram", "encryption")
-        }),
-        ("Управление", {
-            "fields": ("management", "vpn_support")
-        }),
-        ("Физические параметры", {
-            "fields": ("dimensions", "weight"),
-            "classes": ("collapse",)
+        ("Проводное подключение", {
+            "fields": ("wired_speed",)
         }),
     )
+
+    formfield_overrides = {
+        models.CharField: {'widget': admin.widgets.AdminTextInputWidget},
+    }
 
 class TvBoxInline(admin.StackedInline):
     """

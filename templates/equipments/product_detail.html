@@ -121,7 +121,7 @@
                                     {% endif %}
                                     {% if t.max_resolution %}
                                         <div class="spec-item">
-                                            <span class="spec-item__name spec-item__gray">Максимальное разрешение</span>
+                                            <span class="spec-item__name spec-item__name--gray">Максимальное разрешение</span>
                                             <span class="spec-dots"></span>
                                             <span class="spec-item__value spec-item__value--black">{{ t.max_resolution }}</span>
                                         </div>
@@ -138,6 +138,37 @@
                                             <span class="spec-item__name spec-item__name--gray">Встроенная память</span>
                                             <span class="spec-dots"></span>
                                             <span class="spec-item__value spec-item__value--black">{{ t.storage_size }} ГБ</span>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% elif current_item.product.router %}
+                                {% with r=current_item.product.router %}
+                                    {% if r.wifi_standard %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Стандарт Wi-Fi</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ r.wifi_standard }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if r.wifi_bands %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Диапазоны Wi-Fi</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ r.get_wifi_bands_display }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if r.max_wifi_speed_2_4 %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Скорость Wi-Fi на 2.4 ГГц</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ r.max_wifi_speed_2_4 }} Мбит/с</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if r.max_wifi_speed_5 %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Скорость Wi-Fi на 5 ГГц</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ r.max_wifi_speed_5 }} Мбит/с</span>
                                         </div>
                                     {% endif %}
                                 {% endwith %}
