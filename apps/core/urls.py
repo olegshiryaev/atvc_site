@@ -18,7 +18,7 @@ app_name = "core"
 
 urlpatterns = [
     path("", index, name="home"),
-    path('wfhlthch/getstatus', getstatus, name='getstatus'),
+    path("wfhlthch/getstatus/", getstatus, name='getstatus'),
     path("tariffs/<slug:slug>/", TariffDetailView.as_view(), name="tariff_detail"),
     path('tariff/<int:tariff_id>/equipment/', get_tariff_equipment, name='get_tariff_equipment'),
     path("about/", about_company, name="about"),
