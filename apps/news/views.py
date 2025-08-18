@@ -1,11 +1,20 @@
 from django.shortcuts import render, get_object_or_404
+from django.http import Http404
+from django.urls import reverse
 from django.template.loader import render_to_string
 from django.http import HttpResponse, JsonResponse
+from django.views.decorators.cache import cache_page
+from django.core.cache import cache
+from django.contrib import messages
+from apps.services.utils import get_client_ip
 from django.core.paginator import Paginator, EmptyPage
 from django.db.models import F
 from ..cities.models import Locality
 from .models import News
 import re
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def news_list(request, locality_slug):
@@ -58,19 +67,21 @@ def load_more_news(request, locality_slug):
 
 
 def news_detail(request, locality_slug, news_slug):
-    """Отображает детальную страницу новости."""
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     news_item = get_object_or_404(
-        News.objects.published().filter(localities=locality, slug=news_slug).select_related('image').prefetch_related('localities')
+        News, slug=news_slug, localities=locality, is_published=True
     )
 
-    # Увеличиваем счётчик просмотров через метод модели
-    news_item.increment_views()
+    # Увеличиваем счётчик просмотров
+    News.objects.filter(pk=news_item.pk).update(views_count=F("views_count") + 1)
 
-    # Получаем другие новости
-    other_news = News.objects.published().filter(
-        localities=locality
-    ).exclude(id=news_item.id).order_by('-created_at')[:3].select_related('image').prefetch_related('localities')
+    # Получаем другие новости из той же локальности
+    other_news = News.objects.filter(
+        localities=locality,
+        is_published=True
+    ).exclude(
+        id=news_item.id
+    ).order_by('-created_at')[:3]
 
     return render(
         request,
@@ -82,7 +93,7 @@ def news_detail(request, locality_slug, news_slug):
             "title": news_item.title,
             "breadcrumbs": [
                 {"title": "Главная", "url": "core:home"},
-                {"title": "Новости", "url": reverse("news:news_list", kwargs={"locality_slug": locality_slug})},
+                {"title": "Новости", "url": "news:news_list"},
                 {"title": news_item.title, "url": None},
             ],
         },

@@ -21,13 +21,6 @@ def validate_image_size(value):
     if value.size > max_size_mb * 1024 * 1024:
         raise ValidationError(f"Размер файла не должен превышать {max_size_mb} МБ.")
 
-class NewsManager(models.Manager):
-    def published(self):
-        """Возвращает только опубликованные новости с учётом даты публикации."""
-        return self.filter(
-            is_published=True,
-            publish_at__lte=timezone.now()
-        )
 
 class News(models.Model):
     CATEGORY_CHOICES = (
@@ -82,49 +75,13 @@ class News(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     views_count = models.PositiveIntegerField(default=0, verbose_name="Количество просмотров")
 
-    objects = NewsManager()  # Подключаем кастомный менеджер
-
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Новость / акция"
         verbose_name_plural = "Новости и акции"
-        indexes = [
-            models.Index(fields=["slug"]),
-            models.Index(fields=["created_at"]),
-            models.Index(fields=["category"]),
-            models.Index(fields=["publish_at"]),  # Для быстрого поиска по publish_at
-        ]
 
     def __str__(self):
         return self.title
-    
-    @property
-    def preview_text(self):
-        if not self.content:
-            return ""
-        text = html.unescape(strip_tags(self.content))
-        return Truncator(text).words(20, truncate='...')
-    
-    def increment_views(self):
-        self.views_count = models.F('views_count') + 1
-        self.save(update_fields=["views_count"])
-
-    def get_absolute_url(self):
-        locality = self.localities.filter(is_active=True).first()
-        if not locality:
-            locality = self.localities.first()
-        return reverse(
-            "news:news_detail",
-            kwargs={"locality_slug": locality.slug, "news_slug": self.slug},
-        )
-    
-    def get_og_data(self):
-        return {
-            "og:title": self.title,
-            "og:description": self.preview_text,
-            "og:image": self.image.url if self.image else None,
-            "og:url": self.get_absolute_url(),
-        }
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -135,15 +92,19 @@ class News(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
-
-        if not self.meta_title:
-            self.meta_title = self.title
-        if not self.meta_description:
-            self.meta_description = Truncator(self.preview_text).chars(160)
-
         super().save(*args, **kwargs)
 
+        
     @property
-    def is_visible(self):
-        """Проверяет, видна ли новость пользователю."""
-        return self.is_published and (self.publish_at is None or self.publish_at <= timezone.now())
+    def preview_text(self):
+        text = html.unescape(strip_tags(self.content))
+        return Truncator(text).words(20, truncate='...')
+
+    def get_absolute_url(self):
+        locality = self.localities.filter(is_active=True).first()
+        if not locality:
+            locality = self.localities.first()
+        return reverse(
+            "news:news_detail",
+            kwargs={"locality_slug": locality.slug, "news_slug": self.slug},
+        )
