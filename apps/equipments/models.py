@@ -602,31 +602,85 @@ class Router(models.Model):
 
 
 class TvBox(models.Model):
+    """
+    Модель для хранения характеристик ТВ-приставок.
+    Содержит информацию об операционной системе, разрешении, памяти, беспроводных соединениях и интерфейсах.
+    Связана с моделью Product через OneToOneField.
+    """
+    
     product = models.OneToOneField(
         Product, on_delete=models.CASCADE, primary_key=True, related_name="tvbox",
         verbose_name="Товар"
     )
-    ethernet = models.CharField("Ethernet", max_length=50, blank=True, null=True)
-    usb_count = models.PositiveIntegerField(
-        "Количество USB-портов", blank=True, null=True
+    os = models.CharField(
+        "Операционная система",
+        max_length=100,
+        default="Не указано"
     )
-    os = models.CharField("Операционная система", max_length=50, blank=True, null=True)
-    hdmi = models.BooleanField("HDMI", default=True)
-    usb_ports = models.IntegerField("USB порты", blank=True, null=True)
-    hdmi_version = models.CharField("HDMI выход", max_length=50, blank=True, null=True)
-    av_output = models.BooleanField("AV выход", default=False)
-    sd_card = models.BooleanField("micro SD", default=False)
-    ram = models.CharField("ОЗУ", max_length=50, blank=True, null=True)
-    rom = models.CharField("ПЗУ", max_length=50, blank=True, null=True)
-    wifi = models.CharField("Wi-Fi", max_length=255, blank=True, null=True)
-    protocols = models.TextField("Поддержка протоколов", blank=True, null=True)
+    max_resolution = models.CharField(
+        "Максимальное разрешение",
+        max_length=100,
+        default="Не указано"
+    )
+
+    # Характеристики памяти
+    storage_size = models.PositiveIntegerField(
+        "Встроенная память (ГБ)",
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(8, "Встроенная память должна быть не менее 8 ГБ")]
+    )
+    ram_size = models.PositiveIntegerField(
+        "Оперативная память (ГБ)",
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1, "Оперативная память должна быть не менее 1 ГБ")]
+    )
+
+    # Беспроводное соединение
+    wireless_interfaces = models.CharField(
+        "Беспроводные интерфейсы",
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    bluetooth_version = models.CharField(
+        "Версия Bluetooth",
+        max_length=10,
+        blank=True,
+        null=True
+    )
+    wifi_standard = models.CharField(
+        "Стандарт Wi-Fi",
+        max_length=50,
+        blank=True,
+        null=True
+    )
+
+    # Интерфейсы и разъемы
+    interfaces = models.CharField(
+        "Интерфейсы",
+        max_length=255,
+        blank=True,
+        null=True
+    )
+    hdmi_count = models.PositiveIntegerField(
+        "Количество HDMI-разъемов",
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1, "Количество HDMI-разъемов должно быть не менее 1")]
+    )
 
     def __str__(self):
-        return f"ТВ-приставка: {self.product.name}"
+        return f"{self.product.name} ({self.os}, {self.max_resolution})"
 
     class Meta:
         verbose_name = "ТВ-приставка"
         verbose_name_plural = "ТВ-приставки"
+        indexes = [
+            models.Index(fields=['os']),
+            models.Index(fields=['max_resolution']),
+        ]
 
 
 class ViewCount(models.Model):

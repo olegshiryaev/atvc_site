@@ -78,7 +78,6 @@
                     <!-- Краткие характеристики -->
                     {% if current_item.product.smart_speaker or current_item.product.camera or current_item.product.router or current_item.product.tvbox %}
                         <h6 class="product-specs-title">Характеристики:</h6>
-                        <!-- Краткие характеристики -->
                         <div class="product-specs-short">
                             {% if current_item.product.smart_speaker %}
                                 {% with s=current_item.product.smart_speaker %}
@@ -108,6 +107,37 @@
                                             <span class="spec-item__name spec-item__name--gray">Максимальная мощность</span>
                                             <span class="spec-dots"></span>
                                             <span class="spec-item__value spec-item__value--black">{{ s.max_power }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endwith %}
+                            {% elif current_item.product.tvbox %}
+                                {% with t=current_item.product.tvbox %}
+                                    {% if t.os %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Операционная система</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ t.os }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if t.max_resolution %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__gray">Максимальное разрешение</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ t.max_resolution }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if t.ram_size %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Оперативная память</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ t.ram_size }} ГБ</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if t.storage_size %}
+                                        <div class="spec-item">
+                                            <span class="spec-item__name spec-item__name--gray">Встроенная память</span>
+                                            <span class="spec-dots"></span>
+                                            <span class="spec-item__value spec-item__value--black">{{ t.storage_size }} ГБ</span>
                                         </div>
                                     {% endif %}
                                 {% endwith %}

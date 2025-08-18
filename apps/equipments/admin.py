@@ -123,20 +123,35 @@ class RouterInline(admin.StackedInline):
     )
 
 class TvBoxInline(admin.StackedInline):
+    """
+    Inline-форма для отображения характеристик ТВ-приставки в админке.
+    Связана с моделью TvBox через OneToOneField.
+    """
     model = TvBox
     can_delete = False
+    extra = 0  # Не показывать пустые формы для новых объектов
     verbose_name = "Характеристики ТВ-приставки"
+    verbose_name_plural = "Характеристики ТВ-приставки"
+
     fieldsets = (
-        ("Подключение", {
-            "fields": (("ethernet", "wifi"), "hdmi", "hdmi_version", "av_output", "usb_ports")
+        ("Основные характеристики", {
+            "fields": (("os", "max_resolution"),)
         }),
         ("Память", {
-            "fields": (("os", "ram", "rom"),)
+            "fields": (("ram_size", "storage_size"),)
         }),
-        ("Дополнительно", {
-            "fields": (("sd_card", "usb_count"), "protocols")
+        ("Беспроводное соединение", {
+            "fields": (("wireless_interfaces", "bluetooth_version", "wifi_standard"),)
+        }),
+        ("Интерфейсы и разъемы", {
+            "fields": (("interfaces", "hdmi_count"),)
         }),
     )
+
+    # Настройка виджетов для текстовых полей
+    formfield_overrides = {
+        models.CharField: {'widget': admin.widgets.AdminTextInputWidget},
+    }
 
 
 @admin.register(ProductItem)

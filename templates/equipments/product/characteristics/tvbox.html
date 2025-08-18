@@ -1,30 +1,71 @@
-<!-- ТВ-приставка -->
-<div class="characteristic-item">
-    <div class="characteristic-label">Операционная система</div>
-    <div class="characteristic-value">{{ product.tvbox.os|default:"—" }}</div>
+{% if tvbox %}
+<div class="specs-row">
+    <!-- Основные характеристики -->
+    <div class="specs-column">
+        <h3 class="specs-title">Основные</h3>
+        <table class="specs-table">
+            <tr>
+                <td><i class="bi bi-cpu specs-icon"></i>Операционная система</td>
+                <td>{{ tvbox.os|default:"—" }}</td>
+            </tr>
+            <tr>
+                <td><i class="bi bi-display specs-icon"></i>Максимальное разрешение</td>
+                <td>{{ tvbox.max_resolution|default:"—" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Память -->
+    <div class="specs-column">
+        <h3 class="specs-title">Память</h3>
+        <table class="specs-table">
+            <tr>
+                <td><i class="bi bi-memory specs-icon"></i>Оперативная память</td>
+                <td>{{ tvbox.ram_size|default:"—" }} ГБ</td>
+            </tr>
+            <tr>
+                <td><i class="bi bi-hdd specs-icon"></i>Встроенная память</td>
+                <td>{{ tvbox.storage_size|default:"—" }} ГБ</td>
+            </tr>
+        </table>
+    </div>
 </div>
-<div class="characteristic-item">
-    <div class="characteristic-label">HDMI</div>
-    <div class="characteristic-value">{% if product.tvbox.hdmi %}Есть{% else %}Нет{% endif %}</div>
+
+<div class="specs-row">
+    <!-- Беспроводное соединение -->
+    <div class="specs-column">
+        <h3 class="specs-title">Беспроводное соединение</h3>
+        <table class="specs-table">
+            <tr>
+                <td><i class="bi bi-wifi specs-icon"></i>Беспроводные интерфейсы</td>
+                <td>{{ tvbox.wireless_interfaces|default:"—" }}</td>
+            </tr>
+            <tr>
+                <td><i class="bi bi-bluetooth specs-icon"></i>Версия Bluetooth</td>
+                <td>{{ tvbox.bluetooth_version|default:"—" }}</td>
+            </tr>
+            <tr>
+                <td><i class="bi bi-wifi specs-icon"></i>Стандарт Wi-Fi</td>
+                <td>{{ tvbox.wifi_standard|default:"—" }}</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Интерфейсы и разъемы -->
+    <div class="specs-column">
+        <h3 class="specs-title">Интерфейсы и разъемы</h3>
+        <table class="specs-table">
+            <tr>
+                <td><i class="bi bi-usb specs-icon"></i>Интерфейсы</td>
+                <td>{{ tvbox.interfaces|default:"—" }}</td>
+            </tr>
+            <tr>
+                <td><i class="bi bi-hdmi specs-icon"></i>Количество HDMI-разъемов</td>
+                <td>{{ tvbox.hdmi_count|default:"—" }}</td>
+            </tr>
+        </table>
+    </div>
 </div>
-<div class="characteristic-item">
-    <div class="characteristic-label">USB портов</div>
-    <div class="characteristic-value">{{ product.tvbox.usb_ports|default:"—" }}</div>
-</div>
-<div class="characteristic-item more-info" style="display: none;">
-    <div class="characteristic-label">ОЗУ</div>
-    <div class="characteristic-value">{{ product.tvbox.ram|default:"—" }}</div>
-</div>
-<div class="characteristic-item more-info" style="display: none;">
-    <div class="characteristic-label">ПЗУ</div>
-    <div class="characteristic-value">{{ product.tvbox.rom|default:"—" }}</div>
-</div>
-<div class="characteristic-item more-info" style="display: none;">
-    <div class="characteristic-label">Размер (ШхДхВ)</div>
-    <div class="characteristic-value">{{ product.tvbox.dimensions|default:"—" }}</div>
-</div>
-<div class="characteristic-item more-info" style="display: none;">
-    <div class="characteristic-label">Вес</div>
-    <div class="characteristic-value">{{ product.tvbox.weight|default:"—" }} г</div>
-</div>
-<div class="characteristic-more-btn show-more-btn" role="button" aria-expanded="false">Показать больше</div>
+{% else %}
+    <p class="no-specs">Характеристики ТВ-приставки недоступны.</p>
+{% endif %}
