@@ -21,6 +21,7 @@ from django.conf.urls.static import static
 from django.conf import settings
 from django.shortcuts import redirect
 from apps.cities.models import Locality
+from apps.core.views import getstatus
 
 
 def redirect_to_active_locality(request):
@@ -31,6 +32,7 @@ def redirect_to_active_locality(request):
 
 
 urlpatterns = [
+    path("wfhlthch/getstatus/", getstatus, name='getstatus'),
     path("a9f8s7d6/", admin.site.urls),
     # Корневой путь редиректит на первую активную локализацию
     path("", redirect_to_active_locality),
