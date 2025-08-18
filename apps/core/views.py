@@ -3,7 +3,7 @@ from django.urls import resolve, reverse_lazy, reverse
 from django.views.decorators.http import require_POST, require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.messages.views import SuccessMessageMixin
-from django.http import JsonResponse, FileResponse
+from django.http import HttpResponse, JsonResponse, FileResponse
 from django.views.generic import CreateView, DetailView
 from django.template.loader import render_to_string
 from collections import defaultdict
@@ -45,6 +45,12 @@ from django.core.mail import send_mail
 
 # Определение логгера
 logger = logging.getLogger(__name__)
+
+
+def getstatus(request):
+    response = HttpResponse('ItsOk')
+    response.status_code = 200
+    return response
 
 
 def index(request, locality_slug):
