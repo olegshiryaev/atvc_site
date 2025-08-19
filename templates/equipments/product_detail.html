@@ -233,41 +233,43 @@
         <aside class="product-sidebar" id="product-sidebar">
             <div class="sidebar-content">
                 <!-- Блок выбора способа оплаты -->
-                <div class="payment-methods mt-3 border-top pt-3">
-                    <h6 class="mb-2">Выберите вариант оплаты</h6>
-                    <div class="payment-options">
-                        <!-- Полная оплата -->
-                        <label class="payment-option active">
-                            <input type="radio" name="payment_method" value="purchase" checked data-price="{{ current_item.get_final_price }}">
-                            <span class="payment-title">Полная стоимость</span>
-                            <span class="payment-price">{{ current_item.get_price_display }}</span>
-                        </label>
-
-                        {% if current_item.installment_12_months %}
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="installment12" data-price="{{ current_item.installment_12_months }}">
-                                <span class="payment-title">Рассрочка на 12 месяцев</span>
-                                <span class="payment-price">{{ current_item.installment_12_months }} ₽/мес</span>
+                {% if current_item.installment_available %}
+                    <div class="payment-methods mt-3 border-top pt-3">
+                        <h6 class="mb-2">Выберите вариант оплаты</h6>
+                        <div class="payment-options">
+                            <!-- Полная оплата -->
+                            <label class="payment-option active">
+                                <input type="radio" name="payment_method" value="purchase" checked data-price="{{ current_item.get_final_price }}">
+                                <span class="payment-title">Полная стоимость</span>
+                                <span class="payment-price">{{ current_item.get_price_display }}</span>
                             </label>
-                        {% endif %}
 
-                        {% if current_item.installment_24_months %}
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="installment24" data-price="{{ current_item.installment_24_months }}">
-                                <span class="payment-title">Рассрочка на 24 месяца</span>
-                                <span class="payment-price">{{ current_item.installment_24_months }} ₽/мес</span>
-                            </label>
-                        {% endif %}
+                            {% if current_item.installment_12_months %}
+                                <label class="payment-option">
+                                    <input type="radio" name="payment_method" value="installment12" data-price="{{ current_item.installment_12_months }}">
+                                    <span class="payment-title">Рассрочка на 12 месяцев</span>
+                                    <span class="payment-price">{{ current_item.installment_12_months }} ₽/мес</span>
+                                </label>
+                            {% endif %}
 
-                        {% if current_item.installment_48_months %}
-                            <label class="payment-option">
-                                <input type="radio" name="payment_method" value="installment48" data-price="{{ current_item.installment_48_months }}">
-                                <span class="payment-title">Рассрочка на 48 месяцев</span>
-                                <span class="payment-price">{{ current_item.installment_48_months }} ₽/мес</span>
-                            </label>
-                        {% endif %}
+                            {% if current_item.installment_24_months %}
+                                <label class="payment-option">
+                                    <input type="radio" name="payment_method" value="installment24" data-price="{{ current_item.installment_24_months }}">
+                                    <span class="payment-title">Рассрочка на 24 месяца</span>
+                                    <span class="payment-price">{{ current_item.installment_24_months }} ₽/мес</span>
+                                </label>
+                            {% endif %}
+
+                            {% if current_item.installment_48_months %}
+                                <label class="payment-option">
+                                    <input type="radio" name="payment_method" value="installment48" data-price="{{ current_item.installment_48_months }}">
+                                    <span class="payment-title">Рассрочка на 48 месяцев</span>
+                                    <span class="payment-price">{{ current_item.installment_48_months }} ₽/мес</span>
+                                </label>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
+                {% endif %}
                 <div class="price-block">
                     <div class="current-price" id="current-price-display">
                         {{ current_item.get_price_display }}
@@ -479,6 +481,7 @@
         const priceDisplay = document.getElementById('current-price-display');
 
         if (orderButton && priceDisplay && paymentRadios.length > 0) {
+            // Только если есть радио-кнопки (т.е. рассрочка доступна)
             const baseUrl = orderButton.dataset.baseUrl ||
                 "{% url 'orders:equipment_order' locality_slug=locality_slug product_item_id=current_item.id %}";
 
@@ -498,13 +501,11 @@
                 radio.parentElement.classList.add('active');
             };
 
-            // Инициализация активного радио
             const activeRadio = document.querySelector('input[name="payment_method"]:checked');
             if (activeRadio) {
                 updatePriceAndButton(activeRadio);
             }
 
-            // Обработчики на изменение
             paymentRadios.forEach(radio => {
                 radio.addEventListener('change', () => {
                     updatePriceAndButton(radio);

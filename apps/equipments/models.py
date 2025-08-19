@@ -216,6 +216,7 @@ class ProductItem(BaseModel):
         max_length=50,
         blank=True,
         null=True,
+        unique=True,
         help_text="Уникальный код товара"
     )
     installment_available = models.BooleanField("Доступна рассрочка", default=False)
@@ -247,22 +248,19 @@ class ProductItem(BaseModel):
         return self.price
 
     def get_installment_price(self, months):
-        """
-        Возвращает ежемесячный платёж для указанного количества месяцев.
-        """
         if not self.installment_available:
             return None
-        if months == 12:
-            return self.installment_12_months
-        if months == 24:
-            return self.installment_24_months
-        if months == 48:
-            return self.installment_48_months
-        return None
+        installment_fields = {
+            12: self.installment_12_months,
+            24: self.installment_24_months,
+            48: self.installment_48_months,
+        }
+        return installment_fields.get(months)
 
     def get_total_installment_price(self, months):
         """
-        Возвращает общую сумму выплат по рассрочке.
+        Возвращает общую сумму выплат по рассрочке для указанного количества месяцев.
+        Если рассрочка недоступна или платеж не указан, возвращает полную цену.
         """
         installment_price = self.get_installment_price(months)
         if installment_price:

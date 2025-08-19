@@ -8,40 +8,55 @@
             {% if product_item.in_stock > 0 %}
                 <div class="order-form__main">
                     <!-- Информация о товаре -->
-                    <section class="product-info">
-                        <div class="product-info__content">
-                            <div class="product-info__image" id="productImageContainer">
+                    <section class="product-order">
+                        <div class="product-order__content">
+                            <!-- Изображение слева -->
+                            <div class="product-order__image" id="productImageContainer">
                                 {% with main_image=product_item.get_main_image %}
                                     {% if main_image %}
-                                        <img src="{{ main_image.image.url }}" alt="{{ product_item.get_display_name }}" class="product-info__img" id="productImage">
+                                        <img src="{{ main_image.image.url }}" alt="{{ product_item.get_display_name }}" class="product-order__img" id="productImage">
                                     {% else %}
-                                        <div class="product-info__img-placeholder" id="productImagePlaceholder">
+                                        <div class="product-order__img-placeholder" id="productImagePlaceholder">
                                             <span>Нет изображения</span>
                                         </div>
                                     {% endif %}
                                 {% endwith %}
                             </div>
-                            <div class="product-info__details">
-                                <div class="product-info__header">
-                                    <h3 class="product-info__title">
-                                        <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product_item.slug %}" 
-                                           class="product-info__link"
-                                           title="Подробнее о {{ product_item.get_display_name }}">
-                                            {{ product_item.get_display_name }}
-                                        </a>
-                                    </h3>
-                                    <div class="product-info__price-inline">
-                                        <div class="product-info__price-value" id="current-price-display">
+
+                            <!-- Название, цвет и цена -->
+                            <div class="product-order__details">
+                                <div class="product-order__header">
+                                    <!-- Название слева -->
+                                    <div class="product-order__title-wrapper">
+                                        <h3 class="product-order__title">
+                                            <a href="{% url 'equipments:product_detail' locality_slug=locality.slug slug=product_item.slug %}"
+                                            class="product-order__link"
+                                            title="Подробнее о {{ product_item.get_display_name }}">
+                                                {{ product_item.get_display_name }}
+                                            </a>
+                                        </h3>
+
+                                        <!-- Цвет -->
+                                        {% if product_item.color %}
+                                            <div class="product-order__color-info">
+                                                <span class="product-order__color-label">Цвет:</span>
+                                                <span class="product-order__color-name">{{ product_item.color.name|lower }}</span>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Цена справа -->
+                                    <div class="product-order__price-block">
+                                        <div class="product-order__price-value" id="current-price-display">
                                             {{ product_item.get_price_display }}
                                         </div>
+                                        {% if product_item.old_price %}
+                                            <div class="product-order__old-price">
+                                                {{ product_item.old_price|intcomma }} ₽
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
-                                {% if product_item.color %}
-                                    <div class="product-info__color-selection">
-                                        <h5 class="product-info__variant-title">Цвет</h5>
-                                        <span>{{ product_item.color.name }}</span>
-                                    </div>
-                                {% endif %}
                             </div>
                         </div>
                     </section>
