@@ -5170,6 +5170,9 @@ button.swiper-pagination-bullet {
     /* Дополнительно: уменьшаем максимальную высоту изображения */
     .product-card__img {
         object-position: center; /* Убедимся, что центрирование явно указано */
+        max-width: 90%; 
+        max-height: 220px;
+        object-fit: contain;
     }
 
     /* Ещё больше сжимаем карточку на малых экранах */
@@ -10206,12 +10209,22 @@ button.swiper-pagination-bullet {
         box-shadow: 0 4px 16px rgba(0,102,204,0.3);
     }
     .gallery__thumbs-item {
-        width: 50px !important;
-        height: 50px;
+        width: 48px !important;
+        height: 48px;
+        border-radius: 6px;
     }
-    .gallery__item-img, .gallery__single-img img {
-        max-width: 100%; /* На мобильных — полная ширина */
-        max-height: 250px; /* Уменьшено для мобильных */
+    .product-gallery-main .gallery__item-img,
+    .gallery__single-img img {
+        max-width: 90%; /* Было 100% — теперь чуть меньше с отступами */
+        max-height: 220px; /* Уменьшено с 250px */
+        object-fit: contain;
+    }
+
+    /* Контейнер галереи — центрирование и ограничение */
+    .product-gallery-main,
+    .gallery__single-img {
+        max-height: 240px;
+        min-height: 220px;
     }
 }
 
