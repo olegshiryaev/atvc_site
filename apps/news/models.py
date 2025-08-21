@@ -2,6 +2,8 @@ from django.db import models
 from django.urls import reverse
 from django.utils.text import slugify
 from datetime import datetime
+import os
+from django.utils.crypto import get_random_string
 import html
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
@@ -13,8 +15,10 @@ from django.utils import timezone
 from ..cities.models import Locality
 
 def news_image_upload_to(instance, filename):
-    created_at = instance.created_at or datetime.now()
-    return f"news/{created_at.year}/{created_at.month}/{filename}"
+    created_at = instance.created_at or timezone.now()
+    ext = os.path.splitext(filename)[1]  # расширение
+    new_filename = f"{slugify(instance.title)}-{get_random_string(6)}{ext}"
+    return f"news/{created_at.year}/{created_at.month:02d}/{new_filename}"
 
 def validate_image_size(value):
     max_size_mb = 5
@@ -79,6 +83,11 @@ class News(models.Model):
         ordering = ["-created_at"]
         verbose_name = "Новость / акция"
         verbose_name_plural = "Новости и акции"
+        indexes = [
+            models.Index(fields=['is_published', 'publish_at']),
+            models.Index(fields=['-created_at']),
+            models.Index(fields=['slug']),
+        ]
 
     def __str__(self):
         return self.title
@@ -92,6 +101,16 @@ class News(models.Model):
                 slug = f"{base_slug}-{counter}"
                 counter += 1
             self.slug = slug
+
+        # Автозаполнение meta title
+        if not self.meta_title:
+            self.meta_title = self.title
+
+        # Автозаполнение meta description
+        if not self.meta_description:
+            text = html.unescape(strip_tags(self.content))
+            self.meta_description = Truncator(text).words(30, truncate='...')
+
         super().save(*args, **kwargs)
 
         
@@ -100,10 +119,14 @@ class News(models.Model):
         text = html.unescape(strip_tags(self.content))
         return Truncator(text).words(20, truncate='...')
 
+    @property
+    def is_visible(self):
+        return self.is_published and (self.publish_at is None or self.publish_at <= timezone.now())
+
     def get_absolute_url(self):
-        locality = self.localities.filter(is_active=True).first()
+        locality = self.localities.filter(is_active=True).first() or self.localities.first()
         if not locality:
-            locality = self.localities.first()
+            raise ValueError("Новость должна быть привязана хотя бы к одному населённому пункту.")
         return reverse(
             "news:news_detail",
             kwargs={"locality_slug": locality.slug, "news_slug": self.slug},

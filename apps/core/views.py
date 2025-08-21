@@ -368,7 +368,7 @@ def services(request, service_slug, locality_slug):
         # Для TV Box — ищем конкретный продукт, но возвращаем его ProductItem
         tv_box_item = ProductItem.objects.filter(
             product__services=service,
-            product__name__contains="Smart-TV приставка Wink Box Mini",
+            product__name__contains="Smart-TV приставка WinkBox Mini",
             product__is_available=True,
         ).select_related('product', 'color').prefetch_related('images').first()
     except ProductItem.DoesNotExist:

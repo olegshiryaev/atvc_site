@@ -2,6 +2,7 @@ from django.contrib import admin
 import os
 from django.conf import settings
 from django.core.files import File
+from django.core.exceptions import ValidationError
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from import_export.admin import ImportExportModelAdmin
@@ -43,9 +44,27 @@ admin.site.site_header = "Админ-панель управления сайт�
 admin.site.site_title = "Пенль управления сайтом"
 admin.site.index_title = "Добро пожаловать в панель управления сайтом"
 
-class CustomBooleanWidget(BooleanWidget):
-    TRUE_VALUES = ("1", "true", "yes", "on", "Истина")
-    FALSE_VALUES = ("0", "false", "no", "off", "Ложь")
+class CustomBooleanWidget(widgets.BooleanWidget):
+    TRUE_VALUES = ("1", "true", "yes", "on", "Истина", "ИСТИНА", "истина")
+    FALSE_VALUES = ("0", "false", "no", "off", "Ложь", "ЛОЖЬ", "ложь")
+
+    def clean(self, value, row=None, **kwargs):
+        if value is None or value == '' or value is False:
+            return False
+
+        value = str(value).strip().replace('\u00A0', ' ').lower()
+
+        # Проверяем, есть ли значение в списке истинных (в нижнем регистре)
+        if value in [v.lower() for v in self.TRUE_VALUES]:
+            return True
+        elif value in [v.lower() for v in self.FALSE_VALUES]:
+            return False
+
+        # Можно добавить поддержку булевых значений Python
+        if isinstance(value, bool):
+            return value
+
+        raise ValidationError(f"Неизвестное значение для булевого поля: {value}")
 
 
 class WorkScheduleInline(admin.TabularInline):
@@ -91,6 +110,7 @@ class CategoryWidget(widgets.Widget):
         "Музыка": "music",
         "Бизнес, новости": "news",
         "Спорт": "sport",
+        "Другое": "other",
     }
 
     def clean(self, value, row=None, *args, **kwargs):
