@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Частые вопросы (FAQ) - Поддержка АТВК{% endblock %}
+
+{% block content %}
+<div class="sp-container">
+    <!-- Breadcrumbs -->
+    <nav class="sp-breadcrumbs">
+        <a href="{% url 'support:home' locality.slug %}">Главная</a>
+        <i class="fas fa-chevron-right mx-1"></i>
+        <span>Частые вопросы</span>
+    </nav>
+
+    <!-- Заголовок -->
+    <header class="sp-section">
+        <h1 class="sp-section-title">Частые вопросы</h1>
+        <p class="sp-section-subtitle">Ответы на самые популярные вопросы наших клиентов</p>
+    </header>
+
+    <!-- FAQ по категориям -->
+    <section class="sp-section">
+        {% for category, faqs in faqs_by_category.items %}
+        <div class="sp-faq-category">
+            <h2 class="sp-faq-category-title">
+                <i class="fas fa-{{ category.icon }} me-2"></i> {{ category.title }}
+            </h2>
+            
+            <div class="sp-grid sp-grid-1">
+                {% for faq in faqs %}
+                <div class="sp-card sp-faq-item" id="faq-{{ faq.id }}">
+                    <h3 class="sp-faq-question">
+                        <i class="fas fa-question-circle text-primary me-2"></i> {{ faq.question }}
+                    </h3>
+                    <div class="sp-faq-answer">
+                        {{ faq.answer|safe }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% empty %}
+        <div class="sp-card text-center">
+            <p>Частые вопросы пока не добавлены.</p>
+        </div>
+        {% endfor %}
+    </section>
+
+    <!-- Дополнительная помощь -->
+    <section class="sp-section">
+        <div class="sp-card" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff;">
+            <div class="text-center">
+                <h2 class="sp-section-title" style="color: #ffffff;">Не нашли ответ?</h2>
+                <p class="sp-section-subtitle" style="color: #e2e8f0; margin-bottom: 2rem;">Свяжитесь с нашей службой поддержки</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="tel:88001234567" class="sp-btn" style="background: #ffffff; color: #2563eb;">
+                        <i class="fas fa-phone"></i> 8-800-123-45-67
+                    </a>
+                    <a href="mailto:support@atvc.ru" class="sp-btn" style="background: #f59e0b; color: #ffffff;">
+                        <i class="fas fa-envelope"></i> support@atvc.ru
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

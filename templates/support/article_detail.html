@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ article.title }} - Поддержка АТВК{% endblock %}
+
+{% block content %}
+<div class="sp-container">
+    <!-- Breadcrumbs -->
+    <nav class="sp-breadcrumbs">
+        <a href="{% url 'support:home' locality.slug %}">Главная</a>
+        <i class="fas fa-chevron-right mx-1"></i>
+        <a href="{% url 'support:category_detail' locality.slug article.category.slug %}">{{ article.category.title }}</a>
+        <i class="fas fa-chevron-right mx-1"></i>
+        <span>{{ article.title }}</span>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="sp-section">
+        <div class="sp-card-header mb-3">
+            <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
+            <span class="sp-stat">{{ article.category.title }}</span>
+        </div>
+        
+        <h1 class="sp-section-title text-start">{{ article.title }}</h1>
+        
+        <div class="d-flex gap-3 align-items-center flex-wrap">
+            <span class="sp-stat">
+                <i class="far fa-calendar sp-stat-icon"></i> {{ article.created_at|date:"d.m.Y" }}
+            </span>
+            <span class="sp-stat">
+                <i class="far fa-eye sp-stat-icon"></i> {{ article.view_count }} просмотров
+            </span>
+            {% if article.author %}
+            <span class="sp-stat">
+                <i class="far fa-user sp-stat-icon"></i> {{ article.author.get_full_name }}
+            </span>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Article Content -->
+    <article class="sp-section">
+        <div class="sp-card">
+            <div class="sp-article-content">
+                {{ article.content|safe }}
+            </div>
+        </div>
+    </article>
+
+    <!-- Feedback -->
+    <section class="sp-section">
+        <div class="sp-feedback">
+            <h3 class="sp-feedback-title">Была ли полезна эта статья?</h3>
+            <div class="sp-feedback-buttons">
+                <button class="sp-btn sp-btn-primary" onclick="sendFeedback(true)">
+                    <i class="fas fa-thumbs-up"></i> Да
+                </button>
+                <button class="sp-btn sp-btn-secondary" onclick="sendFeedback(false)">
+                    <i class="fas fa-thumbs-down"></i> Нет
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Articles -->
+    {% if related_articles %}
+    <section class="sp-section">
+        <h2 class="sp-section-title">Похожие статьи</h2>
+        <div class="sp-related-grid">
+            {% for related in related_articles %}
+            <a href="{% url 'support:article_detail' locality.slug related.category.slug related.slug %}" class="sp-card sp-related-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-{{ related.category.icon }} sp-card-icon"></i>
+                    <span class="sp-stat">{{ related.category.title }}</span>
+                </div>
+                <h3 class="sp-card-title">{{ related.title }}</h3>
+                <p class="sp-card-description">{{ related.content|striptags|truncatewords:15 }}</p>
+                <div class="sp-card-footer">
+                    <span class="sp-stat">
+                        <i class="far fa-eye sp-stat-icon"></i> {{ related.view_count }}
+                    </span>
+                    <span class="sp-btn sp-btn-outline">
+                        Читать <i class="fas fa-arrow-right ms-1"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+{% block extra_js %}
+<script>
+function sendFeedback(isHelpful) {
+    fetch("{% url 'support:article_feedback' locality.slug article.id %}", {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({is_helpful: isHelpful})
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert(data.message);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+</script>
+{% endblock %}
+{% endblock %}

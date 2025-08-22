@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Категория: {{ category.title }} - Поддержка АТВК{% endblock %}
+
+{% block content %}
+<div class="sp-container">
+    <!-- Breadcrumbs -->
+    <nav class="sp-breadcrumbs">
+        <a href="{% url 'support:home' locality.slug %}">Главная</a>
+        <i class="fas fa-chevron-right mx-1"></i>
+        <span>{{ category.title }}</span>
+    </nav>
+
+    <!-- Заголовок категории -->
+    <header class="sp-section">
+        <div class="text-center">
+            <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
+                <i class="fas fa-{{ category.icon }}"></i>
+            </div>
+            <h1 class="sp-section-title">{{ category.title }}</h1>
+            {% if category.description %}
+            <p class="sp-section-subtitle">{{ category.description }}</p>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Статьи категории -->
+    <section class="sp-section">
+        <h2 class="sp-section-title">Статьи в этой категории</h2>
+        
+        {% if page_obj %}
+        <div class="sp-grid sp-grid-2">
+            {% for article in page_obj %}
+            <a href="{% url 'support:article_detail' locality.slug article.category.slug article.slug %}" class="sp-card sp-related-card">
+                <h3 class="sp-card-title">{{ article.title }}</h3>
+                <p class="sp-card-description">{{ article.content|striptags|truncatewords:20 }}</p>
+                <div class="sp-card-footer">
+                    <span class="sp-stat">
+                        <i class="far fa-eye sp-stat-icon"></i> {{ article.view_count }}
+                    </span>
+                    <span class="sp-btn sp-btn-outline">
+                        Читать <i class="fas fa-arrow-right ms-1"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+
+        <!-- Пагинация -->
+        {% if page_obj.has_other_pages %}
+        <nav class="d-flex justify-content-center mt-4">
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                </li>
+                {% endif %}
+                
+                {% for num in page_obj.paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперед</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+
+        {% else %}
+        <div class="sp-card text-center">
+            <p>В этой категории пока нет статей.</p>
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- FAQ категории -->
+    {% if category_faqs %}
+    <section class="sp-section">
+        <h2 class="sp-section-title">Частые вопросы</h2>
+        <div class="sp-grid sp-grid-1">
+            {% for faq in category_faqs %}
+            <div class="sp-card">
+                <h3 class="sp-faq-question">
+                    <i class="fas fa-question-circle text-primary me-2"></i> {{ faq.question }}
+                </h3>
+                <div class="sp-faq-answer">
+                    {{ faq.answer|safe }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

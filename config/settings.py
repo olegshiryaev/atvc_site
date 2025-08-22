@@ -18,7 +18,7 @@ import environ
 # Работа с env.dev
 env = environ.Env()
 
-environ.Env.read_env(env_file=Path("./docker/env/.env.prod"))
+environ.Env.read_env(env_file=Path("./docker/env/.env.dev"))
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "apps.equipments",
     "apps.orders",
     "apps.chat",
+    "apps.support",
 ]
 
 MIDDLEWARE = [

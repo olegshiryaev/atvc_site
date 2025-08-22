@@ -1,0 +1,126 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Центр поддержки АТВК{% endblock %}
+
+{% block content %}
+<div class="sp-container">
+    <!-- Hero Section -->
+    <section class="sp-hero">
+        <h1 class="sp-hero-title">Центр поддержки АТВК</h1>
+        <p class="sp-hero-subtitle">Найдите ответы на ваши вопросы или свяжитесь с нашей поддержкой</p>
+        
+        <!-- Search Form -->
+        <form action="{% url 'support:search' locality.slug %}" method="get" class="sp-search-form">
+            <input type="search" name="q" placeholder="Введите ваш вопрос или проблему..." class="sp-search-input" required>
+            <button type="submit" class="sp-search-btn">
+                <i class="fas fa-search"></i>
+            </button>
+        </form>
+    </section>
+
+    <!-- Featured FAQs -->
+    {% if featured_faqs %}
+    <section class="sp-section">
+        <h2 class="sp-section-title">Частые вопросы</h2>
+        <div class="sp-grid sp-grid-2">
+            {% for faq in featured_faqs %}
+            <div class="sp-card">
+                <h3 class="sp-card-title">
+                    <i class="fas fa-question-circle text-primary me-2"></i> {{ faq.question }}
+                </h3>
+                <p class="sp-card-description">{{ faq.answer|striptags|truncatewords:30 }}</p>
+                <div class="sp-card-footer">
+                    <span class="sp-stat">
+                        <i class="fas fa-folder sp-stat-icon"></i> {{ faq.category.title }}
+                    </span>
+                    <a href="{% url 'support:faq_list' locality.slug %}#faq-{{ faq.id }}" class="sp-btn sp-btn-outline">
+                        Подробнее <i class="fas fa-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Помощь по услугам -->
+    <section class="sp-section">
+        <h2 class="sp-section-title">Помощь по услугам</h2>
+        <div class="sp-grid sp-grid-3">
+            {% for service in services %}
+            <a href="{% url 'support:service_help' locality.slug service.slug %}" class="sp-card sp-service-card">
+                {% if service.background_image %}
+                <div class="sp-service-image" style="background-image: url('{{ service.background_image.url }}');">
+                    <div class="sp-service-overlay">
+                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">
+                            <i class="fas fa-wifi"></i> <!-- Замените на соответствующую иконку -->
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                <div class="sp-service-icon">
+                    <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
+                        <i class="fas fa-wifi"></i> <!-- Замените на соответствующую иконку -->
+                    </div>
+                </div>
+                {% endif %}
+                <h3 class="sp-card-title text-center">{{ service.name }}</h3>
+                {% if service.description %}
+                <p class="sp-card-description text-center">{{ service.description|truncatewords:15 }}</p>
+                {% endif %}
+            </a>
+            {% empty %}
+            <div class="sp-card text-center">
+                <p>Услуги пока не добавлены.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Популярные статьи -->
+    {% if popular_articles %}
+    <section class="sp-section">
+        <h2 class="sp-section-title">Популярные статьи</h2>
+        <div class="sp-grid sp-grid-3">
+            {% for article in popular_articles %}
+            <a href="{% url 'support:article_detail' locality.slug article.category.slug article.slug %}" class="sp-card sp-related-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
+                    <span class="sp-stat">{{ article.category.title }}</span>
+                </div>
+                <h3 class="sp-card-title">{{ article.title }}</h3>
+                <p class="sp-card-description">{{ article.content|striptags|truncatewords:20 }}</p>
+                <div class="sp-card-footer">
+                    <span class="sp-stat">
+                        <i class="fas fa-eye sp-stat-icon"></i> {{ article.view_count }}
+                    </span>
+                    <span class="sp-btn sp-btn-primary">
+                        Читать <i class="fas fa-arrow-right ms-1"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Support Contacts -->
+    <section class="sp-section">
+        <div class="sp-card" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff;">
+            <div class="text-center">
+                <h2 class="sp-section-title" style="color: #ffffff;">Нужна дополнительная помощь?</h2>
+                <p class="sp-section-subtitle" style="color: #e2e8f0; margin-bottom: 2rem;">Свяжитесь с нашей службой поддержки</p>
+                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <a href="tel:88001234567" class="sp-btn" style="background: #ffffff; color: #2563eb;">
+                        <i class="fas fa-phone"></i> 8-800-123-45-67
+                    </a>
+                    <a href="mailto:support@atvc.ru" class="sp-btn" style="background: #f59e0b; color: #ffffff;">
+                        <i class="fas fa-envelope"></i> support@atvc.ru
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

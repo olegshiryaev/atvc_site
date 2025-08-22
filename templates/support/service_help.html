@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Помощь по услуге: {{ service.name }} - АТВК{% endblock %}
+
+{% block content %}
+<div class="sp-container">
+    <!-- Breadcrumbs -->
+    <nav class="sp-breadcrumbs">
+        <a href="{% url 'support:home' locality.slug %}">Главная</a>
+        <i class="fas fa-chevron-right mx-1"></i>
+        <span>{{ service.name }}</span>
+    </nav>
+
+    <!-- Заголовок услуги -->
+    <header class="sp-section">
+        <div class="text-center">
+            {% if service.background_image %}
+            <div class="sp-service-header-image" style="background-image: url('{{ service.background_image.url }}');">
+                <div class="sp-service-header-overlay">
+                    <h1 class="sp-section-title" style="color: #ffffff;">{{ service.name }}</h1>
+                    {% if service.description %}
+                    <p class="sp-section-subtitle" style="color: #e2e8f0;">{{ service.description }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <h1 class="sp-section-title">{{ service.name }}</h1>
+            {% if service.description %}
+            <p class="sp-section-subtitle">{{ service.description }}</p>
+            {% endif %}
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Поиск по услуге -->
+    <section class="sp-section">
+        <div class="sp-card">
+            <h2 class="sp-section-title text-center">Поиск по услуге "{{ service.name }}"</h2>
+            <form action="{% url 'support:search' locality.slug %}" method="get" class="sp-search-form">
+                <input type="hidden" name="service" value="{{ service.slug }}">
+                <input type="search" name="q" placeholder="Введите вопрос по услуге {{ service.name }}..." class="sp-search-input" required>
+                <button type="submit" class="sp-search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Категории помощи для услуги -->
+    <section class="sp-section">
+        <h2 class="sp-section-title">Темы вопросов</h2>
+        <div class="sp-grid sp-grid-3">
+            {% for category in categories %}
+            <a href="{% url 'support:category_detail' locality.slug category.slug %}" class="sp-card sp-category-card">
+                <div style="text-align: center;">
+                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: #2563eb;">
+                        <i class="fas fa-{{ category.icon }}"></i>
+                    </div>
+                    <h3 class="sp-card-title">{{ category.title }}</h3>
+                    <p class="sp-card-description">{{ category.description|default:"" }}</p>
+                    <span class="sp-stat">{{ category.article_count }} статей</span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="sp-card text-center">
+                <p>Разделы помощи для этой услуги пока не добавлены.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Популярные статьи по услуге -->
+    {% if popular_articles %}
+    <section class="sp-section">
+        <h2 class="sp-section-title">Популярные статьи</h2>
+        <div class="sp-grid sp-grid-2">
+            {% for article in popular_articles %}
+            <a href="{% url 'support:article_detail' locality.slug article.category.slug article.slug %}" class="sp-card sp-related-card">
+                <div class="sp-card-header">
+                    <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
+                    <span class="sp-stat">{{ article.category.title }}</span>
+                </div>
+                <h3 class="sp-card-title">{{ article.title }}</h3>
+                <p class="sp-card-description">{{ article.content|striptags|truncatewords:20 }}</p>
+                <div class="sp-card-footer">
+                    <span class="sp-stat">
+                        <i class="fas fa-eye sp-stat-icon"></i> {{ article.view_count }}
+                    </span>
+                    <span class="sp-btn sp-btn-outline">
+                        Читать <i class="fas fa-arrow-right ms-1"></i>
+                    </span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Дополнительная помощь -->
+    <section class="sp-section">
+        <div class="sp-grid sp-grid-2">
+            <div class="sp-card text-center">
+                <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>Частые вопросы</h3>
+                <p>Ответы на самые популярные вопросы по услуге</p>
+                <a href="{% url 'support:faq_list' locality.slug %}?service={{ service.slug }}" class="sp-btn sp-btn-primary mt-2">
+                    Смотреть FAQ
+                </a>
+            </div>
+            
+            <div class="sp-card text-center" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff;">
+                <div style="font-size: 3rem; color: #ffffff; margin-bottom: 1rem;">
+                    <i class="fas fa-headset"></i>
+                </div>
+                <h3>Техническая поддержка</h3>
+                <p>Нужна помощь с услугой {{ service.name }}?</p>
+                <a href="tel:88001234567" class="sp-btn mt-2" style="background: #ffffff; color: #2563eb;">
+                    <i class="fas fa-phone"></i> 8-800-123-45-67
+                </a>
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+.sp-service-header-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.sp-service-header-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.sp-service-image {
+    height: 120px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px 12px 0 0;
+    position: relative;
+}
+
+.sp-service-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(37, 99, 235, 0.9);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px 12px 0 0;
+    color: white;
+}
+
+.sp-service-icon {
+    text-align: center;
+    padding: 2rem 1rem 1rem 1rem;
+}
+</style>
+{% endblock %}

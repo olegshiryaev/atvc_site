@@ -44,6 +44,7 @@ urlpatterns = [
     path("<slug:locality_slug>/", include("apps.core.urls")),
     path("<slug:locality_slug>/", include("apps.equipments.urls")),
     path("<slug:locality_slug>/", include("apps.orders.urls")),
+    path('<slug:locality_slug>/support/', include("apps.support.urls", namespace='support')),
     path("chat/", include("apps.chat.urls")),
 ]
 
