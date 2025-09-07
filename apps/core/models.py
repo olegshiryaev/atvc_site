@@ -81,7 +81,7 @@ class WorkSchedule(models.Model):
     )
 
     office = models.ForeignKey(
-        Office, on_delete=models.CASCADE, related_name="schedules"
+        Office, on_delete=models.CASCADE, null=True, blank=True, related_name="schedules"
     )
     days = models.CharField(max_length=50, choices=DAYS_CHOICES)
     start_time = models.TimeField(null=True, blank=True)  # Время начала работы
@@ -190,6 +190,7 @@ class Tariff(models.Model):
     service = models.ForeignKey(
         "Service",
         on_delete=models.CASCADE,
+	null=True, blank=True,
         verbose_name="Тип услуги",
         related_name="tariffs",
     )
