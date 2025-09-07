@@ -107,6 +107,10 @@ class Service(models.Model):
     background_image = models.ImageField(
         "Изображение", upload_to="services/", blank=True, null=True
     )
+    icon_image = models.ImageField(
+        "Иконка", upload_to="service/icon/", blank=True, null=True,
+        help_text="Загрузите изображение иконки для услуги."
+    )
     slug = models.SlugField("URL-адрес", unique=True)
     is_active = models.BooleanField("Активна", default=True)
     created_at = models.DateTimeField("Дата создания", auto_now_add=True, null=True)

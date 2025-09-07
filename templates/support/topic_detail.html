@@ -1,0 +1,417 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Категория: {{ topic.title }} - Поддержка АТВК{% endblock %}
+
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'support/partials/topic_breadcrumbs.html' with title=title %}
+
+        <!-- Статьи категории -->
+        {% if page_obj %}
+        <section class="support-section">
+            <div class="support-grid support-grid-3">
+                {% for article in page_obj %}
+                <div class="support-card support-article-card" onclick="window.location.href='{% url 'support:article_detail' locality.slug article.topic.service.slug article.topic.slug article.slug %}'" style="cursor: pointer;">
+                    <div class="support-card-content">
+                        {% if article.image %}
+                            <img src="{{ article.image.url }}" alt="{{ article.title }}" class="support-card-thumb">
+                        {% else %}
+                            <div class="support-card-thumb-placeholder">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                        {% endif %}
+
+                        <div class="support-card-text">
+                            <h3 class="support-card-title">{{ article.title }}</h3>
+                            <div class="support-card-footer">
+                                <div class="support-footer-left">
+                                    <span class="support-stat">
+                                        <i class="far fa-eye support-stat-icon"></i> {{ article.view_count }}
+                                    </span>
+                                    {% if article.has_pdf %}
+                                    <a href="{{ article.pdf_file.url }}" 
+                                    class="support-pdf-link" 
+                                    title="Скачать PDF-инструкцию" 
+                                    target="_blank" 
+                                    download
+                                    onclick="event.stopPropagation();">
+                                        <i class="fas fa-file-pdf"></i>
+                                    </a>
+                                    {% endif %}
+                                </div>
+                                <span class="support-btn support-btn-outline">
+                                    Читать <i class="fas fa-arrow-right"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Пагинация -->
+            {% if page_obj.has_other_pages %}
+            <nav class="support-pagination">
+                <ul class="support-pagination-list">
+                    {% if page_obj.has_previous %}
+                    <li><a href="?page={{ page_obj.previous_page_number }}" class="support-pagination-link">Назад</a></li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    <li>
+                        <a href="?page={{ num }}" class="support-pagination-link {% if page_obj.number == num %}active{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li><a href="?page={{ page_obj.next_page_number }}" class="support-pagination-link">Вперед</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </section>
+        {% else %}
+        <div class="support-card text-center">
+            <p>В этой категории пока нет статей.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --gray-100: #f8fafc;
+    --gray-200: #e2e8f0;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.2s ease;
+}
+
+.support-container {
+    width: 100%;
+    max-width: none;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: var(--gray-800);
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+/* Breadcrumbs */
+.support-breadcrumbs {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.support-breadcrumbs a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+/* Header */
+.support-header {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.support-topic-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.support-topic-icon-large {
+    width: 70px;
+    height: 70px;
+    background: #dbeafe;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    font-size: 2rem;
+}
+
+.support-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.support-subtitle {
+    font-size: 1rem;
+    color: var(--gray-700);
+    margin: 0;
+}
+
+/* Grid */
+.support-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.support-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 auto;
+}
+
+/* Cards */
+.support-card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 1rem;
+    padding: 1rem;
+    background: white;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    height: auto;
+    overflow: hidden;
+}
+
+.support-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+/* Контейнер для изображения и текста */
+.support-card-content {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 1rem;
+    width: 100%;
+}
+
+/* Миниатюра */
+.support-card-thumb {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+    border: 1px solid var(--gray-200);
+}
+
+/* Заглушка вместо изображения */
+.support-card-thumb-placeholder {
+    width: 80px;
+    height: 80px;
+    border-radius: 8px;
+    background-color: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #94a3b8;
+    border: 1px solid var(--gray-200);
+}
+
+/* Текстовая часть (заголовок + подвал) */
+.support-card-text {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    flex-grow: 1;
+    min-height: 80px;
+}
+
+/* Заголовок */
+.support-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--gray-800);
+}
+
+.support-card-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.support-footer-left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.support-stat {
+    font-size: 0.9rem;
+    color: var(--gray-600);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.support-stat-icon {
+    color: var(--gray-500);
+}
+
+/* Бейдж с иконкой PDF */
+.support-pdf-link {
+    color: #dc2626;
+    font-size: 1.1rem;
+    opacity: 0.9;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+}
+
+.support-pdf-link:hover {
+    opacity: 1;
+    color: #b91c1c !important;
+}
+
+.support-pdf-link i {
+    pointer-events: none; /* Чтобы иконка не мешала при клике */
+}
+
+.support-btn {
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.support-btn-outline {
+    border: 1px solid var(--primary);
+    color: var(--primary);
+    background: transparent;
+}
+
+.support-btn-outline:hover {
+    background: var(--primary);
+    color: white;
+}
+
+/* Pagination */
+.support-pagination {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.support-pagination-list {
+    display: flex;
+    list-style: none;
+    gap: 0.5rem;
+    padding: 0;
+    margin: 0;
+}
+
+.support-pagination-link {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    color: var(--gray-700);
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.support-pagination-link:hover {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.support-pagination-link.active {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* FAQ */
+.support-faq-list {
+    margin-top: 1rem;
+}
+
+.support-faq-item {
+    margin-bottom: 1rem;
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+}
+
+.support-faq-content {
+    padding: 1rem;
+}
+
+.support-faq-question {
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.support-faq-answer {
+    font-size: 0.95rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .support-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .support-grid-3 {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+    }
+
+    .support-card-content {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .support-card-text {
+        width: 100%;
+    }
+
+    .support-card-title {
+        text-align: center;
+    }
+
+    .support-card-footer {
+        justify-content: center;
+        gap: 20px
+    }
+
+    .support-pdf-badge {
+        font-size: 1rem;
+    }
+}
+</style>
+{% endblock %}

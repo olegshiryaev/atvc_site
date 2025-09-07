@@ -1,0 +1,249 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Вопросы и ответы — {{ service.name }} - АТВК{% endblock %}
+
+{% block content %}
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'support/partials/topic_breadcrumbs.html' with title=title %}
+
+        <div class="faq-container">
+            <!-- Секции по категориям -->
+            {% for category, faqs in faqs_by_category %}
+                <section class="support-section">
+                    <h2 class="support-section-title">{{ category }}</h2>
+
+                    <div class="faq-section">
+                        {% for faq in faqs %}
+                            <div class="faq-item closed">
+                                <button class="faq-question">
+                                    <span class="faq-text">{{ faq.question }}</span>
+                                    <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                                </button>
+                                <div class="faq-answer">
+                                    <div class="faq-answer-content">
+                                        {{ faq.answer|safe }}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </section>
+            {% empty %}
+                <section class="support-section">
+                    <div class="support-card text-center">
+                        <p>Для этой услуги пока нет вопросов и ответов.</p>
+                    </div>
+                </section>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary: #006699;
+        --primary-light: #0088cc;
+        --gray-100: #f8f9fa;
+        --gray-200: #e3e3e3;
+        --gray-700: #555;
+        --gray-800: #2c3e50;
+        --radius: 12px;
+        --shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.1);
+        --transition: all 0.2s ease;
+    }
+
+    .support-section {
+        margin-bottom: 2.5rem;
+    }
+
+    .support-section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-800);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e3e3e3;
+    }
+
+    /* Стиль FAQ из предыдущих страниц */
+    .faq-container {
+        margin: 0 auto;
+        padding: 20px;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .faq-section {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .faq-item {
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .faq-item:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+    }
+
+    .faq-question {
+        width: 100%;
+        padding: 1.25rem;
+        text-align: left;
+        background: var(--gray-100);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--gray-800);
+        transition: all 0.3s ease;
+    }
+
+    .faq-text {
+        flex: 1;
+        text-align: left;
+    }
+
+    .faq-question:hover {
+        background: var(--primary);
+        color: white;
+    }
+
+    .faq-question:hover .faq-toggle-icon {
+        color: white;
+    }
+
+    .faq-toggle-icon {
+        margin-left: 15px;
+        font-size: 16px;
+        transition: transform 0.3s ease;
+        min-width: 20px;
+        text-align: center;
+        color: var(--primary);
+    }
+
+    .faq-question.active {
+        background: var(--primary);
+        color: white;
+    }
+
+    .faq-question.active .faq-toggle-icon {
+        transform: rotate(180deg);
+    }
+
+    /* Анимация раскрытия */
+    .faq-answer {
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: white;
+    }
+
+    .faq-answer.open {
+        max-height: 5000px;
+    }
+
+    .faq-answer-content {
+        padding: 1.25rem;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: opacity 0.3s ease 0.1s, transform 0.3s ease 0.1s;
+    }
+
+    .faq-answer.open .faq-answer-content {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .faq-answer-content p,
+    .faq-answer-content ul,
+    .faq-answer-content ol {
+        margin: 0 0 1rem 0;
+        color: var(--gray-700);
+        line-height: 1.6;
+    }
+
+    .faq-answer-content p:last-child,
+    .faq-answer-content ul:last-child,
+    .faq-answer-content ol:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Изображения внутри ответов */
+    .faq-answer-content img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 1rem 0;
+    }
+
+    .faq-answer-content .image-caption {
+        display: block;
+        margin-top: 0.5rem;
+        font-size: 14px;
+        color: #666;
+        font-style: italic;
+        text-align: center;
+    }
+
+    /* Адаптивность */
+    @media (max-width: 768px) {
+        .faq-question {
+            font-size: 16px;
+            padding: 1rem;
+        }
+        .faq-answer-content {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const faqQuestions = document.querySelectorAll('.faq-question');
+
+        faqQuestions.forEach(question => {
+            question.addEventListener('click', function () {
+                const answer = this.nextElementSibling; // .faq-answer
+                const isOpen = answer.classList.contains('open');
+
+                // Если уже открыт — закрываем и выходим
+                if (isOpen) {
+                    answer.classList.remove('open');
+                    this.classList.remove('active');
+                    return;
+                }
+
+                // Закрываем все другие
+                document.querySelectorAll('.faq-answer').forEach(el => {
+                    el.classList.remove('open');
+                });
+                document.querySelectorAll('.faq-question').forEach(el => {
+                    el.classList.remove('active');
+                });
+
+                // Открываем текущий
+                answer.classList.add('open');
+                this.classList.add('active');
+            });
+        });
+    });
+</script>
+
+{% endblock %}

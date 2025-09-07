@@ -1,117 +1,30 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Результаты поиска - Поддержка АТВК{% endblock %}
+{% block title %}Поиск: {{ query }} - АТВК{% endblock %}
 
 {% block content %}
-<div class="sp-container">
-    <!-- Breadcrumbs -->
-    <nav class="sp-breadcrumbs">
-        <a href="{% url 'support:home' locality.slug %}">Главная</a>
-        <i class="fas fa-chevron-right mx-1"></i>
-        <span>Результаты поиска</span>
-    </nav>
+<div class="container">
+    <h1>Результаты поиска по запросу: "{{ query }}"</h1>
 
-    <!-- Заголовок -->
-    <header class="sp-section">
-        <h1 class="sp-section-title">Результаты поиска</h1>
-        {% if query %}
-        <p class="sp-section-subtitle">По запросу: "{{ query }}"</p>
-        {% endif %}
-    </header>
+    {% if articles or faqs %}
+        <div class="support-grid support-grid-1">
+            {% for article in articles %}
+                <a href="{{ article.get_absolute_url(locality_slug) }}" class="support-card">
+                    <h3>{{ article.title }}</h3>
+                    <p>{{ article.content|striptags|truncatewords:30 }}</p>
+                </a>
+            {% endfor %}
 
-    <!-- Результаты -->
-    <section class="sp-section">
-        {% if results %}
-        <p class="text-muted mb-4">Найдено результатов: {{ results_count }}</p>
-        
-        <div class="sp-grid sp-grid-1">
-            {% for result in results %}
-            {% if result|classname == 'HelpArticle' %}
-            <!-- Статья -->
-            <a href="{% url 'support:article_detail' locality.slug result.category.slug result.slug %}" class="sp-card sp-related-card">
-                <div class="sp-card-header">
-                    <i class="fas fa-{{ result.category.icon }} sp-card-icon"></i>
-                    <span class="sp-stat">{{ result.category.title }}</span>
-                </div>
-                <h3 class="sp-card-title">{{ result.title }}</h3>
-                <p class="sp-card-description">{{ result.content|striptags|truncatewords:30 }}</p>
-                <div class="sp-card-footer">
-                    <span class="sp-stat">
-                        <i class="far fa-eye sp-stat-icon"></i> {{ result.view_count }}
-                    </span>
-                    <span class="sp-btn sp-btn-outline">
-                        Читать <i class="fas fa-arrow-right ms-1"></i>
-                    </span>
-                </div>
-            </a>
-            {% else %}
-            <!-- FAQ -->
-            <div class="sp-card sp-faq-item">
-                <div class="sp-card-header">
-                    <i class="fas fa-question-circle text-primary sp-card-icon"></i>
-                    <span class="sp-stat">{{ result.category.title }}</span>
-                </div>
-                <h3 class="sp-card-title">{{ result.question }}</h3>
-                <div class="sp-faq-answer">
-                    {{ result.answer|striptags|truncatewords:30 }}
-                </div>
-                <div class="sp-card-footer">
-                    <a href="{% url 'support:faq_list' locality.slug %}#faq-{{ result.id }}" class="sp-btn sp-btn-outline">
-                        Подробнее <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
-                </div>
-            </div>
-            {% endif %}
+            {% for faq in faqs %}
+                <a href="{% url 'support:service_faq' locality_slug faq.service.slug %}#faq-{{ faq.pk }}" class="support-card">
+                    <h3>{{ faq.question }}</h3>
+                    <p>{{ faq.answer|striptags|truncatewords:30 }}</p>
+                </a>
             {% endfor %}
         </div>
-
-        <!-- Пагинация -->
-        {% if page_obj.has_other_pages %}
-        <nav class="d-flex justify-content-center mt-4">
-            <ul class="pagination">
-                {% if page_obj.has_previous %}
-                <li class="page-item">
-                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.previous_page_number }}">Назад</a>
-                </li>
-                {% endif %}
-                
-                {% for num in page_obj.paginator.page_range %}
-                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
-                    <a class="page-link" href="?q={{ query }}&page={{ num }}">{{ num }}</a>
-                </li>
-                {% endfor %}
-                
-                {% if page_obj.has_next %}
-                <li class="page-item">
-                    <a class="page-link" href="?q={{ query }}&page={{ page_obj.next_page_number }}">Вперед</a>
-                </li>
-                {% endif %}
-            </ul>
-        </nav>
-        {% endif %}
-
-        {% else %}
-        <div class="sp-card text-center">
-            <div style="font-size: 4rem; color: #e2e8f0; margin-bottom: 1rem;">
-                <i class="fas fa-search"></i>
-            </div>
-            <h3>Ничего не найдено</h3>
-            <p class="text-muted">Попробуйте изменить поисковый запрос или воспользуйтесь категориями ниже</p>
-            
-            <!-- Быстрые категории -->
-            <div class="mt-4">
-                <h4>Популярные категории:</h4>
-                <div class="d-flex flex-wrap gap-2 justify-content-center mt-3">
-                    {% for category in categories|slice:":5" %}
-                    <a href="{% url 'support:category_detail' locality.slug category.slug %}" class="sp-btn sp-btn-outline">
-                        <i class="fas fa-{{ category.icon }} me-2"></i> {{ category.title }}
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </section>
+    {% else %}
+        <p>Ничего не найдено.</p>
+    {% endif %}
 </div>
 {% endblock %}

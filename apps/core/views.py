@@ -156,10 +156,11 @@ def submit_application(request, locality_slug):
 
 
 def office_list(request, locality_slug=None):
-    localities = Locality.objects.filter(
-        is_active=True,
-        office__isnull=False
-    ).distinct().prefetch_related('office_set', 'office_set__schedules')
+    localities = (
+        Locality.objects.filter(is_active=True, office__isnull=False)
+        .distinct()
+        .prefetch_related("office_set", "office_set__schedules")
+    )
 
     current_locality = None
 
@@ -167,23 +168,42 @@ def office_list(request, locality_slug=None):
         current_locality = localities.filter(slug=locality_slug).first()
 
     if not current_locality:
-        current_locality = localities.filter(name__icontains="Архангельск").first() or localities.first()
+        current_locality = (
+            localities.filter(name__icontains="Архангельск").first()
+            or localities.first()
+        )
 
-    # Обработка формы обратной связи
-    if request.method == 'POST':
+    if request.method == "POST":
         form = FeedbackForm(request.POST)
         if form.is_valid():
             feedback = form.save(commit=False)
-            feedback.ip_address = request.META.get('REMOTE_ADDR')
+            feedback.ip_address = request.META.get("REMOTE_ADDR")
             feedback.save()
-            
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': True})
-            messages.success(request, 'Ваше сообщение успешно отправлено!')
+
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({"success": True})
+
+            messages.success(request, "Ваше сообщение успешно отправлено!")
             return redirect(request.path)
         else:
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-                return JsonResponse({'success': False, 'errors': form.errors})
+            if request.headers.get("x-requested-with") == "XMLHttpRequest":
+                return JsonResponse({"success": False, "errors": form.errors})
+
+            return render(
+                request,
+                "core/offices.html",
+                {
+                    "localities": localities,
+                    "current_locality": current_locality,
+                    "title": "Контакты",
+                    "meta_title": f"Офисы обслуживания АТК {f'в {current_locality.name_prepositional}' if current_locality else ''}",
+                    "breadcrumbs": [
+                        {"title": "Главная", "url": "core:home"},
+                        {"title": "Контакты", "url": None},
+                    ],
+                    "form": form,
+                },
+            )
     else:
         form = FeedbackForm()
 
@@ -337,7 +357,7 @@ def feedback_form(request, locality_slug):
             return render(request, "core/callback_success.html")
         return redirect("core:index")
     else:
-        print(form.errors)  # Debug form errors
+        print(form.errors)
         return render(request, "core/callback_form.html", {"form": form})
 
 

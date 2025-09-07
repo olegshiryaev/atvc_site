@@ -4,177 +4,393 @@
 {% block title %}Помощь по услуге: {{ service.name }} - АТВК{% endblock %}
 
 {% block content %}
-<div class="sp-container">
-    <!-- Breadcrumbs -->
-    <nav class="sp-breadcrumbs">
-        <a href="{% url 'support:home' locality.slug %}">Главная</a>
-        <i class="fas fa-chevron-right mx-1"></i>
-        <span>{{ service.name }}</span>
-    </nav>
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'partials/page_header.html' with title=title %}
 
-    <!-- Заголовок услуги -->
-    <header class="sp-section">
-        <div class="text-center">
-            {% if service.background_image %}
-            <div class="sp-service-header-image" style="background-image: url('{{ service.background_image.url }}');">
-                <div class="sp-service-header-overlay">
-                    <h1 class="sp-section-title" style="color: #ffffff;">{{ service.name }}</h1>
-                    {% if service.description %}
-                    <p class="sp-section-subtitle" style="color: #e2e8f0;">{{ service.description }}</p>
-                    {% endif %}
-                </div>
+        <!-- Поиск по услуге -->
+        <section class="support-section">
+            <div class="support-search-form">
+                <input type="search" name="q" placeholder="Поиск" class="support-search-input" required>
+                <button type="submit" class="support-search-btn">Найти</button>
             </div>
-            {% else %}
-            <h1 class="sp-section-title">{{ service.name }}</h1>
-            {% if service.description %}
-            <p class="sp-section-subtitle">{{ service.description }}</p>
-            {% endif %}
-            {% endif %}
-        </div>
-    </header>
+        </section>
 
-    <!-- Поиск по услуге -->
-    <section class="sp-section">
-        <div class="sp-card">
-            <h2 class="sp-section-title text-center">Поиск по услуге "{{ service.name }}"</h2>
-            <form action="{% url 'support:search' locality.slug %}" method="get" class="sp-search-form">
-                <input type="hidden" name="service" value="{{ service.slug }}">
-                <input type="search" name="q" placeholder="Введите вопрос по услуге {{ service.name }}..." class="sp-search-input" required>
-                <button type="submit" class="sp-search-btn">
-                    <i class="fas fa-search"></i>
-                </button>
-            </form>
-        </div>
-    </section>
-
-    <!-- Категории помощи для услуги -->
-    <section class="sp-section">
-        <h2 class="sp-section-title">Темы вопросов</h2>
-        <div class="sp-grid sp-grid-3">
-            {% for category in categories %}
-            <a href="{% url 'support:category_detail' locality.slug category.slug %}" class="sp-card sp-category-card">
-                <div style="text-align: center;">
-                    <div style="font-size: 2.5rem; margin-bottom: 1rem; color: #2563eb;">
-                        <i class="fas fa-{{ category.icon }}"></i>
+        <!-- Темы вопросов -->
+        <section class="support-section">
+            <div class="support-grid support-grid-3">
+                {% for topic in topics %}
+                    <a href="{% url 'support:topic_detail' locality.slug topic.service.slug topic.slug %}" class="support-card support-topic-card">
+                        <div class="support-topic-icon">
+                            {% if topic.get_icon_url %}
+                                <img src="{{ topic.get_icon_url }}" alt="{{ topic.title }}">
+                            {% else %}
+                                <img src="{% static 'support/images/default-icon.png' %}" alt="Иконка по умолчанию">
+                            {% endif %}
+                        </div>
+                        <h3 class="support-card-title">{{ topic.title }}</h3>
+                        <p class="support-card-desc">{{ topic.description|default:"" }}</p>
+                    </a>
+                {% empty %}
+                    <div class="support-card text-center">
+                        <p>Разделы помощи для этой услуги пока не добавлены.</p>
                     </div>
-                    <h3 class="sp-card-title">{{ category.title }}</h3>
-                    <p class="sp-card-description">{{ category.description|default:"" }}</p>
-                    <span class="sp-stat">{{ category.article_count }} статей</span>
-                </div>
-            </a>
-            {% empty %}
-            <div class="sp-card text-center">
-                <p>Разделы помощи для этой услуги пока не добавлены.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
+                {% endfor %}
 
-    <!-- Популярные статьи по услуге -->
-    {% if popular_articles %}
-    <section class="sp-section">
-        <h2 class="sp-section-title">Популярные статьи</h2>
-        <div class="sp-grid sp-grid-2">
-            {% for article in popular_articles %}
-            <a href="{% url 'support:article_detail' locality.slug article.category.slug article.slug %}" class="sp-card sp-related-card">
-                <div class="sp-card-header">
-                    <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
-                    <span class="sp-stat">{{ article.category.title }}</span>
-                </div>
-                <h3 class="sp-card-title">{{ article.title }}</h3>
-                <p class="sp-card-description">{{ article.content|striptags|truncatewords:20 }}</p>
-                <div class="sp-card-footer">
-                    <span class="sp-stat">
-                        <i class="fas fa-eye sp-stat-icon"></i> {{ article.view_count }}
-                    </span>
-                    <span class="sp-btn sp-btn-outline">
-                        Читать <i class="fas fa-arrow-right ms-1"></i>
-                    </span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
+                <!-- Карточка "Проверка скорости" -->
+                {% if service.slug == 'internet' %}
+                    <a href="https://www.qms.ru/" target="_blank" class="support-card support-topic-card">
+                        <div class="support-topic-icon">
+                            <img src="{% static 'img/support/speed-icon.png' %}" alt="Проверка скорости">
+                        </div>
+                        <h3 class="support-card-title">Проверка скорости</h3>
+                    </a>
+                {% endif %}
 
-    <!-- Дополнительная помощь -->
-    <section class="sp-section">
-        <div class="sp-grid sp-grid-2">
-            <div class="sp-card text-center">
-                <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
-                    <i class="fas fa-question-circle"></i>
-                </div>
-                <h3>Частые вопросы</h3>
-                <p>Ответы на самые популярные вопросы по услуге</p>
-                <a href="{% url 'support:faq_list' locality.slug %}?service={{ service.slug }}" class="sp-btn sp-btn-primary mt-2">
-                    Смотреть FAQ
+                <!-- Карточка "Вопросы и ответы" -->
+                <a href="{% url 'support:service_faq' locality.slug service.slug %}" class="support-card support-topic-card">
+                    <div class="support-topic-icon">
+                        <img src="{% static 'img/support/faq-icon.png' %}" alt="Вопросы и ответы">
+                    </div>
+                    <h3 class="support-card-title">Вопросы и ответы</h3>
                 </a>
             </div>
-            
-            <div class="sp-card text-center" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff;">
-                <div style="font-size: 3rem; color: #ffffff; margin-bottom: 1rem;">
-                    <i class="fas fa-headset"></i>
-                </div>
-                <h3>Техническая поддержка</h3>
-                <p>Нужна помощь с услугой {{ service.name }}?</p>
-                <a href="tel:88001234567" class="sp-btn mt-2" style="background: #ffffff; color: #2563eb;">
-                    <i class="fas fa-phone"></i> 8-800-123-45-67
-                </a>
+        </section>
+
+        <!-- Популярные вопросы (в стиле аккордеона) -->
+        {% if featured_faqs %}
+        <section class="support-section">
+            <h2 class="support-section-title">Популярные вопросы</h2>
+
+            <div class="faq-accordion-group">
+                {% for faq in featured_faqs %}
+                    <div class="faq-accordion-item closed">
+                        <button class="faq-accordion-header">
+                            <span class="faq-question">{{ faq.question }}</span>
+                            <i class="fas fa-chevron-down faq-toggle-icon"></i>
+                        </button>
+                        <div class="faq-accordion-body-wrapper">
+                            <div class="faq-accordion-body">
+                                <div class="faq-answer">{{ faq.answer|safe }}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
             </div>
-        </div>
-    </section>
+        </section>
+        {% endif %}
+    </div>
 </div>
 
 <style>
-.sp-service-header-image {
-    height: 200px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 12px;
-    position: relative;
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --gray-100: #f8fafc;
+    --gray-200: #e2e8f0;
+    --gray-700: #334155;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.2s ease;
+}
+
+.support-container {
+    width: 100%;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: var(--gray-700);
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    max-width: none;
+}
+
+/* Breadcrumbs */
+.support-breadcrumbs {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    margin-bottom: 1rem;
+    color: var(--gray-600);
+    font-size: 0.9rem;
+}
+
+.support-breadcrumbs a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+/* Header */
+.support-header {
     margin-bottom: 2rem;
 }
 
-.sp-service-header-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.6);
+.support-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.support-subtitle {
+    font-size: 1rem;
+    color: var(--gray-600);
+}
+
+/* Search Form */
+.support-search-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+}
+
+.support-search-input {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: 1px solid var(--gray-200);
+    border-radius: 8px;
+    font-size: 1rem;
+    outline: none;
+}
+
+.support-search-btn {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.support-search-btn:hover {
+    background: var(--primary-light);
+}
+
+/* Grid */
+.support-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.support-grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+    margin: 0 auto;
+}
+
+/* Cards */
+.support-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--gray-200);
+    text-align: left;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    border-radius: 12px;
-    padding: 2rem;
+    align-items: flex-start;
 }
 
-.sp-service-image {
-    height: 120px;
-    background-size: cover;
-    background-position: center;
-    border-radius: 12px 12px 0 0;
-    position: relative;
+.support-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
-.sp-service-overlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(37, 99, 235, 0.9);
+/* Иконка темы — просто контейнер для изображения */
+.support-topic-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 0 1.5rem 0;
     display: flex;
-    justify-content: center;
     align-items: center;
-    border-radius: 12px 12px 0 0;
-    color: white;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.sp-service-icon {
-    text-align: center;
-    padding: 2rem 1rem 1rem 1rem;
+/* Стили для изображений внутри иконки */
+.support-topic-icon img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.support-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.support-card-desc {
+    font-size: 0.95rem;
+    color: var(--gray-600);
+    margin: 0;
+    line-height: 1.5;
+}
+
+/* Sections */
+.support-section {
+    margin-bottom: 2.5rem;
+}
+
+.support-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+    .support-grid-3 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .support-grid-3 {
+        grid-template-columns: 1fr;
+        padding: 0 1rem;
+    }
+}
+
+/* Кнопка в блоке qms.ru */
+.support-btn-primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.support-btn-primary:hover {
+    background: var(--primary-light);
+}
+
+.mt-3 {
+    margin-top: 1rem;
+}
+
+/* --- Аккордеон: единый стиль с FAQ --- */
+
+/* Заголовок раздела */
+.support-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+/* Группа аккордеонов */
+.faq-accordion-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Отдельный элемент аккордеона */
+.faq-accordion-item {
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: white;
+}
+
+.faq-accordion-header {
+    width: 100%;
+    text-align: left;
+    background: var(--gray-100);
+    padding: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--gray-800);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background-color 0.2s ease;
+}
+
+.faq-accordion-header:hover {
+    background: #e0e7ff;
+}
+
+.faq-accordion-header.active {
+    background: #dbeafe;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.faq-toggle-icon {
+    color: var(--gray-500);
+    transition: transform 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.faq-accordion-header.active .faq-toggle-icon {
+    transform: rotate(180deg);
+}
+
+/* Плавная анимация */
+.faq-accordion-body-wrapper {
+    overflow: hidden;
+    transition: height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.faq-accordion-body {
+    padding: 0 1rem 1rem;
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+.faq-accordion-item.closed .faq-accordion-body-wrapper {
+    height: 0;
+}
+
+.faq-accordion-item:not(.closed) .faq-accordion-body-wrapper {
+    height: auto;
 }
 </style>
+<script>
+document.querySelectorAll('.faq-accordion-header').forEach(button => {
+    button.addEventListener('click', function () {
+        const item = this.parentElement;
+        const isOpen = !item.classList.contains('closed');
+        const wrapper = item.querySelector('.faq-accordion-body-wrapper');
+
+        // Закрываем все
+        document.querySelectorAll('.faq-accordion-item').forEach(el => {
+            el.classList.add('closed');
+            el.querySelector('.faq-accordion-body-wrapper').style.height = '0px';
+        });
+
+        // Открываем текущий
+        if (!isOpen) {
+            item.classList.remove('closed');
+            requestAnimationFrame(() => {
+                const height = wrapper.scrollHeight + 'px';
+                wrapper.style.height = height;
+            });
+        }
+    });
+});
+
+// Инициализация: скрываем все тела
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.faq-accordion-body-wrapper').forEach(wrapper => {
+        wrapper.style.height = '0px';
+    });
+});
+</script>
 {% endblock %}

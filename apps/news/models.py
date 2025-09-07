@@ -14,11 +14,22 @@ from django.utils import timezone
 
 from ..cities.models import Locality
 
+# Кастомный менеджер
+class NewsManager(models.Manager):
+    def published(self):
+        now = timezone.now()
+        return self.get_queryset().filter(
+            is_published=True,
+            publish_at__lte=now
+        ).order_by('-created_at')
+
+
 def news_image_upload_to(instance, filename):
     created_at = instance.created_at or timezone.now()
-    ext = os.path.splitext(filename)[1]  # расширение
+    ext = os.path.splitext(filename)[1]
     new_filename = f"{slugify(instance.title)}-{get_random_string(6)}{ext}"
     return f"news/{created_at.year}/{created_at.month:02d}/{new_filename}"
+
 
 def validate_image_size(value):
     max_size_mb = 5
@@ -79,6 +90,9 @@ class News(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
     views_count = models.PositiveIntegerField(default=0, verbose_name="Количество просмотров")
 
+    # Заменяем стандартный менеджер
+    objects = NewsManager()
+
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "Новость / акция"
@@ -113,7 +127,6 @@ class News(models.Model):
 
         super().save(*args, **kwargs)
 
-        
     @property
     def preview_text(self):
         text = html.unescape(strip_tags(self.content))

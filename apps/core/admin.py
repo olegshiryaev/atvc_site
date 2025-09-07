@@ -95,9 +95,11 @@ class LocalityFilter(admin.SimpleListFilter):
 class ServiceAdmin(admin.ModelAdmin):
     filter_horizontal = ("localities",)
     list_display = ("name", "slug", "is_active")
-    search_fields = ("name",)
+    search_fields = ('name', 'description')
     prepopulated_fields = {"slug": ("name",)}
-    list_filter = ['is_active']
+    list_filter = ('is_active', 'localities')
+    fields = ('name', 'description', 'icon_image', 'background_image', 'localities', 'slug', 'is_active')
+    readonly_fields = ('created_at', 'updated_at')
 
 
 class CategoryWidget(widgets.Widget):

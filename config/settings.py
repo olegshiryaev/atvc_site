@@ -273,6 +273,12 @@ CKEDITOR_CONFIGS = {
         "removePlugins": "elementspath",
         # (опционально) запретить изменение размера редактора мышкой
         "resize_enabled": False,
+        'extraPlugins': ','.join([
+            'uploadimage',  # для загрузки изображений
+            'image2',       # улучшенный режим изображений
+        ]),
+        'removePlugins': 'easyimage',
+        'uploadUrl': '/ckeditor/upload/',
     }
 }
 
@@ -340,6 +346,7 @@ LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
     "/chat/support/",
     "/ws/",
     "/a9f8s7d6/",
+    "/ckeditor/",
     "/static/",
     "/media/",
     "/sitemap.xml",

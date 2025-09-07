@@ -34,6 +34,7 @@ def redirect_to_active_locality(request):
 urlpatterns = [
     path("wfhlthch/getstatus/", getstatus, name='getstatus'),
     path("a9f8s7d6/", admin.site.urls),
+    path('ckeditor/', include('ckeditor_uploader.urls')),
     # Корневой путь редиректит на первую активную локализацию
     path("", redirect_to_active_locality),
     # Пути без slug (например, список всех населённых пунктов)

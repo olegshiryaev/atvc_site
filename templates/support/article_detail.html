@@ -4,111 +4,384 @@
 {% block title %}{{ article.title }} - Поддержка АТВК{% endblock %}
 
 {% block content %}
-<div class="sp-container">
-    <!-- Breadcrumbs -->
-    <nav class="sp-breadcrumbs">
-        <a href="{% url 'support:home' locality.slug %}">Главная</a>
-        <i class="fas fa-chevron-right mx-1"></i>
-        <a href="{% url 'support:category_detail' locality.slug article.category.slug %}">{{ article.category.title }}</a>
-        <i class="fas fa-chevron-right mx-1"></i>
-        <span>{{ article.title }}</span>
-    </nav>
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'support/partials/topic_breadcrumbs.html' with title=title %}
 
-    <!-- Article Header -->
-    <header class="sp-section">
-        <div class="sp-card-header mb-3">
-            <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
-            <span class="sp-stat">{{ article.category.title }}</span>
-        </div>
-        
-        <h1 class="sp-section-title text-start">{{ article.title }}</h1>
-        
-        <div class="d-flex gap-3 align-items-center flex-wrap">
-            <span class="sp-stat">
-                <i class="far fa-calendar sp-stat-icon"></i> {{ article.created_at|date:"d.m.Y" }}
-            </span>
-            <span class="sp-stat">
-                <i class="far fa-eye sp-stat-icon"></i> {{ article.view_count }} просмотров
-            </span>
-            {% if article.author %}
-            <span class="sp-stat">
-                <i class="far fa-user sp-stat-icon"></i> {{ article.author.get_full_name }}
-            </span>
-            {% endif %}
-        </div>
-    </header>
-
-    <!-- Article Content -->
-    <article class="sp-section">
-        <div class="sp-card">
-            <div class="sp-article-content">
-                {{ article.content|safe }}
-            </div>
-        </div>
-    </article>
-
-    <!-- Feedback -->
-    <section class="sp-section">
-        <div class="sp-feedback">
-            <h3 class="sp-feedback-title">Была ли полезна эта статья?</h3>
-            <div class="sp-feedback-buttons">
-                <button class="sp-btn sp-btn-primary" onclick="sendFeedback(true)">
-                    <i class="fas fa-thumbs-up"></i> Да
-                </button>
-                <button class="sp-btn sp-btn-secondary" onclick="sendFeedback(false)">
-                    <i class="fas fa-thumbs-down"></i> Нет
-                </button>
-            </div>
-        </div>
-    </section>
-
-    <!-- Related Articles -->
-    {% if related_articles %}
-    <section class="sp-section">
-        <h2 class="sp-section-title">Похожие статьи</h2>
-        <div class="sp-related-grid">
-            {% for related in related_articles %}
-            <a href="{% url 'support:article_detail' locality.slug related.category.slug related.slug %}" class="sp-card sp-related-card">
-                <div class="sp-card-header">
-                    <i class="fas fa-{{ related.category.icon }} sp-card-icon"></i>
-                    <span class="sp-stat">{{ related.category.title }}</span>
+        <!-- Article Content -->
+        <article class="support-section block">
+            <div class="support-card">
+                <div class="support-article-content">
+                    {{ article.content|safe }}
                 </div>
-                <h3 class="sp-card-title">{{ related.title }}</h3>
-                <p class="sp-card-description">{{ related.content|striptags|truncatewords:15 }}</p>
-                <div class="sp-card-footer">
-                    <span class="sp-stat">
-                        <i class="far fa-eye sp-stat-icon"></i> {{ related.view_count }}
-                    </span>
-                    <span class="sp-btn sp-btn-outline">
-                        Читать <i class="fas fa-arrow-right ms-1"></i>
-                    </span>
+            </div>
+        </article>
+
+        <!-- PDF Instructions -->
+        {% if pdf_instructions %}
+        <section class="support-section block">
+            <div class="pdf-instructions-card">
+                <h3 class="support-subtitle">
+                    <i class="fas fa-file-pdf" style="color: #d93025; margin-right: 8px;"></i>
+                    PDF-инструкции
+                </h3>
+                <div class="pdf-file-list">
+                    {% for pdf in pdf_instructions %}
+                    <a href="{{ pdf.pdf_file.url }}" class="pdf-file-item" target="_blank">
+                        <div class="pdf-file-icon">
+                            <i class="fas fa-file-pdf"></i>
+                        </div>
+                        <div class="pdf-file-info">
+                            <strong class="pdf-file-title">{{ pdf.display_title }}</strong>
+                            <span class="pdf-file-meta">{{ pdf.display_description }}</span>
+                        </div>
+                        <div class="pdf-file-download">
+                            <i class="fas fa-arrow-down"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
                 </div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
+            </div>
+        </section>
+        {% endif %}
+
+        <!-- Feedback -->
+        {% if not hide_feedback %}
+        <section class="support-section block">
+            <div class="support-feedback">
+                <h3 class="support-feedback-title">Была ли полезна эта статья?</h3>
+                <div class="support-feedback-buttons">
+                    <button class="support-btn support-btn-primary" onclick="sendFeedback(true)">
+                        <i class="fas fa-thumbs-up"></i> Да
+                    </button>
+                    <button class="support-btn support-btn-secondary" onclick="sendFeedback(false)">
+                        <i class="fas fa-thumbs-down"></i> Нет
+                    </button>
+                </div>
+            </div>
+        </section>
+        {% endif %}
+    </div>
 </div>
+<style>
+/* === Общие отступы между секциями === */
+.support-section.block {
+    margin-bottom: 2.5rem;
+}
 
-{% block extra_js %}
+/* === Контент статьи === */
+.support-article-content {
+    line-height: 1.7;
+    color: #2d2d2d;
+    font-size: 1.05rem;
+}
+
+.support-article-content h1,
+.support-article-content h2,
+.support-article-content h3,
+.support-article-content h4 {
+    margin-top: 1.8rem;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.support-article-content h1 { font-size: 1.8rem; }
+.support-article-content h2 { font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; }
+.support-article-content h3 { font-size: 1.3rem; }
+.support-article-content h4 { font-size: 1.1rem; }
+
+.support-article-content p {
+    margin-bottom: 1rem;
+}
+
+.support-article-content ul,
+.support-article-content ol {
+    margin-left: 2rem;
+    margin-bottom: 1.2rem;
+}
+
+.support-article-content ul li,
+.support-article-content ol li {
+    margin-bottom: 0.5rem;
+}
+
+.support-article-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.support-article-content a:hover {
+    text-decoration: none;
+}
+
+.support-article-content img,
+.support-article-content figure img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    margin: 1rem 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* === PDF File List Style === */
+.pdf-instructions-card {
+    padding: 1.5rem;
+    border-radius: 12px;
+    background-color: #ffffff;
+    border: 1px solid #e0e0e5;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.support-subtitle {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin: 0 0 1.2rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #007bff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pdf-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.pdf-file-item {
+    display: flex;
+    align-items: center;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid #e0e0e5;
+    border-radius: 10px;
+    background-color: #ffffff;
+    text-decoration: none;
+    color: #2d2d2d;
+    transition: all 0.2s ease;
+    gap: 1rem;
+}
+
+.pdf-file-item:hover {
+    border-color: #007bff;
+    background-color: #f8fdff;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0, 123, 255, 0.08);
+}
+
+.pdf-file-icon {
+    font-size: 1.6rem;
+    color: #d93025;
+    width: 40px;
+    text-align: center;
+}
+
+.pdf-file-info {
+    flex: 1;
+    line-height: 1.5;
+}
+
+.pdf-file-title {
+    font-size: 1.05rem;
+    color: #1a1a1a;
+    display: block;
+}
+
+.pdf-file-meta {
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.pdf-file-download {
+    color: #007bff;
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    background-color: #e3f2fd;
+    border-radius: 50%;
+    transition: background-color 0.2s ease;
+}
+
+.pdf-file-item:hover .pdf-file-download {
+    background-color: #007bff;
+    color: white;
+}
+
+/* === Блок обратной связи (уже частично был) === */
+.support-feedback {
+    background-color: #f9f9fb;
+    border: 1px solid #e0e0e5;
+    border-radius: 12px;
+    padding: 1.8rem;
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.support-feedback-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 1.2rem;
+}
+
+.support-feedback-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.support-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.support-btn-primary {
+    background-color: #007bff;
+    color: white;
+}
+
+.support-btn-primary:hover:not(:disabled) {
+    background-color: #0069d9;
+    transform: translateY(-1px);
+}
+
+.support-btn-secondary {
+    background-color: #6c757d;
+    color: white;
+}
+
+.support-btn-secondary:hover:not(:disabled) {
+    background-color: #5a6268;
+    transform: translateY(-1px);
+}
+
+.support-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* === Адаптивность (мобильные устройства) === */
+@media (max-width: 768px) {
+    .support-article-content {
+        padding: 0rem;
+        font-size: 1rem;
+    }
+
+    .support-feedback {
+        padding: 1.5rem;
+    }
+
+    .support-feedback-title {
+        font-size: 1.1rem;
+    }
+
+    .support-btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.95rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .support-feedback-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .support-btn {
+        width: 100%;
+        max-width: 300px;
+    }
+}
+</style>
 <script>
-function sendFeedback(isHelpful) {
-    fetch("{% url 'support:article_feedback' locality.slug article.id %}", {
+function sendFeedback(helped) {
+    const articleSlug = "{{ article.slug }}";
+    const url = "{% url 'support:submit_feedback' service_slug=article.topic.service.slug topic_slug=article.topic.slug article_slug=article.slug locality_slug=locality.slug %}";
+
+    // Получаем или генерируем session_id
+    let sessionId = getCookie('atvk_feedback_session');
+    if (!sessionId) {
+        sessionId = generateUUID();  // Простой UUID-подобный идентификатор
+        setCookie('atvk_feedback_session', sessionId, 365);  // На 1 год
+    }
+
+    fetch(url, {
         method: 'POST',
         headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
             'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
         },
-        body: JSON.stringify({is_helpful: isHelpful})
+        body: JSON.stringify({
+            helped: helped,
+            session_id: sessionId
+        })
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message);
+        if (data.success) {
+            // Блокируем кнопки
+            document.querySelectorAll('.support-feedback-buttons button').forEach(btn => {
+                btn.disabled = true;
+            });
+            alert(data.message);
+        } else {
+            alert(data.error || "Ошибка при отправке");
+        }
     })
-    .catch(error => {
-        console.error('Error:', error);
+    .catch(err => {
+        console.error('Ошибка:', err);
+        alert("Не удалось отправить отзыв");
     });
+}
+
+// Вспомогательные функции
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function setCookie(name, value, days) {
+    const date = new Date();
+    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+    const expires = "expires=" + date.toUTCString();
+    document.cookie = name + "=" + value + ";" + expires + ";path=/;SameSite=Lax";
+}
+
+function generateUUID() {
+    return 'anon-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
 }
 </script>
 {% endblock %}
-{% endblock %}
+
+
+

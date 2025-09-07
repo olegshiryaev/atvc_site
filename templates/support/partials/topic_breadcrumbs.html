@@ -1,0 +1,30 @@
+<div class="py-4">
+    {% if breadcrumbs %}
+    <!-- Breadcrumbs -->
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            {% for crumb in breadcrumbs %}
+                {% if not forloop.last and crumb.url %}
+                    <li class="breadcrumb-item">
+                        {% if crumb.topic_slug and locality.slug and crumb.service_slug %}
+                            <a href="{% url crumb.url locality_slug=locality.slug service_slug=crumb.service_slug topic_slug=crumb.topic_slug %}">{{ crumb.title }}</a>
+                        {% elif crumb.service_slug and locality.slug %}
+                            <a href="{% url crumb.url locality_slug=locality.slug service_slug=crumb.service_slug %}">{{ crumb.title }}</a>
+                        {% elif locality.slug %}
+                            <a href="{% url crumb.url locality_slug=locality.slug %}">{{ crumb.title }}</a>
+                        {% else %}
+                            <a href="{% url crumb.url %}">{{ crumb.title }}</a>
+                        {% endif %}
+                    </li>
+                {% else %}
+                    <li class="breadcrumb-item active" aria-current="page">{{ crumb.title }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
+    <!-- Заголовок -->
+    <h1 class="fs-1 fw-bold mb-2 mb-sm-0">
+        {{ title|default:"Название страницы" }}
+    </h1>
+</div>

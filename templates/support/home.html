@@ -4,123 +4,633 @@
 {% block title %}Центр поддержки АТВК{% endblock %}
 
 {% block content %}
-<div class="sp-container">
-    <!-- Hero Section -->
-    <section class="sp-hero">
-        <h1 class="sp-hero-title">Центр поддержки АТВК</h1>
-        <p class="sp-hero-subtitle">Найдите ответы на ваши вопросы или свяжитесь с нашей поддержкой</p>
+<div class="bg-white w-100">
+    <div class="container">
+        <!-- Хлебные крошки -->
+        {% include 'partials/page_header.html' with title=title %}
         
-        <!-- Search Form -->
-        <form action="{% url 'support:search' locality.slug %}" method="get" class="sp-search-form">
-            <input type="search" name="q" placeholder="Введите ваш вопрос или проблему..." class="sp-search-input" required>
-            <button type="submit" class="sp-search-btn">
-                <i class="fas fa-search"></i>
-            </button>
-        </form>
-    </section>
-
-    <!-- Featured FAQs -->
-    {% if featured_faqs %}
-    <section class="sp-section">
-        <h2 class="sp-section-title">Частые вопросы</h2>
-        <div class="sp-grid sp-grid-2">
-            {% for faq in featured_faqs %}
-            <div class="sp-card">
-                <h3 class="sp-card-title">
-                    <i class="fas fa-question-circle text-primary me-2"></i> {{ faq.question }}
-                </h3>
-                <p class="sp-card-description">{{ faq.answer|striptags|truncatewords:30 }}</p>
-                <div class="sp-card-footer">
-                    <span class="sp-stat">
-                        <i class="fas fa-folder sp-stat-icon"></i> {{ faq.category.title }}
-                    </span>
-                    <a href="{% url 'support:faq_list' locality.slug %}#faq-{{ faq.id }}" class="sp-btn sp-btn-outline">
-                        Подробнее <i class="fas fa-arrow-right ms-1"></i>
-                    </a>
+        <!-- Header + Search -->
+        <header class="support-header block">
+            <div class="support-header-content" style="max-width: none;">
+                <!-- Поисковая форма -->
+                <div class="support-search-wrapper">
+                    <div class="support-search-container">
+                        <input type="text"
+                            id="search-input"
+                            placeholder="Поиск"
+                            class="support-search-input"
+                            autocomplete="off">
+                        <i class="fas fa-search search-icon"></i>
+                        <button type="button" id="search-btn" class="support-search-btn btn">
+                            Найти
+                        </button>
+                    </div>
+                    <div id="search-suggestions" class="search-suggestions"></div>
                 </div>
             </div>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
+        </header>
 
-    <!-- Помощь по услугам -->
-    <section class="sp-section">
-        <h2 class="sp-section-title">Помощь по услугам</h2>
-        <div class="sp-grid sp-grid-3">
-            {% for service in services %}
-            <a href="{% url 'support:service_help' locality.slug service.slug %}" class="sp-card sp-service-card">
-                {% if service.background_image %}
-                <div class="sp-service-image" style="background-image: url('{{ service.background_image.url }}');">
-                    <div class="sp-service-overlay">
-                        <div style="font-size: 2.5rem; margin-bottom: 1rem;">
-                            <i class="fas fa-wifi"></i> <!-- Замените на соответствующую иконку -->
+        <!-- Помощь по услугам -->
+        <section class="support-section block">
+            <h2 class="support-section-title">Помощь по услугам</h2>
+            <div class="support-grid support-grid-3">
+                {% for service in services %}
+                <a href="{% url 'support:service_help' locality.slug service.slug %}" class="support-card support-service-card" aria-label="Подробнее об услуге {{ service.name }}">
+                    <div class="support-service-icon">
+                        {% if service.icon_image %}
+                            <img src="{{ service.icon_image.url }}" alt="Иконка услуги {{ service.name }}" class="service-icon-img">
+                        {% else %}
+                            <img src="{% static 'images/default-icon.png' %}" alt="Иконка по умолчанию" class="service-icon-img">
+                        {% endif %}
+                    </div>
+                    <h3 class="support-card-title">{{ service.name }}</h3>
+                </a>
+                {% empty %}
+                <div class="support-card text-center">
+                    <p>Услуги пока не добавлены.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Помощь по темам -->
+        <section class="support-section block">
+            <h2 class="support-section-title">Помощь по темам</h2>
+            <div class="support-grid support-grid-3">
+                {% for topic in help_topics %}
+                <a href="{% url 'support:topic_detail' locality.slug topic.service.slug topic.slug %}" class="support-card support-topic-card">
+                    <div class="support-topic-icon">
+                        {% if topic.get_icon_url %}
+                            <img src="{{ topic.get_icon_url }}" alt="{{ topic.title }}">
+                        {% else %}
+                            <img src="{% static 'support/images/default-icon.png' %}" alt="Иконка по умолчанию">
+                        {% endif %}
+                    </div>
+                    <h3 class="support-card-title">{{ topic.title }}</h3>
+                </a>
+                {% empty %}
+                <div class="support-card text-center">
+                    <p>Темы помощи пока не добавлены.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Контакты -->
+        <section class="support-section block">
+            <div class="support-contact-card">
+                <h2 class="support-contact-title">Не нашли ответ на Ваш вопрос?</h2>
+                <p class="support-contact-subtitle">Свяжитесь с нами любым удобным способом</p>
+                <div class="support-contact-grid">
+                    <div class="support-contact-item">
+                        <i class="fas fa-phone support-contact-icon"></i>
+                        <div>
+                            <h4><a href="tel:+78182423505">+7 (8182) 423-505</a></h4>
+                            <p>Пн–Вс, 8:00–21:00</p>
+                        </div>
+                    </div>
+                    <div class="support-contact-item">
+                        <i class="fas fa-comments support-contact-icon"></i>
+                        <div>
+                            <h4>Онлайн-чат</h4>
+                            <p>Всегда на связи</p>
+                        </div>
+                    </div>
+                    <div class="support-contact-item">
+                        <i class="fab fa-vk support-contact-icon"></i>
+                        <div>
+                            <h4><a href="https://vk.com/atvc_public" target="_blank">ВКонтакте</a></h4>
+                            <p>@atvc_public</p>
+                        </div>
+                    </div>
+                    <div class="support-contact-item">
+                        <i class="fas fa-envelope support-contact-icon"></i>
+                        <div>
+                            <h4><a href="mailto:support@atvc.ru">support@atvc.ru</a></h4>
+                            <p>Почта для вопросов</p>
                         </div>
                     </div>
                 </div>
-                {% else %}
-                <div class="sp-service-icon">
-                    <div style="font-size: 3rem; color: #2563eb; margin-bottom: 1rem;">
-                        <i class="fas fa-wifi"></i> <!-- Замените на соответствующую иконку -->
+            </div>
+        </section>
+
+        <section id="feedback-form" class="feedback-form block" data-block-slug="feedback-form">
+            <div class="feedback-form__wrapper">
+                <!-- Левая часть с формой -->
+                <div class="feedback-form__content">
+                    <div class="feedback-form__header">
+                        <h2 class="feedback-form__title block__title">Задай свой вопрос</h2>
+                        <div class="feedback-form__subtitle">Если у вас есть какие-нибудь вопросы и пожелания, то самое время рассказать их нам!</div>
+                    </div>
+                    
+                    <div class="feedback-form__form">
+                        <form id="feedback-form-submit" method="post" class="feedback-form__form">
+                            {% csrf_token %}
+                            <input type="hidden" name="redirect_url" value="{{ request.path }}">
+
+                            <div class="feedback-form__row">
+                                <div class="feedback-form__field">
+                                    <label for="feedback-name" class="feedback-form__label">Имя *</label>
+                                    <input type="text"
+                                        name="name"
+                                        id="feedback-name"
+                                        class="feedback-form__input"
+                                        placeholder="Иван Иванов"
+                                        required>
+                                    <div class="feedback-form__error" id="error_name"></div>
+                                </div>
+
+                                <div class="feedback-form__field">
+                                    <label for="feedback-phone" class="feedback-form__label">Телефон *</label>
+                                    <input type="tel"
+                                        name="phone"
+                                        id="feedback-phone"
+                                        class="feedback-form__input"
+                                        placeholder="+7 (___) ___-__-__"
+                                        required>
+                                    <div class="feedback-form__error" id="error_phone"></div>
+                                </div>
+                            </div>
+
+                            <div class="feedback-form__field">
+                                <label for="feedback-message" class="feedback-form__label">Сообщение</label>
+                                <textarea name="content"
+                                        id="feedback-message"
+                                        class="feedback-form__textarea"
+                                        placeholder="Расскажите подробнее о вашем вопросе"></textarea>
+                                <div class="feedback-form__error" id="error_message"></div>
+                            </div>
+
+                            <div class="feedback-form__policy">
+                                Нажимая «Отправить», вы соглашаетесь с
+                                <a href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
+                                target="_blank" class="feedback-form__policy-link">
+                                    Условиями обработки персональных данных
+                                </a>
+                            </div>
+
+                            <button type="submit" class="feedback-form__submit btn btn-primary">Отправить</button>
+                        </form>
                     </div>
                 </div>
-                {% endif %}
-                <h3 class="sp-card-title text-center">{{ service.name }}</h3>
-                {% if service.description %}
-                <p class="sp-card-description text-center">{{ service.description|truncatewords:15 }}</p>
-                {% endif %}
-            </a>
-            {% empty %}
-            <div class="sp-card text-center">
-                <p>Услуги пока не добавлены.</p>
-            </div>
-            {% endfor %}
-        </div>
-    </section>
-
-    <!-- Популярные статьи -->
-    {% if popular_articles %}
-    <section class="sp-section">
-        <h2 class="sp-section-title">Популярные статьи</h2>
-        <div class="sp-grid sp-grid-3">
-            {% for article in popular_articles %}
-            <a href="{% url 'support:article_detail' locality.slug article.category.slug article.slug %}" class="sp-card sp-related-card">
-                <div class="sp-card-header">
-                    <i class="fas fa-{{ article.category.icon }} sp-card-icon"></i>
-                    <span class="sp-stat">{{ article.category.title }}</span>
-                </div>
-                <h3 class="sp-card-title">{{ article.title }}</h3>
-                <p class="sp-card-description">{{ article.content|striptags|truncatewords:20 }}</p>
-                <div class="sp-card-footer">
-                    <span class="sp-stat">
-                        <i class="fas fa-eye sp-stat-icon"></i> {{ article.view_count }}
-                    </span>
-                    <span class="sp-btn sp-btn-primary">
-                        Читать <i class="fas fa-arrow-right ms-1"></i>
-                    </span>
-                </div>
-            </a>
-            {% endfor %}
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- Support Contacts -->
-    <section class="sp-section">
-        <div class="sp-card" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff;">
-            <div class="text-center">
-                <h2 class="sp-section-title" style="color: #ffffff;">Нужна дополнительная помощь?</h2>
-                <p class="sp-section-subtitle" style="color: #e2e8f0; margin-bottom: 2rem;">Свяжитесь с нашей службой поддержки</p>
-                <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                    <a href="tel:88001234567" class="sp-btn" style="background: #ffffff; color: #2563eb;">
-                        <i class="fas fa-phone"></i> 8-800-123-45-67
-                    </a>
-                    <a href="mailto:support@atvc.ru" class="sp-btn" style="background: #f59e0b; color: #ffffff;">
-                        <i class="fas fa-envelope"></i> support@atvc.ru
-                    </a>
+                
+                <!-- Правая часть с изображением -->
+                <div class="feedback-form__image-side">
+                    <div class="feedback-form__image-container">
+                        <img src="{% static 'img/send.webp' %}" alt="Свяжитесь с нами" class="feedback-form__image" loading="lazy">
+                    </div>
                 </div>
             </div>
-        </div>
-    </section>
+            
+            <!-- Модальное окно -->
+            <div class="feedback-form__modal" id="feedback-modal">
+                <div class="feedback-form__modal-content">
+                    <span class="feedback-form__modal-close" id="modal-close">×</span>
+                    <h3 class="feedback-form__modal-title">Спасибо за обращение!</h3>
+                    <p class="feedback-form__modal-text">
+                        Мы получили ваше сообщение и ответим в ближайшее время.
+                    </p>
+                    <button class="feedback-form__modal-btn btn btn-primary" id="modal-close-btn">Закрыть</button>
+                </div>
+            </div>
+        </section>
+    </div>
 </div>
+
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-light: #3b82f6;
+    --gray-100: #f8fafc;
+    --gray-200: #e2e8f0;
+    --gray-700: #334155;
+    --gray-800: #1e293b;
+    --radius: 12px;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --transition: all 0.2s ease;
+}
+
+.support-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    color: var(--gray-800);
+}
+
+/* Header */
+.support-header {
+    position: relative;
+}
+
+.support-header-content {
+    width: 100%;
+    margin: 0 auto;
+}
+
+.support-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.support-subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+    margin-bottom: 1.5rem;
+}
+
+/* Поисковый контейнер */
+.support-search-wrapper {
+    position: relative;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.support-search-container {
+    display: flex;
+    align-items: stretch;
+    background: white;
+    border-radius: 8px;
+    padding: 0;
+    transition: all 0.3s ease;
+    width: 100%;
+    height: 56px;
+    gap: 12px; /* Расстояние между полем и кнопкой */
+}
+
+.search-icon {
+    color: #6b7280;
+    font-size: 1.1rem;
+    position: absolute;
+    z-index: 2;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.support-search-input {
+    flex: 1;
+    padding: 0.50rem 2.5rem 0.75rem 4rem !important;
+    outline: none;
+    border: 1px solid var(--smoky-white-color) !important;
+    background-color: var(--smoky-white-color) !important;
+    font-size: 1.1rem !important;
+    color: #1f2937;
+    border-radius: 8px;
+    height: 100%;
+    margin: 0;
+}
+
+.support-search-input::placeholder {
+    color: #9ca3af;
+}
+
+.support-search-btn {
+    color: white;
+    padding: 0 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    min-width: 100px;
+    flex-shrink: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Подсказки */
+.search-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none;
+}
+
+.search-suggestion {
+    padding: 1rem;
+    display: block;
+    color: inherit;
+    text-decoration: none;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s ease;
+}
+
+.search-suggestion:last-child {
+    border-bottom: none;
+}
+
+.search-suggestion:hover {
+    background: #f9fafb;
+}
+
+.search-suggestion-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    margin: 0 0 0.25rem 0;
+    color: #1f2937;
+}
+
+.search-suggestion-desc {
+    font-size: 0.85rem;
+    color: #6b7280;
+    line-height: 1.4;
+    margin: 0;
+}
+
+.search-suggestion.empty {
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Grid */
+.support-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.support-grid-2 { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.support-grid-3 { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.support-grid-4 { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+/* Cards */
+.support-card {
+    background: white;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 2rem;
+    transition: var(--transition);
+    text-decoration: none;
+    color: inherit;
+    border: 1px solid var(--gray-200);
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.support-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.service-icon-img {
+    width: 75px;
+    height: 75px;
+    object-fit: contain;
+    margin-bottom: 1rem;
+}
+
+/* Иконка темы — просто контейнер для изображения */
+.support-topic-icon {
+    width: 50px;
+    height: 50px;
+    margin: 0 0 1.5rem 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* Стили для изображений внутри иконки */
+.support-topic-icon img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+}
+
+.support-card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+    color: var(--gray-800);
+}
+
+.support-card-desc {
+    font-size: 0.95rem;
+    color: var(--gray-700);
+    margin: 0 0 1rem 0;
+    line-height: 1.5;
+}
+
+.support-link {
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.support-link:hover {
+    text-decoration: underline;
+}
+
+/* Useful Cards */
+.support-useful-card .support-useful-icon {
+    background: #f0f9ff;
+    color: #0369a1;
+}
+
+.support-app-card {
+    background: var(--primary);
+    color: white;
+    text-align: center;
+}
+
+.support-app-card .support-card-title,
+.support-app-card .support-card-desc,
+.support-app-card .support-link {
+    color: white;
+}
+
+.support-app-img {
+    width: 120px;
+    margin: 0 auto 1rem;
+    border-radius: 8px;
+}
+
+.support-app-links {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.support-app-btn {
+    background: white;
+    color: var(--primary);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.support-app-btn:hover {
+    background: var(--gray-200);
+}
+
+/* Contact */
+.support-contact-card {
+    background: white;
+    border-radius: var(--radius);
+    padding: 2.5rem;
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.support-contact-title {
+    font-size: 1.8rem;
+    color: var(--gray-800);
+    margin: 0 0 0.5rem 0;
+}
+
+.support-contact-subtitle {
+    color: var(--gray-700);
+    margin-bottom: 2rem;
+}
+
+.support-contact-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    text-align: left;
+}
+
+.support-contact-item {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+
+.support-contact-icon {
+    color: var(--main-color);
+    font-size: 1.5rem;
+    min-width: 32px;
+    margin-top: 4px;
+}
+
+.support-contact-item h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.support-contact-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--gray-700);
+}
+
+/* Sections */
+.support-section {
+    margin-bottom: 3rem;
+}
+
+.support-section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .support-title {
+        font-size: 1.8rem;
+    }
+    .support-search-form {
+        flex-direction: column;
+    }
+    .support-grid-4 {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    .support-contact-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@2.4.0/dist/purify.min.js"></script>
+
+<script>
+window.localitySlug = "{{ locality.slug }}";
+
+const searchInput = document.getElementById('search-input');
+const searchBtn = document.getElementById('search-btn');
+const suggestionsBox = document.getElementById('search-suggestions');
+
+searchInput.addEventListener('input', debounce(fetchSuggestions, 300));
+searchInput.addEventListener('focus', showSuggestions);
+searchInput.addEventListener('blur', () => setTimeout(() => suggestionsBox.innerHTML = '', 200));
+
+searchBtn.addEventListener('click', () => {
+    if (searchInput.value.trim()) {
+        const q = encodeURIComponent(searchInput.value.trim());
+        window.location.href = `/${window.localitySlug}/support/search/?q=${q}`;
+    }
+});
+
+function debounce(func, delay) {
+    let timer;
+    return function () {
+        const context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
+function fetchSuggestions() {
+    const query = searchInput.value.trim();
+    if (!query) {
+        suggestionsBox.innerHTML = '';
+        return;
+    }
+
+    fetch(`/${window.localitySlug}/support/search/suggestions/?q=${encodeURIComponent(query)}`)
+        .then(res => {
+            if (!res.ok) throw new Error('Network error');
+            return res.json();
+        })
+        .then(data => {
+            if (data.results.length === 0) {
+                suggestionsBox.innerHTML = '<div class="search-suggestion empty">Ничего не найдено</div>';
+            } else {
+                suggestionsBox.innerHTML = data.results.map(item => {
+                    const cleanTitle = DOMPurify.sanitize(item.title);
+                    const cleanDesc = DOMPurify.sanitize(item.desc);
+                    return `
+                        <a href="${item.url}" class="search-suggestion">
+                            <div class="search-suggestion-title">${cleanTitle}</div>
+                            <div class="search-suggestion-desc">${cleanDesc}</div>
+                        </a>
+                    `;
+                }).join('');
+            }
+            suggestionsBox.style.display = 'block'; // Показываем подсказки
+        })
+        .catch(err => {
+            console.error("Ошибка поиска:", err);
+            suggestionsBox.innerHTML = '<div class="search-suggestion empty">Ошибка поиска</div>';
+            suggestionsBox.style.display = 'block';
+        });
+}
+
+function showSuggestions() {
+    if (suggestionsBox.innerHTML.trim() && searchInput.value.trim()) {
+        suggestionsBox.style.display = 'block';
+    }
+}
+</script>
 {% endblock %}
