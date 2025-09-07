@@ -65,6 +65,9 @@ class Locality(models.Model):
     is_active = models.BooleanField(default=True, verbose_name="Активен")
 
     class Meta:
+        indexes = [
+            models.Index(fields=["slug", "is_active"]),
+        ]
         ordering = ["name"]
         unique_together = ("name", "region")
         verbose_name = "Населённый пункт"

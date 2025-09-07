@@ -10231,3 +10231,18 @@ button.swiper-pagination-bullet {
     width: 2rem;
     height: 2rem;
 }
+
+.main-nav .navbar-brand {
+    flex-shrink: 0;
+}
+
+.main-nav .d-lg-none {
+    margin-left: auto;
+}
+
+@media (max-width: 991.98px) {
+    .main-nav .container > div {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
