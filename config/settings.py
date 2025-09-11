@@ -90,6 +90,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "apps.core.context_processors.yandex_metrika",
                 "apps.cities.context_processors.locality_context",
                 "apps.core.context_processors.available_services",
             ],
@@ -355,3 +356,8 @@ LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
 ]
 
 SITE_NAME = "АТК"
+
+YANDEX_METRIKA_ID = '104125433'
+
+if DEBUG:
+    YANDEX_METRIKA_ID = None

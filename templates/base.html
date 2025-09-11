@@ -7,20 +7,20 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ title }}</title>
-    <meta name="description" content="{{ meta_tag.description|default:'Default Description' }}">
-    <meta name="keywords" content="{{ meta_tag.keywords|default:'default, keywords' }}">
-    <meta name="robots" content="{{ meta_tag.robots|default:'robots' }}">
+    <title>{{ title|escape }}</title>
+    <meta name="description" content="{{ meta_tag.description|default:'Default Description'|escape }}">
+    <meta name="keywords" content="{{ meta_tag.keywords|default:'default, keywords'|escape }}">
+    <meta name="robots" content="{{ meta_tag.robots|default:'index, follow'|escape }}">
 
     <!-- Open Graph meta tags -->
     <meta property="og:locale" content="ru_RU">
     <meta property="og:type" content="website">
     {% if meta_tag.og_title %}
-        <meta property="og:title" content="{{ meta_tag.og_title }}">
+        <meta property="og:title" content="{{ meta_tag.og_title|escape }}">
     {% endif %}
-    <meta property="og:site_name" content="{{ site_name }}">
+    <meta property="og:site_name" content="{{ site_name|escape }}">
     {% if meta_tag.og_description %}
-        <meta property="og:description" content="{{ meta_tag.og_description }}">
+        <meta property="og:description" content="{{ meta_tag.og_description|escape }}">
     {% endif %}
     {% if meta_tag.og_image %}
         <meta property="og:image" content="{{ meta_tag.og_image.url }}">
@@ -28,6 +28,29 @@
     <meta property="og:url" content="{{ canonical_url }}">
 
     <link rel="canonical" href="{{ canonical_url }}" />
+
+    <!-- Yandex.Metrika counter -->
+    {% if YANDEX_METRIKA_ID %}
+    <script type="text/javascript" defer>
+        (function(m,e,t,r,i,k,a){
+            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();
+            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id={{ YANDEX_METRIKA_ID }}', 'ym');
+
+        ym({{ YANDEX_METRIKA_ID }}, 'init', {
+            ssr: true,
+            webvisor: true,
+            clickmap: true,
+            ecommerce: "dataLayer",
+            accurateTrackBounce: true,
+            trackLinks: true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/{{ YANDEX_METRIKA_ID }}" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    {% endif %}
 
     <!-- Bootstrap CSS -->
     {% compress css %}
@@ -60,7 +83,7 @@
     {% include "core/callback_form.html" %}
 
     <!-- Chat toggle button -->
-    <button id="chat-toggle" class="chat-toggle-btn" title="Открыть чат" aria-expanded="false" aria-controls="chat-modal">
+    <button id="chat-toggle" class="chat-toggle-btn" title="Открыть чат" aria-expanded="false" aria-controls="chat-modal" style="display: none;">
         <i class="fas fa-comments"></i>
         <span id="unread-count" class="chat-unread-count" style="display: none;">0</span>
     </button>
@@ -175,6 +198,7 @@
             });
         });
     </script>
+    <!--
     <script>
         let sessionId = null;
         let socket = null;
@@ -623,6 +647,7 @@
             if (socket) socket.close();
         });
     </script>
+    -->
     {% block extra_js %}{% endblock %}
 </body>
 </html>

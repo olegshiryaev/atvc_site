@@ -1,5 +1,12 @@
+from django.conf import settings
 from apps.cities.models import Locality
 from .models import Service
+
+
+def yandex_metrika(request):
+    return {
+        'YANDEX_METRIKA_ID': settings.YANDEX_METRIKA_ID if hasattr(settings, 'YANDEX_METRIKA_ID') else None
+    }
 
 
 def available_services(request):
