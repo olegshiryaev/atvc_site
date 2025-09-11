@@ -10246,3 +10246,148 @@ button.swiper-pagination-bullet {
         justify-content: space-between;
     }
 }
+
+/* Баннер согласия на cookie */
+.cookie-consent {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    color: #333333;
+    padding: 14px 24px;
+    box-shadow: var(--shadow-card);
+    border-radius: 15px;
+    z-index: 1001;
+    display: none; /* Скрыто по умолчанию, управляется через JS */
+    flex-direction: row; /* Текст и кнопки в строку */
+    align-items: center; /* Вертикальное выравнивание */
+    justify-content: space-between; /* Текст слева, кнопки справа */
+    gap: 20px;
+    max-width: 1300px;
+    width: calc(100% - 30px);
+    margin: 0 auto;
+    animation: slideInUp 0.4s ease-out;
+}
+
+/* Текст — слева, с ограничением ширины */
+.cookie-consent-content {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #495057;
+    font-weight: 400;
+    max-width: 70%; /* Ограничиваем ширину текста */
+    flex: 1; /* Текст занимает доступное пространство */
+}
+
+/* Убираем лишние отступы у параграфа */
+.cookie-consent-content p {
+    margin: 0;
+}
+
+/* Стили для ссылок в тексте */
+.cookie-consent-content a {
+    color: var(--main-color);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.cookie-consent-content a:hover {
+    color: var(--main-color-on-hover);
+}
+
+/* Кнопки — справа, в строку */
+.cookie-consent-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: nowrap;
+    flex-shrink: 0;
+}
+
+/* Общие стили для кнопок */
+.cookie-consent-buttons .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    min-width: 80px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* Основная кнопка (Принять) */
+.cookie-consent-buttons .btn-primary {
+    background-color: var(--main-color);
+    color: white;
+}
+
+.cookie-consent-buttons .btn-primary:hover {
+    background-color: var(--main-color-on-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(13, 110, 253, 0.2);
+}
+
+/* Вторичная кнопка (Отказаться) */
+.cookie-consent-buttons .btn-secondary {
+    background-color: transparent;
+    color: #495057;
+    border: 1px solid #dee2e6;
+}
+
+.cookie-consent-buttons .btn-secondary:hover {
+    background-color: #f8f9fa;
+    border-color: #adb5bd;
+}
+
+/* Анимация появления */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translate(-50%, 20px);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, 0);
+    }
+}
+
+/* Адаптивность — мобильная версия */
+@media (max-width: 768px) {
+    .cookie-consent {
+        flex-direction: column;
+        padding: 12px 16px;
+        gap: 16px;
+        text-align: center;
+    }
+
+    .cookie-consent-content {
+        max-width: 100%;
+        font-size: 13px;
+    }
+
+    .cookie-consent-buttons {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .cookie-consent-buttons .btn {
+        width: calc(50% - 8px);
+        min-width: auto;
+    }
+}
+
+/* Для очень маленьких экранов */
+@media (max-width: 480px) {
+    .cookie-consent-buttons {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .cookie-consent-buttons .btn {
+        width: 100%;
+    }
+}

@@ -45,5 +45,3 @@ Email: {{ order.email|default:"Не указан" }}
 Общая стоимость: {{ order.total_cost }} ₽
 
 Комментарий: {{ order.comment|default:"Не указан" }}
-
-Подробности в админ-панели: {{ admin_url }}

@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 @shared_task(bind=True, max_retries=3, retry_backoff=True)
-def send_order_notification(self, order_id, admin_url):
+def send_order_notification(self, order_id):
     logger.info(f"Начало выполнения задачи для заявки #{order_id}")
     try:
         order = Order.objects.get(id=order_id)
@@ -27,7 +27,6 @@ def send_order_notification(self, order_id, admin_url):
         if dispatchers_emails:
             context = {
                 "order": order,
-                "admin_url": admin_url,
             }
             subject = f"Новая заявка #{order.id}"
             text_message = render_to_string(
@@ -53,8 +52,8 @@ def send_order_notification(self, order_id, admin_url):
             )
             return f"Уведомление о заявке #{order.id} отправлено: {', '.join(dispatchers_emails)}"
         else:
-            logger.warning(f"Нет активных диспетчеров для заявки #{order.id}")
-            return f"Нет активных диспетчеров для заявки #{order.id}"
+            logger.warning(f"Нет активных диспетчеров для заявки #{order_id}")
+            return f"Нет активных диспетчеров для заявки #{order_id}"
     except Order.DoesNotExist:
         logger.error(f"Заявка #{order_id} не найдена")
         return f"Заявка #{order_id} не найдена"

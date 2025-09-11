@@ -32,21 +32,24 @@
     <!-- Yandex.Metrika counter -->
     {% if YANDEX_METRIKA_ID %}
     <script type="text/javascript" defer>
-        (function(m,e,t,r,i,k,a){
-            m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
-            m[i].l=1*new Date();
-            for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
-            k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
-        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id={{ YANDEX_METRIKA_ID }}', 'ym');
+        // Проверяем согласие пользователя перед загрузкой Метрики
+        if (!window['disableYandexMetrika'] && !localStorage.getItem('cookieConsent') || localStorage.getItem('cookieConsent') === 'accepted') {
+            (function(m,e,t,r,i,k,a){
+                m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+                m[i].l=1*new Date();
+                for (var j = 0; j < document.scripts.length; j++) {if (document.scripts[j].src === r) { return; }}
+                k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+            })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id={{ YANDEX_METRIKA_ID }}', 'ym');
 
-        ym({{ YANDEX_METRIKA_ID }}, 'init', {
-            ssr: true,
-            webvisor: true,
-            clickmap: true,
-            ecommerce: "dataLayer",
-            accurateTrackBounce: true,
-            trackLinks: true
-        });
+            ym({{ YANDEX_METRIKA_ID }}, 'init', {
+                ssr: true,
+                webvisor: true,
+                clickmap: true,
+                ecommerce: "dataLayer",
+                accurateTrackBounce: true,
+                trackLinks: true
+            });
+        }
     </script>
     <noscript><div><img src="https://mc.yandex.ru/watch/{{ YANDEX_METRIKA_ID }}" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
     <!-- /Yandex.Metrika counter -->
@@ -127,6 +130,17 @@
         </div>
     </div>
 
+    <!-- Cookie Consent Banner -->
+    <div id="cookie-consent" class="cookie-consent" role="dialog" aria-modal="true" aria-labelledby="cookie-consent-title">
+        <div class="cookie-consent-content">
+            <p id="cookie-consent-title">Мы используем cookie и Яндекс.Метрику для анализа посещаемости и улучшения работы сайта. Продолжая использовать сайт, вы соглашаетесь с <a href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}" target="_blank">политикой конфиденциальности</a>.</p>
+        </div>
+        <div class="cookie-consent-buttons">
+            <button id="cookie-accept" class="btn btn-primary">Принять</button>
+            <button id="cookie-decline" class="btn btn-secondary">Отказаться</button>
+        </div>
+    </div>
+
     {% include 'partials/_footer.html' %}
 
     <!-- Bootstrap JS -->
@@ -138,6 +152,7 @@
     <!-- Swiper JS -->
     <script defer src="{% static 'js/swiper-bundle.min.js' %}"></script>
     <!-- Глобальные переменные и отладка -->
+    <script src="{% static 'js/cookie_consent.js' %}" defer></script>
     <script src="{% static 'js/offices.js' %}"></script>
     <script src="{% static 'js/order_modal.js' %}" defer></script>
     <script src="{% static 'js/channels_filter.js' %}" defer></script>
