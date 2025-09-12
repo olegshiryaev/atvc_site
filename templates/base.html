@@ -752,22 +752,36 @@
 
     input.addEventListener('focus', () => {
         if (sessionId && isChatOpen) {
+            console.log('Фокус на поле ввода, вызов markMessagesAsRead');
             markMessagesAsRead();
         }
     });
 
     document.getElementById('chat-messages').addEventListener('scroll', async () => {
         const messagesBox = document.getElementById('chat-messages');
-        if (messagesBox.scrollTop === 0) {
-            const offset = messagesBox.children.length;
+        if (messagesBox.scrollTop === 0 && sessionId) {
+            const messageElements = messagesBox.querySelectorAll('[data-message-id]').length;
+            const offset = messageElements;
+            console.log('Попытка загрузки старых сообщений, offset:', offset);
             try {
                 const response = await fetch(`/chat/api/history/${sessionId}/?offset=${offset}`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ошибка: ${response.status}`);
+                }
                 const messages = await response.json();
+                console.log('Получены старые сообщения:', messages.length);
+                if (messages.length === 0) {
+                    console.log('Больше сообщений нет');
+                    return;
+                }
+                const previousScrollHeight = messagesBox.scrollHeight;
                 messages.forEach(msg => addMessageToChat(msg, true));
-                messagesBox.scrollTop = messagesBox.scrollHeight - currentScrollHeight;
+                const newScrollHeight = messagesBox.scrollHeight;
+                messagesBox.scrollTop = newScrollHeight - previousScrollHeight;
                 console.log('Подгружены старые сообщения, новый scrollTop:', messagesBox.scrollTop);
             } catch (error) {
-                showError('Ошибка загрузки истории чата.');
+                console.error('Ошибка загрузки истории чата:', error);
+                showError('Не удалось загрузить историю чата.');
             }
         }
     });

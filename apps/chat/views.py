@@ -107,8 +107,10 @@ def upload_file(request):
 
 def get_chat_history(request, session_id):
     try:
-        messages = ChatMessage.objects.filter(session_id=session_id).order_by('timestamp')
-        logger.info(f"Загружена история: session_id={session_id}, messages_count={messages.count()}")
+        offset = int(request.GET.get('offset', 0))
+        limit = 50
+        messages = ChatMessage.objects.filter(session_id=session_id).order_by('timestamp')[offset:offset + limit]
+        logger.info(f"Загружена история: session_id={session_id}, offset={offset}, messages_count={messages.count()}")
         return JsonResponse([
             {
                 'message_id': str(msg.message_id),
@@ -124,6 +126,9 @@ def get_chat_history(request, session_id):
     except ChatSession.DoesNotExist:
         logger.error(f"Сессия не найдена: session_id={session_id}")
         return JsonResponse({'error': 'Сессия не найдена'}, status=404)
+    except ValueError:
+        logger.error(f"Некорректный offset: session_id={session_id}, offset={request.GET.get('offset')}")
+        return JsonResponse({'error': 'Некорректный параметр offset'}, status=400)
 
 @csrf_exempt
 def get_unread_count(request):
