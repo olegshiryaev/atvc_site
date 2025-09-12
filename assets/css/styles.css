@@ -6826,6 +6826,28 @@ button.swiper-pagination-bullet {
 .chat-close-btn:hover {
     transform: rotate(90deg);
 }
+.chat-form-header {
+    font-family: var(--font, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 12px;
+    text-align: center;
+    max-width: 300px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 768px) {
+    .chat-form-header {
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+}
 .chat-messages {
     flex: 1;
     overflow-y: auto;

@@ -60,21 +60,15 @@ class ChatConsumer(AsyncWebsocketConsumer):
                         'message': 'Специалист на связи'
                     }
                 )
-
-            # Помечаем сообщения как прочитанные
-            if self.is_support:
+                # Помечаем сообщения клиента как прочитанные только для специалиста
                 await self.mark_client_messages_as_read()
-            else:
-                await self.mark_support_messages_as_read()
-
-            # Отправляем обновлённый unread_count
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'read_status',
-                    'unread_count': await self.get_unread_count()
-                }
-            )
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'read_status',
+                        'unread_count': await self.get_unread_count()
+                    }
+                )
 
             skip_history = 'skip_history=true' in query_string
             if not skip_history:
@@ -161,6 +155,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 await self.mark_client_messages_as_read()
             else:
                 await self.mark_support_messages_as_read()
+            logger.info(f"Обработка mark_read: session_id={self.session_id}, is_support={self.is_support}")
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -211,15 +206,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'is_read': False
             }
         )
-        # Обновляем статус прочтения для сообщений специалиста
-        if is_support:
-            await self.channel_layer.group_send(
-                self.room_group_name,
-                {
-                    'type': 'read_status',
-                    'unread_count': await self.get_unread_count()
-                }
-            )
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({

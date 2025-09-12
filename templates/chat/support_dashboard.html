@@ -23,6 +23,56 @@
             background: #f4f4f4;
         }
 
+        .support-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px 20px;
+            background: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--main-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
         .support-container {
             display: flex;
             max-width: 1200px;
@@ -36,14 +86,14 @@
             border-radius: var(--radius-md);
             box-shadow: var(--shadow-card);
             overflow-y: auto;
-            max-height: 80vh;
+            max-height: 70vh;
         }
 
         .session-item {
             padding: 15px;
             border-bottom: 1px solid #eee;
             cursor: pointer;
-            transition: background 0.2s ease;
+            transition: background 0.2s ease, border-left 0.2s ease;
             position: relative;
         }
 
@@ -52,8 +102,14 @@
         }
 
         .session-item.active {
-            background: var(--main-color);
-            color: #fff;
+            background: #e7f1ff; /* Светлый синий фон для активной сессии */
+            border-left: 4px solid var(--main-color); /* Обводка слева для акцента */
+            color: #333; /* Сохраняем темный текст для читаемости */
+        }
+
+        .session-item.active .session-name,
+        .session-item.active .session-contact {
+            color: #333; /* Убедимся, что текст остается читаемым */
         }
 
         .session-item .unread-count {
@@ -87,7 +143,7 @@
             box-shadow: var(--shadow-card);
             display: flex;
             flex-direction: column;
-            max-height: 80vh;
+            max-height: 70vh;
         }
 
         .chat-header {
@@ -301,6 +357,12 @@
         .chat-date-divider::after { right: 0; }
 
         @media (max-width: 768px) {
+            .support-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
             .support-container {
                 flex-direction: column;
             }
@@ -315,6 +377,19 @@
     </style>
 </head>
 <body>
+    <!-- Шапка с информацией о пользователе -->
+    <div class="support-header">
+        <div class="user-info">
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="user-name" id="user-name">{{ request.user.username|default:"Неизвестный пользователь" }}</div>
+        </div>
+        <a href="{% url 'support_logout' %}" class="logout-btn">
+            <i class="fas fa-sign-out-alt"></i> Выход
+        </a>
+    </div>
+
     <div class="support-container">
         <!-- Список сессий -->
         <div class="sessions-list" id="sessions-list">
@@ -346,17 +421,48 @@
         </div>
     </div>
 
-        <script>
+    <script>
         let currentSessionId = null;
         let socket = null;
         let lastDateHeader = null;
         const notificationSound = new Audio('/static/sounds/notification.mp3');
         const loadedMessageIds = new Set();
 
+        // Функция для получения информации о текущем пользователе
+        async function loadUserInfo() {
+            try {
+                const response = await fetch('/auth/user-info/');
+                if (response.ok) {
+                    const userData = await response.json();
+                    document.getElementById('user-name').textContent = userData.username || 'Специалист';
+                    
+                    // Создаем аватар из первых букв имени
+                    const avatar = document.querySelector('.user-avatar');
+                    if (userData.username) {
+                        const initials = userData.username.split(' ')
+                            .map(name => name[0])
+                            .join('')
+                            .toUpperCase()
+                            .substring(0, 2);
+                        avatar.innerHTML = initials;
+                    }
+                } else {
+                    console.error('Ошибка загрузки информации о пользователе');
+                }
+            } catch (error) {
+                console.error('Ошибка:', error);
+            }
+        }
+
         function escapeHTML(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
+            const escapeMap = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            };
+            return str.replace(/[&<>"']/g, char => escapeMap[char]);
         }
 
         function showError(message, persistent = false) {
@@ -399,7 +505,10 @@
         }
 
         function addMessageToChat(data, isHistory = false) {
-            if (loadedMessageIds.has(data.message_id)) return;
+            if (loadedMessageIds.has(data.message_id)) {
+                console.log('Сообщение уже загружено, message_id:', data.message_id);
+                return;
+            }
             loadedMessageIds.add(data.message_id);
 
             const fragment = document.createDocumentFragment();
@@ -434,13 +543,10 @@
                 </div>
             `;
             fragment.appendChild(msg);
-            document.getElementById('chat-messages').appendChild(fragment);
-            document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
-
-            if (!isHistory && !data.is_support) {
-                notificationSound.play().catch(() => {});
-                if ('vibrate' in navigator) navigator.vibrate(200);
-                loadSessions();
+            const messagesBox = document.getElementById('chat-messages');
+            messagesBox.appendChild(fragment);
+            if (!isHistory) {
+                messagesBox.scrollTop = messagesBox.scrollHeight;
             }
         }
 
@@ -454,7 +560,7 @@
                 sessionsList.innerHTML = '';
                 sessions.forEach(session => {
                     const sessionItem = document.createElement('div');
-                    sessionItem.className = 'session-item';
+                    sessionItem.className = `session-item ${session.id === currentSessionId ? 'active' : ''}`;
                     sessionItem.dataset.sessionId = session.id;
                     sessionItem.innerHTML = `
                         <div class="session-info">
@@ -471,11 +577,21 @@
                 }
             } catch (error) {
                 showError('Ошибка загрузки сессий.');
+                console.error('Ошибка загрузки сессий:', error);
             }
         }
 
         async function selectSession(sessionId, sessionName) {
-            if (socket) socket.close();
+            console.log('Выбрана сессия:', sessionId, sessionName);
+            if (currentSessionId === sessionId) {
+                console.log('Сессия уже активна, игнорируем');
+                return;
+            }
+
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
             currentSessionId = sessionId;
             document.getElementById('session-name').textContent = sessionName;
             document.getElementById('chat-container').style.display = 'flex';
@@ -485,6 +601,7 @@
             document.getElementById('chat-status').textContent = 'Загрузка...';
             document.getElementById('chat-error').style.display = 'none';
 
+            // Обновляем выделение активной сессии
             document.querySelectorAll('.session-item').forEach(item => {
                 item.classList.toggle('active', item.dataset.sessionId == sessionId);
             });
@@ -495,16 +612,22 @@
                 const messages = await response.json();
                 messages.forEach(msg => addMessageToChat(msg, true));
                 document.getElementById('chat-status').textContent = 'Сессия активна';
+                // Прокручиваем к последнему сообщению после загрузки истории
+                const messagesBox = document.getElementById('chat-messages');
+                messagesBox.scrollTop = messagesBox.scrollHeight;
             } catch (error) {
                 showError('Ошибка загрузки истории чата.', true);
+                console.error('Ошибка загрузки истории:', error);
                 return;
             }
 
+            // Подключаемся к WebSocket
             const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
             socket = new WebSocket(`${protocol}//${window.location.host}/ws/chat/${sessionId}/?token=support&skip_history=true`);
             socket.onopen = () => {
+                console.log('WebSocket подключен для сессии:', sessionId);
                 document.getElementById('chat-status').textContent = 'Подключено';
-                loadSessions();
+                loadSessions(); // Обновляем список сессий для актуализации unread_count
             };
             socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
@@ -527,17 +650,19 @@
                     addMessageToChat(data, data.history || false);
                 }
                 if (data.type === 'read_status') {
-                    loadSessions();
+                    loadSessions(); // Обновляем список сессий для актуализации unread_count
                 }
                 if (data.type === 'session_closed') {
                     showError(data.message, true);
                     document.getElementById('chat-close').click();
                 }
             };
-            socket.onerror = () => {
+            socket.onerror = (error) => {
+                console.error('WebSocket ошибка:', error);
                 showError('Ошибка соединения с чатом');
             };
             socket.onclose = () => {
+                console.log('WebSocket закрыт для сессии:', sessionId);
                 showError('Соединение с чатом закрыто.');
             };
         }
@@ -616,6 +741,7 @@
                 }
             } catch (err) {
                 showError('Ошибка загрузки файла.');
+                console.error('Ошибка загрузки файла:', err);
             }
         });
 
@@ -630,13 +756,36 @@
             document.getElementById('chat-input').value = '';
             document.getElementById('chat-error').style.display = 'none';
             document.querySelectorAll('.session-item').forEach(item => item.classList.remove('active'));
-            if (socket) socket.close();
+            currentSessionId = null;
+            if (socket) {
+                socket.close();
+                socket = null;
+            }
             loadSessions();
         };
 
         const input = document.getElementById('chat-input');
         let typing = false;
         let typingTimeout = null;
+        let markReadTimeout = null;
+
+        // Отмечаем сообщения как прочитанные при фокусе на поле ввода
+        input.addEventListener('focus', () => {
+            if (markReadTimeout) {
+                console.log('markReadTimeout уже активен, пропускаем');
+                return;
+            }
+            if (socket?.readyState === WebSocket.OPEN && currentSessionId) {
+                console.log('Фокус на поле ввода, отправляем mark_read для сессии:', currentSessionId);
+                markReadTimeout = setTimeout(() => {
+                    socket.send(JSON.stringify({ type: 'mark_read' }));
+                    markReadTimeout = null;
+                }, 500);
+            } else {
+                console.log('mark_read не отправлен: нет соединения или sessionId');
+            }
+        });
+
         input.addEventListener('input', () => {
             const maxLength = 1000;
             if (input.value.length > maxLength) {
@@ -655,6 +804,7 @@
         });
 
         window.addEventListener('load', () => {
+            loadUserInfo();
             loadSessions();
             setInterval(loadSessions, 10000);
         });

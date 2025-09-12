@@ -104,6 +104,7 @@
 
         <!-- User form -->
         <div id="chat-user-form" class="chat-user-form">
+            <div class="chat-form-header">Пожалуйста, заполните поля, чтобы начать чат</div>
             <input type="text" id="chat-name" class="chat-input" placeholder="Ваше имя" aria-label="Ваше имя" aria-describedby="name-hint" autocomplete="name" required />
             <span id="name-hint" class="sr-only">Введите ваше имя</span>
             <input type="text" id="chat-contact" class="chat-input" placeholder="Телефон или email" aria-label="Телефон или email" aria-describedby="contact-hint" autocomplete="email tel" required pattern="^([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}|^\+?\d{10,15})$" />
@@ -223,11 +224,17 @@
     const maxReconnectAttempts = 3;
     const notificationSound = new Audio('/static/sounds/notification.mp3');
     const loadedMessageIds = new Set();
+    let markReadTimeout = null;
 
     function escapeHTML(str) {
-        const div = document.createElement('div');
-        div.textContent = str;
-        return div.innerHTML;
+        const escapeMap = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        };
+        return str.replace(/[&<>"']/g, char => escapeMap[char]);
     }
 
     function formatFileSize(bytes) {
@@ -240,6 +247,7 @@
 
     function updateUnreadCount(count) {
         console.log('Обновление unread_count:', count);
+        unreadCount = count;
         const unreadBadge = document.getElementById('unread-count');
         unreadBadge.textContent = count;
         unreadBadge.style.display = count > 0 ? 'block' : 'none';
@@ -252,8 +260,7 @@
 
     function clearChatNotification() {
         document.getElementById('chat-toggle').classList.remove('chat-notification');
-        unreadCount = 0;
-        updateUnreadCount(unreadCount);
+        updateUnreadCount(0);
     }
 
     function sendTypingEvent(isTyping) {
@@ -294,7 +301,10 @@
     }
 
     function addMessageToChat(data, isHistory = false) {
-        if (loadedMessageIds.has(data.message_id)) return;
+        if (loadedMessageIds.has(data.message_id)) {
+            console.log('Сообщение уже загружено, message_id:', data.message_id);
+            return;
+        }
         loadedMessageIds.add(data.message_id);
 
         const fragment = document.createDocumentFragment();
@@ -357,6 +367,7 @@
 
         if (!isHistory && data.is_support && (!isChatOpen || !document.hasFocus())) {
             unreadCount++;
+            console.log('Новое сообщение от специалиста, unreadCount увеличен до:', unreadCount);
             notificationSound.play().catch(() => {});
             if ('vibrate' in navigator) navigator.vibrate(200);
             showChatNotification();
@@ -416,23 +427,40 @@
     }
 
     async function markMessagesAsRead() {
-        if (!sessionId) return;
-        try {
-            const response = await fetch(`/chat/api/mark_read/${sessionId}/`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            });
-            if (response.ok) {
-                console.log('Сообщения помечены как прочитанные');
-                await updateUnreadCountFromServer();
-            } else {
-                console.error('Ошибка при пометке сообщений как прочитанных');
-            }
-        } catch (error) {
-            console.error('Ошибка при отправке запроса mark_read:', error);
+        if (!sessionId || !isChatOpen) {
+            console.log('markMessagesAsRead пропущен: sessionId или isChatOpen отсутствуют');
+            return;
         }
+        if (markReadTimeout) {
+            console.log('markMessagesAsRead уже в процессе, пропускаем');
+            return;
+        }
+        markReadTimeout = setTimeout(async () => {
+            try {
+                if (socket?.readyState === WebSocket.OPEN) {
+                    socket.send(JSON.stringify({ type: 'mark_read' }));
+                    console.log('Отправлен запрос mark_read через WebSocket для sessionId:', sessionId);
+                } else {
+                    console.warn('WebSocket недоступен, используем HTTP для mark_read');
+                    const response = await fetch(`/chat/api/mark_read/${sessionId}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        }
+                    });
+                    if (response.ok) {
+                        console.log('Сообщения помечены как прочитанные через HTTP');
+                        await updateUnreadCountFromServer();
+                    } else {
+                        console.error('Ошибка при пометке сообщений как прочитанных через HTTP:', response.status);
+                    }
+                }
+            } catch (error) {
+                console.error('Ошибка при отправке запроса mark_read:', error);
+                showError('Ошибка при пометке сообщений как прочитанных.');
+            }
+            markReadTimeout = null;
+        }, 500);
     }
 
     function startChatWebSocket() {
@@ -488,9 +516,9 @@
                 }
             }
             if (data.type === 'read_status') {
-                unreadCount = data.unread_count;
-                updateUnreadCount(unreadCount);
-                if (unreadCount === 0) clearChatNotification();
+                console.log('Получено событие read_status, unread_count:', data.unread_count);
+                updateUnreadCount(data.unread_count);
+                if (data.unread_count === 0) clearChatNotification();
             }
             if (data.type === 'session_closed') {
                 showError(data.message, true);
@@ -539,10 +567,9 @@
             const response = await fetch(`/chat/api/unread/?session_id=${sessionId}`);
             const data = await response.json();
             console.log('Получен unread_count:', data.unread);
-            unreadCount = data.unread;
-            updateUnreadCount(unreadCount);
-            if (unreadCount > 0 && !isChatOpen) showChatNotification();
-            else if (unreadCount === 0) clearChatNotification();
+            updateUnreadCount(data.unread);
+            if (data.unread > 0 && !isChatOpen) showChatNotification();
+            else if (data.unread === 0) clearChatNotification();
         } catch (error) {
             console.error('Ошибка загрузки непрочитанных сообщений:', error);
         }
