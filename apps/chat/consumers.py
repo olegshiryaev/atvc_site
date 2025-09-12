@@ -1,6 +1,6 @@
-# apps/chat/consumers.py
 import json
 import logging
+from urllib.parse import parse_qs, unquote
 from channels.generic.websocket import AsyncWebsocketConsumer
 from channels.db import database_sync_to_async
 from .models import ChatSession, ChatMessage
@@ -9,79 +9,116 @@ logger = logging.getLogger(__name__)
 
 class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
-        self.session_id = self.scope['url_route']['kwargs']['session_id']
-        self.room_group_name = f'chat_{self.session_id}'
-        self.session = await self.get_session(self.session_id)
+        try:
+            self.session_id = self.scope['url_route']['kwargs']['session_id']
+            self.room_group_name = f'chat_{self.session_id}'
+            self.session = await self.get_session(self.session_id)
 
-        await self.accept()
+            await self.accept()
 
-        if not self.session:
-            logger.error(f"Сессия с ID={self.session_id} не найдена")
-            await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Сессия не найдена'
-            }))
-            await self.close()
-            return
-        if self.session.is_closed:
-            logger.error(f"Сессия с ID={self.session_id} закрыта")
-            await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Сессия закрыта'
-            }))
-            await self.close()
-            return
-
-        query_string = self.scope['query_string'].decode()
-        token = query_string.split('token=')[1].split('&')[0] if 'token=' in query_string else None
-        logger.info(f"Подключение WebSocket: session_id={self.session_id}, token={token}")
-        self.is_support = token == 'support'
-        if not token or (token != self.session.contact and not self.is_support):
-            logger.error(f"Недостаточно прав: session_id={self.session_id}, token={token}, contact={self.session.contact}")
-            await self.send(text_data=json.dumps({
-                'type': 'error',
-                'message': 'Недостаточно прав'
-            }))
-            await self.close()
-            return
-
-        await self.channel_layer.group_add(self.room_group_name, self.channel_name)
-        logger.info(f"Успешное подключение: session_id={self.session_id}, channel={self.channel_name}")
-        
-        # Помечаем сообщения как прочитанные
-        if self.is_support:
-            await self.mark_client_messages_as_read()
-        else:
-            await self.mark_support_messages_as_read()
-        
-        # Отправляем обновлённый unread_count
-        await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'read_status',
-                'unread_count': await self.get_unread_count()
-            }
-        )
-
-        skip_history = 'skip_history=true' in query_string
-        if not skip_history:
-            messages = await self.get_last_messages(limit=50)
-            for msg in messages:
+            if not self.session:
+                logger.error(f"Сессия с ID={self.session_id} не найдена")
                 await self.send(text_data=json.dumps({
-                    'type': 'chat_message',
-                    'message_id': str(msg['message_id']),
-                    'message': msg['message'],
-                    'is_support': msg['is_support'],
-                    'timestamp': msg['timestamp'].isoformat(),
-                    'sender': msg['sender'],
-                    'attachment': msg['attachment'],
-                    'history': True,
-                    'is_read': msg['is_read']
+                    'type': 'error',
+                    'message': 'Сессия не найдена'
                 }))
+                await self.close()
+                return
+            if self.session.is_closed:
+                logger.error(f"Сессия с ID={self.session_id} закрыта")
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': 'Сессия закрыта'
+                }))
+                await self.close()
+                return
+
+            query_string = self.scope['query_string'].decode()
+            query_params = parse_qs(query_string)
+            token = unquote(query_params.get('token', [None])[0] or '')
+            logger.info(f"Подключение WebSocket: session_id={self.session_id}, token={token}")
+            self.is_support = token == 'support'
+            if not token or (token != self.session.contact and not self.is_support):
+                logger.error(f"Недостаточно прав: session_id={self.session_id}, token={token}, contact={self.session.contact}")
+                await self.send(text_data=json.dumps({
+                    'type': 'error',
+                    'message': f'Недостаточно прав: token={token}, contact={self.session.contact}'
+                }))
+                await self.close()
+                return
+
+            await self.channel_layer.group_add(self.room_group_name, self.channel_name)
+            logger.info(f"Успешное подключение: session_id={self.session_id}, channel={self.channel_name}")
+
+            # Отправляем уведомление о подключении специалиста
+            if self.is_support:
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'status_update',
+                        'status': 'connected',
+                        'message': 'Специалист на связи'
+                    }
+                )
+
+            # Помечаем сообщения как прочитанные
+            if self.is_support:
+                await self.mark_client_messages_as_read()
+            else:
+                await self.mark_support_messages_as_read()
+
+            # Отправляем обновлённый unread_count
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'read_status',
+                    'unread_count': await self.get_unread_count()
+                }
+            )
+
+            skip_history = 'skip_history=true' in query_string
+            if not skip_history:
+                messages = await self.get_last_messages(limit=50)
+                for msg in messages:
+                    await self.send(text_data=json.dumps({
+                        'type': 'chat_message',
+                        'message_id': str(msg['message_id']),
+                        'message': msg['message'],
+                        'is_support': msg['is_support'],
+                        'timestamp': msg['timestamp'].isoformat(),
+                        'sender': msg['sender'],
+                        'attachment': msg['attachment_url'],
+                        'file_size': msg['file_size'],
+                        'history': True,
+                        'is_read': msg['is_read']
+                    }))
+        except Exception as e:
+            logger.error(f"Ошибка при подключении WebSocket: session_id={self.session_id}, error={str(e)}")
+            await self.send(text_data=json.dumps({
+                'type': 'error',
+                'message': 'Внутренняя ошибка сервера'
+            }))
+            await self.close()
+
+    async def status_update(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'status_update',
+            'status': event['status'],
+            'message': event['message']
+        }))
 
     async def disconnect(self, close_code):
         logger.info(f"WebSocket отключен: session_id={self.session_id}, code={close_code}")
         await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        if self.is_support:
+            await self.channel_layer.group_send(
+                self.room_group_name,
+                {
+                    'type': 'status_update',
+                    'status': 'pending',
+                    'message': 'Ожидание специалиста...'
+                }
+            )
 
     async def receive(self, text_data):
         try:
@@ -136,6 +173,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         message = data.get('message', '')
         is_support = data.get('is_support', False)
         attachment_url = data.get('attachment')
+        file_size = data.get('file_size')
         sender = data.get('sender', 'Специалист' if is_support else self.session.name)
 
         if not isinstance(message, str) or not message.strip():
@@ -158,7 +196,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             }))
             return
 
-        timestamp, message_id = await self.save_message(message.strip(), is_support, attachment_url, sender)
+        timestamp, message_id = await self.save_message(message.strip(), is_support, attachment_url, file_size, sender)
         await self.channel_layer.group_send(
             self.room_group_name,
             {
@@ -169,6 +207,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'timestamp': timestamp.isoformat(),
                 'sender': sender,
                 'attachment': attachment_url,
+                'file_size': file_size,
                 'is_read': False
             }
         )
@@ -191,6 +230,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'timestamp': event['timestamp'],
             'sender': event['sender'],
             'attachment': event.get('attachment'),
+            'file_size': event.get('file_size'),
             'is_read': event['is_read']
         }))
 
@@ -223,16 +263,17 @@ class ChatConsumer(AsyncWebsocketConsumer):
             return None
 
     @database_sync_to_async
-    def save_message(self, message, is_support, attachment=None, sender=None):
+    def save_message(self, message, is_support, attachment_url=None, file_size=None, sender=None):
         msg = ChatMessage.objects.create(
             session=self.session,
             message=message,
             is_support=is_support,
             is_read=False,
             sender=sender or ('Специалист' if is_support else self.session.name),
-            attachment=attachment or None
+            attachment_url=attachment_url,
+            file_size=file_size
         )
-        logger.info(f"Сохранено сообщение: session_id={self.session_id}, message_id={msg.message_id}, is_support={is_support}")
+        logger.info(f"Сохранено сообщение: session_id={self.session_id}, message_id={msg.message_id}, is_support={is_support}, attachment_url={attachment_url}, file_size={file_size}")
         return msg.timestamp, msg.message_id
 
     @database_sync_to_async
@@ -273,7 +314,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             ChatMessage.objects
             .filter(session=self.session)
             .order_by('-timestamp')
-            .values('message_id', 'message', 'is_support', 'timestamp', 'attachment', 'sender', 'is_read')[offset:offset+limit]
+            .values(
+                'message_id',
+                'message',
+                'is_support',
+                'timestamp',
+                'attachment_url',
+                'file_size',
+                'sender',
+                'is_read'
+            )[offset:offset+limit]
         )
 
     @database_sync_to_async

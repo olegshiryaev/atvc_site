@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from .models import ChatSession, ChatMessage
 
 @admin.register(ChatSession)
@@ -19,11 +20,32 @@ class ChatSessionAdmin(admin.ModelAdmin):
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
-    list_display = ('session', 'message_preview', 'is_support', 'is_read', 'timestamp', 'attachment')
-    list_filter = ('is_support', 'is_read', 'timestamp')
+    list_display = ('session', 'message_preview', 'is_support', 'is_read', 'attachment_link', 'file_size_formatted', 'timestamp')
+    list_filter = ('is_support', 'is_read', 'timestamp', 'attachment_url')
     search_fields = ('message', 'session__name', 'session__contact')
     readonly_fields = ('timestamp',)
 
     def message_preview(self, obj):
         return obj.message[:50] + ('...' if len(obj.message) > 50 else '')
     message_preview.short_description = 'Сообщение'
+
+    def attachment_link(self, obj):
+        if obj.attachment_url:
+            file_name = obj.attachment_url.split('/')[-1]
+            if file_name and '_' in file_name and len(file_name) > 37:
+                file_name = file_name[37:]  # Убираем UUID и '_'
+            return format_html('<a href="{}" target="_blank">{}</a>', obj.attachment_url, file_name)
+        return '-'
+    attachment_link.short_description = 'Вложение'
+
+    def file_size_formatted(self, obj):
+        if obj.file_size:
+            if obj.file_size < 1024:
+                return f"{obj.file_size} Б"
+            kb = obj.file_size / 1024
+            if kb < 1024:
+                return f"{kb:.1f} КБ"
+            mb = kb / 1024
+            return f"{mb:.1f} МБ"
+        return '-'
+    file_size_formatted.short_description = 'Размер файла'

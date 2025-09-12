@@ -6756,29 +6756,47 @@ button.swiper-pagination-bullet {
 
 /* Чат-модальное окно */
 .chat-modal {
-    display: none;
+    display: flex;
+    flex-direction: column;
     position: fixed;
     bottom: 90px;
     right: 20px;
     width: 380px;
     height: 520px;
-    background: #fff;
+    background: white;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-card);
-    flex-direction: column;
-    overflow: hidden;
-    font-family: var(--font);
     z-index: 1001;
-    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
-    transform: translateY(100%);
-    -webkit-overflow-scrolling: touch;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.chat-modal[aria-hidden="true"] {
+    transform: scale(0.95);
     opacity: 0;
+    display: none;
 }
+
 .chat-modal[aria-hidden="false"] {
-    display: flex;
-    transform: translateY(0);
+    transform: scale(1);
     opacity: 1;
+    display: flex;
 }
+
+/* Стили для сообщений */
+.message-support, .message-client {
+    margin-bottom: 10px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: messageAppear 0.3s ease forwards;
+}
+
+@keyframes messageAppear {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .chat-header {
     background: var(--main-color);
     color: var(--smoky-white-color);
@@ -6796,6 +6814,7 @@ button.swiper-pagination-bullet {
     opacity: 0.85;
     margin-top: 4px;
 }
+
 .chat-close-btn {
     background: none;
     border: none;
@@ -6808,13 +6827,13 @@ button.swiper-pagination-bullet {
     transform: rotate(90deg);
 }
 .chat-messages {
-    flex-grow: 1;
-    padding: 16px;
+    flex: 1;
     overflow-y: auto;
-    background: #f8f9fa;
-    scroll-behavior: smooth;
+    max-height: 400px; /* Установите подходящую высоту для вашего дизайна */
     display: flex;
     flex-direction: column;
+    padding: 10px;
+    box-sizing: border-box;
 }
 .message-support, .message-client {
     margin: 8px 12px;
@@ -6845,6 +6864,20 @@ button.swiper-pagination-bullet {
     border-bottom-left-radius: 16px;
     border-bottom-right-radius: 16px;
     align-self: flex-end;
+}
+.chat-message-bubble a {
+    color: #fff;
+    word-break: break-all;
+    display: inline-flex;
+    align-items: center;
+}
+.chat-message-bubble a:hover {
+    color: #f1f3f5 !important;
+}
+
+.file-icon {
+    margin-right: 5px;
+    font-size: 16px;
 }
 .chat-message-footer {
     display: flex;

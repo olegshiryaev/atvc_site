@@ -35,6 +35,7 @@ urlpatterns = [
     path("wfhlthch/getstatus/", getstatus, name='getstatus'),
     path("a9f8s7d6/", admin.site.urls),
     path('ckeditor/', include('ckeditor_uploader.urls')),
+    path("chat/", include("apps.chat.urls")),
     # Корневой путь редиректит на первую активную локализацию
     path("", redirect_to_active_locality),
     # Пути без slug (например, список всех населённых пунктов)
@@ -46,7 +47,6 @@ urlpatterns = [
     path("<slug:locality_slug>/", include("apps.equipments.urls")),
     path("<slug:locality_slug>/", include("apps.orders.urls")),
     path('<slug:locality_slug>/support/', include("apps.support.urls", namespace='support')),
-    path("chat/", include("apps.chat.urls")),
 ]
 
 if settings.DEBUG:

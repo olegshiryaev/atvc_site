@@ -9,5 +9,7 @@ urlpatterns = [
     path('api/mark_read/<int:session_id>/', views.mark_messages_as_read, name='mark_messages_as_read'),
     path('api/close/<int:session_id>/', views.close_chat, name='close_chat'),
     path('api/sessions/', views.get_sessions, name='get_sessions'),
+    path('support/login/', views.support_login, name='support_login'),
+    path('support/logout/', views.support_logout, name='support_logout'),
     path('support/', views.support_dashboard, name='support_dashboard'),
 ]

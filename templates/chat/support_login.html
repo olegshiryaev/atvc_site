@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход для специалистов</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        :root {
+            --main-color: #007bff;
+            --main-color-on-hover: #0056b3;
+            --smoky-white-color: #f8f9fa;
+            --shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            --shadow-card: 0 8px 16px rgba(0, 0, 0, 0.2);
+            --radius-md: 12px;
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            font-family: var(--font);
+            margin: 0;
+            padding: 20px;
+            background: #f4f4f4;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .login-container {
+            background: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-card);
+            padding: 24px;
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-header {
+            font-size: 20px;
+            font-weight: 600;
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .login-form label {
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .login-form input {
+            padding: 12px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            transition: border-color 0.3s ease;
+        }
+
+        .login-form input:focus {
+            border-color: var(--main-color);
+            outline: none;
+        }
+
+        .login-form input.error {
+            border-color: #c62828;
+            background-color: #fef0f0;
+        }
+
+        .login-error {
+            background: #fef0f0;
+            color: #c62828;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 13px;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .login-error.active {
+            display: block;
+        }
+
+        .login-button {
+            background: var(--main-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: var(--main-color-on-hover);
+        }
+
+        .login-footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .login-container {
+                padding: 16px;
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">Вход для специалистов</div>
+        {% if form.non_field_errors %}
+            <div class="login-error active">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            <div>
+                <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}"
+                       class="{% if form.username.errors %}error{% endif %}" required>
+                {% if form.username.errors %}
+                    <div class="login-error active">{{ form.username.errors.as_text }}</div>
+                {% endif %}
+            </div>
+            <div>
+                <label for="{{ form.password.id_for_label }}">Пароль</label>
+                <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}"
+                       class="{% if form.password.errors %}error{% endif %}" required>
+                {% if form.password.errors %}
+                    <div class="login-error active">{{ form.password.errors.as_text }}</div>
+                {% endif %}
+            </div>
+            <button type="submit" class="login-button">Войти</button>
+        </form>
+        <div class="login-footer">
+            Нет аккаунта? Обратитесь к администратору.
+        </div>
+    </div>
+</body>
+</html>
