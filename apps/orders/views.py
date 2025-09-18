@@ -20,6 +20,8 @@ import json
 from django.db import transaction
 import logging
 
+from apps.services.utils import is_business_hours
+
 
 
 
@@ -41,28 +43,30 @@ def process_order_data(order, form_data, logger):
         else:
             logger.debug("Ни один тариф не был добавлен (не найдены или неактивны)")
 
-        # Обработка оборудования
+        # --- 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Проверяем наличие оборудования ---
         equipment_ids = form_data.get("selected_equipment_ids") or []
         if not isinstance(equipment_ids, list):
             logger.warning(f"Поле selected_equipment_ids не является списком: {equipment_ids}")
             equipment_ids = []
-        payment_options = form_data.get("equipment_payment_options", {})
-        if not isinstance(payment_options, dict):
-            logger.warning(f"Поле equipment_payment_options не является словарем: {payment_options}")
-            payment_options = {}
+
+        # Получаем payment_options ТОЛЬКО если есть оборудование
+        payment_options = {}
+        if equipment_ids:
+            payment_options = form_data.get("equipment_payment_options", {})
+            if not isinstance(payment_options, dict):
+                logger.warning(f"Поле equipment_payment_options не является словарем: {payment_options}")
+                payment_options = {}
 
         for product_id in equipment_ids:
             product_item = get_object_or_404(ProductItem, id=product_id)
             payment_type = payment_options.get(str(product_id), 'purchase')
             price = product_item.get_final_price()
-
             if payment_type == 'installment12' and product_item.installment_12_months:
                 price = product_item.installment_12_months
             elif payment_type == 'installment24' and product_item.installment_24_months:
                 price = product_item.installment_24_months
             elif payment_type == 'installment48' and product_item.installment_48_months:
                 price = product_item.installment_48_months
-
             OrderProduct.objects.create(
                 order=order,
                 product_item=product_item,
@@ -223,25 +227,45 @@ def submit_order(request, locality_slug):
         except Exception as e:
             logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
 
-        # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Возвращаем HTML-фрагмент с редиректом ---
+        # --- 🔥 Определяем тип формы по скрытому полю ---
+        form_type = request.POST.get('form_type', '')
+
         if request.headers.get('HX-Request'):  # Это htmx-запрос
-            redirect_url = reverse("orders:order_success", kwargs={
-                "locality_slug": locality_slug,
-                "order_id": order.id
-            })
-            # Возвращаем скрытый div, который сработает при загрузке и выполнит редирект
-            return HttpResponse(f"""
-                <div hx-trigger="load" hx-get="{redirect_url}" hx-target="body" hx-swap="outerHTML">
-                    <!-- Редирект на страницу успеха -->
-                </div>
-            """)
+            if form_type == 'address_check':
+                # --- 🔥 Определяем сообщение в зависимости от времени ---
+                if is_business_hours():
+                    message_text = "Мы свяжемся с вами в течение часа для уточнения деталей."
+                else:
+                    message_text = "Ваша заявка принята. Мы свяжемся с вами в рабочее время (с 8:00 до 21:00)."
+                # Возвращаем HTML для модального окна
+                return HttpResponse(f"""
+                    <div class="address-check__modal-content">
+                        <span class="address-check__modal-close" role="button" aria-label="Закрыть модальное окно" 
+                            hx-delete="" hx-target="#address-check-modal" hx-swap="delete">×</span>
+                        <h3 class="address-check__modal-title" id="address-check-modal-title">Заявка отправлена!</h3>
+                        <p class="address-check__modal-text">{message_text}</p>
+                        <button class="address-check__modal-btn" 
+                                hx-delete="" hx-target="#address-check-modal" hx-swap="delete">Закрыть</button>
+                    </div>
+                """)
+            else:
+                # Возвращаем HTML-фрагмент с редиректом для основной формы
+                redirect_url = reverse("orders:order_success", kwargs={
+                    "locality_slug": locality_slug,
+                    "order_id": order.id
+                })
+                return HttpResponse(f"""
+                    <div hx-trigger="load" hx-get="{redirect_url}" hx-target="body" hx-swap="outerHTML">
+                        <!-- Редирект на страницу успеха -->
+                    </div>
+                """)
         else:
-            # Если это обычный запрос (на всякий случай), делаем стандартный редирект
+            # Если это обычный запрос, делаем стандартный редирект
             return redirect("orders:order_success", locality_slug=locality_slug, order_id=order.id)
 
     else:
         logger.warning(f"Ошибка валидации формы: {form.errors}")
-        # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Воссоздаем контекст и возвращаем форму с ошибками ---
+        # --- Воссоздаем контекст и возвращаем форму с ошибками ---
 
         # Получаем текущий тариф (как в order_create)
         tariff_id = request.POST.get('tariff_id')
@@ -273,8 +297,7 @@ def submit_order(request, locality_slug):
         products = tariff.products.all().select_related('product__category') if tariff else ProductItem.objects.none()
         services = AdditionalService.objects.filter(service_types=tariff.service).distinct() if tariff else AdditionalService.objects.none()
 
-        # Рендерим ТОЛЬКО контейнер с формой (или всю страницу, если не создали частичный шаблон)
-        # Для простоты пока рендерим всю страницу, но это можно оптимизировать.
+        # Рендерим всю страницу с формой и ошибками
         return render(
             request,
             "orders/order_create.html",
@@ -362,7 +385,6 @@ class EquipmentOrderView(TemplateView):
         locality = get_object_or_404(Locality, slug=kwargs['locality_slug'], is_active=True)
         product_item = get_object_or_404(ProductItem, pk=kwargs['product_item_id'], in_stock__gt=0)
         form = OrderForm(request.POST, locality=locality)
-
         if form.is_valid():
             try:
                 order = form.save(commit=False)
@@ -370,23 +392,19 @@ class EquipmentOrderView(TemplateView):
                 if not order.comment:
                     order.comment = f"Заказ оборудования: {product_item.get_display_name()}"
                 order.save()
-
                 price = product_item.get_final_price()
                 payment_type = form.cleaned_data['payment_type']
                 if payment_type.startswith('installment'):
                     months = int(payment_type.replace('installment', ''))
                     installment_price = product_item.get_installment_price(months)
                     price = installment_price if installment_price else price
-
                 OrderProduct.objects.create(
                     order=order,
                     product_item=product_item,
                     price=price,
                     payment_type=payment_type
                 )
-
                 logger.info(f"Создан заказ #{order.id} для {product_item.get_display_name()} (пользователь: {order.full_name})")
-
                 # --- Отправка уведомления ---
                 try:
                     send_order_notification.delay(order.id)
@@ -394,31 +412,28 @@ class EquipmentOrderView(TemplateView):
                 except Exception as e:
                     logger.error(f"Ошибка при отправке уведомления для заказа #{order.id}: {str(e)}")
                 # ----------------------------
-
                 success_url = reverse('orders:order_success', kwargs={
                     'locality_slug': locality.slug,
                     'order_id': order.id
                 })
 
-                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                    return JsonResponse({
-                        'success': True,
-                        'redirect_url': success_url
-                    })
-
-                return redirect('orders:order_success', locality_slug=locality.slug, order_id=order.id)
+                # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Возвращаем HTML-фрагмент с редиректом ---
+                if request.headers.get('HX-Request'):  # Это htmx-запрос
+                    return HttpResponse(f"""
+                        <div hx-trigger="load" hx-get="{success_url}" hx-target="body" hx-swap="outerHTML">
+                            <!-- Редирект на страницу успеха -->
+                        </div>
+                    """)
+                else:
+                    return redirect('orders:order_success', locality_slug=locality.slug, order_id=order.id)
 
             except Exception as e:
                 logger.error(f"Ошибка создания заказа для product_item_id={kwargs['product_item_id']}: {str(e)}")
                 raise
-
         else:
             logger.warning(f"Ошибка валидации формы заказа: {form.errors}")
 
-        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            errors = {field: [str(e) for e in error_list] for field, error_list in form.errors.items()}
-            return JsonResponse({'success': False, 'errors': errors}, status=400)
-
+        # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Возвращаем HTML с формой и ошибками ---
         context = self.get_context_data(**kwargs)
         context['form'] = form
         return self.render_to_response(context)

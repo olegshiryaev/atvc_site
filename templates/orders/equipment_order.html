@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 {% load humanize %}
+
 {% block content %}
 <div class="order-form">
     <div class="order-form__container container">
@@ -22,7 +23,6 @@
                                     {% endif %}
                                 {% endwith %}
                             </div>
-
                             <!-- Название, цвет и цена -->
                             <div class="product-order__details">
                                 <div class="product-order__header">
@@ -35,7 +35,6 @@
                                                 {{ product_item.get_display_name }}
                                             </a>
                                         </h3>
-
                                         <!-- Цвет -->
                                         {% if product_item.color %}
                                             <div class="product-order__color-info">
@@ -44,7 +43,6 @@
                                             </div>
                                         {% endif %}
                                     </div>
-
                                     <!-- Цена справа -->
                                     <div class="product-order__price-block">
                                         <div class="product-order__price-value" id="current-price-display">
@@ -60,7 +58,7 @@
                             </div>
                         </div>
                     </section>
-                
+
                     {% if product_item.installment_available %}
                     <!-- Способ приобретения оборудования -->
                     <section class="payment-methods">
@@ -152,7 +150,17 @@
                         <noscript>
                             <div class="alert alert-danger">Для корректной работы формы требуется включённый JavaScript.</div>
                         </noscript>
-                        <form class="order-form__form" id="orderForm" method="post" action="{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product_item.id %}">
+
+                        <!-- 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Добавляем атрибуты HTMX -->
+                        <form class="order-form__form" 
+                              id="orderForm" 
+                              method="post" 
+                              action="{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product_item.id %}"
+                              hx-post="{% url 'orders:equipment_order' locality_slug=locality.slug product_item_id=product_item.id %}"
+                              hx-target="#orderFormContainer"
+                              hx-swap="outerHTML"
+                              hx-indicator="#submit-button"
+                              hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
                             {% csrf_token %}
                             <div class="order-form__fields">
                                 <!-- Имя -->
@@ -163,7 +171,6 @@
                                         {% if form.full_name.errors %}{{ form.full_name.errors.0 }}{% endif %}
                                     </div>
                                 </div>
-
                                 <!-- Телефон -->
                                 <div class="order-form__field order-form__field--phone">
                                     <label for="id_phone" class="order-form__label">Номер телефона</label>
@@ -172,7 +179,6 @@
                                         {% if form.phone.errors %}{{ form.phone.errors.0 }}{% endif %}
                                     </div>
                                 </div>
-
                                 <!-- Второй ряд: Улица, Дом, Квартира -->
                                 <div class="order-form__row--address">
                                     <!-- Улица -->
@@ -183,7 +189,6 @@
                                             {% if form.street.errors %}{{ form.street.errors.0 }}{% endif %}
                                         </div>
                                     </div>
-
                                     <!-- Дом -->
                                     <div class="order-form__field order-form__field--house">
                                         <label for="id_house" class="order-form__label">Дом</label>
@@ -192,7 +197,6 @@
                                             {% if form.house.errors %}{{ form.house.errors.0 }}{% endif %}
                                         </div>
                                     </div>
-
                                     <!-- Квартира -->
                                     <div class="order-form__field order-form__field--apartment">
                                         <label for="id_apartment" class="order-form__label">Квартира</label>
@@ -202,7 +206,6 @@
                                         </div>
                                     </div>
                                 </div>
-
                                 <!-- Комментарий -->
                                 <div class="order-form__field order-form__field--comments">
                                     <label for="id_comment" class="order-form__label">Комментарий (необязательно)</label>
@@ -211,7 +214,6 @@
                                         {% if form.comment.errors %}{{ form.comment.errors.0 }}{% endif %}
                                     </div>
                                 </div>
-
                                 <!-- Скрытые поля (не отображаем) -->
                                 {{ form.product_item_id }}
                                 {{ form.payment_type }}
@@ -220,7 +222,6 @@
                                 {{ form.equipment_payment_options }}
                                 {{ form.selected_service_slugs }}
                                 {{ form.selected_tv_package_ids }}
-
                                 <!-- Общие ошибки формы -->
                                 <div id="form-errors" class="error-container">
                                     {% if form.non_field_errors %}
@@ -273,6 +274,8 @@
     </div>
 </div>
 
+<!-- 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Подключаем HTMX -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 <script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -321,19 +324,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const price = document.querySelector(`input[name="payment_type"][value="${selectedPayment}"]`)?.dataset.price || {{ product_item.get_final_price }};
         const isMonthly = selectedPayment !== 'purchase';
         const formattedPrice = new Intl.NumberFormat('ru-RU').format(price) + ' ₽' + (isMonthly ? '/мес.' : '');
-
         // Обновляем отображение цены
         priceDisplay.textContent = formattedPrice;
         summaryPrice.textContent = formattedPrice;
         summaryTotal.textContent = formattedPrice;
-
         // 🔥 Обновляем мобильную версию итогов
         document.querySelector('#summary-price-mobile').textContent = formattedPrice;
         document.querySelector('#summary-total-mobile').textContent = formattedPrice;
-
         // Обновляем поле формы
         document.querySelector('#orderForm [name="payment_type"]').value = selectedPayment;
-
         // Активация выбранного способа оплаты
         paymentRadios.forEach(r => r.parentElement.classList.remove('active'));
         document.querySelector(`input[name="payment_type"][value="${selectedPayment}"]`).parentElement.classList.add('active');
@@ -353,90 +352,21 @@ document.addEventListener('DOMContentLoaded', () => {
     validateOrderForm();
     updatePrice();
 
-    // Обработка отправки формы
-    document.getElementById('orderForm').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        // Сброс ошибок
-        document.querySelectorAll('.order-form__input, .order-form__textarea').forEach(el => {
-            el.classList.remove('order-form__input--invalid');
-        });
-        document.querySelectorAll('.order-form__validation-message').forEach(el => {
-            el.textContent = '';
-            el.style.display = 'none';
-        });
-        document.getElementById('form-errors').innerHTML = '';
-
-        const formData = new FormData(this);
-
-        // Валидация телефона
-        const phone = phoneMask ? preparePhoneNumber(phoneMask.unmaskedValue) : null;
-        if (!phone) {
-            const phoneField = document.querySelector('#phone');
-            phoneField.classList.add('order-form__input--invalid');
-            document.getElementById('error_phone').textContent = 'Введите корректный номер';
-            document.getElementById('error_phone').style.display = 'block';
-            return;
+    // 🔥 КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Добавляем глобальные обработчики для HTMX
+    document.body.addEventListener('htmx:beforeSend', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.id === 'submit-button') {
+            btn.disabled = true;
+            btn.classList.add('order-form__submit--loading');
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Отправка...';
         }
-        formData.set('phone', phone);
-
-        // Валидация имени
-        const fullName = formData.get('full_name').trim();
-        if (fullName.length < 3) {
-            document.querySelector('#name').classList.add('order-form__input--invalid');
-            document.getElementById('error_full_name').textContent = 'Минимум 3 символа';
-            document.getElementById('error_full_name').style.display = 'block';
-            return;
-        }
-
-        submitButton.disabled = true;
-        submitButton.classList.add('order-form__submit--loading');
-        submitButton.innerHTML = 'Отправка...';
-
-        try {
-            const response = await fetch(this.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-            const data = await response.json();
-            if (response.ok && data.success) {
-                this.reset();
-                if (phoneMask) phoneMask.updateValue();
-                window.location.href = data.redirect_url;
-            } else {
-                const errorList = document.createElement('ul');
-                errorList.className = 'errorlist';
-                for (const [field, errors] of Object.entries(data.errors || {})) {
-                    errors.forEach(err => {
-                        const li = document.createElement('li');
-                        li.textContent = err;
-                        errorList.appendChild(li);
-                        const fieldElement = document.querySelector(`#orderForm [name="${field}"]`);
-                        if (fieldElement) {
-                            fieldElement.classList.add('order-form__input--invalid');
-                            const errorDiv = document.getElementById(`error_${field}`);
-                            if (errorDiv) {
-                                errorDiv.textContent = err;
-                                errorDiv.style.display = 'block';
-                            }
-                        }
-                    });
-                }
-                document.getElementById('form-errors').appendChild(errorList);
-                document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
-            }
-        } catch (error) {
-            console.error('Ошибка сети:', error);
-            document.getElementById('form-errors').innerHTML = '<ul class="errorlist"><li>Ошибка соединения. Попробуйте позже.</li></ul>';
-            document.getElementById('form-errors').scrollIntoView({ behavior: 'smooth' });
-        } finally {
-            submitButton.disabled = false;
-            submitButton.classList.remove('order-form__submit--loading');
-            submitButton.innerHTML = 'Отправить заявку';
+    });
+    document.body.addEventListener('htmx:afterSettle', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.id === 'submit-button') {
+            btn.disabled = false;
+            btn.classList.remove('order-form__submit--loading');
+            btn.innerHTML = 'Отправить заявку';
         }
     });
 });

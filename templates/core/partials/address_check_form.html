@@ -15,11 +15,22 @@
                     <p class="address-check__description">Узнайте, какие услуги доступны по вашему адресу</p>
                 </div>
                 
-                <form id="connectionCheckForm" class="address-check__form" method="post" action="{% url 'orders:submit_order' locality_slug=locality.slug %}" novalidate>
+                <!-- 🔥 МОДИФИЦИРОВАННАЯ ФОРМА С HTMX -->
+                <form id="connectionCheckForm" 
+                      class="address-check__form" 
+                      method="post" 
+                      action="{% url 'orders:submit_order' locality_slug=locality.slug %}"
+                      hx-post="{% url 'orders:submit_order' locality_slug=locality.slug %}"
+                      hx-target="#address-check-modal"
+                      hx-swap="innerHTML"
+                      hx-indicator="#submitConnectionBtn"
+                      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+                      novalidate>
                     {% csrf_token %}
                     <input type="hidden" name="tariff_id" id="tariff_id" value="">
                     <input type="hidden" name="comment" id="comment" value="Требуется подбор тарифа">
-                    
+                    <input type="hidden" name="form_type" value="address_check">
+
                     <!-- Поле ФИО -->
                     <div class="address-check__field-group">
                         <input type="text" name="full_name" id="full_name" class="address-check__input" 
@@ -83,12 +94,7 @@
 
 <!-- Модальное окно успешной отправки -->
 <div class="address-check__modal" id="address-check-modal" role="dialog" aria-modal="true" aria-labelledby="address-check-modal-title">
-    <div class="address-check__modal-content">
-        <span class="address-check__modal-close" role="button" aria-label="Закрыть модальное окне">×</span>
-        <h3 class="address-check__modal-title" id="address-check-modal-title">Заявка отправлена!</h3>
-        <p class="address-check__modal-text">Мы свяжемся с вами в течение часа для уточнения деталей.</p>
-        <button class="address-check__modal-btn" id="address-check-modal-close">Закрыть</button>
-    </div>
+    <!-- HTMX вставит сюда содержимое при успехе -->
 </div>
 
 <style>
@@ -294,6 +300,12 @@
     transition: visibility 0s linear, opacity 0.3s ease;
 }
 
+.address-check__modal:has(.address-check__modal-content) {
+    visibility: visible;
+    opacity: 1;
+    transition: visibility 0s linear, opacity 0.3s ease;
+}
+
 .address-check__modal-content {
     background: #fff;
     padding: 30px;
@@ -483,11 +495,13 @@
 }
 </style>
 
+<!-- 🔥 Подключаем HTMX -->
+<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+<script src="https://unpkg.com/imask@7/dist/imask.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const connectionForm = document.getElementById('connectionCheckForm');
     const successModal = document.getElementById('address-check-modal');
-    const modalCloseBtn = document.getElementById('address-check-modal-close');
     
     if (!connectionForm) return;
 
@@ -499,7 +513,7 @@ document.addEventListener('DOMContentLoaded', function() {
         placeholderChar: '_'
     });
 
-    // Функция для подготовки номера телефона к отправке
+    // Функция для подготовки номера телефона
     function preparePhoneNumber(phoneValue) {
         const digits = phoneValue.replace(/\D/g, '');
         if (digits.length === 11 && digits.startsWith('7')) {
@@ -524,122 +538,61 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Управление модальным окном
-    function showSuccessModal() {
-        successModal.classList.add('is-visible');
-    }
-    
     function hideSuccessModal() {
+        successModal.innerHTML = ''; // Очищаем содержимое модалки
         successModal.classList.remove('is-visible');
     }
     
-    modalCloseBtn.addEventListener('click', hideSuccessModal);
-    successModal.querySelector('.address-check__modal-close').addEventListener('click', hideSuccessModal);
-    
-    successModal.addEventListener('click', function(e) {
-        if (e.target === successModal) {
+    // Добавляем обработчик закрытия модалки
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('address-check__modal-close')) {
             hideSuccessModal();
         }
     });
 
-    // Отправка формы
-    connectionForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        // Сброс ошибок
-        connectionForm.querySelectorAll('.address-check__input').forEach(el => el.classList.remove('address-check__input--invalid'));
-        connectionForm.querySelectorAll('.address-check__validation-message').forEach(el => {
-            el.classList.remove('address-check__validation-message--visible');
-        });
-
-        // Валидация
-        let isFormValid = true;
-        const preparedPhone = preparePhoneNumber(phoneMask.unmaskedValue);
-        
-        // Валидация ФИО
-        const fullNameField = connectionForm.querySelector('[name="full_name"]');
-        if (fullNameField.value.trim().length < 3) {
-            fullNameField.classList.add('address-check__input--invalid');
-            const errorElement = connectionForm.querySelector('#error_full_name');
-            errorElement.textContent = 'Введите полное имя (минимум 3 символа)';
-            errorElement.classList.add('address-check__validation-message--visible');
-            isFormValid = false;
-        }
-        
-        // Валидация телефона
-        const phoneField = connectionForm.querySelector('[name="phone"]');
-        if (!preparedPhone) {
-            phoneField.classList.add('address-check__input--invalid');
-            const errorElement = connectionForm.querySelector('#error_phone');
-            errorElement.textContent = 'Введите номер телефона в формате +7 (XXX) XXX-XX-XX';
-            errorElement.classList.add('address-check__validation-message--visible');
-            isFormValid = false;
-        }
-        
-        // Валидация улицы
-        const streetField = connectionForm.querySelector('[name="street"]');
-        if (!streetField.value.trim()) {
-            streetField.classList.add('address-check__input--invalid');
-            const errorElement = connectionForm.querySelector('#error_street');
-            errorElement.textContent = 'Введите название улицы';
-            errorElement.classList.add('address-check__validation-message--visible');
-            isFormValid = false;
-        }
-        
-        // Валидация дома
-        const houseField = connectionForm.querySelector('[name="house"]');
-        if (!houseField.value.trim()) {
-            houseField.classList.add('address-check__input--invalid');
-            const errorElement = connectionForm.querySelector('#error_house');
-            errorElement.textContent = 'Введите номер дома';
-            errorElement.classList.add('address-check__validation-message--visible');
-            isFormValid = false;
-        }
-        
-        if (!isFormValid) return;
-
-        // Отправка данных
-        try {
-            const submitBtn = connectionForm.querySelector('#submitConnectionBtn');
-            submitBtn.disabled = true;
-            submitBtn.classList.add('address-check__submit-btn--loading');
-            
-            const formData = new FormData(connectionForm);
-            formData.set('phone', preparedPhone);
-            
-            const response = await fetch(connectionForm.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            const data = await response.json();
-
-            if (response.ok && data.success) {
-                connectionForm.reset();
-                phoneMask.updateValue();
-                showSuccessModal();
-            } else if (data.errors) {
-                for (const [field, errors] of Object.entries(data.errors)) {
-                    const errorElement = connectionForm.querySelector(`#error_${field}`);
-                    if (errorElement) {
-                        errorElement.textContent = errors.join(' ');
-                        errorElement.classList.add('address-check__validation-message--visible');
-                        const inputField = connectionForm.querySelector(`[name="${field}"]`);
-                        if (inputField) inputField.classList.add('address-check__input--invalid');
-                    }
-                }
-            }
-        } catch (error) {
-            console.error('Ошибка при проверке адреса:', error);
-            alert('Произошла ошибка при отправке данных. Пожалуйста, попробуйте позже.');
-        } finally {
-            const submitBtn = connectionForm.querySelector('#submitConnectionBtn');
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('address-check__submit-btn--loading');
+    // --- 🔥 Добавляем глобальные обработчики для HTMX ---
+    document.body.addEventListener('htmx:beforeSend', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.id === 'submitConnectionBtn') {
+            btn.disabled = true;
+            btn.classList.add('address-check__submit-btn--loading');
         }
     });
+    document.body.addEventListener('htmx:afterSettle', function(evt) {
+        const btn = evt.detail.elt;
+        if (btn.id === 'submitConnectionBtn') {
+            btn.disabled = false;
+            btn.classList.remove('address-check__submit-btn--loading');
+        }
+        // Автоматически показываем модалку, если в нее что-то вставлено
+        if (evt.detail.target.id === 'address-check-modal' && evt.detail.target.innerHTML.trim() !== '') {
+            evt.detail.target.classList.add('is-visible');
+        }
+    });
+
+    // --- 🔥 НОВОЕ: Очищаем форму после успешной отправки ---
+    document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+        // Проверяем, что это наша форма и запрос был успешным
+        if (evt.detail.elt.id === 'connectionCheckForm' && evt.detail.xhr.status === 200) {
+            // Проверяем, что в ответе есть модальное окно (успешная отправка)
+            if (evt.detail.xhr.responseText.includes('address-check__modal-content')) {
+                evt.detail.elt.reset(); // Очищаем поля формы
+                if (phoneMask) {
+                    phoneMask.updateValue(''); // Сбрасываем маску телефона
+                }
+                // Сбрасываем классы ошибок валидации
+                connectionForm.querySelectorAll('.address-check__input--invalid').forEach(el => {
+                    el.classList.remove('address-check__input--invalid');
+                });
+                // Скрываем сообщения об ошибках
+                connectionForm.querySelectorAll('.address-check__validation-message').forEach(el => {
+                    el.classList.remove('address-check__validation-message--visible');
+                    el.style.display = 'none';
+                });
+            }
+        }
+    });
+    // --- КОНЕЦ НОВОГО КОДА ---
 
     // Инициализация формы
     validateConnectionForm();
