@@ -22,7 +22,12 @@ class ChatSession(models.Model):
     operator = models.ForeignKey(ChatOperator, on_delete=models.SET_NULL, null=True, blank=True, related_name='sessions')
     created_at = models.DateTimeField(auto_now_add=True)
     is_closed = models.BooleanField(default=False)
-    token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
+    token = models.UUIDField(
+        default=uuid.uuid4,
+        unique=True,
+        editable=False,
+        help_text="Уникальный токен для идентификации сессии в WebSocket."
+    )
 
     def __str__(self):
         return f"{self.name} ({self.contact})"

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 def news_list(request, locality_slug):
     """Отображает список новостей для указанного населённого пункта."""
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
-    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at").select_related('image').prefetch_related('localities')
+    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at").prefetch_related('localities')
     paginator = Paginator(news_qs, 6)
     page_obj = paginator.get_page(request.GET.get("page", 1))
 
@@ -42,14 +42,11 @@ def news_list(request, locality_slug):
 
 def load_more_news(request, locality_slug):
     """Загружает дополнительные новости через AJAX."""
-    if not request.headers.get("X-Requested-With") == "XMLHttpRequest":
-        return JsonResponse({"error": "Требуется AJAX-запрос"}, status=400)
-
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
     page = int(request.GET.get("page", 2))
-    news_per_page = 6  # Унифицировано с news_list
+    news_per_page = 6
 
-    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at").select_related('image').prefetch_related('localities')
+    news_qs = News.objects.published().filter(localities=locality).order_by("-created_at")
     paginator = Paginator(news_qs, news_per_page)
 
     try:
@@ -57,13 +54,30 @@ def load_more_news(request, locality_slug):
     except EmptyPage:
         return JsonResponse({"has_more_news": False, "html": ""})
 
-    html = render_to_string(
-        "news/partials/news_card_list.html",
-        {"page_obj": page_obj, "locality": locality},
-        request=request,
-    )
+    # --- ИЗМЕНЕНИЕ НАЧИНАЕТСЯ ЗДЕСЬ ---
+    # Собираем HTML для каждой отдельной новости на странице
+    news_html_list = []
+    for news_item in page_obj.object_list: # Итерируемся по списку объектов на странице
+        # Рендерим шаблон ОДНОЙ карточки для каждой новости
+        news_html = render_to_string(
+            "news/partials/news_card.html",  # <-- Шаблон ОДНОЙ карточки
+            {
+                "news": news_item,          # Передаем ОДИН объект новости
+                "locality": locality,
+                "is_preview": False,        # Если этот параметр используется в шаблоне
+            },
+            request=request,
+        )
+        news_html_list.append(news_html)
 
-    return JsonResponse({"html": html, "has_more_news": page_obj.has_next()})
+    # Объединяем все карточки в одну строку HTML
+    combined_html = ''.join(news_html_list)
+    # --- ИЗМЕНЕНИЕ ЗАКАНЧИВАЕТСЯ ЗДЕСЬ ---
+
+    return JsonResponse({
+        "html": combined_html,              # Отправляем строку из отдельных карточек
+        "has_more_news": page_obj.has_next()
+    })
 
 
 def news_detail(request, locality_slug, news_slug):

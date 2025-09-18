@@ -1,7 +1,7 @@
 {% load static %}
 {% if latest_news %}
 <section class="main_news-block block" data-swiper='{
-    "slidesPerView": 1,
+    "slidesPerView": 1.1,
     "spaceBetween": 24,
     "breakpoints": {
         "768": {"slidesPerView": 2, "spaceBetween": 24},
@@ -21,7 +21,7 @@
         </div>
     </div>
     <div class="main_news-block__wrapper_slider">
-        <div class="swiper">
+        <div class="swiper swiper-container--not-ready">
             <div class="swiper-wrapper">
                 {% for news in latest_news %}
                 <div class="main_news-block__news news news_slide swiper-slide" aria-label="Новость {{ news.title|default:'Без заголовка' }}">
@@ -29,19 +29,19 @@
                 </div>
                 {% endfor %}
             </div>
-        </div>
-        <div class="main_news-block_navs slider-navs">
-            <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд" aria-controls="news-slider">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 19L8 12L15 5"></path>
-                </svg>
-            </button>
-            <div class="slider-navs__pag"></div>
-            <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд" aria-controls="news-slider">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M15 19L8 12L15 5"></path>
-                </svg>
-            </button>
+            <div class="main_news-block_navs slider-navs">
+                <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд" aria-controls="news-slider">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 19L8 12L15 5"></path>
+                    </svg>
+                </button>
+                <div class="slider-navs__pag"></div>
+                <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд" aria-controls="news-slider">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M15 19L8 12L15 5"></path>
+                    </svg>
+                </button>
+            </div>
         </div>
     </div>
 </section>

@@ -387,6 +387,7 @@ class ColorAdmin(admin.ModelAdmin):
     list_display = ('name', 'hex_code', 'color_preview', 'product_count')
     search_fields = ('name', 'hex_code')
     prepopulated_fields = {'slug': ('name',)}
+    fields = ('name', 'slug', 'hex_code')
 
     def color_preview(self, obj):
         if obj.hex_code:

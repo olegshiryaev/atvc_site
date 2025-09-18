@@ -21,15 +21,13 @@ document.addEventListener('DOMContentLoaded', () => {
         new Swiper(swiperContainer, {
             ...config,
             navigation: {
-                nextEl,
-                prevEl,
+                nextEl: '.slider-navs__next',
+                prevEl: '.slider-navs__prev',
                 disabledClass: 'slider-navs__btn--disabled', // Добавляем класс для неактивных кнопок
             },
             pagination: {
-                el: paginationEl,
+                el: '.slider-navs__pag',
                 clickable: true,
-                bulletClass: 'slider-navs__bullet',
-                bulletActiveClass: 'slider-navs__bullet--active',
             },
             lazy: {
                 loadPrevNext: true,
@@ -45,7 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
             watchOverflow: true, // Отключает навигацию, если слайдов мало
             on: {
                 init: function () {
-                    container.classList.add('swiper-ready');
+                    // this.el — это DOM-элемент .swiper
+                    const swiperEl = this.el;
+                    swiperEl.classList.remove('swiper-container--not-ready');
+                    swiperEl.classList.add('swiper-container--ready');
                 },
             },
         });
@@ -59,20 +60,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!el.swiper) {
                 new Swiper(el, {
-                    slidesPerView: 1,
-                    spaceBetween: 20,
+                    slidesPerView: 1.1,
+                    spaceBetween: 30,
                     loop: false,
                     watchOverflow: true,
+                    grabCursor: true,
                     pagination: {
-                        el: wrapper.querySelector('.slider-navs__pag'),
+                        el: '.tariff-swiper .slider-navs__pag',
                         clickable: true,
-                        bulletClass: 'slider-navs__bullet',
-                        bulletActiveClass: 'slider-navs__bullet--active',
                     },
                     navigation: {
-                        nextEl: wrapper.querySelector('.slider-navs__next'),
-                        prevEl: wrapper.querySelector('.slider-navs__prev'),
-                        disabledClass: 'slider-navs__btn--disabled',
+                        nextEl: '.tariff-swiper .slider-navs__next',
+                        prevEl: '.tariff-swiper .slider-navs__prev',
                     },
                     breakpoints: {
                         576: { slidesPerView: 1.2 },
@@ -82,7 +81,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     },
                     on: {
                         init: function () {
-                            wrapper.classList.add('swiper-ready');
+                            const swiperEl = this.el;
+                            swiperEl.classList.remove('swiper-container--not-ready');
+                            swiperEl.classList.add('swiper-container--ready');
                         },
                     },
                 });

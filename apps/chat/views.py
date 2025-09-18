@@ -18,11 +18,12 @@ import logging
 logger = logging.getLogger(__name__)
 
 def is_support(user):
-    return user.is_authenticated and user.is_staff
+    return user.is_authenticated and user.groups.filter(name='SupportTeam').exists()
 
 def support_login(request):
-    if request.user.is_authenticated and request.user.is_staff:
+    if request.user.is_authenticated and request.user.groups.filter(name='SupportTeam').exists():
         return redirect('support_dashboard')
+
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
@@ -30,13 +31,13 @@ def support_login(request):
             password = form.cleaned_data.get('password')
             user = authenticate(request, username=username, password=password)
             if user is not None:
-                if user.is_staff:
+                if user.groups.filter(name='SupportTeam').exists():
                     login(request, user)
                     logger.info(f"Специалист вошёл: username={username}")
                     return redirect('support_dashboard')
                 else:
                     logger.warning(f"Попытка входа без прав специалиста: username={username}")
-                    form.add_error(None, 'Требуются права специалиста')
+                    form.add_error(None, 'Требуется принадлежность к группе SupportTeam')
             else:
                 logger.warning(f"Неверные учетные данные: username={username}")
                 form.add_error(None, 'Неверное имя пользователя или пароль')

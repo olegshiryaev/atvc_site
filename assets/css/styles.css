@@ -698,6 +698,21 @@ select,
     background: url("/static/icons/credit-card.svg") no-repeat 50% 50%/contain
 }
 
+.account-link {
+    padding: 8px 16px;
+    background-color: var(--main-color);
+    color: white;
+    border-radius: 4px;
+    text-decoration: none;
+    transition: background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.account-link:hover {
+    background-color: var(--main-color-on-hover);
+    color: white !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
 /* Кнопка выбора города */
 .main-nav .btn-link {
     color: var(--color-text);
@@ -799,6 +814,7 @@ select,
     position: relative;
     transition-property: transform;
     display: block;
+    transition: transform 0.3s ease;
 }
 
 .swiper-slide-invisible-blank {
@@ -1573,9 +1589,8 @@ button.swiper-pagination-bullet {
 .slider-navs .owl-prev,
 .slider-navs .owl-next {
     position: absolute;
-    top: 14px;
-    bottom: 0;
-    margin: auto;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 1;
     width: 40px;
     height: 40px;
@@ -1655,6 +1670,7 @@ button.swiper-pagination-bullet {
 /* === Стили пагинации === */
 .slider-navs__pag {
     text-align: center;
+    margin-top: 28px;
 }
 
 .slider-navs__pag .swiper-pagination-bullet {
@@ -2634,7 +2650,7 @@ button.swiper-pagination-bullet {
 .news-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 24px;
+    gap: 40px;
     width: 100%; /* Растягиваем сетку на всю ширину контейнера */
     justify-content: start; /* Выравнивание по левому краю */
 }
@@ -2644,6 +2660,18 @@ button.swiper-pagination-bullet {
         grid-template-columns: repeat(3, 1fr);
         justify-content: start; /* Карточки начинаются с левого края */
     }
+}
+
+/* Анимация появления */
+.news-grid__item {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.news-grid__item.animate-in {
+    opacity: 0;
+    transform: translateY(30px);
 }
 
 /* Кнопка "Читать ещё" */
@@ -2909,8 +2937,31 @@ button.swiper-pagination-bullet {
 
 .related-news__grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 24px;
+    justify-content: start;
+}
+
+.related-news__card {
+    width: 100%;
+}
+
+/* Адаптивность */
+@media (max-width: 960px) {
+    .related-news__grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Адаптивное количество колонок */
+        justify-content: start; /* Выравнивание слева */
+    }
+}
+
+@media (max-width: 768px) {
+    .related-news__grid {
+        grid-template-columns: 1fr; /* Одна колонка на узких экранах */
+    }
+
+    .related-news__card {
+        width: 100%; /* Карточка занимает всю ширину */
+    }
 }
 
 /* Адаптивность */
@@ -5205,10 +5256,6 @@ button.swiper-pagination-bullet {
     position: relative;
 }
 
-.products-slider-block .slider-navs {
-    margin-top: 28px;
-}
-
 .products-slider-block__item.swiper-slide {
     height: auto;
     display: flex;
@@ -6441,10 +6488,6 @@ button.swiper-pagination-bullet {
         rgba(28, 61, 90, 0.95),
         rgba(28, 61, 90, 0.2)
     );
-}
-
-.advantages-block .slider-navs {
-    margin-top: 28px;
 }
 
 /* === Блок "Доступные услуги" === */
@@ -10445,4 +10488,17 @@ button.swiper-pagination-bullet {
     .cookie-consent-buttons .btn {
         width: 100%;
     }
+}
+
+/* Скрываем слайдер до инициализации */
+.swiper-container--not-ready {
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+/* Показываем слайдер после инициализации */
+.swiper-container--ready {
+    opacity: 1;
+    visibility: visible;
 }

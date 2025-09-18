@@ -3,7 +3,7 @@
 {% load static %}
 <div class="tariff-swiper-wrapper">
     <!-- Swiper -->
-    <div class="swiper tariff-swiper">
+    <div class="swiper tariff-swiper swiper-container--not-ready">
         <div class="swiper-wrapper">
             <!-- Цикл по тарифам -->
             {% for tariff in displayed_tariffs %}
@@ -147,23 +147,23 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Навигация для слайдера -->
-    <div class="slider-navs">
-        <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 19L8 12L15 5"></path>
-            </svg>
-        </button>
-        <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                 stroke-linecap="round" stroke-linejoin="round">
-                <path d="M15 19L8 12L15 5"></path>
-            </svg>
-        </button>
-        <div class="slider-navs__pag swiper-pagination-clickable swiper-pagination-bullets swiper-pagination-horizontal"></div>
+        <!-- Навигация для слайдера -->
+        <div class="slider-navs">
+            <button class="slider-navs__btn slider-navs__prev" aria-label="Предыдущий слайд">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 19L8 12L15 5"></path>
+                </svg>
+            </button>
+            <div class="slider-navs__pag"></div>
+            <button class="slider-navs__btn slider-navs__next" aria-label="Следующий слайд">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M15 19L8 12L15 5"></path>
+                </svg>
+            </button>
+        </div>
     </div>
 </div>
 

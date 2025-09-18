@@ -17,6 +17,7 @@ from django.contrib import messages
 
 from django.views.decorators.http import require_POST
 import json
+from django.db import transaction
 import logging
 
 
@@ -24,6 +25,66 @@ import logging
 
 # Определение логгера
 logger = logging.getLogger('orders')
+
+
+def process_order_data(order, form_data, logger):
+    with transaction.atomic():
+        # Обработка тарифов
+        tariff_ids = list(set(
+            ([form_data.get("tariff_id")] if form_data.get("tariff_id") else []) +
+            (form_data.get("tariff_ids", []) or [])
+        ))
+        tariffs = Tariff.objects.filter(id__in=tariff_ids, is_active=True).select_related('service')
+        if tariffs.exists():
+            order.tariffs.set(tariffs)
+            logger.debug(f"Добавлены тарифы: {list(tariffs.values_list('name', flat=True))}")
+        else:
+            logger.debug("Ни один тариф не был добавлен (не найдены или неактивны)")
+
+        # Обработка оборудования
+        equipment_ids = form_data.get("selected_equipment_ids") or []
+        if not isinstance(equipment_ids, list):
+            logger.warning(f"Поле selected_equipment_ids не является списком: {equipment_ids}")
+            equipment_ids = []
+        payment_options = form_data.get("equipment_payment_options", {})
+        if not isinstance(payment_options, dict):
+            logger.warning(f"Поле equipment_payment_options не является словарем: {payment_options}")
+            payment_options = {}
+
+        for product_id in equipment_ids:
+            product_item = get_object_or_404(ProductItem, id=product_id)
+            payment_type = payment_options.get(str(product_id), 'purchase')
+            price = product_item.get_final_price()
+
+            if payment_type == 'installment12' and product_item.installment_12_months:
+                price = product_item.installment_12_months
+            elif payment_type == 'installment24' and product_item.installment_24_months:
+                price = product_item.installment_24_months
+            elif payment_type == 'installment48' and product_item.installment_48_months:
+                price = product_item.installment_48_months
+
+            OrderProduct.objects.create(
+                order=order,
+                product_item=product_item,
+                price=price,
+                payment_type=payment_type
+            )
+
+        # Обработка дополнительных услуг
+        service_slugs = form_data.get("selected_service_slugs", [])
+        if service_slugs:
+            services = AdditionalService.objects.filter(slug__in=service_slugs)
+            order.services.set(services)
+            logger.debug(f"Добавлены услуги: {list(services.values_list('name', flat=True))}")
+
+        # Обработка ТВ-пакетов
+        tv_package_ids = form_data.get("selected_tv_package_ids", [])
+        if tv_package_ids:
+            tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids)
+            order.tv_packages.set(tv_packages)
+            logger.debug(f"Добавлены ТВ-пакеты: {list(tv_packages.values_list('name', flat=True))}")
+
+        return tariffs
 
 def order_create(request, locality_slug, slug):
     logger.debug(f"Получен запрос: {request.method}, URL: {request.path}, POST: {dict(request.POST)}")
@@ -68,14 +129,7 @@ def order_create(request, locality_slug, slug):
             order.locality = locality
             order.save()
 
-            tariff_ids = form.cleaned_data.get("tariff_ids", [])
-            if not tariff_ids:
-                tariff_ids = [tariff.id]
-            else:
-                tariff_ids = list(set(tariff_ids + [tariff.id]))
-                logger.debug(f"Обработанные tariff_ids: {tariff_ids}")
-
-            selected_tariffs = Tariff.objects.filter(id__in=tariff_ids, is_active=True)
+            selected_tariffs = process_order_data(order, form.cleaned_data, logger)
 
             service_ids = list(selected_tariffs.values_list('service__id', flat=True))
             if len(service_ids) != len(set(service_ids)):
@@ -91,82 +145,14 @@ def order_create(request, locality_slug, slug):
                     "is_tv_tariff": is_tv_tariff,
                     "is_internet_tariff": is_internet_tariff,
                     "no_tv_packages": not tv_packages.exists(),
+                    "submit_order_url": reverse("orders:submit_order", kwargs={"locality_slug": locality_slug}),
                 })
 
-            order.tariffs.set(selected_tariffs)
-            total_connection_price = sum(t.connection_price for t in selected_tariffs)
-            logger.debug(f"Добавлены тарифы: {[t.id for t in selected_tariffs]}, общая стоимость подключения: {total_connection_price}")
-
-            equipment_ids = form.cleaned_data.get("selected_equipment_ids", [])
-            payment_options = form.cleaned_data.get("equipment_payment_options", {})
-
-            for product_id in equipment_ids:
-                product_item = get_object_or_404(ProductItem, id=product_id)
-                payment_type = payment_options.get(str(product_id), 'purchase')
-                price = product_item.get_final_price()
-
-                if payment_type == 'installment12' and product_item.installment_12_months:
-                    price = product_item.installment_12_months
-                elif payment_type == 'installment24' and product_item.installment_24_months:
-                    price = product_item.installment_24_months
-                elif payment_type == 'installment48' and product_item.installment_48_months:
-                    price = product_item.installment_48_months
-
-                OrderProduct.objects.create(
-                    order=order,
-                    product_item=product_item,
-                    price=price,
-                    payment_type=payment_type
-                )
-
-            service_slugs = form.cleaned_data.get("selected_service_slugs", [])
-            if service_slugs:
-                order.services.set(AdditionalService.objects.filter(slug__in=service_slugs))
-                logger.debug(f"Добавлены услуги: {service_slugs}")
-
-            tv_package_ids = form.cleaned_data.get("selected_tv_package_ids", [])
-            if tv_package_ids:
-                if not order.tariffs.filter(service__slug="tv").exists():
-                    form.add_error(None, "Пакеты ТВ-каналов можно выбрать только при наличии тарифа на телевидение.")
-                    return render(request, "orders/order_create.html", {
-                        "form": form,
-                        "tariff": tariff,
-                        "tv_tariffs": tv_tariffs,
-                        "products": products,
-                        "services": services,
-                        "tv_packages": tv_packages,
-                        "locality": locality,
-                        "is_tv_tariff": is_tv_tariff,
-                        "is_internet_tariff": is_internet_tariff,
-                        "no_tv_packages": not tv_packages.exists(),
-                    })
-                tv_tariff = order.tariffs.filter(service__slug="tv").first()
-                if tv_tariff:
-                    valid_packages = tv_tariff.tv_packages.filter(id__in=tv_package_ids)
-                    if valid_packages.count() != len(tv_package_ids):
-                        form.add_error(None, "Некоторые ТВ-пакеты не совместимы с выбранным ТВ-тарифом.")
-                        logger.warning(f"Несовместимые ТВ-пакеты: {set(tv_package_ids) - set(valid_packages.values_list('id', flat=True))}")
-                        return render(request, "orders/order_create.html", {
-                            "form": form,
-                            "tariff": tariff,
-                            "tv_tariffs": tv_tariffs,
-                            "products": products,
-                            "services": services,
-                            "tv_packages": tv_packages,
-                            "locality": locality,
-                            "is_tv_tariff": is_tv_tariff,
-                            "is_internet_tariff": is_internet_tariff,
-                            "no_tv_packages": not tv_packages.exists(),
-                        })
-                    order.tv_packages.set(valid_packages)
-                    logger.debug(f"Добавлены ТВ-пакеты: {tv_package_ids}")
-
-            logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {[t.name for t in order.tariffs.all()]}, общая стоимость подключения: {total_connection_price}")
             try:
-                admin_url = request.build_absolute_uri(reverse('admin:orders_order_change', args=[order.id]))
-                send_order_notification.delay(order.id, admin_url)
+                send_order_notification.delay(order.id)
+                logger.info(f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь")
             except Exception as e:
-                logger.error(f"Ошибка при формировании ссылки админки: {str(e)}")
+                logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -212,10 +198,10 @@ def order_create(request, locality_slug, slug):
             "is_tv_tariff": is_tv_tariff,
             "is_internet_tariff": is_internet_tariff,
             "no_tv_packages": not tv_packages.exists(),
+            "submit_order_url": reverse("orders:submit_order", kwargs={"locality_slug": locality_slug}),
         },
     )
 
-@require_POST
 def submit_order(request, locality_slug):
     logger.debug(f"Полученные данные формы: {request.POST}")
     locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
@@ -225,89 +211,18 @@ def submit_order(request, locality_slug):
         logger.debug(f"Очищенные данные: {form.cleaned_data}")
         order = form.save(commit=False)
         order.locality = locality
-        order.save()  # Сохраняем, чтобы можно было работать с M2M
+        order.save()
 
-        # === Обработка тарифов ===
-        tariff_ids_to_add = []
+        process_order_data(order, form.cleaned_data, logger)
 
-        # 1. Основной tariff_id (если есть)
-        tariff_id = form.cleaned_data.get("tariff_id")
-        if tariff_id:
-            tariff_ids_to_add.append(tariff_id)
-
-        # 2. Дополнительные тарифы из tariff_ids (например, интернет + ТВ)
-        additional_tariff_ids = form.cleaned_data.get("tariff_ids")
-        if isinstance(additional_tariff_ids, list):
-            tariff_ids_to_add.extend(additional_tariff_ids)
-
-        # Убираем дубликаты
-        tariff_ids_to_add = list(set(tariff_ids_to_add))
-
-        # Фильтруем только активные тарифы
-        tariffs = Tariff.objects.filter(id__in=tariff_ids_to_add, is_active=True)
-        if tariffs.exists():
-            order.tariffs.add(*tariffs)
-            logger.debug(f"Добавлены тарифы: {list(tariffs.values_list('name', flat=True))}")
-        else:
-            logger.debug("Ни один тариф не был добавлен (не найдены или неактивны)")
-
-        # === Обработка оборудования ===
-        equipment_ids = form.cleaned_data.get("selected_equipment_ids")
-        if not isinstance(equipment_ids, list):
-            equipment_ids = []
-        payment_options = form.cleaned_data.get("equipment_payment_options") or {}
-        if not isinstance(payment_options, dict):
-            payment_options = {}
-
-        logger.debug(f"Обработка продуктов: equipment_ids={equipment_ids}, payment_options={payment_options}")
-
-        for product_id in equipment_ids:
-            product_item = get_object_or_404(ProductItem, id=product_id)
-            payment_type = payment_options.get(str(product_id), 'purchase')
-            price = product_item.get_final_price()
-
-            if payment_type == 'installment12' and product_item.installment_12_months:
-                price = product_item.installment_12_months
-            elif payment_type == 'installment24' and product_item.installment_24_months:
-                price = product_item.installment_24_months
-            elif payment_type == 'installment48' and product_item.installment_48_months:
-                price = product_item.installment_48_months
-
-            OrderProduct.objects.create(
-                order=order,
-                product_item=product_item,
-                price=price,
-                payment_type=payment_type
-            )
-
-        # === Дополнительные услуги ===
-        service_slugs = form.cleaned_data.get("selected_service_slugs")
-        if isinstance(service_slugs, list):
-            services = AdditionalService.objects.filter(slug__in=service_slugs)
-            if services.exists():
-                order.services.set(services)
-                logger.debug(f"Добавлены услуги: {list(services.values_list('name', flat=True))}")
-
-        # === ТВ-пакеты ===
-        tv_package_ids = form.cleaned_data.get("selected_tv_package_ids")
-        if isinstance(tv_package_ids, list):
-            tv_packages = TVChannelPackage.objects.filter(id__in=tv_package_ids)
-            if tv_packages.exists():
-                order.tv_packages.set(tv_packages)
-                logger.debug(f"Добавлены ТВ-пакеты: {list(tv_packages.values_list('name', flat=True))}")
-
-        # === Логирование (с несколькими тарифами) ===
         tariff_names = ", ".join(t.name for t in order.tariffs.all())
         tariff_display = tariff_names if tariff_names else "не указаны"
-
         logger.info(
             f"Заявка #{order.id} создана для {locality.name}, тарифы: {tariff_display}"
         )
 
-        # === Уведомление ===
         try:
-            admin_url = request.build_absolute_uri(f"/admin/orders/order/{order.id}/change/")
-            send_order_notification.delay(order.id, admin_url)
+            send_order_notification.delay(order.id)
             logger.info(f"Задача отправки уведомления о заявке #{order.id} поставлена в очередь")
         except Exception as e:
             logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")

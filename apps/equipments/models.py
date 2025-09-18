@@ -58,10 +58,10 @@ class Color(BaseModel):
         validators=[
             RegexValidator(
                 regex=r'^#[0-9A-Fa-f]{6}$',
-                message="HEX-код должен быть в формате #RRGGBB, например #FFFFFF."
+                message="HEX-код должен быть в формате #rrggbb, например #ffffff."
             )
         ],
-        help_text="Например, #FFFFFF для белого"
+        help_text="Например, #ffffff для белого"
     )
 
     def __str__(self):
@@ -69,6 +69,13 @@ class Color(BaseModel):
 
     def clean(self):
         super().clean()
+        if self.hex_code:
+            self.hex_code = self.hex_code.lower()
+
+    def save(self, *args, **kwargs):
+        if self.hex_code:
+            self.hex_code = self.hex_code.lower()
+        super().save(*args, **kwargs)
 
     class Meta:
         verbose_name = "Цвет"

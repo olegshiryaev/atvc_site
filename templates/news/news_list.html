@@ -7,7 +7,7 @@
 
         <!-- Сетка новостей -->
         <div class="news-grid" id="news-container">
-            {% for news in news_list %}
+            {% for news in page_obj %}
             <div class="news-grid__item">
                 {% include 'news/partials/news_card.html' with news=news is_preview=False %}
             </div>
@@ -34,13 +34,16 @@
         const loadMoreBtn = document.getElementById('load-more-btn');
         const newsContainer = document.getElementById('news-container');
     
-        if (!loadMoreBtn) return;
+        if (!loadMoreBtn) {
+            console.log('Кнопка "Читать ещё" не найдена');
+            return;
+        }
     
         loadMoreBtn.addEventListener('click', async () => {
             const nextPage = loadMoreBtn.getAttribute('data-next-page');
             const citySlug = loadMoreBtn.getAttribute('data-city-slug');
-            const url = `{% url 'news:load_more_news' locality.slug %}?page=${nextPage}`;
-    
+            const url = `/${citySlug}/news/load-more/?page=${nextPage}`;
+
             try {
                 const response = await fetch(url, {
                     headers: {
@@ -48,29 +51,45 @@
                     }
                 });
     
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
                 const data = await response.json();
     
-                // Если есть HTML — добавляем его
                 if (data.html) {
                     const temp = document.createElement('div');
                     temp.innerHTML = data.html;
-    
-                    // Добавляем каждую колонку с новостью
-                    Array.from(temp.children).forEach(card => {
+
+                    const newCards = Array.from(temp.children);
+
+                    // Добавляем анимационный класс ПЕРЕД вставкой в DOM
+                    newCards.forEach(card => {
+                        card.classList.add('animate-in');
+                    });
+
+                    // Вставляем карточки
+                    newCards.forEach(card => {
                         newsContainer.appendChild(card);
                     });
+
+                    // Запускаем анимацию через 10мс
+                    setTimeout(() => {
+                        newCards.forEach(card => {
+                            card.classList.remove('animate-in');
+                        });
+                    }, 10);
                 }
     
-                // Обновляем номер страницы
                 loadMoreBtn.setAttribute('data-next-page', parseInt(nextPage) + 1);
     
-                // Убираем кнопку, если больше нет новостей
                 if (!data.has_more_news) {
                     loadMoreBtn.remove();
                 }
     
             } catch (error) {
                 console.error('Ошибка при загрузке новостей:', error);
+                alert('Произошла ошибка при загрузке новостей. Попробуйте позже.');
             }
         });
     });

@@ -35,9 +35,14 @@ def send_order_notification(self, order_id):
             html_message = render_to_string(
                 "emails/new_order_notification.html", context
             )
-            logger.debug(f"Содержимое текстового письма: {text_message}")
-            logger.debug(f"Содержимое HTML письма: {html_message}")
-            logger.debug(f"Настройки почты: HOST={settings.EMAIL_HOST}, PORT={settings.EMAIL_PORT}, TLS={settings.EMAIL_USE_TLS}, SSL={settings.EMAIL_USE_SSL}")
+            logger.info(
+                "Уведомление отправлено",
+                extra={
+                    "order_id": order.id,
+                    "recipients": list(dispatchers_emails),
+                    "subject": subject
+                }
+            )
 
             send_mail(
                 subject=subject,
