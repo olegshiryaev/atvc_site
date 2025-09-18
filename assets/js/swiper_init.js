@@ -16,14 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const prevEl = container.querySelector('.slider-navs__prev');
         const paginationEl = container.querySelector('.slider-navs__pag');
 
-        if (!swiperContainer) return; // Пропускаем, если .swiper не найден
+        if (!swiperContainer) return;
 
         new Swiper(swiperContainer, {
             ...config,
             navigation: {
                 nextEl: '.slider-navs__next',
                 prevEl: '.slider-navs__prev',
-                disabledClass: 'slider-navs__btn--disabled', // Добавляем класс для неактивных кнопок
+                disabledClass: 'slider-navs__btn--disabled',
             },
             pagination: {
                 el: '.slider-navs__pag',

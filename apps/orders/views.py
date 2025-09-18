@@ -212,14 +212,10 @@ def submit_order(request, locality_slug):
         order = form.save(commit=False)
         order.locality = locality
         order.save()
-
         process_order_data(order, form.cleaned_data, logger)
 
         tariff_names = ", ".join(t.name for t in order.tariffs.all())
-        tariff_display = tariff_names if tariff_names else "не указаны"
-        logger.info(
-            f"Заявка #{order.id} создана для {locality.name}, тарифы: {tariff_display}"
-        )
+        logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {tariff_names}")
 
         try:
             send_order_notification.delay(order.id)
@@ -227,21 +223,75 @@ def submit_order(request, locality_slug):
         except Exception as e:
             logger.error(f"Ошибка постановки задачи уведомления о заявке #{order.id}: {str(e)}")
 
-        return JsonResponse({
-            "success": True,
-            "message": "Заявка успешно отправлена! Мы свяжемся с вами в течение часа.",
-            "order_id": order.id,
-            "locality_slug": locality_slug
-        })
+        # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Возвращаем HTML-фрагмент с редиректом ---
+        if request.headers.get('HX-Request'):  # Это htmx-запрос
+            redirect_url = reverse("orders:order_success", kwargs={
+                "locality_slug": locality_slug,
+                "order_id": order.id
+            })
+            # Возвращаем скрытый div, который сработает при загрузке и выполнит редирект
+            return HttpResponse(f"""
+                <div hx-trigger="load" hx-get="{redirect_url}" hx-target="body" hx-swap="outerHTML">
+                    <!-- Редирект на страницу успеха -->
+                </div>
+            """)
+        else:
+            # Если это обычный запрос (на всякий случай), делаем стандартный редирект
+            return redirect("orders:order_success", locality_slug=locality_slug, order_id=order.id)
+
     else:
-        errors = {field: [str(e) for e in errors] for field, errors in form.errors.items()}
-        non_field_errors = [str(error) for error in form.non_field_errors()]
         logger.warning(f"Ошибка валидации формы: {form.errors}")
-        return JsonResponse({
-            "success": False,
-            "errors": errors,
-            "non_field_errors": non_field_errors
-        }, status=400)
+        # --- КЛЮЧЕВОЕ ИЗМЕНЕНИЕ: Воссоздаем контекст и возвращаем форму с ошибками ---
+
+        # Получаем текущий тариф (как в order_create)
+        tariff_id = request.POST.get('tariff_id')
+        if not tariff_id:
+            tariff_ids = request.POST.getlist('tariff_ids')
+            tariff_id = tariff_ids[0] if tariff_ids else None
+        tariff = get_object_or_404(Tariff, id=tariff_id) if tariff_id else None
+
+        is_internet_tariff = tariff.service.slug == "internet" if tariff else False
+        is_tv_tariff = tariff.service.slug == "tv" if tariff else False
+
+        # Получаем ТВ-тарифы (как в order_create)
+        tv_tariffs = Tariff.objects.none()
+        tv_packages = TVChannelPackage.objects.none()
+        if is_internet_tariff and tariff:
+            tv_tariffs = Tariff.objects.filter(
+                service__slug="tv",
+                is_active=True,
+                localities=locality
+            ).prefetch_related('products', 'included_channels')
+            tv_packages = TVChannelPackage.objects.filter(
+                tariffs__in=tv_tariffs
+            ).prefetch_related('channels', 'tariffs').distinct()
+        elif is_tv_tariff and tariff:
+            tv_tariffs = Tariff.objects.filter(id=tariff.id)
+            tv_packages = tariff.tv_packages.all().prefetch_related('channels', 'tariffs')
+
+        # Получаем оборудование и услуги (как в order_create)
+        products = tariff.products.all().select_related('product__category') if tariff else ProductItem.objects.none()
+        services = AdditionalService.objects.filter(service_types=tariff.service).distinct() if tariff else AdditionalService.objects.none()
+
+        # Рендерим ТОЛЬКО контейнер с формой (или всю страницу, если не создали частичный шаблон)
+        # Для простоты пока рендерим всю страницу, но это можно оптимизировать.
+        return render(
+            request,
+            "orders/order_create.html",
+            {
+                "form": form,  # форма с ошибками
+                "tariff": tariff,
+                "tv_tariffs": tv_tariffs,
+                "products": products,
+                "services": services,
+                "tv_packages": tv_packages,
+                "locality": locality,
+                "is_tv_tariff": is_tv_tariff,
+                "is_internet_tariff": is_internet_tariff,
+                "no_tv_packages": not tv_packages.exists(),
+                "submit_order_url": reverse("orders:submit_order", kwargs={"locality_slug": locality_slug}),
+            },
+        )
     
 
 def order_success(request, locality_slug, order_id):

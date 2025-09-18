@@ -54,28 +54,23 @@ def load_more_news(request, locality_slug):
     except EmptyPage:
         return JsonResponse({"has_more_news": False, "html": ""})
 
-    # --- ИЗМЕНЕНИЕ НАЧИНАЕТСЯ ЗДЕСЬ ---
-    # Собираем HTML для каждой отдельной новости на странице
     news_html_list = []
-    for news_item in page_obj.object_list: # Итерируемся по списку объектов на странице
-        # Рендерим шаблон ОДНОЙ карточки для каждой новости
+    for news_item in page_obj.object_list:
         news_html = render_to_string(
-            "news/partials/news_card.html",  # <-- Шаблон ОДНОЙ карточки
+            "news/partials/news_card.html",
             {
-                "news": news_item,          # Передаем ОДИН объект новости
+                "news": news_item,
                 "locality": locality,
-                "is_preview": False,        # Если этот параметр используется в шаблоне
+                "is_preview": False,
             },
             request=request,
         )
         news_html_list.append(news_html)
 
-    # Объединяем все карточки в одну строку HTML
     combined_html = ''.join(news_html_list)
-    # --- ИЗМЕНЕНИЕ ЗАКАНЧИВАЕТСЯ ЗДЕСЬ ---
 
     return JsonResponse({
-        "html": combined_html,              # Отправляем строку из отдельных карточек
+        "html": combined_html,
         "has_more_news": page_obj.has_next()
     })
 
