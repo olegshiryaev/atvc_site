@@ -339,10 +339,7 @@ class EquipmentOrderView(TemplateView):
 
                 # --- Отправка уведомления ---
                 try:
-                    admin_url = request.build_absolute_uri(
-                        reverse('admin:orders_order_change', args=[order.id])
-                    )
-                    send_order_notification.delay(order.id, admin_url)
+                    send_order_notification.delay(order.id)
                     logger.info(f"Задача отправки уведомления добавлена для заказа #{order.id}")
                 except Exception as e:
                     logger.error(f"Ошибка при отправке уведомления для заказа #{order.id}: {str(e)}")
