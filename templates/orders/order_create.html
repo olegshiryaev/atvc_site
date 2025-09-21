@@ -48,8 +48,8 @@
                     </div>
                 </section>
 
-                {% if is_internet_tariff %}
-                <section class="tv-tariff-section">
+                {% if is_internet_tariff and tv_tariffs.exists %}
+                <section class="tv-tariff-section" aria-hidden="false">
                     <h3 class="tv-tariff-section__title">Добавить телевидение</h3>
                     <p class="tv-tariff-section__description">Выберите тариф на телевидение — он будет подключён вместе с интернетом</p>
                     <div class="tv-tariff-grid">
@@ -102,6 +102,8 @@
                         {% endfor %}
                     </div>
                 </section>
+                {% else %}
+                <section class="tv-tariff-section" style="display: none;" aria-hidden="true"></section>
                 {% endif %}
 
                 <section class="tv-packages" id="tv-packages-section" {% if not is_tv_tariff %}style="display: none; opacity: 0;" aria-hidden="true"{% else %}style="opacity: 1;" aria-hidden="false"{% endif %}>
@@ -749,14 +751,15 @@
     }
 
     function updateTVTariffSummary() {
-        if (isTvTariff) return; // Не отображаем секцию "Телевидение" для ТВ-тарифа
+        if (isTvTariff) return;
         const containers = document.querySelectorAll('#tvTariffSummary');
+        if (containers.length === 0) return;
         let html = '';
         if (selectedTVTariff) {
             html = `
                 <h5 class="summary__section-title">Телевидение</h5>
                 <div class="summary__item">
-                    <span class="summary__item-name">${selectedTVTariff.name}</span>
+                    <span class="summary__item-name">${escapeHtml(selectedTVTariff.name)}</span>
                     <span class="summary__item-value">
                         ${selectedTVTariff.actual_price.toLocaleString('ru-RU')} ₽/мес.
                         ${selectedTVTariff.is_promo ? `<br>(в течение ${selectedTVTariff.promo_months} мес., затем — ${selectedTVTariff.original_price.toLocaleString('ru-RU')} ₽/мес.)` : ''}
@@ -771,13 +774,13 @@
 
     function filterTVPackages() {
         const tvPackages = document.querySelectorAll('.tv-package');
+        const tvPackagesSection = document.getElementById('tv-packages-section');
+        if (!tvPackagesSection) return;
+
         let hasCompatiblePackages = false;
         tvPackages.forEach(package => {
             const tariffIds = package.dataset.tariffIds ? package.dataset.tariffIds.split(',').map(id => parseInt(id.trim(), 10)).filter(id => !isNaN(id)) : [];
-            if (!tariffIds.length) {
-                console.warn(`Пакет ${package.dataset.id} не имеет связанных тарифов`);
-            }
-            const isCompatible = selectedTVTariff && tariffIds.includes(parseInt(selectedTVTariff.id, 10));
+            const isCompatible = (selectedTVTariff && tariffIds.includes(parseInt(selectedTVTariff.id, 10))) || (isTvTariff && tariffIds.includes(internetTariffId));
             package.style.display = isCompatible ? 'block' : 'none';
             package.style.opacity = isCompatible ? '1' : '0';
             package.setAttribute('aria-hidden', isCompatible ? 'false' : 'true');
@@ -792,21 +795,21 @@
                 }
             }
         });
-        const tvPackagesSection = document.getElementById('tv-packages-section');
-        if (tvPackagesSection) {
-            tvPackagesSection.style.display = hasCompatiblePackages || isTvTariff ? 'block' : 'none';
-            tvPackagesSection.style.opacity = hasCompatiblePackages || isTvTariff ? '1' : '0';
-            tvPackagesSection.setAttribute('aria-hidden', hasCompatiblePackages || isTvTariff ? 'false' : 'true');
-            if (!hasCompatiblePackages && !isTvTariff) {
-                selectedTVPackages = {};
-                totalTVPackagesPrice = 0;
-                updateTVPackageSummary();
-            }
+
+        // Скрываем секцию, если нет совместимых пакетов и это не ТВ-тариф
+        tvPackagesSection.style.display = (hasCompatiblePackages || isTvTariff) ? 'block' : 'none';
+        tvPackagesSection.style.opacity = (hasCompatiblePackages || isTvTariff) ? '1' : '0';
+        tvPackagesSection.setAttribute('aria-hidden', (hasCompatiblePackages || isTvTariff) ? 'false' : 'true');
+
+        if (!hasCompatiblePackages && !isTvTariff) {
+            selectedTVPackages = {};
+            totalTVPackagesPrice = 0;
+            updateTVPackageSummary();
         }
     }
 
     function selectTVTariff(checkbox, id, actual_price, name, original_price, is_promo, promo_months, connection_price) {
-        if (isTvTariff) return;
+        if (isTvTariff || !{{ tv_tariffs.exists|yesno:"true,false" }}) return;
         if (!checkbox.checked) {
             if (selectedTVTariff && selectedTVTariff.id === id) {
                 selectedTVTariff = null;
@@ -820,7 +823,7 @@
             selectedTVTariff = {
                 id,
                 actual_price: parseInt(actual_price),
-                name,
+                name: escapeHtml(name),
                 original_price: parseInt(original_price),
                 is_promo: is_promo,
                 promo_months: parseInt(promo_months),
@@ -830,7 +833,7 @@
         updateTVTariffSummary();
         filterTVPackages();
         calculateTotal();
-        updateEquipmentList(selectedTVTariff ? selectedTVTariff.id : null);  // НОВОЕ: Вызов обновления оборудования
+        updateEquipmentList(selectedTVTariff ? selectedTVTariff.id : null);
     }
 
     function toggleEquipmentSelection(id, checked, purchasePrice, installment12Price, installment24Price, installment48Price) {
@@ -1294,9 +1297,17 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-        originalEquipmentHTML = document.querySelector('.equipment__list').innerHTML;
+        const equipmentListElement = document.querySelector('.equipment__list');
+        if (equipmentListElement) {
+            originalEquipmentHTML = equipmentListElement.innerHTML;
+        } else {
+            originalEquipmentHTML = '';
+            console.warn('Элемент .equipment__list не найден на странице. Возможно, для тарифа нет оборудования.');
+        }
+
         validateOrderForm();
         calculateTotal();
+
         if (isTvTariff) {
             selectedTVTariff = {
                 id: {{ tariff.id }},
