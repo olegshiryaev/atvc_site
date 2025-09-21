@@ -30,6 +30,7 @@ logger = logging.getLogger('orders')
 
 
 def process_order_data(order, form_data, logger):
+    logger.debug(f"Данные, полученные в process_order_data: {form_data}")
     with transaction.atomic():
         # Обработка тарифов
         tariff_ids = list(set(
@@ -212,11 +213,16 @@ def submit_order(request, locality_slug):
     form = OrderForm(request.POST, locality=locality)
 
     if form.is_valid():
-        logger.debug(f"Очищенные данные: {form.cleaned_data}")
+        # 🔥 ЯВНО СОХРАНЯЕМ ОЧИЩЕННЫЕ ДАННЫЕ В ПЕРЕМЕННУЮ
+        cleaned_data = form.cleaned_data
+        logger.debug(f"Очищенные данные: {cleaned_data}")
+
         order = form.save(commit=False)
         order.locality = locality
         order.save()
-        process_order_data(order, form.cleaned_data, logger)
+
+        # 🔥 ПЕРЕДАЕМ ЯВНО СОХРАНЕННУЮ ПЕРЕМЕННУЮ
+        process_order_data(order, cleaned_data, logger)
 
         tariff_names = ", ".join(t.name for t in order.tariffs.all())
         logger.info(f"Заявка #{order.id} создана для {locality.name}, тарифы: {tariff_names}")
