@@ -55,11 +55,28 @@
     });
 
     function openModal() {
-        document.getElementById('callbackModal').style.display = 'flex';
+        const modal = document.getElementById('callbackModal');
+        const body = document.body;
+
+        // Сохраняем текущую позицию скролла
+        const scrollY = window.scrollY;
+        body.style.top = `-${scrollY}px`;
+        body.classList.add('modal-open');
+
+        modal.style.display = 'flex';
     }
 
     function closeModal() {
-        document.getElementById('callbackModal').style.display = 'none';
+        const modal = document.getElementById('callbackModal');
+        const body = document.body;
+
+        modal.style.display = 'none';
+
+        // Убираем класс и восстанавливаем скролл
+        body.classList.remove('modal-open');
+        const scrollY = parseInt(body.style.top || '0') * -1;
+        window.scrollTo(0, scrollY);
+        body.style.top = '';
     }
 
     document.addEventListener('keydown', function(event) {
@@ -72,6 +89,13 @@
     document.body.addEventListener('htmx:afterSwap', function(event) {
         if (event.detail.target.id === 'callbackModal' || event.detail.target.classList.contains('callback-modal-content')) {
             document.getElementById('callbackModal').style.display = 'flex';
+            // Если модалка открыта через HTMX — тоже блокируем скролл
+            const body = document.body;
+            if (!body.classList.contains('modal-open')) {
+                const scrollY = window.scrollY;
+                body.style.top = `-${scrollY}px`;
+                body.classList.add('modal-open');
+            }
         }
     });
 </script>
