@@ -3,8 +3,8 @@
     <div class="callback-modal-backdrop" onclick="closeModal()"></div>
     <div class="callback-modal-content">
         <button class="callback-modal-close" onclick="closeModal()">×</button>
-        <h3 class="callback-modal-title">Консультация от специалистов<br><span class="accent">АТК</span></h3>
-        <p class="callback-modal-subtitle">Заполните данные, и наши специалисты свяжутся<br>с Вами в ближайшее время.</p>
+        <h3 class="callback-modal-title">Обратный звонок</h3>
+        <p class="callback-modal-subtitle">Заполните свои данные и мы Вам перезвоним!</p>
         <form id="callbackForm" 
               method="post" 
               action="{% url 'core:feedback_form' locality_slug=request.locality.slug %}"
