@@ -148,7 +148,7 @@
                     </div>
                     
                     <div class="feedback-form__form">
-                        <form id="feedback-form-submit" action="{% url 'core:contacts' locality_slug=current_locality.slug %}" method="post" class="form" aria-label="Форма обратной связи">
+                        <form id="feedback-form-submit" method="post" class="form" aria-label="Форма обратной связи">
                             {% csrf_token %}
                             <div class="feedback-form__fields">
                                 <!-- Строка с именем и телефоном -->
@@ -165,6 +165,29 @@
                                         <label for="feedback-phone" class="feedback-form__label">Номер телефона *</label>
                                         <input type="tel" name="phone" id="feedback-phone" class="feedback-form__input" placeholder="+7 (___) ___-__-__" autocomplete="tel" required aria-describedby="error_phone">
                                         <div class="feedback-form__error" id="error_phone" role="alert"></div>
+                                    </div>
+                                </div>
+
+                                <div class="feedback-form__row--address">
+                                    <!-- Улица -->
+                                    <div class="feedback-form__field feedback-form__field_street">
+                                        <label for="feedback-street" class="feedback-form__label">Улица</label>
+                                        <input type="text" name="street" id="feedback-street" class="feedback-form__input" placeholder="Улица" autocomplete="address-line1">
+                                        <div class="feedback-form__error" id="error_street" role="alert"></div>
+                                    </div>
+
+                                    <!-- Дом -->
+                                    <div class="feedback-form__field feedback-form__field_house">
+                                        <label for="feedback-house" class="feedback-form__label">Дом</label>
+                                        <input type="text" name="house" id="feedback-house" class="feedback-form__input" placeholder="Дом" autocomplete="address-line2">
+                                        <div class="feedback-form__error" id="error_house" role="alert"></div>
+                                    </div>
+
+                                    <!-- Квартира -->
+                                    <div class="feedback-form__field feedback-form__field_apartment">
+                                        <label for="feedback-apartment" class="feedback-form__label">Квартира</label>
+                                        <input type="text" name="apartment" id="feedback-apartment" class="feedback-form__input" placeholder="Квартира" autocomplete="address-line3">
+                                        <div class="feedback-form__error" id="error_apartment" role="alert"></div>
                                     </div>
                                 </div>
                                 

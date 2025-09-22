@@ -406,6 +406,9 @@ class Feedback(models.Model):
         max_length=20, blank=True, null=True,
         verbose_name="Номер телефона",
     )
+    street = models.CharField("Улица", max_length=255, blank=True, null=True)
+    house = models.CharField("Дом", max_length=20, blank=True, null=True)
+    apartment = models.CharField("Квартира", max_length=10, blank=True, null=True)
     content = models.TextField(verbose_name="Сообщение", blank=True, null=True)
     time_create = models.DateTimeField(auto_now_add=True, verbose_name="Дата отправки")
     ip_address = models.GenericIPAddressField(

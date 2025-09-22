@@ -2488,11 +2488,14 @@ button.swiper-pagination-bullet {
 
 .callback-input {
     width: 100%;
+    max-width: 100%;
     margin-bottom: 15px;
-    padding: 14px 18px;
-    border-radius: 30px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+    padding: 18px 25px;
+    border-radius: 8px;
+    border: 1px solid #989898;
+    font-size: 15px;
+    line-height: 140%;
+    letter-spacing: 0.24px;
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
@@ -8004,6 +8007,13 @@ button.swiper-pagination-bullet {
     gap: 20px;
 }
 
+.feedback-form__row--address {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: var(--spacing-md);
+}
+
 .feedback-form__field {
     width: 100%;
 }
@@ -9368,7 +9378,7 @@ button.swiper-pagination-bullet {
 .order-form__input,
 .order-form__textarea {
     width: 100%;
-    padding: var(--spacing-sm) var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
     border-radius: 8px;
     font-size: var(--font-size-base);
     background-color: var(--color-white);

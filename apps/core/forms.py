@@ -94,11 +94,34 @@ class ContactForm(forms.Form):
 class FeedbackForm(forms.ModelForm):
     class Meta:
         model = Feedback
-        fields = ['name', 'phone', 'content']
+        fields = ['name', 'phone', 'street', 'house', 'apartment', 'content']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': 'Ваше имя'}),
-            'phone': forms.TextInput(attrs={'class': 'callback-input', 'placeholder': '+7 (___) ___-__-__', "autocomplete": "tel", "required": "required",}),
-            'content': forms.HiddenInput(),
+            'phone': forms.TextInput(attrs={
+                'class': 'callback-input',
+                'placeholder': '+7 (___) ___-__-__',
+                "autocomplete": "tel",
+                "required": "required",
+            }),
+            'street': forms.TextInput(attrs={
+                'class': 'callback-input',
+                'placeholder': 'Улица',
+                'autocomplete': 'address-line1',
+            }),
+            'house': forms.TextInput(attrs={
+                'class': 'callback-input',
+                'placeholder': 'Дом',
+                'autocomplete': 'address-line2',
+            }),
+            'apartment': forms.TextInput(attrs={
+                'class': 'callback-input',
+                'placeholder': 'Квартира',
+                'autocomplete': 'address-line3',
+            }),
+            'content': forms.Textarea(attrs={
+                'class': 'feedback-form__textarea',
+                'placeholder': 'Ваше сообщение',
+            }),
         }
 
     def clean_phone(self):

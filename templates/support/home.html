@@ -127,49 +127,70 @@
                         <form id="feedback-form-submit" method="post" class="feedback-form__form">
                             {% csrf_token %}
                             <input type="hidden" name="redirect_url" value="{{ request.path }}">
-
-                            <div class="feedback-form__row">
-                                <div class="feedback-form__field">
-                                    <label for="feedback-name" class="feedback-form__label">Имя *</label>
-                                    <input type="text"
-                                        name="name"
-                                        id="feedback-name"
-                                        class="feedback-form__input"
-                                        placeholder="Иван Иванов"
-                                        required>
-                                    <div class="feedback-form__error" id="error_name"></div>
+                                <div class="feedback-form__fields">
+                                <!-- Строка с именем и телефоном -->
+                                <div class="feedback-form__row">
+                                    <!-- Имя -->
+                                    <div class="feedback-form__field feedback-form__field_name">
+                                        <label for="feedback-name" class="feedback-form__label">Имя *</label>
+                                        <input type="text" name="name" id="feedback-name" class="feedback-form__input" placeholder="Иванов Иван Иванович" autocomplete="name" required aria-describedby="error_name">
+                                        <div class="feedback-form__error" id="error_name" role="alert"></div>
+                                    </div>
+                                    
+                                    <!-- Телефон -->
+                                    <div class="feedback-form__field feedback-form__field_phone">
+                                        <label for="feedback-phone" class="feedback-form__label">Номер телефона *</label>
+                                        <input type="tel" name="phone" id="feedback-phone" class="feedback-form__input" placeholder="+7 (___) ___-__-__" autocomplete="tel" required aria-describedby="error_phone">
+                                        <div class="feedback-form__error" id="error_phone" role="alert"></div>
+                                    </div>
                                 </div>
 
-                                <div class="feedback-form__field">
-                                    <label for="feedback-phone" class="feedback-form__label">Телефон *</label>
-                                    <input type="tel"
-                                        name="phone"
-                                        id="feedback-phone"
-                                        class="feedback-form__input"
-                                        placeholder="+7 (___) ___-__-__"
-                                        required>
-                                    <div class="feedback-form__error" id="error_phone"></div>
+                                <div class="feedback-form__row--address">
+                                    <!-- Улица -->
+                                    <div class="feedback-form__field feedback-form__field_street">
+                                        <label for="feedback-street" class="feedback-form__label">Улица</label>
+                                        <input type="text" name="street" id="feedback-street" class="feedback-form__input" placeholder="Улица" autocomplete="address-line1">
+                                        <div class="feedback-form__error" id="error_street" role="alert"></div>
+                                    </div>
+
+                                    <!-- Дом -->
+                                    <div class="feedback-form__field feedback-form__field_house">
+                                        <label for="feedback-house" class="feedback-form__label">Дом</label>
+                                        <input type="text" name="house" id="feedback-house" class="feedback-form__input" placeholder="Дом" autocomplete="address-line2">
+                                        <div class="feedback-form__error" id="error_house" role="alert"></div>
+                                    </div>
+
+                                    <!-- Квартира -->
+                                    <div class="feedback-form__field feedback-form__field_apartment">
+                                        <label for="feedback-apartment" class="feedback-form__label">Квартира</label>
+                                        <input type="text" name="apartment" id="feedback-apartment" class="feedback-form__input" placeholder="Квартира" autocomplete="address-line3">
+                                        <div class="feedback-form__error" id="error_apartment" role="alert"></div>
+                                    </div>
                                 </div>
+                                
+                                <!-- Сообщение -->
+                                <div class="feedback-form__field feedback-form__field_message">
+                                    <label for="feedback-message" class="feedback-form__label">Сообщение</label>
+                                    <textarea name="content" id="feedback-message" class="feedback-form__textarea" placeholder="Ваше сообщение" aria-describedby="error_message"></textarea>
+                                    <div class="feedback-form__error" id="error_message" role="alert"></div>
+                                </div>
+                                
+                                <!-- Согласие с политикой -->
+                                <div class="feedback-form__policy">
+                                    Нажимая кнопку «Отправить», вы соглашаетесь с 
+                                    <a 
+                                        target="_blank" 
+                                        class="feedback-form__policy-link" 
+                                        href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
+                                        rel="noopener noreferrer"
+                                    >
+                                        Условиями обработки персональных данных
+                                    </a>
+                                </div>
+                                
+                                <!-- Кнопка отправки -->
+                                <button class="feedback-form__submit btn btn-submit" type="submit">Отправить</button>
                             </div>
-
-                            <div class="feedback-form__field">
-                                <label for="feedback-message" class="feedback-form__label">Сообщение</label>
-                                <textarea name="content"
-                                        id="feedback-message"
-                                        class="feedback-form__textarea"
-                                        placeholder="Расскажите подробнее о вашем вопросе"></textarea>
-                                <div class="feedback-form__error" id="error_message"></div>
-                            </div>
-
-                            <div class="feedback-form__policy">
-                                Нажимая «Отправить», вы соглашаетесь с
-                                <a href="{% url 'core:static_page' locality_slug=locality.slug slug='privacy-policy' %}"
-                                target="_blank" class="feedback-form__policy-link">
-                                    Условиями обработки персональных данных
-                                </a>
-                            </div>
-
-                            <button type="submit" class="feedback-form__submit btn btn-primary">Отправить</button>
                         </form>
                     </div>
                 </div>
@@ -183,14 +204,12 @@
             </div>
             
             <!-- Модальное окно -->
-            <div class="feedback-form__modal" id="feedback-modal">
+            <div class="feedback-form__modal" id="feedback-modal" role="dialog" aria-modal="true" aria-labelledby="feedback-form-modal-title">
                 <div class="feedback-form__modal-content">
-                    <span class="feedback-form__modal-close" id="modal-close">×</span>
-                    <h3 class="feedback-form__modal-title">Спасибо за обращение!</h3>
-                    <p class="feedback-form__modal-text">
-                        Мы получили ваше сообщение и ответим в ближайшее время.
-                    </p>
-                    <button class="feedback-form__modal-btn btn btn-primary" id="modal-close-btn">Закрыть</button>
+                    <span class="feedback-form__modal-close" role="button" aria-label="Закрыть модальное окно">×</span>
+                    <h3 class="feedback-form__modal-title" id="feedback-form-modal-title">Сообщение отправлено!</h3>
+                    <p class="feedback-form__modal-text">Мы рассмотрим ваше обращение и ответим в ближайшее время.</p>
+                    <button class="feedback-form__modal-btn btn btn-submit" id="feedback-form-modal-close">Закрыть</button>
                 </div>
             </div>
         </section>
