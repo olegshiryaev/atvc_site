@@ -425,7 +425,7 @@ class Feedback(models.Model):
         ]
 
     def __str__(self):
-        return f"Сообщение от {self.phone}"
+        return f"Сообщение от {self.name or 'Аноним'} ({self.phone or 'без номера'})"
 
 
 class Company(models.Model):

@@ -20,9 +20,19 @@ from django.urls import path, include
 from django.conf.urls.static import static
 from django.conf import settings
 from django.shortcuts import redirect
+from django.views.generic import TemplateView
 from apps.cities.models import Locality
+from django.contrib.sitemaps.views import sitemap
+from apps.core.sitemaps import CoreStaticSitemap, StaticPagesSitemap
+from apps.news.sitemaps import NewsSitemap
 from apps.core.views import getstatus
 
+
+sitemaps = {
+    "news": NewsSitemap,
+    "static_core": CoreStaticSitemap,
+    "static_pages": StaticPagesSitemap,
+}
 
 def redirect_to_active_locality(request):
     locality = Locality.objects.filter(is_active=True).first()
@@ -32,10 +42,15 @@ def redirect_to_active_locality(request):
 
 
 urlpatterns = [
-    path("wfhlthch/getstatus/", getstatus, name='getstatus'),
+    path("wfhlthch/getstatus/", getstatus, name="getstatus"),
     path("a9f8s7d6/", admin.site.urls),
-    path('ckeditor/', include('ckeditor_uploader.urls')),
+    path("ckeditor/", include("ckeditor_uploader.urls")),
     path("chat/", include("apps.chat.urls")),
+    path(
+        "robots.txt",
+        TemplateView.as_view(template_name="robots.txt", content_type="text/plain"),
+    ),
+    path("sitemap.xml", sitemap, {"sitemaps": sitemaps}),
     # Корневой путь редиректит на первую активную локализацию
     path("", redirect_to_active_locality),
     # Пути без slug (например, список всех населённых пунктов)

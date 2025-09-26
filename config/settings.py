@@ -47,6 +47,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
+    "django.contrib.sites",
     "imagekit",
     "ckeditor",
     "ckeditor_uploader",
@@ -346,16 +348,17 @@ LOCALITY_MIDDLEWARE_EXCLUDED_PATHS = [
     "/chat/api/",
     "/chat/support/",
     "/ws/",
-    "/a9f8s7d6/",
-    "/ckeditor/",
-    "/static/",
-    "/media/",
-    "/sitemap.xml",
-    "/robots.txt",
-    "/wfhlthch/getstatus",
+    "/a9f8s7d6/",       # админка
+    "/ckeditor/",       # редактор
+    "/static/",         # статика
+    "/media/",          # медиа
+    "/sitemap.xml",     # карта сайта
+    "/robots.txt",      # роботы
+    "/wfhlthch/getstatus",  # healthcheck
 ]
 
 SITE_NAME = "АТК"
+SITE_ID = 1
 
 YANDEX_METRIKA_ID = '104125433'
 

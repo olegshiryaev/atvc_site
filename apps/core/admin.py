@@ -639,15 +639,16 @@ class FeedbackAdmin(admin.ModelAdmin):
         "name",
         "phone",
         "short_content",
+        "status",
         "time_create",
         "ip_address",
     )
-    list_filter = ("time_create",)
-    search_fields = ("name", "phone", "content", "ip_address")
+    list_filter = ("time_create", "status")
+    search_fields = ("name", "phone", "ip_address")
     readonly_fields = ("time_create", "ip_address")
 
     def short_content(self, obj):
-        return obj.content[:50] + "..." if len(obj.content) > 50 else obj.content
+        return obj.content[:50] + "..." if obj.content and len(obj.content) > 50 else obj.content or ""
 
     short_content.short_description = "Сообщение"
 

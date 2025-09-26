@@ -7877,7 +7877,7 @@ button.swiper-pagination-bullet {
     background: #ffffff;
     color: #1f2937;
     border: 1px solid #e5e7eb;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 20px 20px 30px 40px;
     display: flex;
@@ -8087,6 +8087,7 @@ button.swiper-pagination-bullet {
     width: 100%;
     padding: 14px 16px;
     border-radius: 8px;
+    border: 1px solid #989898;
     font-size: 16px;
     line-height: 1.5;
     background-color: white;
@@ -8198,19 +8199,28 @@ button.swiper-pagination-bullet {
     position: relative;
     border-radius: 12px;
     overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .feedback-form__image-container {
     position: relative;
-    height: 100%;
-    min-height: 400px;
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .feedback-form__image {
     width: 100%;
-    height: 100%;
-    object-fit: cover;
+    max-height: 400px;
+    object-fit: contain;
+    object-position: center;
     border-radius: 12px;
+    transition: all 0.3s ease;
 }
 
 .feedback-form__image-overlay {
@@ -8251,8 +8261,21 @@ button.swiper-pagination-bullet {
     }
     
     .feedback-form__image-side {
-        min-height: 300px;
+        height: auto;
         order: -1;
+    }
+
+    .feedback-form__image-container {
+        height: auto;
+        max-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feedback-form__image {
+        max-height: 300px;
+        object-fit: contain;
     }
 }
 
@@ -8267,12 +8290,34 @@ button.swiper-pagination-bullet {
         gap: 20px;
     }
 
+    .feedback-form__row--address {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
     .feedback-form__title {
         font-size: 28px;
     }
     
     .feedback-form__submit {
         max-width: 100%;
+    }
+
+    .feedback-form__image-side {
+        height: auto;
+    }
+
+    .feedback-form__image-container {
+        height: auto;
+        max-height: 250px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feedback-form__image {
+        max-height: 250px;
+        object-fit: contain;
     }
 }
 
@@ -8295,6 +8340,23 @@ button.swiper-pagination-bullet {
     
     .feedback-form__image-text {
         font-size: 14px;
+    }
+
+    .feedback-form__image-side {
+        height: auto;
+    }
+
+    .feedback-form__image-container {
+        height: auto;
+        max-height: 200px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .feedback-form__image {
+        max-height: 200px;
+        object-fit: contain;
     }
 }
 
