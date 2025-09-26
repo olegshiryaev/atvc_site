@@ -227,6 +227,11 @@ class ProductItem(BaseModel):
         help_text="Уникальный код товара"
     )
     installment_available = models.BooleanField("Доступна рассрочка", default=False)
+    prefer_installment = models.BooleanField(
+        default=False,
+        verbose_name="Предпочитать рассрочку",
+        help_text="Если включено, по умолчанию для этого оборудования выбирается рассрочка."
+    )
     installment_12_months = models.PositiveIntegerField(
         "Ежемесячный платёж на 12 месяцев", blank=True, null=True
     )

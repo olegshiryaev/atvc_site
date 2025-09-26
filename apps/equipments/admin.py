@@ -10,7 +10,7 @@ class ProductItemInline(admin.TabularInline):
     extra = 1
     fields = (
         'display_name', 'admin_image_preview', 'color', 'price', 'old_price',
-        'in_stock', 'article', 'installment_badge'
+        'in_stock', 'article', 'installment_badge', 'prefer_installment'
     )
     readonly_fields = (
         'admin_image_preview', 'installment_badge'
@@ -163,9 +163,9 @@ class TvBoxInline(admin.StackedInline):
 class ProductItemAdmin(admin.ModelAdmin):
     list_display = (
         'product_link', 'display_name', 'color', 'price_display', 'old_price', 
-        'in_stock', 'is_in_stock', 'images_count', 'installment_badge'
+        'in_stock', 'is_in_stock', 'images_count', 'installment_badge', 'prefer_installment'
     )
-    list_filter = ('color', 'in_stock', 'product__category', 'installment_available')
+    list_filter = ('color', 'in_stock', 'product__category', 'installment_available', 'prefer_installment')
     search_fields = ('product__name', 'article', 'color__name', 'display_name')  # + display_name
     autocomplete_fields = ('product', 'color')
     readonly_fields = ('slug', 'get_main_image_preview')
@@ -183,13 +183,15 @@ class ProductItemAdmin(admin.ModelAdmin):
         ('Рассрочка', {
             'fields': (
                 'installment_available',
+                'prefer_installment',
                 'installment_12_months',
                 'installment_24_months',
                 'installment_48_months',
             ),
             'classes': ('collapse',),
             'description': 'Условия рассрочки для этой товарной позиции. '
-                           'Если рассрочка доступна — укажите хотя бы один срок.'
+                          'Если рассрочка доступна — укажите хотя бы один срок. '
+                          'Отметьте "Предпочитать рассрочку", чтобы по умолчанию выбиралась рассрочка.'
         }),
     )
     inlines = [ProductImageInline]
@@ -247,6 +249,11 @@ class ProductItemAdmin(admin.ModelAdmin):
         )
     installment_badge.short_description = "Рассрочка"
     installment_badge.allow_tags = True
+
+    def prefer_installment(self, obj):
+        return obj.prefer_installment
+    prefer_installment.boolean = True
+    prefer_installment.short_description = "Предпочитать рассрочку"
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('product', 'color')

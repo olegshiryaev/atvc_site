@@ -442,7 +442,6 @@ def get_tariff_equipment(request, locality_slug, tariff_id):
     API-эндпоинт для получения оборудования по ID тарифа.
     """
     try:
-        # Опционально: проверяем, что тариф доступен в указанной локали
         locality = get_object_or_404(Locality, slug=locality_slug, is_active=True)
         tariff = get_object_or_404(Tariff, id=tariff_id, is_active=True, localities=locality)
         
@@ -451,11 +450,11 @@ def get_tariff_equipment(request, locality_slug, tariff_id):
             price = product_item.get_final_price()
             installment_data = {}
             if product_item.installment_available:
-                if product_item.installment_12_months:
+                if product_item.installment_12_months and product_item.installment_12_months > 0:
                     installment_data['installment12'] = product_item.installment_12_months
-                if product_item.installment_24_months:
+                if product_item.installment_24_months and product_item.installment_24_months > 0:
                     installment_data['installment24'] = product_item.installment_24_months
-                if product_item.installment_48_months:
+                if product_item.installment_48_months and product_item.installment_48_months > 0:
                     installment_data['installment48'] = product_item.installment_48_months
 
             image_url = product_item.get_main_image().image.url if product_item.get_main_image() else None
@@ -467,10 +466,12 @@ def get_tariff_equipment(request, locality_slug, tariff_id):
                 'installment_available': product_item.installment_available,
                 'installment_prices': installment_data,
                 'image_url': image_url,
-                'has_image': bool(image_url)
+                'has_image': bool(image_url),
+                'prefer_installment': product_item.prefer_installment,
             })
         return JsonResponse({'success': True, 'equipment': equipment_data})
     except Tariff.DoesNotExist:
         return JsonResponse({'success': False, 'error': 'Тариф не найден или недоступен в этом регионе'}, status=404)
     except Exception as e:
-        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+        logger.exception(f"Ошибка в get_tariff_equipment: tariff_id={tariff_id}, locality_slug={locality_slug}")
+        return JsonResponse({'success': False, 'error': 'Внутренняя ошибка сервера'}, status=500)
